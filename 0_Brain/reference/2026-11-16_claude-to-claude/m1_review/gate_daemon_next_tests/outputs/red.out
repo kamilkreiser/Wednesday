@@ -1,0 +1,21 @@
+start 2026-11-25 17:46:22
+ITEM     RED                    TARGET         TEST                                                                   RESULT
+11       relay_orphan           acceptance     test1_request_and_reply_through_the_relay_and_mcp                      RED (as required): timed out after 10s waiting for: relay and guard processes gone
+R2-2     no_retransmit_timer    delta          r2_2_one_dropped_frame_at_any_position_does_not_stall_the_session      RED (as required): only 0 of 1 messages arrived within 58.921052375s: []
+V4       no_retransmit_timer    recovery_model v4_isolated_t_rto_alone_heals_a_lost_message                           RED (as required): V4 recovers_from_any_state (T-RTO alone): delivered false; clocks that fired on the sender {}
+F1       guard_line_panics      dnx_guard      the_guard_ends_as_before_when_its_reader_is_gone                       RED (as required): assertion `left == right` failed: (a) reader gone, end of input: the guard's exit status
+O1       relay_url_untrimmed    dnx_flags      a_relay_url_with_surrounding_blanks_is_used_trimmed                    RED (as required): assertion `left != right` failed: the url with surrounding blanks was not used trimmed
+DN-r1    relay_flag_empty_accepted dn_flags       empty_relay_url_or_pin_is_refused_at_start                             RED (as required): r1: a data folder was created by a refused start
+DN-r1b   connect_reason_empty   lib            link::tests::connect_with_no_candidate_names_why                       RED (as required): assertion `left == right` failed
+N2       connect_reason_empty   dnx_flags      a_pin_that_is_not_a_fingerprint_names_no_usable_candidate              RED (as required): assertion `left == right` failed
+DN-r2    pin_mismatch_dropped   dn_cert        a_changed_relay_certificate_is_named_in_status                         RED (as required): timed out after 120s waiting for: the guest's status names the changed identity
+DN-r8    identity_field_never_set dn_cert        a_changed_relay_certificate_is_named_in_status                         RED (as required): timed out after 120s waiting for: the guest's status names the changed identity
+DN-r3    dead_relay_invite_old_text dn_invite      a_dead_relay_fails_the_waiting_invitation_truthfully                   RED (as required): assertion `left == right` failed: exit first: {"error":"the other side left the mailbox","role":"inviter","state":"failed"}
+DN-r4b   help_no_cmd_prompt_line dn_help        usage_shows_the_command_prompt_form                                    RED (as required): called `Result::unwrap()` on an `Err` value: "no Command Prompt line"
+DN-r6    refill_keeps_spent_clock dn_recovery    a_forward_ack_clears_row_54s_clock                                     RED (as required): assertion `left == right` failed: a RESYNC fired at row 54's time after a forward acknowledgement refilled the budget (skips_spent_at left set by the 
+DN-r7u   mcp_type_defaults      bin:coagent-mcp tests::dn_wrong_argument_types_are_refused_with_fixed_texts            RED (as required): assertion `left == right` failed: "x"
+DN-r7i   mcp_type_defaults      dn_mcp         dn_mcp_wrong_argument_types_are_tool_errors_with_fixed_texts           RED (as required): wait "x": the error flag
+DN-R6-5  no_retransmit_timer    dn_recovery    hostile_peer_messages_and_key_exchanges_never_leave_a_wait_without_a_clock RED (as required): V4 (seed 1): once honest, the sender's messages were not all delivered in 150 s: inbox ["final-1-0", "final-1-1"], last frame lost true, sender T-RTO 
+== final clean run (--no-fail-fast: every binary runs)
+final clean run: green (68 test binaries; ignored under rulings: 2)
+red exit=0 (2213 s) end 18:23:15

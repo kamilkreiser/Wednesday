@@ -1,0 +1,24 @@
+host relay port 65440
+OK  S0 attached | field=False | text_count=0 whole_lines=0 | changed_lines=0 | unreachable_lines=0 | connected=True | reconnects=0
+OK  S1 relay down (unreachable), 2 retries | field=False | text_count=0 whole_lines=0 | changed_lines=0 | unreachable_lines=2 | connected=False | reconnects=3
+   listener 'close' accepted 2 connection(s); reasons seen: ['coagentd: session link down (relay unreachable (candidate 1: tls handshake)); reconnecting']
+OK  S2 non-TLS listener 'close' on the port, 2 retries | field=False | text_count=0 whole_lines=0 | changed_lines=0 | unreachable_lines=4 | connected=False | reconnects=5
+   listener 'garbage' accepted 2 connection(s); reasons seen: ['coagentd: session link down (relay unreachable (candidate 1: tls handshake)); reconnecting']
+OK  S3 non-TLS listener 'garbage' on the port, 2 retries | field=False | text_count=0 whole_lines=0 | changed_lines=0 | unreachable_lines=6 | connected=False | reconnects=7
+OK  S4 restart with saved identity, reattached | field=False | text_count=0 whole_lines=0 | changed_lines=0 | unreachable_lines=6 | connected=True | reconnects=7
+   impersonator up at wss://127.0.0.1:65440/v1 (pin differs: True)
+   field true 0.6s after the impersonator started
+OK  S5 impersonator on the port: named | field=True | text_count=1 whole_lines=1 | changed_lines=1 | unreachable_lines=6 | connected=False | reconnects=9
+OK  S5b three more mismatching retries: still one line | field=True | text_count=1 whole_lines=1 | changed_lines=4 | unreachable_lines=6 | connected=False | reconnects=12
+OK  S6 port closed again: field back to false, no new line | field=False | text_count=1 whole_lines=1 | changed_lines=4 | unreachable_lines=7 | connected=False | reconnects=13
+   host restarted without identity; new pin: True; same url: True
+   field true 29.6s after the host's restart
+OK  S7 host restart without saved identity: named | field=True | text_count=2 whole_lines=2 | changed_lines=5 | unreachable_lines=7 | connected=False | reconnects=14
+OK  S7b three more retries: still one more line only | field=True | text_count=2 whole_lines=2 | changed_lines=8 | unreachable_lines=7 | connected=False | reconnects=17
+OK  S8 joined the relay.moved line, attached: cleared | field=False | text_count=2 whole_lines=2 | changed_lines=8 | unreachable_lines=7 | connected=True | reconnects=17
+   host's own field: False
+processes left and killed by cleanup: []
+LINE: coagentd: The relay's identity changed. That happens when the host restarted it without a saved identity. It also happens when something is impersonating the relay. Ask the host for a new invitation; do not retry.
+LINE: coagentd: The relay's identity changed. That happens when the host restarted it without a saved identity. It also happens when something is impersonating the relay. Ask the host for a new invitation; do not retry.
+ALL OK
+rc=0

@@ -1,0 +1,16 @@
+diff --git a/crates/coagent-daemon/src/main.rs b/crates/coagent-daemon/src/main.rs
+index 209ddd4..1561373 100644
+--- a/crates/coagent-daemon/src/main.rs
++++ b/crates/coagent-daemon/src/main.rs
+@@ -196,10 +196,7 @@ async fn daemon(argv: &[String]) -> i32 {
+                 eprintln!("{RELAY_URL_EMPTY}");
+                 return 2;
+             }
+-            if pin.is_empty() && !cfg!(coagent_red = "relay_flag_empty_accepted") {
+-                eprintln!("{RELAY_PIN_EMPTY}");
+-                return 2;
+-            }
++            // QA-DAEMON-NEXT plant (f): the PIN check removed
+             // DAEMON-NEXT (O1): the url is used trimmed, as the pin is (surrounding blanks made
+             // `invite` fail with `candidate 1: parse`).
+             // RED CONTROL `relay_url_untrimmed`: the broken variant stores it as given.
