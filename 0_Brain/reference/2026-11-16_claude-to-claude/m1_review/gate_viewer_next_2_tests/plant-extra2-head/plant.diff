@@ -1,0 +1,18 @@
+--- /private/tmp/claude-501/qvx2/plant-extra2-head/la_wrap.orig	2026-11-25 15:53:42
++++ /private/tmp/claude-501/qvx2/plant-extra2-head/src/crates/coagent-daemon/tests/la_wrap.rs	2026-11-25 15:53:42
+@@ -895,7 +895,14 @@
+         activity_lines(t).len() == cases.len()
+     });
+     v.stop();
+-    let t = v.text();
++    let mut t = v.text();
++    {
++        let last = printed_entries(&t).last().unwrap().join("\n");
++        t.push_str(&last);
++        t.push('\n');
++        t.push_str(&last);
++        t.push('\n');
++    }
+     // Entries joined back without the marks and the cut marks (addendum 1; inside a field only,
+     // VIEWER-NEXT).
+     let (all, _) = lines(&dh);

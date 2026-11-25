@@ -1,0 +1,14 @@
++- [x] VIEWER-NEXT (the check's m-1): `la_fields_narrow`'s entry count measured `min(daemon lines, printed entries)`, so one extra printed entry was no longer refused
++  - Where: crates/coagent-daemon/tests/la_wrap.rs `la_fields_narrow` (the `zip` of `lines(&dh)` with `printed_entries(&t)`, then `assert_eq!(entries.len(), cases.len())`)
++  - Symptom: a trailing extra printed entry planted after `let t = v.text();` passed (at VIEWER-NEXT's base the same test counted the printed entries and refused it)
++  - Why deferred: n/a (fixed by the next viewer lane, as ruled by the coordinator)
++  - Discovered: 2026-11-25 by the check of VIEWER-NEXT (verdict m-1)
++  - Resolved: 2026-11-25 by lane VIEWER-NEXT-2: one assertion added before the `zip`, `printed_entries(&t).len() == all.len()` ("one printed entry per daemon line"); no other line of the test or of the crate changed
++    assert_eq!(
++        printed_entries(&t).len(),
++        all.len(),
++        "one printed entry per daemon line"
++    );
++- Lane VIEWER-NEXT-2 (the check of VIEWER-NEXT, its m-1): `la_fields_narrow` again refuses a viewer that prints one entry
++  more than the daemon has lines; one assertion added before the `zip`, no other line of the test, no daemon source and
++  no binary changed.

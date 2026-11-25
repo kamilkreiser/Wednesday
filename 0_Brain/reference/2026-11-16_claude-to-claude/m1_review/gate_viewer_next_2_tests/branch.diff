@@ -1,0 +1,41 @@
+diff --git a/BACKLOG.md b/BACKLOG.md
+index fbe4c15..933641f 100644
+--- a/BACKLOG.md
++++ b/BACKLOG.md
+@@ -1519,3 +1519,9 @@
+ - [ ] AUDIT-HOST (check note N-2 of QA-AUDIT-HOST-NOTES, pre-existing, owner-only): a `lock` name swapped between the lock's open and the entry check leaves an accepted host holding its lock on an inode outside the folder (80 of 546 opens under a racing thread; nothing outside written); the link check cannot see a name that is gone and the open order (lock, try_lock, entries) is mandated (crates/coagent-audit-host/src/host.rs `layout`/`open_lock`). Discovered 2026-11-25 by the check; recorded by lane AUDIT-HOST-NOTES (addendum 1)
+ - [ ] AUDIT-HOST (check note N-3 of QA-AUDIT-HOST-NOTES, test strength): crates/coagent-audit-host/tests/notes_docs.rs compares the P-4 table's rows after collapsing whitespace although its message says "byte for byte", so an old row with one extra space passes; fix: compare the raw lines with only the leading indentation trimmed (the rows are byte-identical today). Discovered 2026-11-25 by the check; recorded by lane AUDIT-HOST-NOTES (addendum 1)
+ - [ ] AUDIT-HOST (check note N-4 of QA-AUDIT-HOST-NOTES, wording): the lane's first STATUS §2 put both removed docs lines in §12 (one is in §11), and the N-e entry above names `host.rs:1260`, which is `host.rs:1290` at 52ad858 (the lane's own lines moved it). Discovered 2026-11-25 by the check; recorded by lane AUDIT-HOST-NOTES (addendum 1)
++- [x] VIEWER-NEXT (the check's m-1): `la_fields_narrow`'s entry count measured `min(daemon lines, printed entries)`, so one extra printed entry was no longer refused
++  - Where: crates/coagent-daemon/tests/la_wrap.rs `la_fields_narrow` (the `zip` of `lines(&dh)` with `printed_entries(&t)`, then `assert_eq!(entries.len(), cases.len())`)
++  - Symptom: a trailing extra printed entry planted after `let t = v.text();` passed (at VIEWER-NEXT's base the same test counted the printed entries and refused it)
++  - Why deferred: n/a (fixed by the next viewer lane, as ruled by the coordinator)
++  - Discovered: 2026-11-25 by the check of VIEWER-NEXT (verdict m-1)
++  - Resolved: 2026-11-25 by lane VIEWER-NEXT-2: one assertion added before the `zip`, `printed_entries(&t).len() == all.len()` ("one printed entry per daemon line"); no other line of the test or of the crate changed
+diff --git a/crates/coagent-daemon/tests/la_wrap.rs b/crates/coagent-daemon/tests/la_wrap.rs
+index 785671c..f4e54f4 100644
+--- a/crates/coagent-daemon/tests/la_wrap.rs
++++ b/crates/coagent-daemon/tests/la_wrap.rs
+@@ -899,6 +899,11 @@ fn la_fields_narrow() {
+     // Entries joined back without the marks and the cut marks (addendum 1; inside a field only,
+     // VIEWER-NEXT).
+     let (all, _) = lines(&dh);
++    assert_eq!(
++        printed_entries(&t).len(),
++        all.len(),
++        "one printed entry per daemon line"
++    );
+     let entries: Vec<String> = all
+         .iter()
+         .zip(printed_entries(&t))
+diff --git a/docs/M0-OUTCOMES.md b/docs/M0-OUTCOMES.md
+index ad4d4a1..495f00b 100644
+--- a/docs/M0-OUTCOMES.md
++++ b/docs/M0-OUTCOMES.md
+@@ -189,3 +189,6 @@ go to the owner with the user documentation.
+   so a shell command's own ` >>` ending a reason row is not read as the cut mark; the tests now read the window that
+   way, and `docs/DAEMON.md` §8 says where the cut mark applies, when an escaped field moves whole, and that a reason
+   can imitate the honest second row only after the real fields. Each red-control row writes its own log.
++- Lane VIEWER-NEXT-2 (the check of VIEWER-NEXT, its m-1): `la_fields_narrow` again refuses a viewer that prints one entry
++  more than the daemon has lines; one assertion added before the `zip`, no other line of the test, no daemon source and
++  no binary changed.

@@ -1,0 +1,17 @@
+--- /private/tmp/claude-501/qvx2/plant-drop-head/la_wrap.orig	2026-11-25 15:52:55
++++ /private/tmp/claude-501/qvx2/plant-drop-head/src/crates/coagent-daemon/tests/la_wrap.rs	2026-11-25 15:52:55
+@@ -895,7 +895,13 @@
+         activity_lines(t).len() == cases.len()
+     });
+     v.stop();
+-    let t = v.text();
++    let mut t = v.text();
++    {
++        let rows: Vec<&str> = t.lines().collect();
++        let k = rows.iter().rposition(|r| entry_head(r)).unwrap();
++        let cut = rows[..k].join("\n") + "\n";
++        t = cut;
++    }
+     // Entries joined back without the marks and the cut marks (addendum 1; inside a field only,
+     // VIEWER-NEXT).
+     let (all, _) = lines(&dh);
