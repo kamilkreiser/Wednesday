@@ -1,0 +1,660 @@
+From Tuesday (the Datasec coordinator seat), Datasec / Security Composer. **Your STATUS file is the channel and the wrap** (no mail channel). A question is a last line `STOPPED: NEEDS TUESDAY <one question>`. Files naming another B-number are READABLE claims only.
+
+**Marks.** MEASURED = the drafter (a read-only Agent-tool drafter, Sonnet) printed it with the instrument named, 2026-11-26 from 09:02:59 AEDT (`date` printed 09:02:59; later reads at drafting, `date` printed 09:11:47 and 09:18:09): `gh api -X GET` under the project `GH_CONFIG_DIR` (`/Volumes/Datasec_DEV/!CODING/Datasec/Datasec Security Composer/4_Credentials/.gh-config`; `gh auth status` first: account `kamilDatasec`, active), Jira GET (python `-I -B`, the project's own GET-only helper `.tools/b1959/scripts/jira_get.py` imported in-process, credentials read by name and never printed; control `PCOMP-9999` HTTP 404), python `-I -B` over raw copies, `git hash-object`, and the project's own `vitest`, `eslint` and `prettier` 3.9.6 binaries on a SCRATCH copy of code main (`/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s329/d2113/main`: the tarball `gh api -X GET repos/datasecau/Datasec-Security-Composer/tarball/<BASE>` extracted, host `node_modules` copied from the project checkout, `tsc -b tsconfig.build.json` run once for the package builds; host node `v26.13.0`, NOT the image's pin). RELAYED = read in another file (named). DERIVED = the drafter's prototype (the scratch copy above; the saved copies in `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s329/d2113/proto/` and `.../seat_scripts/`: CLAIMS you may compare with, never files to copy). UNMEASURED = nobody has. **The drafter ran no docker, no image build, no `npm run` script and no CI; it wrote no Jira and no GitHub, opened nothing of HPSM-POC, and made no request to any hosted site but `gh api -X GET` and Jira GET.** Where your number differs from the drafter's, print both and name the cause; an unexplained difference is a STOP. **The drafter's numbers come from the host's node v26.13.0 with a stale `node_modules` (its `tsc -b tsconfig.build.json` returns rc 2 on `apps/api`: a package missing on the host, nothing in this lane); yours come from the CI image (node 22) and must read build rc 0.**
+
+# BRIEF B2113 | SEAT-C110: SECURITY COMPOSER, LANE PCOMP-23 POLICY PDF HALF: THE POLICY DOCUMENT FOOTER'S FIRST LINE IS HELD TO WHAT FITS ABOVE THE HASH LINE. THREE PATHS, ONE COMMIT, ONE BRANCH `b2113/policy-footer-budget` CUT FROM CODE MAIN, PUSHED ONCE. NO PULL REQUEST (TUESDAY OPENS IT), NO CONTENT RELEASE, NO DEPLOY OF ANY KIND, NO JIRA WRITE, NO CUSTOMER WORD.
+
+**Authority and scope.** Ticket **PCOMP-23** (Jira GET at drafting: Bug, Backlog, labels `composer-seed-1023` and `plan-comp-315`, updated 2026-11-10T20:12:59 +1100, 2 comments, no links). Its description, quoted: "with a long target name, the change report's footer drops its manifest <hash> line. That needs a target of ~80 characters or more with a 200-character customer. The policy PDF has the same defect since B103, so this is a ticket, not a blocker." Its fix shape: "Footer line budget, plus a test at 250 + 200 characters." The change report half is on main (pull requests 113 and 120). Comment 2026-11-03 and comment 2026-11-10 both say the policy PDF half is NOT done ("The policy PDF has the same defect and is not changed here"; "The policy PDF half is not done: packages/renderers/src/document-pdf.ts is unchanged by this pull request"). **This lane is the policy PDF half only.** Whether the ticket is Done is not ruled and not yours. **Whose call this build is:** the coordinator's, under the product owner's standing words of 2026-10-24 ("check tickets that can be actioned and if there are any, always start the process of working through it.  You dont need to wait on me to request"), the same call made for the last two Composer test lanes. It is NOT a product-owner ruling and the kit claims none. **Every choice inside this kit (the shape of the fix, the tests, the mutants, the checks) is the drafter's or Tuesday's as coordinator, none the product owner's.** The Composer block at the top of `/Volumes/Datasec_DEV/TUESDAY/0_Brain/tasks/NEXT-PICKUP-TUESDAY.md` (no deploy of a changed content release without the product owner's own card) binds this lane: it is branch-only, the pull request is Tuesday's, and **nothing deploys**. The change alters the bytes of a customer PDF and DOCX only for a first footer line that does not fit (a long company, product or policy name); for every name that fits the footer string is byte for byte what main prints (FACT 9).
+
+**You do NOT** open a pull request, merge, comment on GitHub, write Jira or any record file (`CLARIFICATIONS.md`, `BACKLOG.md`, `JIRA.md`, history), edit any path outside THE CLOSED LIST, run `az` or ssh beyond the deploy key's git, contact any hosted, demo or production site, message any human, open anything of HPSM-POC (any need: STOP), deploy of any kind, cut a release, run `scripts/ci.sh` whole (it starts a compose stack), or delete anything (move to `.tools/b2113/quarantine/`; no `rm`, no `sed -i`). No `cd` (a hook refuses it, and it also refuses a heredoc whose text holds one: write every script and the test file with the Write tool, never through a Bash heredoc): absolute single-quoted paths (`!CODING` contains `!`); use `--root`/`-C` style arguments instead. `/usr/bin/grep -i` with a positive control beside every count (a zero is a suspect until a control fires). Under zsh a word starting with `=` expands and an unmatched glob errors: `bash -c` for glob loops, and never a variable holding a command with spaces used unquoted. One simple command per Bash call; a pipeline's exit code is the last command's, so run the checked command alone.
+
+**Model.** `claude-sonnet-5-5` (`/Volumes/Datasec_DEV/TUESDAY/0_Brain/dashboard/data/models_latest.json:23`). Routing row in `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/specs/model-routing.md`: **C2** (line 92, "Multi-file build or feature that fails the local predicate, not decision-shaped, not auth-design and not a destroying path": Sonnet first; the product owner's 2026-10-10 words in that row, "also get Sonnet to do some of the harder tasks that you would not give to the spark. You ( an opus agent you spin up - your choice) acts as the gatekeeper"; the row's gate: tier 1 or 2 per the G rows). It is not a local-eligible row (three paths, product code and a new test), so the Spark queue does not apply; this is the drafter's reading and a Question for Tuesday. Review after READY: slot GATE-TIER; the drafter proposes **G2** (`model-routing.md:109`: "Tier 2: tests-only, spec-only, docs, config/CI, tooling, and follow-ups whose mechanism a prior gate already measured"), because the mechanism (`footerFirstLine` of the change report) is the one pull requests 113 and 120 put through independent review (two rounds, then two GO WITH FINDINGS reviews, RELAYED from the ticket's comments), no security, data or deploy surface is touched, and nothing deploys; the alternative is **G1** (`model-routing.md:108`, "anything handed to a client tester"), because customer PDF and DOCX bytes change for a long first line. **Model receipt:** print the model id your session reports in STATUS Step 0. **Toolchain by path:** python3 `/opt/homebrew/bin/python3` (always `-I -B`), git `/usr/bin/git`, gh `/opt/homebrew/bin/gh`. Every node, npm, vitest, eslint, prettier and tsc run happens INSIDE the CI image (`docker build -f docker/Dockerfile --target ci`, `--network none`; the Dockerfile's `NODE_IMAGE` pins `node:22-bookworm-slim`, `docker/Dockerfile:3`), never with the machine's node (`v26.13.0`, not the pin). The project has no drive-local node under `.tools/`; the image is the toolchain. **Ports: none assigned and none used** (anything wanting a listener: STOP).
+
+**Launch (Tuesday), ONE seat, level inside the quotes:** `WED_USAGE_STOP=100 bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/cockpit/cockpit.sh add Datasec/Composer-C110 "BRIEF_SEAT_LEVEL=sonnet bash '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/brief_seat.sh' '/Volumes/Datasec_DEV/!CODING/Datasec/Datasec Security Composer' '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-26_B2113_SEAT-C110_composer-pcomp23-pdf-footer.md'"`. Arm `status_watch.sh` on `/Volumes/Datasec_DEV/!CODING/Datasec/Datasec Security Composer/1_Project_Definition/Briefs/<D>_B2113_STATUS.md` once Step 0 prints `<D>`. **Seat id** `SEAT-C110`: by program 0 file names carry it in the two briefs folders before this kit was written (control `SEAT-C109`: 3 in the Tuesday folder and 1 in the project folder). The HARD STOP slot binds.
+
+**Every step ends with its own SEVERITY or STOP; a line without one is a drafting fault: treat it as STOP. A check that FAILS ends in `STOPPED: NEEDS TUESDAY`, even when you can explain the cause.** You never amend a check of this kit yourself.
+
+## FACTS (MEASURED by the drafter unless marked; re-measure at Step 1 and say where yours differ)
+1. **Code main** `d06508f8a69267542b92959a2048198055a7b473` (`git/ref/heads/main`; "Test: the Q-03/Q-04 scan test plants every alternative of its last two alternations (#133)", 2026-11-24T00:42:25Z); open pull requests 0 (`pulls?state=all` read 133 pull requests, unique numbers 133, none open; control: `pulls?state=closed&per_page=5` returns 5). The sweep read this same main (`d06508f8a692`) at 04:53 AEDT and the drafter re-read it at 09:11 and 09:12: the sha is unchanged.
+2. **The three files at main** (GitHub `contents` `.sha`, equal to `git hash-object` of the raw tarball copies): `packages/renderers/src/policy-document.ts` blob `8afaa41cc49549d6692f522c9f233b89b20cfa4f` (39605 bytes); `packages/renderers/src/change-report.ts` blob `2474e3852f5e966dab9fc301efd2a9129c4633c7` (31564 bytes); `packages/renderers/src/document-pdf.ts` blob `2ece0c78916985840aed4323e9d3e879cf0240f8` (9496 bytes; NOT edited: FACT 5).
+3. **The defect, at main (pointers by `grep -n` over the raw files at main):** the policy document's footer string is built at `packages/renderers/src/policy-document.ts:835` as company name, product name, ` | `, the model title, a newline, `manifest <hash>`, with no length limit on the first line; the PDF writer prints that string as the left, width `*` column of a row (`packages/renderers/src/document-pdf.ts:187`, the `footer` function; wired at `:257`) beside a `Page N of M` label, so a long first line takes more rendered lines than the footer's band holds and the hash line (the LAST line) is dropped from the page.
+4. **The reproduction (DERIVED, drafter, host, scratch copy; a render of the policy PDF through `renderPolicyDocumentPdf` over the real content, 250-character policy name and 200-character company, released and draft):** at main, **22 of 22 pages** (ordinary words) and **23 of 23 pages** (the widest letter, W, in 12-letter words) print NO `manifest <hash>` line; the third shape (one unbroken 200-character company token) kept it on all 23 pages (so not every long name loses it) and a short name keeps it on all 22. After the fix: 0 pages without it in all four. A seeded probe of 192 cells (three seeds of 64, the change report test's own name generators, released and draft): **96 of 192 lose the hash line at main, 0 of 192 after the fix**. The seat's red-first proof is the new test at BASE (THE TEST, stage T0).
+5. **The fix, DERIVED (prototype in the scratch copy; its three blobs are those of THE EDIT):** `footerFirstLine` of `packages/renderers/src/change-report.ts` (line 750 at main, `function footerFirstLine(line: string, hashLine: string): string {`, not exported) is the fitting the change report already uses at its own footer (`change-report.ts:809`): it returns the line whole when it is within 122 characters (`FOOTER_FIRST_LINE_BUDGET`, line 499) AND takes at most two rendered lines (`FOOTER_FIRST_LINE_ROWS`, line 502, by the writer's own text widths via `modelledFooterRows`, line 665), otherwise its longest prefix that with exactly three ASCII dots fits. The fix is three small edits: export it (one word), import it in `policy-document.ts`, wrap the first line of the policy footer in it. The writer (`document-pdf.ts`) is NOT edited: the budget is applied to the footer STRING, as the change report does, so the writer, the cover, the contents page and the table layout are untouched. **The policy document's DOCX shares the same footer string** (`policyDocumentSpec` and `policyPdfSpec` both spread `parts.spec`, `document-docx.ts:181` prints `spec.footer`), so the DOCX footer gets the same clipped first line (the change report's DOCX does too, by the same shape).
+6. **The change-report mechanism's reach, DERIVED:** with the fix the renderers project at the scratch copy reads `Tests  296 passed | 1 skipped (297)` and `Test Files  34 passed (34)`; without the new test file it read 291 passed and 1 skipped (292 total) over 33 test files, so the lane adds exactly 5 cells (the new file) and no other cell changes. The change report's own tests are green with the export (the 22 cells of `change-report.test.ts`, run in the same project run).
+7. **The release files you must not change** (blob shas at main, `contents` GET): `content/release-demo/CONTENT_HASH` `23cd95f58dd0ceabecac0c3f5796aeba9b0edd62` (value begins `5db37614db639330`), `content/release-draft/CONTENT_HASH` `09d597c64f07d19c98aeb0859086499ea74300b7` (value begins `5679855b0b9c7948`), `content/release-draft/bundle.json` `3ed9445ba35faed5f7e821161a58c8e9f54c931d` (912212 bytes), `content/sources/SOURCES.json` `30269393179065c9f023e0f0a0081cb9e8dd1449` (3795 bytes). All four equal the values the last Composer code kit (B2033) froze at the earlier main, and the change of main since then is a test file.
+8. **The CI runs you compare with** (RELAYED, `1_Project_Definition/CLARIFICATIONS.md` entry C-160, its sentence (2) about the review of the last landing: renderers project 291 passed and 1 skipped; workspace project 3041 passed and 2 failed, both the `packages/content/src/citations.test.ts` rows that read the withheld SOW text; lint, format check, typecheck and build rc 0). The CI predicate (read at drafting): `package.json:21` `ci:node` is `npm run lint && npm run format:check && npm run typecheck && npm run build && npm run test`, so each of those must exit 0 (the two citation rows are red only because the SOW text is not mounted in your image; `scripts/ci.sh` copies it in at its `node_ci_with_sow_text` step, line 76, which you never run). Your base run re-measures all of it; the red set at BASE is those two rows by name.
+9. **Short names are byte for byte unchanged, DERIVED (host):** a PDF and a DOCX rendered from the real content with a short policy name hash to the same sha256 at main and with the fix (PDF `16b6c2bff941`, DOCX `d45026261620` prefixes, equal at both). The new test's cell P4 pins the footer STRING equal to the old template for a short name.
+10. **Lock, panes and load at drafting:** `.tools/composer-heavy.lock` absent (`ls` rc 1 at 09:12); `LC_ALL=C uptime` load averages 22.92 12.18 9.33 at 09:12 (**load1 22.92 is near heavy.sh's 24 gate**: the seat will wait on load); `tmux list-panes -a -F '#{@cockpit_name}'` printed `tuesday`, `Datasec/MPS-M177` and `Datasec/NexusAI-N178` and no pane holding `Composer`; `.tools/b2113` absent (`ls` of `.tools` counted 0 for `^b2113$`, control `^b2033$` 1). `.tools/b2033/scripts/heavy.sh` is present (1726 bytes). **Identity:** the last Composer code seat's clone (`.tools/b2033/clone`) holds `user.email` `88359143+kamilDatasec@users.noreply.github.com` and `user.name` `kamilDatasec`; the IDENTITY slot decides.
+
+## CORRECTIONS (the kit follows the measurement)
+1. The sweep proposed `document-pdf.ts` (the footer, line 187) as an owned path to edit. Measured: it needs no edit (FACT 5): the defect is the unbounded first line in the string, which the change report's fitting bounds; `document-pdf.ts` is left byte for byte, and a seat that finds a reason to edit it STOPs.
+2. The commission's owned list named two source files and one test; the fix needs `footerFirstLine` exported from `change-report.ts` (one word, a THIRD source path). That path is in THE CLOSED LIST; it is a Question for Tuesday (Q1 of the report) whether to export it in place or to move the function.
+3. The sweep read the defect statically; it now reproduces by render (FACT 4). One shape of the three (a single unbroken 200-character company token) does not lose the line at main: the new test keeps it as a shape anyway (the same three shapes as the change report test).
+4. The rows 450 to 453 (the "18-cell residue") are the change report's follow-ups: Jira GET at drafting reads PCOMP-120 (row 450), PCOMP-121 and PCOMP-122 Done and only PCOMP-123 (row 453, "size the footer by the real page count instead of the widest label", a measurement and a choice, 0 hash lines lost) in Backlog. None of them is this lane's work; see the report's Question on the Done reading.
+
+## THE OUTPUT (binding)
+**Closed list of changed paths (property first: exactly the two existing source files edited in place and one new test file; at least this):** `packages/renderers/src/change-report.ts`, `packages/renderers/src/policy-document.ts`, `packages/renderers/test/policy-footer-budget.test.ts`. Proven at Step 5 by `git diff --name-only <BASE>..HEAD` printing those three paths and no other (control: a list with a fourth path fails your comparator, and so does a list missing one). Any other shape: prove it meets the property or STOP. Never touched: `content/**` (the four files of FACT 7 above all), `packages/renderers/src/document-pdf.ts`, `packages/engine/**`, `apps/web/**`, `apps/api/**`, `packages/content/**`, `content/baselines/**`, any record file, lock file, CI file, `.prettierignore`, eslint or vitest config.
+
+## THE EDIT (binding; three exact-string edits with the Edit tool and one new file with the Write tool; each `old_string` occurring exactly once at BASE; any other change is a STOP)
+After the edits `git hash-object` of each path must print the blob in the table; a different blob is `STOPPED: NEEDS TUESDAY` with your `diff` against the drafter's text, even when your text reads the same. Backslashes are literal (a backslash and an `n`, two characters, where the text shows `\n`).
+- **E1 (`packages/renderers/src/change-report.ts`, the function, line 750 at BASE).** old (one line, with its trailing newline):
+~~~~text
+function footerFirstLine(line: string, hashLine: string): string {
+~~~~
+new (one line):
+~~~~text
+export function footerFirstLine(line: string, hashLine: string): string {
+~~~~
+- **E2 (`packages/renderers/src/policy-document.ts`, the import, line 10 at BASE).** old (one line, trailing newline):
+~~~~text
+import { renderDocumentDocx } from "./document-docx.js";
+~~~~
+new (two lines):
+~~~~text
+import { footerFirstLine } from "./change-report.js";
+import { renderDocumentDocx } from "./document-docx.js";
+~~~~
+- **E3 (`packages/renderers/src/policy-document.ts`, the footer, line 835 at BASE).** old (one line, trailing newline; six leading spaces):
+~~~~text
+      footer: `${brand.company_name} ${brand.product_name} | ${model.title}\nmanifest ${model.manifest_hash}`,
+~~~~
+new (one line, six leading spaces; prettier leaves a template literal on one line, so this is the formatted text):
+~~~~text
+      footer: `${footerFirstLine(`${brand.company_name} ${brand.product_name} | ${model.title}`, `manifest ${model.manifest_hash}`)}\nmanifest ${model.manifest_hash}`,
+~~~~
+- **E4 (NEW FILE `packages/renderers/test/policy-footer-budget.test.ts`, 7216 bytes, 157 lines; the Write tool; the text between the fences, ending with exactly one newline):**
+~~~~typescript
+import { describe, expect, it } from "vitest";
+import { modelledFooterRows } from "../src/change-report.js";
+import {
+  policyDocumentSpec,
+  policyPdfSpec,
+  renderPolicyDocumentDocx,
+  renderPolicyDocumentPdf,
+} from "../src/policy-document.js";
+import type { RenderInput } from "../src/model.js";
+import { ooxmlText, unzip } from "./support/ooxml-read.js";
+import { readPdfTextLayer } from "./support/pdf-text.js";
+import { realRenderInput, withManifest } from "./support/real-resolution.js";
+
+// The policy document half of the footer line budget: a long company or policy name used to push the footer's
+// `manifest <hash>` line off the page of the policy PDF. The first footer line is now held to what fits above the hash
+// line, with the change report's own fitting (change-report.ts, footerFirstLine). The change report's tests are in
+// change-report.test.ts.
+
+const OPTIONS = { generated_at: "2026-09-13T01:00:00Z" };
+// The budget is pinned here as a number of its own, not read from the product, so a budget moved by one fails.
+const BUDGET = 122;
+// Three footer lines fit above the page bottom (measured for the change report: a fourth is dropped) and the hash line
+// takes one, so the lines above it may take two. Pinned here as a number of its own.
+const LINES_ABOVE_HASH = 2;
+const NAME_LENGTH = 250;
+const COMPANY_LENGTH = 200;
+
+// Text of exactly `length` characters from `unit` repeated, never ending in a space.
+const filled = (unit: string, length: number): string =>
+  unit.repeat(Math.ceil(length / unit.length)).slice(0, length - 1) + "x";
+
+// The same two lengths in three shapes: ordinary words, the widest letter in words, and one unbroken company token.
+const SHAPES: ReadonlyArray<{ label: string; name: string; company: string }> = [
+  {
+    label: "ordinary words",
+    name: filled("Quarterly access review ", NAME_LENGTH),
+    company: filled("Sample Company Pty ", COMPANY_LENGTH),
+  },
+  {
+    label: "the widest letter, W, in 12-letter words",
+    name: filled(`${"W".repeat(12)} `, NAME_LENGTH),
+    company: filled(`${"W".repeat(12)} `, COMPANY_LENGTH),
+  },
+  {
+    label: "one unbroken company token",
+    name: filled("Quarterly access review ", NAME_LENGTH),
+    company: "C".repeat(COMPANY_LENGTH),
+  },
+];
+
+function named(shape: { name: string; company: string }, released = true): RenderInput {
+  const base = withManifest(realRenderInput({ released }), (manifest) => {
+    manifest.policy.requested_hpsm_name = shape.name;
+  });
+  return { ...base, brand: { ...base.brand, company_name: shape.company } };
+}
+
+describe("policy document footer budget", () => {
+  it("P1: every page of the policy PDF, released and draft, carries the `manifest <hash>` footer line inside the page", async () => {
+    for (const shape of SHAPES) {
+      for (const released of [true, false]) {
+        const input = named(shape, released);
+        expect(shape.name).toHaveLength(NAME_LENGTH);
+        expect(shape.company).toHaveLength(COMPANY_LENGTH);
+        const layer = await readPdfTextLayer(await renderPolicyDocumentPdf(input, OPTIONS));
+        expect(layer.page_count, shape.label).toBeGreaterThan(0);
+        for (const [index, page] of layer.pages.entries()) {
+          const where = `${shape.label}, ${released ? "released" : "draft"}, page ${index + 1}`;
+          const line = page.runs.find((run) => run.text === `manifest ${input.manifest_hash}`);
+          expect(line, `${where}: the footer's "manifest <hash>" line is missing`).toBeDefined();
+          expect(
+            line?.baseline ?? Infinity,
+            `${where}: the hash line is below the page`,
+          ).toBeLessThan(page.height);
+        }
+      }
+    }
+  });
+
+  it("P2: the PDF's and the DOCX's footer end in exactly the hash line, and what is above it is within the budget and the lines that fit", () => {
+    for (const shape of SHAPES) {
+      const input = named(shape);
+      for (const [kind, spec] of [
+        ["pdf", policyPdfSpec(input, OPTIONS)],
+        ["docx", policyDocumentSpec(input, OPTIONS)],
+      ] as const) {
+        const { footer } = spec;
+        const cut = footer.lastIndexOf("\n");
+        expect(
+          footer.slice(cut + 1),
+          `${shape.label}, ${kind}: the last footer line is not the hash line`,
+        ).toBe(`manifest ${input.manifest_hash}`);
+        const first = footer.slice(0, cut);
+        expect(
+          Array.from(first).length,
+          `${shape.label}, ${kind}: the first footer line is over the ${BUDGET}-character budget`,
+        ).toBeLessThanOrEqual(BUDGET);
+        expect(
+          modelledFooterRows(first),
+          `${shape.label}, ${kind}: the first footer line takes more rendered lines than fit above the hash line`,
+        ).toBeLessThanOrEqual(LINES_ABOVE_HASH);
+      }
+    }
+  });
+
+  it("P3: the DOCX footer still carries the hash line", () => {
+    for (const shape of SHAPES) {
+      const input = named(shape);
+      const footer = ooxmlText(
+        unzip(renderPolicyDocumentDocx(input, OPTIONS))["word/footer1.xml"] ?? "",
+      );
+      expect(footer, shape.label).toContain(`manifest ${input.manifest_hash}`);
+    }
+  });
+
+  it("P4: a short name gives the footer string the old template gives, byte for byte", () => {
+    const input = realRenderInput();
+    const { brand } = input;
+    const title = input.manifest.policy.requested_hpsm_name;
+    const old = `${brand.company_name} ${brand.product_name} | ${title}\nmanifest ${input.manifest_hash}`;
+    expect(Array.from(old.split("\n")[0] ?? "").length).toBeLessThanOrEqual(BUDGET);
+    expect(policyPdfSpec(input, OPTIONS).footer).toBe(old);
+    expect(policyDocumentSpec(input, OPTIONS).footer).toBe(old);
+  });
+
+  it("P5: a first line exactly at the budget is not clipped; one character over is clipped to the budget with three dots", () => {
+    const { brand } = realRenderInput();
+    const template = (name: string) => `${brand.company_name} ${brand.product_name} | ${name}`;
+    // The fixed part of the first line: everything but the name. The name below is one token of letters.
+    const fixed = Array.from(template("")).length;
+    const spec = (length: number) => {
+      const input = withManifest(realRenderInput(), (manifest) => {
+        manifest.policy.requested_hpsm_name = "n".repeat(length - fixed);
+      });
+      return {
+        input,
+        spec: policyPdfSpec(input, OPTIONS),
+        line: template("n".repeat(length - fixed)),
+      };
+    };
+
+    const exact = spec(BUDGET);
+    expect(Array.from(exact.line)).toHaveLength(BUDGET);
+    expect(exact.spec.footer).toBe(`${exact.line}\nmanifest ${exact.input.manifest_hash}`);
+
+    const over = spec(BUDGET + 1);
+    expect(Array.from(over.line)).toHaveLength(BUDGET + 1);
+    const clipped = `${Array.from(over.line)
+      .slice(0, BUDGET - 3)
+      .join("")}...`;
+    expect(clipped).toHaveLength(BUDGET);
+    expect(over.spec.footer).toBe(`${clipped}\nmanifest ${over.input.manifest_hash}`);
+    // Only the footer's first line is clipped: the title and the subject stay full.
+    expect(over.spec.title).toBe(`${"n".repeat(BUDGET + 1 - fixed)}: policy document`);
+    expect(over.spec.subject).toBe(`Policy document for manifest ${over.input.manifest_hash}`);
+  });
+});
+~~~~
+
+| path | blob after the edits | numstat (added, removed) |
+|---|---|---|
+| `packages/renderers/src/change-report.ts` | `1f8c612f49191009c974fd97d670a31e1f684258` | 1, 1 |
+| `packages/renderers/src/policy-document.ts` | `e1857e06b8605d51c2b10be0ee265e59ec4b773f` | 2, 1 |
+| `packages/renderers/test/policy-footer-budget.test.ts` | `7c8dd4013c893db0caaeea1d6cefb5b87bffa738` | 157, 0 |
+
+Line arithmetic (computed by `git diff --no-index --numstat` over the drafter's files): E1 replaces 1 line by 1 (numstat 1 and 1), E2 adds 1 line and E3 replaces 1 by 1 (numstat 2 and 1 together); the new file has 157 lines; the numstat in the table is what binds. The writer, the interface, `modelledFooterRows` and the fitting itself are NOT edited.
+**The commit message** (one commit; no ticket key, no B-number, no card id, no person's name, no coordinator name: the check is CK5): subject `Policy document footer: hold the first line to what fits above the hash line` (76 characters); a blank line; a body of exactly these four lines (the drafter's text, four lines counted by program over the message file you write): "The footer's first line (company, product and title) is fitted to the lines that fit above" / "the hash line, as the change report's is, so a long name no longer pushes the manifest hash" / "line off the page of the policy PDF. A first line that fits is unchanged, byte for byte. A new" / "test covers a 250-character name with a 200-character company, released and draft."; then a blank line and exactly ONE trailer: the attribution line your own session reminder gives.
+
+## THE TEST (red first, in the form this lane allows)
+**Selector:** `npx vitest run --project renderers packages/renderers/test/policy-footer-budget.test.ts` (the renderers project of `vitest.config.ts` includes `packages/renderers/test/**/*.test.ts`; its describe line is `policy document footer budget` and its five tests start `P1:` to `P5:`, each occurring once in the file). Print its `Tests` line; **a total of 0 is a STOP** (an unmatched filter exits 0). A fresh container has no built packages: the job scripts run `npx tsc -b tsconfig.build.json` first and print its rc (0 expected in the image).
+**Stage T0 (the defect shown first; the new test over the UNFIXED product, in a base-image container):** expected `Tests  3 failed | 2 passed (5)`, the failing tests P1, P2 and P5 by name, first assertion `ordinary words, released, page 1: the footer's "manifest <hash>" line is missing: expected undefined to be defined`; P3 and P4 pass (they are the controls: a DOCX footer that already carried the hash line and a short name that already printed the old template).
+**Stage FIXED (the test and the three edited source files over the base files, in a base-image container):** `Tests  5 passed (5)`, prettier `--check` rc 0 and eslint rc 0 on the three paths.
+**Mutants at HEAD** (copies built on the host by `mut_build.py`, anchors asserted to occur once, each `docker cp`'d over its repo path in its own head-image container; the job restores and `cmp`s): **C0** the unmutated head: `Tests  5 passed (5)`; **M1** the policy footer's first line unfitted again (anchor the whole `${footerFirstLine(...)}` expression of E3, replaced by the bare template): `Tests  3 failed | 2 passed (5)` (P1, P2, P5); **M2** the budget moved by one (`const FOOTER_FIRST_LINE_BUDGET = 122;` to `123`): `Tests  2 failed | 3 passed (5)` (P2, P5); **M4** the fitting returns every line whole (`  if (fitsAboveHash(line, hashLine)) return line;` to `  if (line !== "") return line;`): `Tests  3 failed | 2 passed (5)` (P1, P2, P5). All four were run by the drafter on the host with the same scripts and printed these lines. **A mutant of the row count (`FOOTER_FIRST_LINE_ROWS` 2 to 3) is NOT in this table: the new file does not kill it (the drafter ran it: 5 passed) and `change-report.test.ts` does (6 of 22 failed, the drafter's run): it is the change report's cell, not this lane's.** Any other cell of this table is a STOP.
+
+## THE CHECKS (by program on the real files, each with a control that MUST fire before its real zero counts; saved under `Briefs/<D>_B2113_evidence/runs/`)
+The drafter ran the stage T0 and FIXED job (`edit_job.sh`), the mutant job (`mut_job.sh`, four cells) and `mut_build.py` on the host over the scratch copy (REPO and TMPD set), `ck7_compare.py` over host JSON reports of the renderers project at BASE and at the fixed head (the workspace half over a copy of the renderers JSON: a comparator test, not a workspace run), and `ck345.py` over a simulated base and head commit pair in a scratch git repository (it printed PASS on every line, exit 0). The in-image halves, `run_job.sh`, `heavy.sh`, `docker cp`, `ck67_job.sh` (never run anywhere) and `scripts/secret-scan.sh --tree` are NEVER RUN on a real output: a failure you can trace to this kit's wording is `STOPPED: NEEDS TUESDAY`, never yours to amend.
+- **CK1 base is green as relayed** (FACT 8): in the image at BASE: lint, format:check, typecheck, build, renderers project, workspace project, `content:check`; red set exactly the two citation rows by name; counts printed. Control: the counts are non-zero.
+- **CK2 the test tables** (THE TEST): T0 and FIXED in the base image, then C0, M1, M2, M4 in the HEAD image, as written. Control: M4 (the largest) RED at head.
+- **CK3 the closed list and the releases unchanged:** `git diff --name-only <BASE>..HEAD` prints the three paths; at head the four blob shas of FACT 7 equal FACT 7's (`git rev-parse HEAD:<path>`); in the image `npm run content:check` prints `content/release-draft is current` with the hash beginning `5679855b0b9c7948` (the line is the B2033 kit's, RELAYED: print yours). Control: the comparator reports a planted extra path, a missing path and a planted one-character change.
+- **CK4 blob and byte checks:** `git hash-object` of the three paths at head equals the table; 0 bytes above 127 and 0 CR **over the added lines** (the two existing source files already hold bytes above 127 elsewhere, so the check is over the diff; control: a planted `0xC3` counts 1); `git diff --numstat` prints the table's counts.
+- **CK5 names and words, underscore-aware** over the ADDED lines of the diff and the commit message: pattern `(?<![A-Za-z])(ruled|ruling|tuesday|wednesday|friday)(?![a-z])` with `re.I`, plus a person-name list built in memory (the camel-case-split tokens of every distinct author name of the 30 newest main commits, less the word Datasec, and of the IDENTITY slot's name; at drafting that source holds one account name, `kamilDatasec`, 30 of 30) in the same underscore-aware form, plus `composer-[a-z0-9-]+-[0-9]{4}` (card ids), plus `B[0-9]{3,4}|PCOMP` over the message only: 0. Control: a planted `_by_<first token>_`, a planted `B2113` and a planted `_ruled_` each fire (drafter's own list, not the project's: marked so). Second instrument: read the 160 added lines whole and say in STATUS that none names a person. Messages: exactly one trailer line, and a body of 4 lines.
+- **CK6 format and lint:** in the image `npm run format:check` and `npm run lint` rc 0 at head. Control: a planted unformatted copy is flagged by the image's prettier (rc 1) and a planted unused variable by its eslint (rc 1).
+- **CK7 the footer-related tests and the whole suite at head:** `policy-footer-budget`, `change-report`, `policy-document`, `b59-policy-pdf-cover` and `b323-policy-pdf-toc` test files each green by their pass lines (run after `npm run build`); the renderers project at head prints passed = base + 5, failed and skipped equal to base, and the workspace project prints the SAME counts as base; test-name multiset base versus head: lost 0, added 5 and all five in the new file (workspace: lost 0, added 0) (control: one name dropped from a scratch copy reports lost 1, a planted name reports added one more). `scripts/secret-scan.sh --tree` green.
+- **CK8 the content release refusal** (see THE CONTENT RELEASE REFUSAL): the two `CONTENT_HASH` files at head equal BASE's by blob sha (in CK3's table) and their values begin `5db37614db639330` and `5679855b0b9c7948`. Control: the comparator reports a planted one-character change of either value.
+Hard severities: CK1 to CK8 each STOP when it fails or its control does not fire.
+
+## PRIOR-WORK CHECK (required: a READY without a PRIOR WORK section is returned unread)
+At drafting (the drafter, 09:11 to 09:13 AEDT): **what built the half that is on main:** pull request 113 (closed, merged 2026-11-02T19:44:26Z as `f5f33e189f34d36fa374c0ac1d6fa38d003df8ec`, head `b1140/composer-pcomp23-change-report-footer`, 2 files: `change-report.ts` +109 -1 and `change-report.test.ts` +421 -1) added the length budget and the first line's clipping to the change report only; pull request 120 (merged 2026-11-10T03:04:26Z as `61b3a0c21384b6c3cf755733e1b4d937a35e47a5`, head `b1420/composer-footer-model`, 2 files: `change-report.ts` +216 -47, `change-report.test.ts` +323 -10) replaced the character count by the writer's own line breaker and widths (`modelledFooterRows`, `footerFirstLine`): that is the mechanism this lane reuses; neither changed `policy-document.ts` or `document-pdf.ts`. Pull request 85 (merged 2026-11-20T21:28:01Z as `3638da611ce8483628b03b2550367b6eb15aa69c`, 57 files) touched `document-pdf.ts` (+10 -2) and `policy-document.ts` (+23 -10) for the SM 3.16 content work, not the footer; the footer line at `policy-document.ts:835` is the unclipped template on main today. 203 branch names (`branches?per_page=100`, `--paginate`); 4 match `pcomp-?23|footer` and they are `b1017/composer-pcomp102-restore-footer-check`, `b1140/composer-pcomp23-change-report-footer`, `b1241/composer-pcomp122-footer-space-run-row` and `b1420/composer-footer-model` (all the change report's or the deploy guide's, none the policy document); 0 match `b2113|c110`; controls `^b2033` 1 and `^b1959` 1; `git/matching-refs/heads/b2113` 0 refs (control `heads/b2033` 1 ref). 133 pull requests of every state (unique numbers 133): titles, bodies and head refs naming `pcomp-?23` are number 113 only; naming `b2113|c110` none; `footer` nine (30, 58, 73, 108, 109, 113, 114, 117, 120: the change report, the deploy guide, and the policy cover of number 30, none the policy footer fix); controls: titles `deploy guide` 12, bodies `codeql` 30; open pull requests 0. Jira `project = PCOMP AND ( text ~ "footer" )` 11 keys (PCOMP-123, 122, 121, 120, 118, 116, 102, 54, 53, 23, 22); `( text ~ "manifest hash line" )` 4 keys (123, 121, 120, 23); `( text ~ "policy PDF" AND text ~ "footer" )` 4 keys (120, 54, 53, 23); controls `( key = PCOMP-23 )` 1 and `( key = PCOMP-9999 )` 0. Earlier Tuesday kits that name PCOMP-23: B1140 (the change report build, seat C80), its gate B1151 and round two B1160 (seat C82): readable claims, not this lane. Re-run all of it (same patterns, same controls) and `git ls-remote origin 'refs/heads/b2113*'` (control `refs/heads/b2033*` one line); any pushed ref, pull request, later ruling or file that already holds this work (the edits E1 to E3 present on any ref, or a closed ticket): STOP and quote it. SEVERITY: STOP.
+
+## THE CONTENT RELEASE REFUSAL (the standing rule, quoted for the refusal only: never copy it into a commit or a file)
+This lane deploys nothing and cuts nothing. The standing rule is that Security Composer deploy kits REFUSE a changed content release (the product owner's 2026-11-20 ruling on pull request 85's landing, option a: deploys of a changed content release stay refused unless his own card for that release is quoted); the standing push-to-demo grant does NOT cover a changed content release. At main the demo release file holds a value beginning `5db37614db639330` and the draft release file a value beginning `5679855b0b9c7948` (FACT 7): **this kit would STOP at once on any difference between these two values at BASE and at head** (CK3 and CK8: both `CONTENT_HASH` blobs equal BASE's). Any step that would put any commit on any host is outside this kit (STOP). The project's own rule that the live demo site is the product owner's (line 30 of the project's `CLAUDE.md`: click through it, never reconfigure it, never deploy to it without his word) binds too: the customer PDF bytes of a long name change only when someone deploys, and no one does here. Re-measure, never copy: read both files at BASE yourself.
+
+## REFUSE AT ONCE (last line `STOPPED: NEEDS TUESDAY <one question>`, nothing written; each count with a control that fires). SEVERITY: STOP
+1. Any run of four underscores in your Step-0 copy (`/usr/bin/grep -c -E '_''_''_''_'`; control: Tuesday's `.pre-stamp` copy beside this file reads one per slot plus the last line); the last line must read `READ-WHOLE-BY-TUESDAY: DONE ...`; BASE names exactly one 40-hex code sha; GATE-TIER reads `G2` or `G1`; IDENTITY names one name and one email; HARD STOP names a clock.
+2. Pane name (`tmux display -p -t "$TMUX_PANE" '#{@cockpit_name}'`) not `Datasec/Composer-C110`, or more than one pane carries it (control: `-t %0` prints another name); any other live pane whose name holds `Composer` (it may write this repository).
+3. `.tools/b2113` exists before your `mkdir`; `git ls-remote origin 'refs/heads/b2113*'` prints anything (control: `refs/heads/b2033*` prints one line); a `Briefs/<D>_B2113_STATUS.md` exists.
+4. Code main differs from BASE: apply A MOVED MAIN. Any open PR whose file list holds a path of THE CLOSED LIST (`/usr/bin/grep -c -F` over `pulls/<n>/files`; at drafting 0 open PRs).
+5. A file of THE EDIT at BASE does not have its blob of FACT 2 (`policy-document.ts` `8afaa41cc49549d6692f522c9f233b89b20cfa4f`, `change-report.ts` `2474e3852f5e966dab9fc301efd2a9129c4633c7`), or `packages/renderers/test/policy-footer-budget.test.ts` exists at BASE (`gh api -X GET` `contents`, control: the same read of `policy-document.ts` returns 200).
+6. A `.lock` under a git directory you did not create: wait 10 s, retry 5, never delete. Other `.tools/b*` trees are READ-ONLY (`cp` what you reuse).
+7. Docker: `docker version --format '{{.Server.Version}}'` fails (never start, stop or reconfigure Docker): STOP before Step 2. (Run it only while holding the lock, as HEAVY says.)
+8. A needed fact is not in the sources, a sentence of any source would be needed, or a change to any path outside THE CLOSED LIST: STOP. Any path under HPSM-POC: STOP.
+9. **Content release:** the two `CONTENT_HASH` blobs at BASE are not `23cd95f58dd0ceabecac0c3f5796aeba9b0edd62` (demo) and `09d597c64f07d19c98aeb0859086499ea74300b7` (draft), or their values do not begin `5db37614db639330` and `5679855b0b9c7948` (read by `gh api -X GET` `contents`, control: the same read of a path that does not exist returns HTTP 404): STOP, nothing written. This is checked before any write.
+
+## A MOVED MAIN
+Never rebase, amend or force. Read `git ls-remote origin refs/heads/main` at Step 0, before the commit and just before the push. If it differs from BASE, ALL THREE must pass or STOP (`STOPPED: NEEDS TUESDAY main moved to <sha>; <which failed>`): (1) `git diff --name-only <BASE> <new main>` (after `git fetch origin main` by explicit refspec) names nothing under `content/`, `packages/renderers/`, `packages/db/migrations/`, nor `vitest.config.ts`, `.prettierignore`, `eslint.config.js`, `package.json`, `package-lock.json`, `docker/Dockerfile`, `scripts/ci.sh`; (2) the new main's blobs of the two source files equal REFUSE 5's; (3) no open PR's file list holds a path of THE CLOSED LIST. If all pass, keep BASE as your base and record the new main in STATUS.
+
+## HEAVY (the project lock; light work needs none)
+`/Volumes/Datasec_DEV/!CODING/Datasec/Datasec Security Composer/.tools/composer-heavy.lock` is the PROJECT HEAVY LOCK, BINDING. Run `docker` (every verb, `docker version` included), the image build, Vitest, ESLint, Prettier, `tsc`, `content:check` and **every `git commit`** (the pre-commit hook runs `scripts/secret-scan.sh --staged`, a docker run) ONLY while holding it, ONE job at a time, and only when load1 is under 24 at two reads 4 s apart (print `LC_ALL=C uptime`; at drafting load averages 22.92, 12.18, 9.33: expect to wait). The scripts you need are copies of the last Composer code seat's plus eight written from this kit (Step 0c); `heavy.sh` is read whole first (`mkdir` lock, `holder` file, 120 s reads up to 3,600 s then exit 75, load waits in 30 s steps then exit 76, releases by moving the lock into its own quarantine). Prove it once (a planted scratch lock makes it wait on the lock, not on load). Never break, move or edit another seat's lock. Light work (reading, Edit, git reads, `gh` GETs, Jira GETs by python, `bash -n`, your python checks) needs no lock. Bind mounts from this drive hang, so get files in and out only by `docker create` / `docker cp` / `docker start -a`; a fresh container has no built packages: the job scripts build before they test.
+
+## THE WORK
+**Step 0. Setup.** `date`; `date +%F` (this is `<D>`); `LC_ALL=C uptime`. Copy this file unchanged into `/Volumes/Datasec_DEV/!CODING/Datasec/Datasec Security Composer/1_Project_Definition/Briefs/` (`cp -n`), then `cmp` and sha256. Run REFUSE 1 to 9 (prove `.tools/b2113` absent BEFORE any `mkdir`). `mkdir -p` `.tools/b2113/{scripts,scratch,out,quarantine,runs}` under the project dir and `1_Project_Definition/Briefs/<D>_B2113_evidence/runs/`. STATUS `Briefs/<D>_B2113_STATUS.md`, first line `BUILD B2113: PENDING`, STATUS-NOW kept current after every step (step, lock state, load1, last command, next, HARD STOP clock). **Your clone:** `git clone --no-hardlinks --no-checkout '/Volumes/Datasec_DEV/!CODING/Datasec/Datasec Security Composer/2_Project_Files' '/Volumes/Datasec_DEV/!CODING/Datasec/Datasec Security Composer/.tools/b2113/clone'`, then in the clone only `git remote set-url origin git@github.com:datasecau/Datasec-Security-Composer.git`. Every network git verb carries `-c core.sshCommand="ssh -i '/Volumes/Datasec_DEV/!CODING/Datasec/Datasec Security Composer/3_Access_Keys/composer_github_deploy_rw' -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"` (the checkout's own config names a `/Volumes/Laptop-DEV/` path; the last two Composer code seats used the same line). Fetch `main` by explicit refspec `+refs/heads/main:refs/remotes/origin/main` (the local checkout does not hold BASE; `ck345.py` reads `origin/main`), then `git checkout -b b2113/policy-footer-budget <BASE>`; `git rev-parse HEAD` prints BASE; status clean. **Identity:** in the clone, `git config --local user.name` and `user.email` ONCE, to exactly the IDENTITY slot; install the hook the project's way (`scripts/install-hooks.sh`, once). Never `git -c user.*`, never `GIT_AUTHOR_*` / `GIT_COMMITTER_*`; empty or unclear slot: STOP before the commit. SEVERITY: STOP.
+**Step 0b. PRIOR WORK** (above), totals and controls in STATUS. SEVERITY: STOP.
+**Step 0c. Your scripts.** Read `.tools/b2033/scripts/` (READ-ONLY for you; `cp` what you reuse): `heavy.sh`, `run_job.sh`, `run_steps.sh`, `run_in_image.sh`, `ci_steps.sh`, `head_chain.sh`, `jira_get.py` whole first. (a) Write copies of those seven into `.tools/b2113/scripts/` through ONE python `-I -B` program of yours (read each, replace, write to a temp file beside the target, `os.replace`; never `sed -i`). Replacements on every file, counts asserted and printed (a count that differs is a STOP): `b2033` to `b2113`, `B2033` to `B2113`, `C109` to `C110`, `2026-11-24` to `<D>`; the drafter counted, per file, `b2033` / `B2033` / `C109` / `2026-11-24`: `heavy.sh` 1 / 2 / 2 / 0; `run_job.sh` 1 / 2 / 0 / 2; `run_steps.sh` 2 / 1 / 0 / 1; `run_in_image.sh` 1 / 2 / 0 / 2; `ci_steps.sh` 0 / 0 / 0 / 0; `head_chain.sh` 6 / 1 / 0 / 1; `jira_get.py` 0 / 1 / 0 / 0. (b) Write, with the Write tool, the eight files below into `.tools/b2113/scripts/`, each exactly as printed (the sha256 prefix in each heading is the drafter's, over the file as printed; print yours and compare), then replace in `mut_chain.sh` and `edit_chain.sh` the text `@D@` (once each) by `<D>`. (c) `bash -n` on every `.sh`, a python `compile()` of every `.py`, `/usr/bin/grep -c -i -E 'b2033|c109'` over all fifteen copies prints 0 per file (control: it prints non-zero on `.tools/b2033/scripts/heavy.sh`), and run `mut_build.py head <clone>/packages/renderers/src/policy-document.ts <clone>/packages/renderers/src/change-report.ts <project dir>/.tools/b2113/scratch/mut` at Step 3 (after the edits): it prints anchor count 1 for M1, M2 and M4; the drafter's host run over its prototype printed (sha256 prefixes of the head copies) `pristine_policy.ts` `c5ff3cd9e1bb`, `pristine_report.ts` `6414952e75cf`, `M1` `0b3f610ed6f0`, `M2` `caee049b1e54`, `M4` `e777d2ab02ef`. A difference is a STOP naming the file. SEVERITY: STOP.
+**`.tools/b2113/scripts/mut_build.py`** (1893 bytes, sha256 prefix `b136d378288a9744`):
+~~~~text
+"""mut_build.py <stage> <policy-document.ts> <change-report.ts> <outdir>: builds the three mutant COPIES (one source file each) for the stage named.
+Each anchor must occur exactly once in its source (asserted); the mutated text must differ from the source. Writes <outdir>/<stage>/ M1.ts (policy-document.ts),
+M2.ts and M4.ts (change-report.ts), pristine_policy.ts and pristine_report.ts, and prints the sha256 of each. Nothing is written to the repository."""
+import hashlib, os, sys
+
+stage, pol, rep, outdir = sys.argv[1:5]
+P = open(pol, encoding='utf-8', newline='').read()
+R = open(rep, encoding='utf-8', newline='').read()
+MUTANTS = {
+    # M1: the policy document's footer first line is not fitted (the defect again)
+    'M1': (P, '${footerFirstLine(`${brand.company_name} ${brand.product_name} | ${model.title}`, `manifest ${model.manifest_hash}`)}',
+           '${`${brand.company_name} ${brand.product_name} | ${model.title}`}'),
+    # M2: the character budget moved by one (122 to 123)
+    'M2': (R, 'const FOOTER_FIRST_LINE_BUDGET = 122;', 'const FOOTER_FIRST_LINE_BUDGET = 123;'),
+    # M4: the fitting returns every line whole
+    'M4': (R, '  if (fitsAboveHash(line, hashLine)) return line;', '  if (line !== "") return line;'),
+}
+d = os.path.join(outdir, stage)
+os.makedirs(d, exist_ok=True)
+sha = lambda b: hashlib.sha256(b).hexdigest()
+for name, text in (('pristine_policy.ts', P), ('pristine_report.ts', R)):
+    b = text.encode('utf-8')
+    open(os.path.join(d, name), 'wb').write(b)
+    print(stage, name, len(b), 'bytes', sha(b))
+for name, (src, old, new) in MUTANTS.items():
+    n = src.count(old)
+    assert n == 1, f'{name}: anchor occurs {n} times, expected 1'
+    mut = src.replace(old, new)
+    assert mut != src
+    mb = mut.encode('utf-8')
+    open(os.path.join(d, name + '.ts'), 'wb').write(mb)
+    print(stage, name, 'anchor count 1', len(mb), 'bytes', sha(mb))
+~~~~
+**`.tools/b2113/scripts/mut_job.sh`** (1542 bytes, sha256 prefix `618a45ba0b9bf490`):
+~~~~text
+#!/bin/bash
+# Runs INSIDE the CI image (--network none), one mutant per container (REPO and TMPD default to /repo and /tmp; a host test sets them).
+# Before the start, run_job.sh docker-cp'd the mutant copy OVER <REPO>/<target>, the pristine copy of that one file to <TMPD>/pristine.ts,
+# the repo-relative target path to <TMPD>/target and the label to <TMPD>/label. A fresh container has no built packages: the job builds first.
+# Prints the Tests line, the failing tests' names and the first assertion; then restores from pristine.ts and cmp's.
+REPO="${REPO:-/repo}"; TMPD="${TMPD:-/tmp}"
+cd "$REPO" || exit 1
+SEL=packages/renderers/test/policy-footer-budget.test.ts
+T=$(cat "$TMPD/target"); label=$(cat "$TMPD/label")
+strip() { sed 's/\x1b\[[0-9;]*m//g'; }
+echo "=== $label"
+sha256sum "$T" "$TMPD/pristine.ts"
+if cmp -s "$TMPD/pristine.ts" "$T"; then echo "file in the image equals the pristine copy"; else echo "file in the image DIFFERS from the pristine copy (mutant in place)"; fi
+npx tsc -b tsconfig.build.json > "$TMPD/build.txt" 2>&1; echo "build rc=$?"
+npx vitest run --project renderers "$SEL" > "$TMPD/out.txt" 2>&1; echo "vitest rc=$?"
+strip < "$TMPD/out.txt" | /usr/bin/grep -E '^ +Tests  |^ +Test Files  '
+echo "failing tests:"; strip < "$TMPD/out.txt" | /usr/bin/grep -E '^ +(FAIL|×)' | sort -u | cut -c1-300
+echo "first assertion:"; strip < "$TMPD/out.txt" | /usr/bin/grep -m1 -E 'AssertionError' | cut -c1-300
+cp "$TMPD/pristine.ts" "$T"
+cmp "$TMPD/pristine.ts" "$T" && echo "=== RESTORED $label cmp-equal"
+sha256sum "$T"
+~~~~
+**`.tools/b2113/scripts/mut_chain.sh`** (1456 bytes, sha256 prefix `8e93de7ed6292282`):
+~~~~text
+#!/bin/bash
+# mut_chain.sh <stage head> <image-tag> : C0 then M1 M2 M4, each ONE container under the project heavy lock (run_job.sh through heavy.sh).
+# The copies come from .tools/b2113/scratch/mut/<stage>/ (built by mut_build.py). The mutant file is docker-cp'd OVER its repo path; the pristine copy of that
+# one file, its repo-relative path and the label go to /tmp/pristine.ts, /tmp/target and /tmp/label of the container (mut_job.sh reads them).
+P='/Volumes/Datasec_DEV/!CODING/Datasec/Datasec Security Composer'
+S="$1"; IMG="$2"
+M="$P/.tools/b2113/scratch/mut/$S"; H="$P/.tools/b2113/scripts/heavy.sh"; R="$P/.tools/b2113/scripts/run_job.sh"
+E="$P/1_Project_Definition/Briefs/@D@_B2113_evidence/runs"
+A=packages/renderers/src/policy-document.ts
+B=packages/renderers/src/change-report.ts
+for m in C0 M1 M2 M4; do
+  case "$m" in
+    C0) TG="$A"; PR="$M/pristine_policy.ts"; SRC="$M/pristine_policy.ts" ;;
+    M1) TG="$A"; PR="$M/pristine_policy.ts"; SRC="$M/M1.ts" ;;
+    M2) TG="$B"; PR="$M/pristine_report.ts"; SRC="$M/M2.ts" ;;
+    M4) TG="$B"; PR="$M/pristine_report.ts"; SRC="$M/M4.ts" ;;
+  esac
+  printf '%s_%s' "$S" "$m" > "$M/label_$m.txt"
+  printf '%s' "$TG" > "$M/target_$m.txt"
+  bash "$H" bash "$R" "$IMG" "mut_${S}_$m" "$P/.tools/b2113/scripts/mut_job.sh" "$SRC=/repo/$TG" "$PR=/tmp/pristine.ts" "$M/label_$m.txt=/tmp/label" "$M/target_$m.txt=/tmp/target" > "$E/mut_${S}_$m.heavy.log" 2>&1
+done
+echo CHAIN-DONE > "$E/mut_${S}_chain.done"
+~~~~
+**`.tools/b2113/scripts/edit_job.sh`** (1670 bytes, sha256 prefix `5f9b2104ead9d3fa`):
+~~~~text
+#!/bin/bash
+# Runs INSIDE the BASE CI image (--network none; REPO and TMPD default to /repo and /tmp, a host test sets them). run_job.sh docker-cp'd into the container,
+# over the repo's files, whatever the stage needs: the new test file alone (stage T0: the test against the unfixed product) or the new test file and the two
+# edited source files (stage FIXED). A fresh container has no built packages: the job builds first, then the selector, then prettier --check and eslint
+# on the three paths (a path the stage did not copy is the base file, unchanged).
+REPO="${REPO:-/repo}"; TMPD="${TMPD:-/tmp}"
+cd "$REPO" || exit 1
+SEL=packages/renderers/test/policy-footer-budget.test.ts
+A=packages/renderers/src/policy-document.ts
+B=packages/renderers/src/change-report.ts
+strip() { sed 's/\x1b\[[0-9;]*m//g'; }
+echo "=== STAGE $(cat "$TMPD/label")"
+sha256sum "$SEL" "$A" "$B"
+echo "=== STEP build :: npx tsc -b tsconfig.build.json"
+npx tsc -b tsconfig.build.json > "$TMPD/build.txt" 2>&1; echo "=== RC build $?"
+echo "=== STEP selector :: npx vitest run --project renderers $SEL"
+npx vitest run --project renderers "$SEL" > "$TMPD/out.txt" 2>&1; echo "=== RC selector $?"
+strip < "$TMPD/out.txt" | /usr/bin/grep -E '^ +(Test Files|Tests)  '
+echo "failing tests:"; strip < "$TMPD/out.txt" | /usr/bin/grep -E '^ +×' | sort -u | cut -c1-200
+echo "first assertion:"; strip < "$TMPD/out.txt" | /usr/bin/grep -m1 -E 'AssertionError' | cut -c1-300
+echo "=== STEP prettier :: npx prettier --check (three paths)"
+npx prettier --check "$SEL" "$A" "$B"; echo "=== RC prettier $?"
+echo "=== STEP eslint :: npx eslint (three paths)"
+npx eslint "$SEL" "$A" "$B"; echo "=== RC eslint $?"
+~~~~
+**`.tools/b2113/scripts/edit_chain.sh`** (1195 bytes, sha256 prefix `ecf9fcf0799e46c6`):
+~~~~text
+#!/bin/bash
+# edit_chain.sh <base image-tag> : stage T0 (the new test file docker-cp'd into a BASE-image container, the product unfixed) and stage FIXED (the new test file and
+# the two edited source files docker-cp'd over the base files), each ONE container under the project heavy lock. The files come from the clone's working tree.
+P='/Volumes/Datasec_DEV/!CODING/Datasec/Datasec Security Composer'
+IMG="$1"
+C="$P/.tools/b2113/clone"; O="$P/.tools/b2113/scratch"; H="$P/.tools/b2113/scripts/heavy.sh"; R="$P/.tools/b2113/scripts/run_job.sh"
+E="$P/1_Project_Definition/Briefs/@D@_B2113_evidence/runs"
+T=packages/renderers/test/policy-footer-budget.test.ts
+A=packages/renderers/src/policy-document.ts
+B=packages/renderers/src/change-report.ts
+printf 'T0' > "$O/label_T0.txt"; printf 'FIXED' > "$O/label_FIXED.txt"
+bash "$H" bash "$R" "$IMG" edit_T0 "$P/.tools/b2113/scripts/edit_job.sh" "$C/$T=/repo/$T" "$O/label_T0.txt=/tmp/label" > "$E/edit_T0.heavy.log" 2>&1
+bash "$H" bash "$R" "$IMG" edit_FIXED "$P/.tools/b2113/scripts/edit_job.sh" "$C/$T=/repo/$T" "$C/$A=/repo/$A" "$C/$B=/repo/$B" "$O/label_FIXED.txt=/tmp/label" > "$E/edit_FIXED.heavy.log" 2>&1
+echo CHAIN-DONE > "$E/edit_chain.done"
+~~~~
+**`.tools/b2113/scripts/ck67_job.sh`** (1440 bytes, sha256 prefix `98a114af47d88b8c`):
+~~~~text
+#!/bin/bash
+# Runs INSIDE the head CI image (--network none; REPO and TMPD default to /repo and /tmp). CK6 controls (a planted unformatted file must be flagged by prettier,
+# a planted unused variable by eslint), then npm run build and the footer-related test files, each by its own pass line.
+REPO="${REPO:-/repo}"; TMPD="${TMPD:-/tmp}"
+cd "$REPO" || exit 1
+strip() { sed 's/\x1b\[[0-9;]*m//g'; }
+step() { n="$1"; shift; echo "=== STEP $n :: $*"; "$@"; rc=$?; echo "=== RC $n $rc"; }
+D=packages/renderers/test
+printf 'export const   planted  =   {a:1,\n b:2}\n' > "$D/zz-planted-unformatted.test.ts"
+printf 'const unusedPlanted = 1;\nexport {};\n' > "$D/zz-planted-unused.test.ts"
+echo "=== CONTROL prettier on a planted unformatted file (expect rc 1)"
+npx prettier --check "$D/zz-planted-unformatted.test.ts"; echo "=== RC control_prettier $?"
+echo "=== CONTROL eslint on a planted unused variable (expect rc 1)"
+npx eslint "$D/zz-planted-unused.test.ts"; echo "=== RC control_eslint $?"
+mkdir -p "$TMPD/q" && mv -f "$D/zz-planted-unformatted.test.ts" "$D/zz-planted-unused.test.ts" "$TMPD/q/"
+step build npm run build
+for f in policy-footer-budget change-report policy-document b59-policy-pdf-cover b323-policy-pdf-toc; do
+  echo "=== TESTFILE $D/$f.test.ts"
+  npx vitest run --project renderers "$D/$f.test.ts" 2>&1 | strip | /usr/bin/grep -E '^ +(Test Files|Tests)  |FAIL|AssertionError'
+  echo "=== RC testfile ${PIPESTATUS[0]}"
+done
+~~~~
+**`.tools/b2113/scripts/ck7_compare.py`** (3126 bytes, sha256 prefix `76ca52097a33cd2d`):
+~~~~text
+"""ck7_compare.py <base_prefix> <head_prefix> <runs_dir>: compares the two vitest JSON reports of each project (renderers, workspace) of a base run and a head run.
+renderers: the head has exactly the 5 tests of the new file more (passed + 5, failed and skipped equal, names lost 0, names added 5 and every added name in the new file);
+workspace: counts equal, names lost 0 and added 0. Controls: one name dropped from a scratch copy reports lost 1, one planted name reports added 1.
+Exit 1 on any difference or a control that does not fire."""
+import collections, json, sys
+
+bp, hp, R = sys.argv[1], sys.argv[2], sys.argv[3].rstrip('/') + '/'
+NEW = 'packages/renderers/test/policy-footer-budget.test.ts'
+bad = 0
+
+
+def load(path):
+    j = json.load(open(path, encoding='utf-8'))
+    names = collections.Counter()
+    for tr in j['testResults']:
+        f = tr['name'].replace('/repo/', '')
+        for a in tr['assertionResults']:
+            names[(f, a['fullName'])] += 1
+    return j, names
+
+
+def diff(b, h):
+    lost = b - h
+    added = h - b
+    return sum(lost.values()), sum(added.values()), lost, added
+
+
+for proj in ('renderers', 'workspace'):
+    bj, bn = load(R + f'{bp}_{proj}.json')
+    hj, hn = load(R + f'{hp}_{proj}.json')
+    bc = (bj['numPassedTests'], bj['numFailedTests'], bj['numPendingTests'], bj['numTotalTests'])
+    hc = (hj['numPassedTests'], hj['numFailedTests'], hj['numPendingTests'], hj['numTotalTests'])
+    print(f'{proj}: base passed/failed/skipped/total {bc}; head {hc}; test names base {sum(bn.values())} head {sum(hn.values())}')
+    lost, added, ld, ad = diff(bn, hn)
+    print(f'{proj}: names lost {lost}, added {added}')
+    plus = 5 if proj == 'renderers' else 0
+    new_only = all(k[0].endswith(NEW) for k in ad) if proj == 'renderers' else True
+    ok = (hc[0] == bc[0] + plus and hc[1] == bc[1] and hc[2] == bc[2] and hc[3] == bc[3] + plus
+          and lost == 0 and added == plus and new_only and bc[0] > 0)
+    print(('PASS ' if ok else 'FAIL ') + f'CK7 {proj} head = base + {plus} passed, failed and skipped equal, lost 0, added {plus}' + (' (all in the new file)' if proj == 'renderers' else '') + ' (counts non-zero)')
+    if not ok:
+        bad += 1
+        for k in list(ld)[:10]:
+            print('   lost', k)
+        for k in list(ad)[:10]:
+            print('   added', k)
+    # controls on a scratch copy of the head multiset
+    one = next(k for k in hn if not k[0].endswith(NEW))
+    scratch = hn.copy()
+    scratch[one] -= 1
+    cl, ca, _, _ = diff(bn, scratch)
+    cok = cl == 1 and ca == plus
+    print(('PASS ' if cok else 'FAIL ') + f'CK7 {proj} control: one name dropped from a scratch copy reports lost {cl} (added {ca})')
+    if not cok:
+        bad += 1
+    scratch2 = hn.copy()
+    scratch2[('planted.test.ts', 'a planted name')] += 1
+    cl2, ca2, _, ad2 = diff(bn, scratch2)
+    cok2 = cl2 == 0 and ca2 == plus + 1 and all(k[0].endswith(NEW) for k in ad2) is False
+    print(('PASS ' if cok2 else 'FAIL ') + f'CK7 {proj} control: one planted name reports added {ca2} and is not in the new file')
+    if not cok2:
+        bad += 1
+sys.exit(1 if bad else 0)
+~~~~
+**`.tools/b2113/scripts/ck345.py`** (6160 bytes, sha256 prefix `3f16bc2ed4df8bdd`):
+~~~~text
+"""ck345.py <BASE> <HEAD> [clone]: CK3 (closed list, four release blobs), CK4 (blobs, bytes, numstat), CK5 (names and words), each with its control.
+Real checks run on the real clone; each control is a planted failure the same comparator must report. Prints PASS/FAIL lines; exit 1 on any FAIL.
+The person-name list and the control tokens are this seat's own (marked so), built in memory from commit authors and the IDENTITY slot.
+Reads origin/main for the authors, so the clone must hold refs/remotes/origin/main (a git CLONE of the checkout does not: fetch main by explicit refspec first)."""
+import re, subprocess, sys
+
+BASE, HEAD = sys.argv[1], sys.argv[2]
+CL = sys.argv[3] if len(sys.argv) > 3 else '/Volumes/Datasec_DEV/!CODING/Datasec/Datasec Security Composer/.tools/b2113/clone'
+IDENT_NAME = 'kamilDatasec'
+SRC_A = 'packages/renderers/src/change-report.ts'
+SRC_B = 'packages/renderers/src/policy-document.ts'
+TEST = 'packages/renderers/test/policy-footer-budget.test.ts'
+FILES = [SRC_A, SRC_B, TEST]  # the closed list, in git's path order
+BLOBS = {
+    SRC_A: '1f8c612f49191009c974fd97d670a31e1f684258',
+    SRC_B: 'e1857e06b8605d51c2b10be0ee265e59ec4b773f',
+    TEST: '7c8dd4013c893db0caaeea1d6cefb5b87bffa738',
+}
+NUMSTAT = [['1', '1', SRC_A], ['2', '1', SRC_B], ['157', '0', TEST]]
+FIVE = {
+    'content/release-demo/CONTENT_HASH': '23cd95f58dd0ceabecac0c3f5796aeba9b0edd62',
+    'content/release-draft/CONTENT_HASH': '09d597c64f07d19c98aeb0859086499ea74300b7',
+    'content/release-draft/bundle.json': '3ed9445ba35faed5f7e821161a58c8e9f54c931d',
+    'content/sources/SOURCES.json': '30269393179065c9f023e0f0a0081cb9e8dd1449',
+}
+bad = 0
+
+
+def git(*a, raw=False):
+    r = subprocess.run(['/usr/bin/git', '--no-optional-locks', '-C', CL, *a], capture_output=True, check=True)
+    return r.stdout if raw else r.stdout.decode('utf-8')
+
+
+def report(name, ok):
+    global bad
+    print(('PASS ' if ok else 'FAIL ') + name)
+    if not ok:
+        bad += 1
+
+
+# ---- CK3: closed list ----
+def closed_list_ok(paths):
+    return sorted(paths) == sorted(FILES)
+
+
+real = [p for p in git('diff', '--name-only', f'{BASE}..{HEAD}').split('\n') if p]
+report(f'CK3 closed list real: {real}', closed_list_ok(real))
+report('CK3 closed list control: a planted extra path is reported (comparator returns False)', closed_list_ok(real + ['content/x.json']) is False)
+report('CK3 closed list control: a missing path is reported', closed_list_ok(real[:-1]) is False)
+
+
+# ---- CK3: four release blobs ----
+def blobs_ok(read):
+    return all(read(p) == v for p, v in FIVE.items())
+
+
+head_blob = lambda p: git('rev-parse', f'{HEAD}:{p}').strip()
+for p in FIVE:
+    print('   ', p, head_blob(p))
+report('CK3 four release blobs equal their values at BASE', blobs_ok(head_blob))
+report('CK3 release blobs control: a planted one-character change is reported',
+       blobs_ok(lambda p: (head_blob(p)[:-1] + ('0' if head_blob(p)[-1] != '0' else '1')) if p.endswith('SOURCES.json') else head_blob(p)) is False)
+
+# ---- CK4: blobs and bytes ----
+for f in FILES:
+    got = git('rev-parse', f'{HEAD}:{f}').strip()
+    report(f'CK4 blob at head {f} {got}', got == BLOBS[f])
+# the two existing source files already hold bytes above 127 (comments), so the byte check is over the ADDED lines only
+rawdiff = git('diff', '-U0', f'{BASE}..{HEAD}', raw=True)
+data = b'\n'.join(l[1:] for l in rawdiff.split(b'\n') if l.startswith(b'+') and not l.startswith(b'+++'))
+hi = sum(1 for b in data if b > 127)
+cr = data.count(b'\r')
+report(f'CK4 bytes above 127: {hi}, CR: {cr} (over the added lines of the three files)', hi == 0 and cr == 0)
+report('CK4 control: a planted 0xC3 counts 1 byte above 127', sum(1 for b in data + b'\xc3' if b > 127) == 1)
+ns = [l.split('\t') for l in git('diff', '--numstat', f'{BASE}..{HEAD}').split('\n') if l]
+report(f'CK4 numstat {ns}', sorted(ns) == sorted(NUMSTAT))
+report('CK4 control: a planted wrong count is reported', sorted([['1', '1', SRC_A], ['2', '2', SRC_B], ['157', '0', TEST]]) != sorted(ns))
+
+# ---- CK5: names and words over ADDED lines and the commit message ----
+diff = git('diff', '-U0', f'{BASE}..{HEAD}')
+added = [l[1:] for l in diff.split('\n') if l.startswith('+') and not l.startswith('+++')]
+msg = git('log', '--format=%B', f'{BASE}..{HEAD}')
+authors = {a for a in git('log', '-30', '--format=%an', 'origin/main').split('\n') if a}
+authors.add(IDENT_NAME)
+toks = set()
+for a in authors:
+    for t in re.findall(r'[A-Z]+(?![a-z])|[A-Z][a-z]*|[a-z]+|[0-9]+', a):
+        if len(t) >= 2 and t.lower() != 'datasec':
+            toks.add(t)
+print('    person-name tokens (this seat\'s own list, from', len(authors), 'distinct author names):', sorted(toks))
+word = re.compile(r'(?<![A-Za-z])(ruled|ruling|tuesday|wednesday|friday)(?![a-z])', re.I)
+names = re.compile(r'(?<![A-Za-z])(' + '|'.join(re.escape(t) for t in sorted(toks)) + r')(?![a-z])', re.I)
+card = re.compile(r'composer-[a-z0-9-]+-[0-9]{4}')
+msgonly = re.compile(r'B[0-9]{3,4}|PCOMP')
+
+
+def scan(added_lines, message):
+    hits = []
+    for l in added_lines + message.split('\n'):
+        for rx, tag in ((word, 'word'), (names, 'name'), (card, 'card')):
+            if rx.search(l):
+                hits.append((tag, l[:80]))
+    for l in message.split('\n'):
+        if msgonly.search(l):
+            hits.append(('msg-id', l[:80]))
+    return hits
+
+
+first = sorted(toks)[0] if toks else 'kamil'
+real_hits = scan(added, msg)
+report(f'CK5 real scan over {len(added)} added lines and the message: {real_hits}', real_hits == [])
+report(f'CK5 control: a planted _by_{first}_ fires', len(scan([f'// _by_{first}_'], '')) >= 1)
+report('CK5 control: a planted B2113 in a message fires', len(scan([], 'Test: x\n\nB2113 note')) >= 1)
+report('CK5 control: a planted _ruled_ fires', len(scan(['// _ruled_'], '')) >= 1)
+trailers = [l for l in msg.split('\n') if l.startswith('Co-Authored-By:')]
+report(f'CK5 messages: exactly one trailer line: {trailers}', len(trailers) == 1)
+print('    commit message:\n' + '\n'.join('      | ' + l for l in msg.rstrip().split('\n')))
+print('    ADDED LINES (second instrument: read whole):')
+for l in added:
+    print('      +' + l)
+sys.exit(1 if bad else 0)
+~~~~
+**Step 1. Sources.** `gh auth status` (account `kamilDatasec`) before any `gh api`; Jira GET of PCOMP-23 whole, description and both comments (your copy of `jira_get.py` prints the description and the comment count only: read the comments with the helper's own `get()` over `/rest/api/3/issue/PCOMP-23/comment`, in-process, never printing a token); JQL always `project = PCOMP AND ( ... )`; quote its scope sentences in STATUS. Read whole: the two clarification entries C-160 and C-159 of `1_Project_Definition/CLARIFICATIONS.md` (`/usr/bin/grep -n -i 'C-160'` finds the heading) for the landing words; at BASE in the clone the three files of THE EDIT whole where they are edited (`change-report.ts` lines 480 to 530 and 735 to 760, `policy-document.ts` lines 1 to 40 and 820 to 845), `document-pdf.ts` lines 180 to 260, `vitest.config.ts`, `.prettierignore`, and `scripts/ci.sh` lines 76 to 96. Re-measure FACTS 1 to 3, 7, 8 and 10 by your own reads and print a table: fact, yours, the drafter's, equal or not. SEVERITY: STOP.
+**Step 2. Base (under the lock).** Build the CI image once at BASE: `docker build -q -f '<clone>/docker/Dockerfile' --target ci -t pc-b2113-node:base '<clone>'` (absolute paths; never pull by hand; a layer that needs the network beyond the build: STOP). In it, `--network none`, one job at a time: CK1's commands (the copied `run_steps.sh` runs `ci_steps.sh`: lint, format_check, typecheck, build, test_renderers, test_workspace, content_check, each with its own rc line). Record rc and counts. Red set at BASE by name. SEVERITY: STOP on any red outside FACT 8's two rows or any count that differs from FACT 8 without a stated cause (the drafter's renderers count is 291 passed, 1 skipped, over 33 test files, from the host).
+**Step 3. Edit (light), then the stages (under the lock).** Apply E1, E2, E3 with the Edit tool and E4 with the Write tool; `git hash-object` of each path equals the table; `git diff --numstat` prints the table's counts; selector validation (the describe line and a test name of THE TEST each occur once in the file: `/usr/bin/grep -c -F`, with its control on the base `change-report.test.ts` describe line); build the head mutants (`mut_build.py head ...`). Then ONE chain: `bash .tools/b2113/scripts/edit_chain.sh pc-b2113-node:base` (stage T0 then FIXED). Expected as THE TEST says; stage T0 must be RED with P1, P2 and P5 (the defect reproduced by a render in the image before any product change counts); anything else is a STOP. SEVERITY: STOP.
+**Step 4. Identity and commit (under the lock).** The identity check and ONE commit (`git add` the three paths; the message of THE EDIT). SEVERITY: STOP.
+**Step 5. Checks (under the lock for the image).** Build the head image (`pc-b2113-node:head`) and run CK1's commands plus the mutant table at head (`mut_chain.sh head pc-b2113-node:head`: expected C0 5 passed, M1 3 failed, M2 2 failed, M4 3 failed; print each failing test's name and its first assertion line; each mutant restored and `cmp` equal), CK6 and CK7 (`head_chain.sh`, which runs the head image build, `run_steps.sh`, `ck67_job.sh` and the tree secret scan, then `python3 -I -B .tools/b2113/scripts/ck7_compare.py base_steps head_steps '<evidence runs dir>'`); then CK3 to CK5 and CK8 with their controls (`ck345.py <BASE> <HEAD> '<clone>'`). Print the table: check, real, control. SEVERITY: STOP on any failure or any control that does not fire.
+**Step 6. Push once, wrap.** Re-run the moved-main read. Print `git log --format='%h %ae | %ce' <BASE>..HEAD`: one line, both emails equal to the IDENTITY slot's email. Push the one ref plain (`git push origin HEAD:refs/heads/b2113/policy-footer-budget`, with the deploy key), then `git ls-remote origin refs/heads/b2113/policy-footer-budget` equals your head. Release the lock; remove `pc-b2113-*` containers and images by exact name. Never open a PR, fetch other refs, force, amend, rebase or delete a branch. STATUS sections: STATUS-NOW at the top; BLUF; slots as read; PRIOR WORK; the REFUSE table; the Step 1 fact table; base and head runs (rc and counts); the two test tables and the mutant table; the checks table; `git diff --stat <BASE>..HEAD`; the identity print; the outside-the-fences disclosure; UNMEASURED; FOR TUESDAY (the pull request after the gate; the records pass after it: PCOMP-23's move and its C-record are Tuesday's, none of it yours). **The LAST line, exactly one of:** `READY B2113: <sha40>` (the pushed head), `HANDOVER B2113: next <part> <step> | done <parts>`, `PARTIAL B2113: none | done <parts> | not done <parts>` or `STOPPED: NEEDS TUESDAY <one question>`. While running the last line is `BUILD B2113: <step>`. SEVERITY: STOP.
+
+## CONTEXT BAND AND HANDOVER
+At about 70% context start no new part; at about 75% stop at a safe boundary (files whole, mutants restored, every process you started stopped by pid, the lock released, the clone consistent) and write `/Volumes/Datasec_DEV/!CODING/Datasec/Datasec Security Composer/1_Project_Definition/Briefs/<D>_B2113_HANDOVER.md` (done / in hand / next / processes left / decisions a successor keeps), last line `HANDOVER B2113: next <part> <step> | done <parts>`, and make that the STATUS last line.
+
+## HARD STOP (slot)
+At the HARD STOP clock: start nothing new and push nothing unproven. Committed with Step 5 green: push and end `READY B2113: <sha40>`; committed but Step 5 unfinished: push nothing, end `PARTIAL B2113: ...`; write the HANDOVER in either unfinished case.
+
+## STANDING LINES
+- **PRIOR-WORK CHECK** (above). No message to any human. No Jira write, no GitHub write but the one push, no PR, no comment. Never delete (quarantine). No deploy of any kind, no `az`, no hosted site, no image push, no content release.
+- **Closed lists** (paths, mutants, checks, scripts to copy) are stated by their PROPERTY first and then "at least these"; any other shape: prove it meets the property or STOP.
+- `always-verify-and-check` and `no-skip-on-failure`: a red you cannot explain is a STOP; a red you can explain is still a STOP that asks; a check whose control did not fire is not a pass.
+- **Records write rule:** build AND ENCODE the whole new content first, write it to a temp file beside the target, then `os.replace` it; never open a file for writing before its content exists, and never encode a whole file as ASCII when it already holds non-ASCII bytes (encode the ADDED bytes and check them). Your STATUS is the one file you rewrite: the same rule, and `cmp` its kept prefix against a before-copy. The two source files of THE EDIT already hold bytes above 127: edit them only with the Edit tool.
+- **Git identity is never overridden:** the repo's own configured identity only; the IDENTITY slot set once with `git config --local`; never `git -c user.name/user.email`, never `GIT_AUTHOR_*` / `GIT_COMMITTER_*`; the identity print of Step 6 shows both emails equal to the slot's. **Landing:** you push one branch; Tuesday opens the PR and lands it after the gate and every check, as a squash pinned to the tested head, through CodeQL, never bypassed and no alert dismissed. The landing rule, found by `/usr/bin/grep -n -i` in the project's `1_Project_Definition/CLARIFICATIONS.md` (control: the phrase `PR #88` has hits at line 1797): line 1799, C-101 option (a) detail, "squash-merges PR #88 pinned to head 2da99cab after re-reading CodeQL and the checks. Nothing is deployed (Composer deploys only on your card)"; and C-160 (heading at line 2996), "Composer pull request 133, squashed into code `main` as `d06508f8a69267542b92959a2048198055a7b473` (one parent, `8b9ab200b09f9a859c3b25b6441813546338d3dd`)", so main's history is squash commits with one parent each, and the squash subject ends with the pull request number.
+
+## HOLDS and PARTITION (both sides)
+Yours: THE CLOSED LIST on branch `b2113/policy-footer-budget` in `.tools/b2113/clone`; `.tools/b2113/`; `Briefs/<D>_B2113_STATUS.md`, `Briefs/<D>_B2113_evidence/`, `Briefs/<D>_B2113_HANDOVER.md`, the Step 0 copy of this file; `pc-b2113-*` images and containers. **Not yours, every other path:** every record file, `content/**`, `document-pdf.ts`, `packages/engine/**`, `apps/web/**`, every config and lock file, every other seat's tree (`.tools/b2033/` and the others are read-only claims), every Jira key, HPSM-POC. **From the other side:** PCOMP-66 (engine edit, held) is another lane; no other Composer lane runs now (no pane holds `Composer`, FACT 10). **HOLDS:** no deploy of any kind, no release cut, no rebuilt examples, no new customer word beyond the three dots the change report already prints at a clipped footer line, no ruling of your own, no record entry, no Jira.
+
+## STATUS and the last line
+`/Volumes/Datasec_DEV/!CODING/Datasec/Datasec Security Composer/1_Project_Definition/Briefs/<D>_B2113_STATUS.md` (sections as Step 6). The LAST line is one of Step 6's four shapes.
+
+## READ list and its load (by program at drafting)
+Read into context: this kit (about 75 kB with the scripts and the test file); C-160 (about 9 kB); at BASE the excerpts of Step 1; the Jira ticket (about 6 kB). Under about 150 kB, so no section is substituted for a whole file.
+
+## Stamp
+Tuesday fills each slot at launch; one word, clock or answer each. The unstamped copy reads the slot count by `grep -o ... | wc -l` (the slots below plus the last line).
+- STAMP: Tuesday s329 (Opus 5.5) stamped at 09:53 AEDT Thu 26 Nov 2026: kit read whole with the Read tool in two pages (1-419, 420-661) and the drafter report whole (59 lines); stamp_check run before the stamp; pre-stamp copy cmp rc 0. Re-printed at source by gh api GET this session: main d06508f8, open PRs 0, refs b2113 0; policy-document.ts:835 the unclipped footer template; change-report.ts:750 the unexported footerFirstLine; .tools/b2033/clone identity read by git config. Q-answers (Tuesday's, as coordinator): Q1 export footerFirstLine in place (three paths); Q2 document-pdf.ts not edited; Q3 rows 450-453 not needed for this kit; Q4 Sonnet seat, gate G1 (customer PDF and DOCX bytes change for a long first line: the routing row 'anything handed to a client'), overturning the drafter's G2; Q5 the three dots accepted as the change report's own shape, no new customer word; Q6 Tuesday lands a squash pinned to the tested head through CodeQL, nothing deploys.
+- LAUNCH WINDOW: until 10:30 AEDT; load1 2.24 at the stamp; no Composer pane live (pane list count 0); seats beside you: MPS M177 (another project)
+- BASE (code main, 40 hex): d06508f8a69267542b92959a2048198055a7b473
+- IDENTITY (the code clone's `user.name` and `user.email`): kamilDatasec / 88359143+kamilDatasec@users.noreply.github.com (read by Tuesday from .tools/b2033/clone with git config --local --get)
+- GATE-TIER (`G2` or `G1`; the drafter proposes `G2`): G1
+- HARD STOP (clock): 13:00 AEDT Thu 26 Nov 2026
+
+READ-WHOLE-BY-TUESDAY: DONE 09:53 AEDT Thu 26 Nov 2026 (Tuesday s329, kit 661 lines in two Read pages, report 59 lines)
