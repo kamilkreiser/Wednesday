@@ -1,0 +1,33 @@
+# FOR-RECORDS: RD-1037 (records pass, after the landing)
+
+Fill in `<N>` (the PR) and `<M>` (its merge commit) after the landing. Take the Deploy demo line from landing.txt step 4. Take the gate line from the first line of VERDICT.md.
+Jira was NOT read by this gate (no ticket text is quoted here beyond what the kit and the seat's record state); the seat's own read of RD-1037 (Task, To Do, labels `records-pass-1124` and `tooling`, 0 comments) is the seat's.
+
+## RD-1037: result comment
+
+Landed by pull request <N>, merge commit <M>: a merge commit of the reviewed head `58d34abf`. A is `137ee453` (the two tool edits and the new test file); K is `58d34abf` (the counts, 6463 / 405). Built on `04b87b0a`, landed on main `8d8dd76c` (HISTORY.md only differs).
+
+- **Change.** Tooling only; no product file. `bootServer` (`__tests__/helpers/rd395-server-harness.js`) no longer writes `.machine-id` with `fs`: a seeded boot takes its identity from the product's own writer (`MACHINE_ID` set for one synchronous call of `JsonStorage.getMachineIdentifier(dir)`, put back in a `finally`); an unseeded boot writes nothing and the server mints its own identity. `scripts/qa-surface-up.sh` builds the product's store once on the still-empty data folder before the dataset is copied in, so the sentinel is written by the product; a folder that already holds anything is left alone and keeps its alarm.
+- **Whose call.** The fix shape (the product writes the identity and the sentinel; the harness never forges one), a folder that already holds data keeps its alarm, the 13 other boots left alone, no product change: all the coordinator's defaults, not the product owner's.
+- **Measured.** New file 14 cells; red-first at main (the new file alone): exactly 10 red (H1, H2, H5 x3, S1, Q1, Q2, Q4, Q5), the controls H3, H4, S2, Q3 green; green at head (14 of 14, and with rd568, rd404, rd441, rd681: 67 of 67); red-proof (the two tool edits reverted) the same 10; mutation "re-arm the sentinel after the seed" red only on H3 (the seat's frozen judge, run by the gate on its own json). Full verify of the merge tree (main `8d8dd76c` + head): `VERDICT: PASS`, 6463 of 6463 tests in 405 suites (jest exit 0), 0 EADDRINUSE, 21:12:02 to 21:34:05 AEDT, under the NexusAI jest lock, `--maxWorkers=2`, Node v24.22.2. Local CodeQL NEW 0 / KEPT 0 (the seat's). gitleaks none (control fired). Gate B2098: <VERDICT line>.
+- **Auth state of a boot (read by the gate, one boot of each).** The seeded child reads `persistenceSentinelPreexisting=true` state `intact` at main and at head; the unseeded child reads `false` at both (state `missing-with-evidence` at main, `first-boot` at head); `/api/auth/status` of the child is identical at both (`authEnforced` false, `openAccess` true).
+- **Not tested.** A Linux or hosted runner (the hosted Build is the one run), the whole stand script end to end, a real browser, a boot with `MACHINE_ID` exported beyond the gate's probes.
+- **Deploy.** None. Deploy demo run for <M>: <conclusions, from landing.txt step 4>.
+- **Move.** To the column the records pass uses for a landed lane awaiting acceptance.
+
+## Ticket candidate (Q-4): rd525-live-store's makeDataDir
+`__tests__/helpers/rd525-live-store.js` line 48 writes `.machine-id` with `fs` (`rd525-harness-<hex>`); the callers that boot a server on an unseeded folder raise the alarm on a macOS path (2 folders in the drafter's census, both `rd615`). A fix needs a caller or signature change in test files outside this lane's partition. Dup-check RD-1037's neighbours before filing.
+
+## Ticket candidate (Q-5): tests that write their own markers or stores before starting the server
+The drafter's census (error-line preload over the 116 suites that boot the server; the gate did not re-run it): 156 alarmed data folders at main, 17 after the change: 3 are this lane's control cells, 1 is deliberate (`rd681`'s foreign identity), 13 are in 8 other test files (7 start the server themselves, 1 through `rd525-live-store.js`). A shared first-boot folder helper would replace seven copies. At head by `git grep` the files that write `.machine-id` with `fs`: `customer-data-lists-agree`, `rd525-live-store.js`, `rd404-sentinel-first-boot-vs-wipe` (deliberate), `rd421-sentinel-machine-id-follows-store-dir`, `rd681-clear-undecryptable-key` (deliberate), `scripts/test-rd25-schedulers.js`. None is touched by this lane (the branch's diff names four paths).
+
+## Ticket candidate (gate finding 1): the stand script's block leaves a log in the folder before the product builds its store
+`scripts/qa-surface-up.sh` lines 244 to 252: `FIRST_BOOT_LOG="$DATA_DIR/qa-surface-first-boot.log"` is opened by the shell redirect before `node` runs. After a failed attempt the folder holds that file, the block's `[ -z "$(ls -A "$DATA_DIR")" ]` reads "not empty" on the retry, no sentinel is written, and the dataset copied in afterwards is the alarm the ticket names (measured on the block alone with `node` missing from `PATH`, then with `node` back: rc 0, no sentinel). Fix shape: write the log outside the data folder, or ignore that one name in the emptiness test. Dup-check before filing.
+
+## Ticket candidate (gate finding 2): a stand folder whose path contains `/tmp/` stops the first run with exit 13
+The product reads such a folder as ephemeral (`jsonStorage.js` line 1556), still writes the sentinel, and the block's `persistenceSentinelState !== "first-boot"` test (state `ephemeral`) exits 1 and the script exits 13 with a message that says the first boot "did not read as a first boot". The sentinel is on disk afterwards, so the next run skips the block. No workflow calls the script. Fix shape: accept `ephemeral` as well, or test that the sentinel file exists and nothing else.
+
+## Info for records
+1. Unseeded harness boots now carry the server's own identity (`<hostname>-<hex>`, minted by the child) instead of `rd568-harness-<hex>`; seeded boots still carry `rd568-harness-<hex>` (RD-568's cell is unchanged and green).
+2. Two `bootServer` calls started at the same time in one worker can collide on a port (`reservePort`): one of two failed with "server exited (1) ... a 200 answered on :20000 that did not come from this child" at main and at head alike (the gate's probe). Pre-existing; the suite's cells boot one at a time.
+3. Commit A's message says the alarm fires "on a path without /tmp/ (macOS os.tmpdir(), a CI runner's work folder)". On a hosted Linux runner `os.tmpdir()` is `/tmp`, where the product never alarms (the helper `persistent-temp-root.js` says so in its header); the gate did not measure a runner work folder. The new cells use `TMPDIR` = `persistentTempRoot()` for that reason.

@@ -1,0 +1,15 @@
+# The two commits of the branch (BASE 04b87b0ab03e45525bf8c2968656360462311570 .. head 58d34abfd6dc265cbd525d47996af2abf2273d4c), messages as pinned by the seat, printed by `git log --reverse --format='%H%n%B'`. The gate changes none of them.
+137ee4533f5e1f100c52ae7e0a5500fdccae1ca4
+RD-1037: the test harnesses boot a fresh data folder as a first boot, so they raise no volume-wiped alarm
+
+bootServer (__tests__/helpers/rd395-server-harness.js) wrote .machine-id into the new data folder with fs before the server started. The product reads a .machine-id that the booting process did not write as proof the folder already held state, so on a path without "/tmp/" (macOS os.tmpdir(), a CI runner's work folder) every harness boot logged "Persistence sentinel MISSING" and two more alarm lines at error level and re-created the sentinel: in the seed store's process when the boot was seeded, in the server's when it was not. scripts/qa-surface-up.sh copied the dataset into the folder before the first boot, with the same result and a red "Persistent storage check failed" banner on every page of the surface.
+
+bootServer now writes the machine identity with the product's own writer (MACHINE_ID set for one synchronous call), so the seed store counts it as its own and reads the folder as a first boot; an unseeded boot writes nothing, and the server makes its own identity as on a real first deploy. The seed store and the server still share one identity (RD-568). The stand script builds the product's store once on the still-empty folder before the dataset goes in, which writes the sentinel bound to that folder; a folder that already holds anything is left alone, so a surface that really lost its sentinel still alarms. No product code changes.
+
+__tests__/rd1037-harness-boots-raise-no-sentinel-alarm.test.js is new: a seeded and an unseeded harness boot raise no alarm line, a volume that lost its sentinel still raises it through the harness and through the product, and the stand script's first-boot block is run for real on an empty folder, on a folder that already has a sentinel and on one that already holds data.
+----
+58d34abfd6dc265cbd525d47996af2abf2273d4c
+RD-1037: suite counts 6463 tests in 405 suites, written by the project's own command
+
+scripts/verify-expected-counts.json is the output of npm run verify -- --maxWorkers=2 --update-counts at the commit before this one.
+----

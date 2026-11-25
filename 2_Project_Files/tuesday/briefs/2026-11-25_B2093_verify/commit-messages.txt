@@ -1,0 +1,18 @@
+633aa726ab87fbf0a39cb0ed880f64d07140fe81
+RD-974: the unusual-time check and the per-user buckets read a job's own start time, and leave a job with none out
+
+generateAutomaticInsights read each job's time as new Date(job.Job_Start_Time || Date.now()) in two places: the per-user day and week buckets and the check for unusual print times. No store fills Job_Start_Time (the stores fill Job_Start_Time_UTC), so every real or seeded job took the time of the read: when the check ran at night each of them counted as off-hours and a red UNUSUAL_TIME_PATTERN item was raised, and by day the same jobs were put in today's bucket.
+
+Both places now read the job's own start time through one small helper: Job_Start_Time, then Job_Start_Time_UTC. A job with neither, or with one that does not parse, is left out of the hour check and out of the day and week buckets and is never given the time of the read; it still counts in the user's jobs, sheets and pixel totals, and a user with only such jobs has no first or last seen time. A job with an unparseable time no longer stops the whole insights run.
+
+The seeded demo rows carry only Job_Start_Time_UTC, so the demo's off-hours item now reports the jobs whose own start hour is before 6 or after 22 in the server's zone, the same at every hour of the day, instead of all of them at night and none by day.
+
+__tests__/rd798-log-injection-chat-and-learning.test.js: route 190 no longer reads the clock, so its pinned answers are re-pinned: the child runs in UTC, the off-hours paragraph shows in both clock states, and the hour check of the live cell compares with the real UTC hour.
+
+__tests__/rd974-undated-job-is-not-off-hours.test.js is new: the shipped function lifted with stubs, the ticket's case (11 jobs with no start time, run at 23:00), the three shapes of a missing or bad time, the buckets and totals, the 1445 seeded rows at two clocks, and the source.
+
+76f8db9821c0f8a5dfb36930ad0cde923b5338e0
+RD-974: suite counts 6449 tests in 404 suites, written by the project's own command
+
+scripts/verify-expected-counts.json is the output of npm run verify -- --maxWorkers=2 --update-counts at the commit before this one.
+

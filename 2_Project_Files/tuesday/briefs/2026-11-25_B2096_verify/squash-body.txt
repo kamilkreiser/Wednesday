@@ -1,0 +1,28 @@
+The OXPd 1.x client's write catalogue gains two rows of the committed
+CertificateManagement binding: ImportCaCertificate (ImportCertificate)
+and RemoveCaCertificate (RemoveCertificate), each with HTTP Basic for
+the user admin and a dry run unless executed. Their one argument is an
+Oxpd1CaCertificate: ONE DER X.509 certificate of 1 to 10240 bytes whose
+one basic constraints extension names an authority. An import's undo is
+the remove of the same certificate. The writer gains ReadCaStoreAsync
+(ExportCertificates, admin) through one new internal send; it answers
+only when every listed entry is one certificate in HP's shape, so a
+store that cannot be read whole never reads as one without the
+certificate. The read catalogue is unchanged.
+
+The lab's oxpd1 write takes --write ImportCaCertificate or
+RemoveCaCertificate with --certificate (ONE CA certificate, PEM or DER;
+a file holding the words PRIVATE KEY is refused first; a usage error
+before any folder or connection). An executed import reads the store
+first and writes nothing, with no undo, when the certificate is there;
+an answered import or remove reads the store after and says whether it
+is there. undo-owed owes the remove of an import.
+
+36 new cases against stubs on 127.0.0.1; one landed literal moves (the
+write catalogue's row count). Every new cell that can fail failed by
+its assertion first; 12 mutants each turn exactly their cells red. C#
+totals plus 36 on both legs; the rules count plus 2. No device has been
+reached; the run against a device is a separate step. Nothing is
+deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

@@ -1,0 +1,69 @@
+B2093 LANDING TEXT for Tuesday. Gate G2 (Sonnet, round 1 of 2): see VERDICT.md for the grade; this text assumes GO or GO WITH FINDINGS with no Blocker.
+Repo datasecau/Reporting_Dashboard_Au. Branch b2088/rd974-undated-job-is-not-off-hours.
+HEAD (pin) 76f8db9821c0f8a5dfb36930ad0cde923b5338e0 (K; parent A 633aa726ab87fbf0a39cb0ed880f64d07140fe81; A's parent BASE a3f72428241c3e41799f5c11c16b7447fdf521c4 = the merge of PR 255).
+Main at gate d473243df853b11d2519107c309b023eebfc13e2 (the merge of PR 256, HISTORY.md only), read 17:12 AEDT 25 Nov by gh api -X GET.
+Every gh call is made with GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config'.
+
+0. RE-MEASURE BEFORE OPENING
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/ref/heads/main --jq .object.sha
+     -> d473243df853b11d2519107c309b023eebfc13e2. If main has moved: git diff --name-only d473243d..<new main> must touch none of
+        backend/**, __tests__/**, scripts/**, static/**, package*.json, jest.config.js, .github/**. A move touching scripts/verify-expected-counts.json
+        sends the lane back to a seat (counts conflict: this lane carries 6449 / 404); any other allowed move changes the merge tree, so the merge needs a build and a full verify first.
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/matching-refs/heads/b2088 --jq '.[].object.sha'  -> 76f8db98... only
+   gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/pulls?state=open' --jq length                          -> 0
+   gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/compare/main...b2088/rd974-undated-job-is-not-off-hours' --jq '[.ahead_by,.behind_by,(.files|length)]'
+     -> [2,2,4]  (ahead 2, behind 2: the branch sits on a3f72428 and main is two commits on, the records merge of PR 256 and its commit, HISTORY.md only.)
+   THE MERGE TREE IS NOT THE HEAD'S TREE here: it is the head's tree plus main's HISTORY.md. The gate built it (d473243d + head, a clean merge, scratch commit 09ab0c5b) and ran the full verify on it: `VERDICT: PASS`, 6449 of 6449 tests in 404 suites (jest exit 0), verify rc 0, 0 EADDRINUSE, 17:12:35 to 17:35:25 AEDT, under the NexusAI jest lock, `--maxWorkers=2`, Node v24.22.2
+
+1. OPEN THE PR (Tuesday opens it)
+   gh pr create --repo datasecau/Reporting_Dashboard_Au --base main --head b2088/rd974-undated-job-is-not-off-hours \
+     --title "$(cat '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-25_B2093_verify/pr-title.txt')" \
+     --body-file '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-25_B2093_verify/pr-body.md'
+   Then: gh api -X GET repos/datasecau/Reporting_Dashboard_Au/pulls/<N> --jq '[.head.sha,.base.sha,.mergeable,.commits,.changed_files]'
+     -> head 76f8db9821c0f8a5dfb36930ad0cde923b5338e0, base d473243d..., mergeable true, commits 2, changed_files 4.
+
+2. WAIT FOR THE CHECKS (a background task; its exit wakes you)
+   bash '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_checks_wait.sh' datasecau/Reporting_Dashboard_Au <N> 76f8db9821c0f8a5dfb36930ad0cde923b5338e0 60 40 --min-checks 7
+   Seven distinct names expected on the PR head (Analyze (actions) | Analyze (javascript-typescript) | Analyze (python) | CodeQL | audit-production-deps | build | scan; the gate read the same seven on PR 255's head, 8 check runs).
+   Exit 0 = all green. Exit 1 and exit 5 are each a STOP; read the run, never re-run blindly.
+   C-190 / code scanning: the PR must add no new high-or-higher CodeQL alert (the seat's local comparison NEW 0 / KEPT 0; the gate did NOT re-run CodeQL). The hosted CodeQL is the one that counts.
+     Main baseline (read by the gate): 22 open alerts, 13 at backend/server.js, start lines 391 1472 1490 3104 3104 3346 3356 3366 3626 3626 3626 3637 16892 (all well above the lines this lane edits, 20311 to 20720);
+       0 at the edited paths in the other files (backend/incidents.js 2, backend/jsonStorage.js 2, backend/routes/entraProvisioning.js 2, backend/services/emailService.js 2, tests/uat-run.js 1).
+       main's javascript-typescript analysis at d473243d: results_count 29 (python 0, actions 0); the same 29 at a3f72428.
+     gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/code-scanning/analyses?ref=refs/pull/<N>/head&per_page=5' --jq '.[]|[.commit_sha,.results_count,.category]|@tsv'
+       -> read and report each analysis on the PR commit; javascript-typescript above 29 is a STOP until each new result is read. NOTE (DRAFTER_RULES, measured 2026-11-06): a PR-ref read of 29, or of fixed/absent, cannot fail
+          as proof of absence; the check that can fail is main's analysis AT THE MERGE COMMIT, after landing (step 3b).
+     gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/code-scanning/alerts?ref=refs/pull/<N>/head&state=open&per_page=100' --jq '[.[]|.most_recent_instance.location.path]|group_by(.)|map([.[0],length])'
+       -> 22 in all; 13 at backend/server.js; a new alert at backend/server.js (any line) is a STOP.
+
+3. LAND: A MERGE COMMIT PINNED TO THE HEAD. NEVER SQUASH, NEVER REBASE.
+   Rule: C-190 (CLARIFICATIONS.md line 2067): "Never squash, never rebase" (read by the gate with sed -n 2067p).
+   gh pr merge <N> --repo datasecau/Reporting_Dashboard_Au --merge --match-head-commit 76f8db9821c0f8a5dfb36930ad0cde923b5338e0
+   Then: gh api -X GET repos/datasecau/Reporting_Dashboard_Au/pulls/<N> --jq .merge_commit_sha   (call it M)
+         gh api -X GET repos/datasecau/Reporting_Dashboard_Au/commits/<M> --jq '[.parents[].sha]'
+           -> [d473243df853b11d2519107c309b023eebfc13e2 (or the main before the merge), 76f8db9821c0f8a5dfb36930ad0cde923b5338e0]: two parents; one parent = squashed or rebased: STOP.
+         gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/ref/heads/main --jq .object.sha -> M
+   3b. AFTER THE MERGE (the check that can fail): gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/code-scanning/analyses?ref=refs/heads/main&per_page=6' --jq '.[]|[.commit_sha[0:8],.results_count,.category]|@tsv'
+       -> the javascript-typescript analysis at M reads 29 (as main). A higher count is a new round: read each new alert; never dismiss one. 22 open alerts expected, 13 at backend/server.js.
+   The merge tree was verified by the gate (step 0): no separate merge build needed if main did not move.
+
+4. DEPLOY DEMO: READ ONLY. NOTHING DEPLOYS UNDER THIS LANDING. THE C-224 DEMO HOLD STANDS.
+   .github/workflows/deploy-demo.yml at main d473243d: `on:` push to main, `paths-ignore:` '**.md', 'docs/**', 'tests/**' (read by the gate by gh api contents).
+   This merge touches backend/** and __tests__/** and scripts/**: none ignored, so the push STARTS a `Deploy demo` run (workflow id 333076536).
+   Both jobs need vars.CI_DEPLOY_ENABLED == 'true' (build, line 53; deploy, line 91); the deploy job is also bound to environment `demo` (line 95). The gate read the repo's Actions variables: total_count 0.
+   The newest runs of the workflow all read completed/skipped (newest 45540342308 at a3f72428, then 45521577246, 45495872057, 45440511193, 45333856653). PR 256's merge (HISTORY.md only) started none (paths-ignore '**.md').
+   Read the outcome:
+     gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/actions/workflows/333076536/runs?head_sha=<M>' --jq '.workflow_runs[] | [.id,.event,.status,.conclusion] | @tsv'
+       Expect one push run, usually completed/skipped within a minute. If none appears after about 5 minutes read runs?per_page=5 and say so. Do not dispatch one.
+     gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/actions/runs/<run id>/jobs' --jq '.jobs[] | [.name,.status,.conclusion] | @tsv'
+       Expected: build completed skipped, deploy completed skipped. BOTH must read skipped.
+   IF EITHER JOB RUNS (queued, in_progress, waiting, success), THE SWITCH IS ON:
+     - Do NOT approve the pending deployment; do not cancel, re-run or dispatch. Approving or rejecting is approval-class: card it to the product owner
+       under the C-224 hold with the run id and job states. Record in the records pass that the switch read ON at <M>.
+   Make no HTTP request to the demo site in any case.
+   **WHAT A DEPLOY WOULD CHANGE (kit finding 5, stated in the PR body):** the demo's red off-hours item. Before: "1445 jobs during off-hours (10 PM - 6 AM)" when the check ran at night, no item by day.
+   After: the item at every hour, with the count of the seed's 1445 rows whose own start hour in the server's zone is before 6 or after 22: 60 in UTC, 676 in Australia/Sydney (the gate's program over the seed; the
+   hosted zone is UNMEASURED, the Dockerfile sets no TZ). Any demo script or screenshot that quotes the old line must be re-read before the demo is next refreshed.
+
+5. AFTER THE LANDING
+   Hand FOR-RECORDS.md to the records pass.
