@@ -1,0 +1,91 @@
+== unplanted (exit 0)
+   set_model lines: 0 ; auto-mode gate lines: {'claude-haiku-5-5': 1} ; other model in either: 0
+   advisor-enabled lines (a server-side tool switched on; NOT a use, uses are counted by model_count.py): 0
+   catch-all: lines holding "with status": 2 ; of them naming none of our stubs: 0
+   dispatch lines naming claude-haiku-5-5: 3 ; naming another model: 0 
+   hook dispatch lines with one of our stubs: 4 ; with any other command: 0 
+   CHECK PASS
+== model: dispatch line, other model (exit 1)
+   set_model lines: 0 ; auto-mode gate lines: {'claude-haiku-5-5': 1} ; other model in either: 0
+   advisor-enabled lines (a server-side tool switched on; NOT a use, uses are counted by model_count.py): 0
+   catch-all: lines holding "with status": 2 ; of them naming none of our stubs: 0
+   dispatch lines naming claude-haiku-5-5: 3 ; naming another model: 1 {'claude-madeup-7-7': 1}
+   hook dispatch lines with one of our stubs: 4 ; with any other command: 0 
+   CHECK FAIL
+== model: set_model, other model (exit 1)
+   set_model lines: {'claude-madeup-7-7': 1} ; auto-mode gate lines: {'claude-haiku-5-5': 1} ; other model in either: 1
+   advisor-enabled lines (a server-side tool switched on; NOT a use, uses are counted by model_count.py): 0
+   catch-all: lines holding "with status": 2 ; of them naming none of our stubs: 0
+   dispatch lines naming claude-haiku-5-5: 3 ; naming another model: 0 
+   hook dispatch lines with one of our stubs: 4 ; with any other command: 0 
+   CHECK FAIL
+== model: auto-mode gate, other model (exit 1)
+   set_model lines: 0 ; auto-mode gate lines: {'claude-haiku-5-5': 1, 'claude-madeup-7-7': 1} ; other model in either: 1
+   advisor-enabled lines (a server-side tool switched on; NOT a use, uses are counted by model_count.py): 0
+   catch-all: lines holding "with status": 2 ; of them naming none of our stubs: 0
+   dispatch lines naming claude-haiku-5-5: 3 ; naming another model: 0 
+   hook dispatch lines with one of our stubs: 4 ; with any other command: 0 
+   CHECK FAIL
+== model: advisor line, other model ALONE (exit 0)
+   set_model lines: 0 ; auto-mode gate lines: {'claude-haiku-5-5': 1} ; other model in either: 0
+   advisor-enabled lines (a server-side tool switched on; NOT a use, uses are counted by model_count.py): {'claude-madeup-7-7': 1}
+   catch-all: lines holding "with status": 2 ; of them naming none of our stubs: 0
+   dispatch lines naming claude-haiku-5-5: 3 ; naming another model: 0 
+   hook dispatch lines with one of our stubs: 4 ; with any other command: 0 
+   CHECK PASS
+== model: advisor line naming the run's model (exit 0)
+   set_model lines: 0 ; auto-mode gate lines: {'claude-haiku-5-5': 1} ; other model in either: 0
+   advisor-enabled lines (a server-side tool switched on; NOT a use, uses are counted by model_count.py): {'claude-haiku-5-5': 1}
+   catch-all: lines holding "with status": 2 ; of them naming none of our stubs: 0
+   dispatch lines naming claude-haiku-5-5: 3 ; naming another model: 0 
+   hook dispatch lines with one of our stubs: 4 ; with any other command: 0 
+   CHECK PASS
+== model: the seat's three planted at once (exit 1)
+   set_model lines: {'claude-madeup-7-7': 1} ; auto-mode gate lines: {'claude-haiku-5-5': 1, 'claude-madeup-7-7': 1} ; other model in either: 2
+   advisor-enabled lines (a server-side tool switched on; NOT a use, uses are counted by model_count.py): {'claude-madeup-7-7': 1}
+   catch-all: lines holding "with status": 2 ; of them naming none of our stubs: 0
+   dispatch lines naming claude-haiku-5-5: 3 ; naming another model: 0 
+   hook dispatch lines with one of our stubs: 4 ; with any other command: 0 
+   CHECK FAIL
+== hook: Hooks: Ev:m [cmd] finished with status (exit 1)
+   set_model lines: 0 ; auto-mode gate lines: {'claude-haiku-5-5': 1} ; other model in either: 0
+   advisor-enabled lines (a server-side tool switched on; NOT a use, uses are counted by model_count.py): 0
+   catch-all: lines holding "with status": 3 ; of them naming none of our stubs: 1
+   dispatch lines naming claude-haiku-5-5: 3 ; naming another model: 0 
+   hook dispatch lines with one of our stubs: 4 ; with any other command: 1 events {"PreToolUse": 1}
+   CHECK FAIL
+== hook: Hooks: Ev:m [cmd] (plugin x) finished (exit 1)
+   set_model lines: 0 ; auto-mode gate lines: {'claude-haiku-5-5': 1} ; other model in either: 0
+   advisor-enabled lines (a server-side tool switched on; NOT a use, uses are counted by model_count.py): 0
+   catch-all: lines holding "with status": 3 ; of them naming none of our stubs: 1
+   dispatch lines naming claude-haiku-5-5: 3 ; naming another model: 0 
+   hook dispatch lines with one of our stubs: 4 ; with any other command: 0 
+   CHECK FAIL
+== hook: Hook Ev (cmd) returned permissionDecision (exit 1)
+   set_model lines: 0 ; auto-mode gate lines: {'claude-haiku-5-5': 1} ; other model in either: 0
+   advisor-enabled lines (a server-side tool switched on; NOT a use, uses are counted by model_count.py): 0
+   catch-all: lines holding "with status": 2 ; of them naming none of our stubs: 0
+   dispatch lines naming claude-haiku-5-5: 3 ; naming another model: 0 
+   hook dispatch lines with one of our stubs: 4 ; with any other command: 1 events {"PreToolUse": 1}
+   CHECK FAIL
+== hook: Ev:m [cmd] completed with status (exit 1)
+   set_model lines: 0 ; auto-mode gate lines: {'claude-haiku-5-5': 1} ; other model in either: 0
+   advisor-enabled lines (a server-side tool switched on; NOT a use, uses are counted by model_count.py): 0
+   catch-all: lines holding "with status": 3 ; of them naming none of our stubs: 1
+   dispatch lines naming claude-haiku-5-5: 3 ; naming another model: 0 
+   hook dispatch lines with one of our stubs: 4 ; with any other command: 1 events {"Elicitation": 1}
+   CHECK FAIL
+== hook: Spawned hook command for Ev: cmd (exit 0)
+   set_model lines: 0 ; auto-mode gate lines: {'claude-haiku-5-5': 1} ; other model in either: 0
+   advisor-enabled lines (a server-side tool switched on; NOT a use, uses are counted by model_count.py): 0
+   catch-all: lines holding "with status": 2 ; of them naming none of our stubs: 0
+   dispatch lines naming claude-haiku-5-5: 3 ; naming another model: 0 
+   hook dispatch lines with one of our stubs: 4 ; with any other command: 0 
+   CHECK PASS
+== hook: foreign cmd whose text holds hook_stub.py (exit 0)
+   set_model lines: 0 ; auto-mode gate lines: {'claude-haiku-5-5': 1} ; other model in either: 0
+   advisor-enabled lines (a server-side tool switched on; NOT a use, uses are counted by model_count.py): 0
+   catch-all: lines holding "with status": 3 ; of them naming none of our stubs: 0
+   dispatch lines naming claude-haiku-5-5: 3 ; naming another model: 0 
+   hook dispatch lines with one of our stubs: 5 ; with any other command: 0 
+   CHECK PASS
