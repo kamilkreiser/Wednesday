@@ -1,0 +1,4 @@
+# QA-AUDIT-HOST-NOTES-R2 files (second check of `audit-host-notes`, head dbc9c0a)
+- `qahn2_rows.rs` -> `crates/coagent-audit-host/src/tests/qahn2_rows.rs` (+ `mod qahn2_rows;`), uncommitted, in my tree `t5/`: rows 14 and 15 word by word (section 5). The first check's `qahn_seal_gap.rs` was re-run beside it unchanged.
+- `table_r2.py` (the first check's `table.py` + rows 14/15; `QAHN2_NO14=1` = control), `table_orig_path_only.py` (unchanged but its sys.path), `rawrows.py` (raw-byte table compare), `mutate.py` (one docs mutation per copy), `scanrun.py` (drives the first check's `bytescan.py`; words kept out of the verdict), `run.py` (the first check's launcher, work dir changed).
+- `logs/`: table outputs, my row tests, the hook plant (diff + dev/release/test logs), the mutated-docs runs and diffs, the head's fmt/clippy/notes_docs.
