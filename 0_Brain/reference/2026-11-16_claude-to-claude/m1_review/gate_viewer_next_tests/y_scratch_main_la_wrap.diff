@@ -1,0 +1,28 @@
+diff --git a/crates/coagent-daemon/tests/la_wrap.rs b/crates/coagent-daemon/tests/la_wrap.rs
+index bc85394..b30dc1b 100644
+--- a/crates/coagent-daemon/tests/la_wrap.rs
++++ b/crates/coagent-daemon/tests/la_wrap.rs
+@@ -1357,3 +1357,23 @@ fn la_fields_cut() {
+     );
+     run.finish(&[]);
+ }
++
++// ---- QA-VIEWER-NEXT control (scratch copy of MAIN only): main's own check_rows (old strip_rows) over a corpus ----
++#[test]
++fn qvx_old_check_rows() {
++    let cp = std::env::var("QVX_CORPUS").unwrap();
++    let v: Value = serde_json::from_str(&std::fs::read_to_string(&cp).unwrap()).unwrap();
++    let ls: Vec<Value> = match v.get("lines") {
++        Some(a) => a.as_array().unwrap().clone(),
++        None => v.as_array().unwrap().clone(),
++    };
++    let (mut errs, mut first) = (0usize, None);
++    for l in &ls {
++        let rows = watch::entry_rows(l);
++        if let Err(why) = check_rows(l, &rows) {
++            errs += 1;
++            first.get_or_insert(why);
++        }
++    }
++    eprintln!("qvx_old_check_rows: {} entries, main's check_rows errors: {errs}; first: {first:?}", ls.len());
++}

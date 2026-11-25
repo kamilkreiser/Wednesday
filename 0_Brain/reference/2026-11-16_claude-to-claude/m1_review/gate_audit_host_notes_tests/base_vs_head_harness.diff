@@ -1,0 +1,8 @@
+223,224c223,226
+<             h.seal(id, SealTrigger::OwnerCommand, t(now))
+<                 .map(|r| r.info.segment),
+---
+>             h.seal(id, SealTrigger::OwnerCommand, t(now)).map(|r| {
+>                 QAHN_SEALS.with(|v| v.borrow_mut().push(format!("{:?}", r.limits)));
+>                 r.info.segment
+>             }),

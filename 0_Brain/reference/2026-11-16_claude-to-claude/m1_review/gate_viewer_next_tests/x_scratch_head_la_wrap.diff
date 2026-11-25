@@ -1,0 +1,93 @@
+diff --git a/crates/coagent-daemon/tests/la_wrap.rs b/crates/coagent-daemon/tests/la_wrap.rs
+index 785671c..54d8dfd 100644
+--- a/crates/coagent-daemon/tests/la_wrap.rs
++++ b/crates/coagent-daemon/tests/la_wrap.rs
+@@ -1075,6 +1075,7 @@ fn la_wrap_rules() {
+         shown.push(Shown::Field);
+     }
+     let (all, _) = lines(&dh);
++    if let Ok(p) = std::env::var("QVX_DUMP") { std::fs::write(format!("{p}/{}.json", "wrap_rules"), serde_json::to_string(&all).unwrap()).unwrap(); }
+     assert_eq!(all.len(), shown.len());
+     let n = all.len();
+ 
+@@ -1580,6 +1581,7 @@ fn la_reason_append_operator() {
+         cmds.push(cmd);
+     }
+     let (all, _) = lines(&dh);
++    if let Ok(p) = std::env::var("QVX_DUMP") { std::fs::write(format!("{p}/{}.json", "append_real"), serde_json::to_string(&all).unwrap()).unwrap(); }
+     assert_eq!(all.len(), cmds.len());
+     let mut v = Viewer::start(&dh);
+     v.wait_for("every entry", Duration::from_secs(20), |t| {
+@@ -1681,6 +1683,7 @@ fn cut_property_lines() -> Vec<Value> {
+ #[test]
+ fn la_strip_rows_differential() {
+     let ls = cut_property_lines();
++    if let Ok(p) = std::env::var("QVX_DUMP") { std::fs::write(format!("{p}/{}.json", "cut_property"), serde_json::to_string(&ls).unwrap()).unwrap(); }
+     assert_eq!(ls.len(), 14550);
+     let (mut compared, mut differing, mut with_cut) = (0usize, 0usize, 0usize);
+     for l in &ls {
+@@ -1787,3 +1790,64 @@ fn la_doc_lines() {
+         "the doc without the new header row is not found"
+     );
+ }
++
++// ---- QA-VIEWER-NEXT (the check's own test, in its scratch copy only; never in the project) ----
++/// Over a corpus (QVX_CORPUS: JSON list or {"lines": [...]}) and the REAL viewer's screen of it (QVX_SCREEN):
++/// the printed rows of each entry == `watch::entry_rows`; the NEW helper joins every entry back to its render and
++/// `check_rows` passes; the OLD helper's reading fails ("joined back") on exactly the entries with a reason row
++/// ending " >>" (the false error, reproduced as a control); the old and new helpers agree on every other entry.
++#[test]
++fn qvx_helper_attack() {
++    let (Ok(cp), Ok(sp)) = (std::env::var("QVX_CORPUS"), std::env::var("QVX_SCREEN")) else {
++        panic!("QVX_CORPUS / QVX_SCREEN not set");
++    };
++    let v: Value = serde_json::from_str(&std::fs::read_to_string(&cp).unwrap()).unwrap();
++    let ls: Vec<Value> = match v.get("lines") {
++        Some(a) => a.as_array().unwrap().clone(),
++        None => v.as_array().unwrap().clone(),
++    };
++    let screen = std::fs::read_to_string(&sp).unwrap();
++    let rows: Vec<&str> = screen.lines().skip(5).filter(|r| *r != watch::NOTICE).collect();
++    let mut groups: Vec<Vec<String>> = vec![];
++    for r in rows {
++        if entry_head(r) {
++            groups.push(vec![r.to_string()]);
++        } else {
++            groups.last_mut().unwrap().push(r.to_string());
++        }
++    }
++    assert_eq!(groups.len(), ls.len());
++    let (mut reached, mut reach_rows, mut old_false, mut plain, mut same, mut new_fail) = (0, 0, 0, 0, 0, 0);
++    for (i, (l, g)) in ls.iter().zip(&groups).enumerate() {
++        assert_eq!(g, &watch::entry_rows(l), "entry {i}: printed rows != entry_rows");
++        let e = mirror_render(l);
++        let ks = reason_rows_ending_cut(l, g);
++        if join_rows(l, g) != e || check_rows(l, g).is_err() {
++            new_fail += 1;
++            eprintln!("NEW HELPER FAILS entry {i}: {:?}\n{}", check_rows(l, g).err(), g.join("\n"));
++        }
++        let old: String = strip_rows_any(g).into_iter().map(|x| x.0).collect();
++        if ks.is_empty() {
++            plain += 1;
++            if strip_rows(l, g) == strip_rows_any(g) {
++                same += 1;
++            }
++            assert_eq!(old, e, "entry {i}: old helper differs on a plain entry");
++        } else {
++            reached += 1;
++            reach_rows += ks.len();
++            if old != e {
++                old_false += 1;
++            }
++        }
++    }
++    eprintln!(
++        "qvx_helper_attack: {} entries; new helper failures {new_fail}; reason row ending \" >>\": {reached} entries, {reach_rows} rows; \
++         old helper's false 'joined back' on {old_false} of them; old vs new on the {plain} other entries: {} differing",
++        ls.len(),
++        plain - same
++    );
++    assert_eq!(new_fail, 0);
++    assert_eq!(old_false, reached);
++    assert_eq!(same, plain);
++}

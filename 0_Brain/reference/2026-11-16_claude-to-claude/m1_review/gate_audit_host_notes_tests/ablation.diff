@@ -1,0 +1,24 @@
+diff --git a/crates/coagent-audit-host/src/host.rs b/crates/coagent-audit-host/src/host.rs
+index b41866f..b79d827 100644
+--- a/crates/coagent-audit-host/src/host.rs
++++ b/crates/coagent-audit-host/src/host.rs
+@@ -1565,9 +1565,7 @@ impl AuditHost {
+         // N-d (lane AUDIT-HOST-NOTES): step 0 may itself leave a write unwritten (its anchor save,
+         // or `anchors/limits` after a P-4 re-open): the seal plans nothing until it is written.
+         // RED CONTROL `seal_plans_while_dirty`: the broken variant plans, files and commits anyway.
+-        if !cfg!(coagent_audit_host_red = "seal_plans_while_dirty") {
+-            self.ensure_anchor()?;
+-        }
++        // QA ABLATION: the N-d check removed (head minus item 5)
+         let (plan, file) = self.plan_and_file(id)?;
+         let segment = plan.segment;
+         self.window = Some(Window {
+diff --git a/crates/coagent-audit-host/src/tests/mod.rs b/crates/coagent-audit-host/src/tests/mod.rs
+index 9113944..5b64b1e 100644
+--- a/crates/coagent-audit-host/src/tests/mod.rs
++++ b/crates/coagent-audit-host/src/tests/mod.rs
+@@ -69,3 +69,4 @@ pub(crate) fn revert_unsynced(orig: &Path, snap: &Path, undo: &[Undo]) {
+         }
+     }
+ }
++mod qahn;

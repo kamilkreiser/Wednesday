@@ -1,0 +1,5 @@
+# QA-AUDIT-HOST-NOTES test files (independent check of `audit-host-notes`, head 52ad858)
+- `qahn_base.rs` / `qahn_head.rs` -> `crates/coagent-audit-host/src/tests/qahn.rs` (+ `mod qahn;`) at 9145840 / 52ad858: the previous check's harness with a per-case line, a kind filter (QAHN_ONLY) and, at the head, the seal's `limits` printed apart. Diffs: `orig_vs_base.diff`, `base_vs_head_harness.diff`. `ablation.diff`: the third tree (head minus the N-d line).
+- `qahn_same.rs`, `qahn_link.rs` -> `tests/`: section 5. `qahn_seal_both.rs` (both heads), `qahn_seal_head.rs`, `qahn_seal_lc.rs` (m-2), `qahn_seal_gap.rs` (M-1) -> `src/tests/` (+ a `mod` line each): sections 6, 11.
+- `run.py` (own cargo home and target per tree; QA_CLONE picks the tree), `diffrun.sh`, `heavy.sh`, `wincheck.sh`; `compare.py` (differences + attribution by ablation), `table.py` (the docs' table applied mechanically), `classes.py`, `samecmp.py`, `sfcmp.py`, `bytescan.py` (words on the command line only).
+- `logs/`: outputs quoted in the verdict (the large per-case run logs stay in /private/tmp/claude-501/qahn/logs).

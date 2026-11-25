@@ -1,0 +1,74 @@
+11a12,16
+> //!
+> //! QA-AUDIT-HOST-NOTES (independent check of branch `audit-host-notes`): copied UNCOMMITTED into the
+> //! checker's own trees at 9145840 and 52ad858; added only a per-case line (`QAHN CASE`), a kind
+> //! filter (`QAHN_ONLY`, for the ablation run; schedules are drawn identically), and at 52ad858 only
+> //! the seal's new `limits` field printed apart (`QAHN SEALLIMITS`).
+12a18,42
+> thread_local! {
+>     static QAHN_RUN: std::cell::Cell<&'static str> = const { std::cell::Cell::new("-") };
+>     static QAHN_SEALS: RefCell<Vec<String>> = const { RefCell::new(Vec::new()) };
+> }
+> 
+> fn qahn_only(k: K) -> bool {
+>     match std::env::var("QAHN_ONLY") {
+>         Ok(v) if !v.is_empty() => format!("{k:?}") == v,
+>         _ => true,
+>     }
+> }
+> 
+> fn qahn_t(s: &Snap) -> String {
+>     format!("({},{},{},{},{},{})", s.seq, s.cps, s.seg, s.p3, s.p2, s.logical)
+> }
+> 
+> fn qahn_detail(a: &Ans) -> String {
+>     let s = match a {
+>         Ans::O(Ok(o)) => format!("Ok({o:?})"),
+>         Ans::S(Ok(seg)) => format!("Ok(seg {seg})"),
+>         Ans::O(Err(e)) | Ans::S(Err(e)) => format!("Err({e:?})"),
+>     };
+>     s.replace('\n', " ")
+> }
+> 
+309a340,342
+>     QAHN_SEALS.with(|v| v.borrow_mut().clear());
+>     let mut qahn_final = String::from("?");
+>     let mut qahn_dirty_next = String::from("-");
+439a473
+>         qahn_dirty_next = r.short();
+506a541
+>             qahn_final = qahn_t(&f);
+526a562,576
+>     println!(
+>         "QAHN CASE {} {case} {k:?} {sched:?} | {} | member {has_member} | fresh {} | dirty {dirty} next {qahn_dirty_next} | retry {retry_ans} | final {qahn_final} | before {} | extra {extra_n} | failed {fl} | problems {} | detail {}",
+>         QAHN_RUN.with(|r| r.get()),
+>         ans.short(),
+>         fresh_snap.as_ref().map_or("REFUSED".into(), qahn_t),
+>         qahn_t(&before),
+>         problems.iter().filter(|p| !p.starts_with("NOTE-STUB")).count(),
+>         qahn_detail(&ans)
+>     );
+>     QAHN_SEALS.with(|v| {
+>         let v = v.borrow();
+>         if !v.is_empty() {
+>             println!("QAHN SEALLIMITS {} {case} {sched:?} | {}", QAHN_RUN.with(|r| r.get()), v.join(" ; "));
+>         }
+>     });
+590a641
+>     QAHN_RUN.with(|r| r.set("exh"));
+592a644,646
+>         if !qahn_only(k) {
+>             continue;
+>         }
+632a687
+>     QAHN_RUN.with(|r| r.set("per"));
+633a689,691
+>         if !qahn_only(k) {
+>             continue;
+>         }
+661a720
+>     QAHN_RUN.with(|r| r.set("gen"));
+701a761,763
+>         if !qahn_only(k) {
+>             continue;
+>         }
