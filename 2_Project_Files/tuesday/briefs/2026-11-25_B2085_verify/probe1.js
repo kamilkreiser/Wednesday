@@ -1,0 +1,11 @@
+const { buildToolCatalog } = require('/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s326/g2085/head/backend/llm/tools.js');
+const { executors, definitions } = buildToolCatalog({ allLogs: [] });
+const own = Object.keys(executors);
+console.log('own', own.length, own.join(','));
+console.log('defs', definitions.map(d=>d.function&&d.function.name||d.name).join(','));
+const look=(ex,name)=>{ const fn = ex && Object.hasOwn(ex, name) ? ex[name] : undefined; return typeof fn; };
+const oldl=(ex,name)=>{ const fn = ex && ex[name]; return typeof fn; };
+const shapes={own0:own[0],num:5,arr:[own[0]],arrEmpty:[],obj:{},objToString:{toString:()=>own[0]},nul:null,undef:undefined,proto:'__proto__',ctor:'constructor',hasOwnProperty:'hasOwnProperty',str:'toString',empty:'',bool:true};
+for (const [k,v] of Object.entries(shapes)) console.log(k.padEnd(14), 'new', look(executors,v), 'old', oldl(executors,v));
+console.log('absent', look(undefined,'x'), look(null,'x'), 'nullproto', look(Object.assign(Object.create(null),{a(){}}),'a'));
+console.log('every own is function', own.every(n=>look(executors,n)==='function'));

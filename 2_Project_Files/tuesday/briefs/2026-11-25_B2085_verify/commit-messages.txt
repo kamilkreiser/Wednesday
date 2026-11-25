@@ -1,0 +1,18 @@
+8a2d2b8872d84c8bdb02179a8708cb76865b95c9
+RD-1039: suite counts 6429 tests in 403 suites, written by the project's own command
+
+scripts/verify-expected-counts.json is the output of npm run verify -- --maxWorkers=2 --update-counts at the commit before this one.
+
+1b7c1dcc91df4bff4eba555bab1df7253a6f96f0
+RD-1039: the chat's other status lines, the setup screen's table and message lines, and the tool lookup read values as text
+
+The change that made the chat's tool-call label text (RD-1026) left ten more writes of the same kind, and one lookup that accepts more names than the tool list holds. None takes a value an AI endpoint or a viewer chooses today; each now cannot become markup or a tool.
+
+static/js/index.js, the chat's streaming reader: the thinking message, the sub-query types, the model name, the generating message and the message of the outer catch pass through the page's escapeHtml, as the tool label and the error event already do. A status with no value now shows the icon alone instead of the word undefined or null.
+
+static/js/first-run-setup.js: the table discovery writes a table name into a single-quoted attribute and into a code element, and its no-tables message, and the two enforce routes' success message, into paragraphs. Each passes through the script's own escapeHtml, which also escapes both kinds of quote, so a name holding a quote can no longer end the attribute. A success answer with no message shows an empty paragraph instead of the word undefined.
+
+backend/llm/azureOpenAIAdapter.js: the lookup read executors[name] on a plain object, so a tool name every object inherits (constructor, toString, hasOwnProperty and the rest of Object.prototype) found a function: the adapter called it with the model's arguments and told the page a tool by that name was running. It now reads only the tool list's own entries (Object.hasOwn), so such a name gets the unknown-tool answer and no tool_call event. Every tool the list holds, a list with no prototype and a missing list behave as before.
+
+Two new test files hold the cells: the chat rows, the table row and the three message lines with hostile and ordinary values and the source of each write (jsdom, the scripts' own functions lifted), and the tool lookup for every inherited name and every tool the list holds (the real adapter with a scripted client). Rows of the same kind that this ticket does not list are not changed.
+
