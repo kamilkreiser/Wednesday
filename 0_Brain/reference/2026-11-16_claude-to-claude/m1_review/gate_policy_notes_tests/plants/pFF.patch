@@ -1,0 +1,53 @@
+diff --git a/crates/coagent-policy/tests/common/mod.rs b/crates/coagent-policy/tests/common/mod.rs
+index b2b3ee6..705e02c 100644
+--- a/crates/coagent-policy/tests/common/mod.rs
++++ b/crates/coagent-policy/tests/common/mod.rs
+@@ -117,23 +117,19 @@ impl Fx {
+         .unwrap()
+     }
+     pub fn act(&self, tool: &str, input: Value) -> Action {
+-        classify(
+-            &self.hook(tool, input),
+-            HostOs::Posix,
+-            &self.env(),
+-            &PosixNormaliser,
+-        )
++        let h = self.hook(tool, input);
++        let a = classify(&h, HostOs::Posix, &self.env(), &PosixNormaliser);
++        qa_ff_check(&h, &a);
++        a
+     }
+     pub fn bash(&self, cmd: &str) -> Action {
+         self.act("Bash", json!({ "command": cmd, "description": "test" }))
+     }
+     pub fn bash_in(&self, cwd: &Path, cmd: &str) -> Action {
+-        classify(
+-            &self.hook_in(cwd, "Bash", json!({ "command": cmd })),
+-            HostOs::Posix,
+-            &self.env(),
+-            &PosixNormaliser,
+-        )
++        let h = self.hook_in(cwd, "Bash", json!({ "command": cmd }));
++        let a = classify(&h, HostOs::Posix, &self.env(), &PosixNormaliser);
++        qa_ff_check(&h, &a);
++        a
+     }
+     pub fn read(&self, p: &Path) -> Action {
+         self.act("Read", json!({ "file_path": p.to_str().unwrap() }))
+@@ -340,3 +336,16 @@ pub fn generated_shell_commands(seed: u64, n: usize) -> Vec<String> {
+     }
+     cmds
+ }
++
++fn qa_ff_check(h: &HookInput, a: &Action) {
++    let ff = OwnerInputFacts {
++        sandbox_flag_not_false: a.sandbox_disabled,
++        cwd_not_absolute: matches!(&a.cwd, NormPath::Uncertain { raw, .. } if raw.is_empty()),
++    };
++    let real = owner_input_facts(h);
++    use std::io::Write as _;
++    let line = format!("{} {:?} {:?} cwd={:?} tool={:?} input={}\n", if ff == real { "SAME" } else { "DIFF" }, ff, real, h.cwd, h.tool_name, h.tool_input);
++    let path = std::env::var("QA_FF_LOG").unwrap();
++    let mut f = std::fs::OpenOptions::new().create(true).append(true).open(path).unwrap();
++    f.write_all(line.as_bytes()).unwrap();
++}
