@@ -88423,5 +88423,40 @@
    }
   ],
   "amended_ts": "2026-11-26T10:23:27.269529+11:00"
+ },
+ {
+  "id": "secuura-ks2366-what-anchored-means-1126",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-2366: certifications never confirm on chain today. What should 'anchored' mean on verify?",
+  "bluf": "(Prior-ruling override: 4 matches read; none rules on what anchored means. They share only the words 'what' or 'means'; the KS-1699 cards rule who may call verify, not anchoring.) Decision needed, no rush; nothing is broken further by waiting. MEASURED today on Kintsugi (dev), read-only, by Seat S 127th and re-read by Wednesday: of 11 certifications, 10 are stuck at 'submitted' (oldest 69 days), 1 failed, 0 confirmed, 0 with a transaction hash. In the same period 105 ordinary documents confirmed, so the confirming step works, but by the code it looks records up by a field certifications do not have, so it can never reach one. Meanwhile certification verify answers 'blockchainAnchored: true' for all of them (it only checks that an anchor record exists). Facts are posted on KS-2366 (comment, measured). The fix has two parts: make verify honest, and give certifications a way to confirm. Which meaning verify should use is a product choice, so it is yours. My recommendation: option a.",
+  "default_action": "If no answer: option c (nothing is built or changed; KS-2366 stays in Backlog). A product meaning is yours, so I will not pick one for you.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Anchored = confirmed on chain",
+    "detail": "verify says true only for a confirmed anchor (the rule another verify surface already uses); a seat also builds the missing confirm path for certifications; gated, deployed to Kintsugi first"
+   },
+   {
+    "key": "b",
+    "label": "Anchored = a transaction exists",
+    "detail": "true once a transaction hash is present, even before confirmation; the confirm path still needs building for certifications to get there"
+   },
+   {
+    "key": "c",
+    "label": "Leave verify as it is for now",
+    "detail": "keep the ticket in Backlog; nothing changes"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-26T10:26:30.765155+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "CARD secuura-ks1102-public-status-what-may-show",
+   "CARD secuura-1756-misfiled-docs-what-next-1028",
+   "CARD secuura-ks1861-what-tenant-delete-means-1031",
+   "CARD secuura-ks1699-admin-means-platform-admin-1115"
+  ]
  }
 ]
