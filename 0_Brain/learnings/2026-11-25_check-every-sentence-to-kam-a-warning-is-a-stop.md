@@ -18,7 +18,7 @@ supersedes: ""
 **How to apply:**
 1. Before any message to Kam: each fact in it (machine, path, URL, ruling state, "no/none/only/never") has a read in the same action, or the sentence says "unmeasured". Rulings: run `decision_queue.sh prior` on the subject before a conclusion about design or scope.
 2. Steps for people outside the team (staff, HP, customers) are read once by an independent checker (an agent with no context but the steps and the system's record) for "would this person know where to type this?" before they reach Kam.
-3. chat_reply.sh's absence-claim warning becomes a REFUSAL for messages to Kam unless the message carries the measurement or an explicit override with the reason (mechanism owed same day; a quotation of a retracted claim is the expected override case).
+3. chat_reply.sh's absence-claim check is a REFUSAL (rc 6) unless the sentence states what was measured or `CHAT_ALLOW_ABSENCE="<measurement or reason, 15+ chars>"` is set, which is logged to fleet/state/absence_overrides.log (BUILT same day, 2026-11-25; proved by Tuesday in CHAT_DRY=1: fire rc 6, quiet rc 0; arms A1-A11 pass; .pre-1125-absenceblock copies kept). A quotation of a retracted claim is the expected override case.
 4. Corrections are named for what they are, never minimised ("small", "minor") in a message to Kam.
 5. One Kam thread answered at a time; agent wakes wait behind his message.
 

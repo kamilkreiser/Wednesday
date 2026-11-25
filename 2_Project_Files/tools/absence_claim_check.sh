@@ -18,5 +18,8 @@ PAT='\b(nothing|never|no one|nobody|none of|not on|not waiting|isn'"'"'t waiting
 HITS="$(printf '%s' "$TEXT" | /usr/bin/grep -oiE "$PAT" | tr 'A-Z' 'a-z' | sort -u | paste -sd, - 2>/dev/null)"
 if [ -n "$HITS" ]; then
   echo "ADVISORY absence-claim(s): [$HITS] — for each, NAME the measurement that covers the WHOLE space it asserts about, or restate it as what you actually measured (ledger w=4, 2026-09-18). Not blocking." >&2
+  # 2026-11-25 (Kam 11:47, "a warning is a stop"): ABSENCE_CHECK_STRICT=1 gives "flagged" its own exit code, 10,
+  # so a caller (chat_reply.sh) can REFUSE. Default (unset) is unchanged: always exit 0, advisory.
+  [ "${ABSENCE_CHECK_STRICT:-0}" = "1" ] && exit 10
 fi
 exit 0

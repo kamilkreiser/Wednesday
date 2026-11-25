@@ -146,7 +146,27 @@ MSG="${1:-}"
 [ -n "$MSG" ] || { echo "chat_reply: empty message refused" >&2; exit 2; }
 # ADVISORY (ledger w=4, 2026-09-18): flag unmeasured ABSENCE claims before they reach Kam. Never blocks,
 # never changes the exit code. Arms: 2_Project_Files/tests/absence_claim_check_arms.sh
-printf '%s' "$MSG" | bash "$SELF_DIR/absence_claim_check.sh" || true
+# 2026-11-25 (Kam 11:47, "this is not a small oversight"): THIS ONE IS NOW A REFUSAL, not advice. A flagged absence claim blocks
+# the send (rc 6) unless CHAT_ALLOW_ABSENCE="<the measurement or reason>" (>=15 chars) is set; the reason is logged locally
+# (fleet/state/absence_overrides.log, gitignored) and is NOT added to the message. A checker that itself errors also refuses.
+_ab_err="$(printf '%s' "$MSG" | ABSENCE_CHECK_STRICT=1 bash "$SELF_DIR/absence_claim_check.sh" 2>&1 >/dev/null)"; _ab_rc=$?
+if [ "$_ab_rc" -ne 0 ]; then
+  if [ "$_ab_rc" -eq 10 ]; then _ab_hits="$(printf '%s' "$_ab_err" | sed -n 's/.*absence-claim(s): \[\([^]]*\)\].*/\1/p' | head -1)"
+  else _ab_hits="(absence_claim_check.sh itself FAILED rc=$_ab_rc: $(printf '%s' "$_ab_err" | tail -2 | tr '\n' ' '))"; fi
+  _ab_why="${CHAT_ALLOW_ABSENCE:-}"
+  if [ -n "$_ab_why" ] && [ "${#_ab_why}" -ge 15 ]; then
+    _ab_log="${CHAT_ABSENCE_LOG:-$PROJECT_DIR/2_Project_Files/fleet/state/absence_overrides.log}"; mkdir -p "$(dirname "$_ab_log")"
+    printf '%s\t%s\tflagged=[%s]\treason=%s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$AGENT" "$_ab_hits" "$_ab_why" >> "$_ab_log" || { echo "chat_reply: REFUSED — could not write the override log $_ab_log" >&2; exit 6; }
+    echo "chat_reply: absence claim(s) [$_ab_hits] sent on CHAT_ALLOW_ABSENCE (logged to $_ab_log)" >&2
+  else
+    echo "chat_reply: REFUSED (rc 6) — absence claim(s) in this message: [$_ab_hits]" >&2
+    echo "  Nothing was posted, no file shared. Kam 2026-11-25 11:47: \"this is not a small oversight. Please be more careful in checking things.\"" >&2
+    echo "  Either rewrite each sentence to state WHAT YOU MEASURED (\"az list returned 0 rows, read at 11:00\"), or re-run with" >&2
+    echo "  CHAT_ALLOW_ABSENCE=\"<the measurement or reason, at least 15 chars>\" (logged locally, not added to the message)." >&2
+    [ -n "$_ab_why" ] && echo "  (CHAT_ALLOW_ABSENCE was set but is only ${#_ab_why} chars — too short to be a measurement.)" >&2
+    exit 6
+  fi
+fi
 # ADVISORY (Friday ledger w=3, 2026-09-27): flag a COUNT typed beside the list it counts when they disagree
 # ("Five tickets depend on this answer (HPSM-12/19/25/32/35/41)" — six). Same contract: stderr only, never blocks,
 # never changes the exit code. Arms: 2_Project_Files/tests/count_list_check_arms.sh

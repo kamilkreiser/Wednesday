@@ -1,6 +1,6 @@
 #!/bin/bash
 # Arms for tools/absence_claim_check.sh. Each prints PASS/FAIL; exit 1 if any fail.
-C=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/tools/absence_claim_check.sh; F=0
+C="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/../tools" && pwd)/absence_claim_check.sh"; F=0
 arm(){ # name, text, expect_flag(yes/no)
   err="$(printf '%s' "$2" | bash "$C" 2>&1 >/dev/null)"; rc=$?
   flagged=no; [ -n "$err" ] && flagged=yes
@@ -14,4 +14,7 @@ arm "A6 empty input exits 0 unflagged"       ""                                 
 arm "A7 the real 06:00 'only' claim flags (2026-09-22 ledger)" "Peter's only new note is a Schemathesis re-run on KS-61." yes
 arm "A8 'nothing else' flags"                "Nothing else moved on the board overnight."                    yes
 arm "A9 'only' as a positive quantifier still flags (advisory)" "Only #1100 merged tonight."              yes
+# 2026-11-25: strict mode gives "flagged" rc 10; default stays rc 0.
+printf '%s' "there's no direct link" | ABSENCE_CHECK_STRICT=1 bash "$C" 2>/dev/null; r=$?; [ "$r" -eq 10 ] && echo "PASS  A10 strict flagged rc=10" || { echo "FAIL  A10 strict flagged rc=$r"; F=1; }
+printf '%s' "the deploy run skipped both jobs" | ABSENCE_CHECK_STRICT=1 bash "$C" 2>/dev/null; r=$?; [ "$r" -eq 0 ] && echo "PASS  A11 strict quiet rc=0" || { echo "FAIL  A11 strict quiet rc=$r"; F=1; }
 exit $F
