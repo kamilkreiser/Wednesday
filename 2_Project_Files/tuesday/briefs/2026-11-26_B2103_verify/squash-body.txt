@@ -1,0 +1,33 @@
+The OXPd 1.x client's write catalogue gains two rows of the committed
+UIConfiguration binding: RegisterTopLevelButton and
+UnregisterTopLevelButton, each with HTTP Basic for the user admin and a
+dry run unless executed. A register's one argument is an
+Oxpd1TopLevelButton: an id, a title of 1 to 100 characters, a position
+of 1 to 65535 and an absolute https target page of at most 256
+characters; the record carries no icon, no credentials and no post
+body. A register's undo is the unregister of the same id. The writer
+gains ReadTopLevelButtonsAsync (GetTopLevelButtonRecords, admin)
+through the existing internal admin read; it answers only when every
+listed record holds one id of HP's UUID form, so a list that cannot be
+read whole never reads as one without the id. The read catalogue is
+unchanged.
+
+The lab's oxpd1 write takes --write RegisterTopLevelButton or
+UnregisterTopLevelButton with --button-id (and, for a register,
+--button-title, --button-target and --button-position); a usage error
+before any folder or connection otherwise. An executed register reads
+the records first and writes nothing, with no undo, when a record holds
+the id in any letter case (exit 10); an answered register or unregister
+reads the records after and says whether the id is listed. undo-owed
+owes the unregister of a register, and now matches a write only with a
+write of its own family (sign-in agent, Test service, CA store,
+top-level button).
+
+41 new cases against stubs on 127.0.0.1; one landed literal moves (the
+write catalogue's row count). Every new cell that can fail failed by
+its assertion first; 17 mutants each turn exactly their cells red. C#
+totals plus 41 on both legs; the rules count plus 2. No device has been
+reached; the run against a device is a separate step. Nothing is
+deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
