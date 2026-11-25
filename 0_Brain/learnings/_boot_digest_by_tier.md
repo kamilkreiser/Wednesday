@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-25 08:11 from 290 lesson files (1,222,257 B). M 43 · MIXED 5 · P (Datasec/OXPd) 1 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 6 · W 233. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-25 11:50 from 291 lesson files (1,225,433 B). M 43 · MIXED 5 · P (Datasec/OXPd) 1 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 6 · W 234. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (6) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md · 2026-11-21_a-holding-helper-gets-the-next-useful-job.md · 2026-11-21_friday-runs-on-opus-fable-only-when-flagged.md · 2026-11-21_windows-helper-launches-without-permission-prompts.md
 
@@ -8171,4 +8171,17 @@ sections (open the file for these): The rule · Why · The failure behind it (le
 - Every action Kam puts on himself for OXPd becomes an OXPD2 ticket assigned to Kam (Jira's "Kamil Kreiser"), with its BLUF and the one thing needed; a card may still go to the fleet-activity board when a decision is needed. When his action is done (his word), the ticket is moved by a records pass.
 - Scope: Datasec/OXPd only. Do not retrofit other projects' boards without his word (a rule for creation is not a mandate to retrofit).
 - Jira writes go through a project seat's kit (create, attach, assign; never delete), never by Tuesday's own hand.
+
+
+## Check every sentence to Kam at its source before it goes; a tool's warning on it is a stop, not advice
+`2026-11-25_check-every-sentence-to-kam-a-warning-is-a-stop.md` · correction · 2026-11-25 · status: live · tier: W
+
+**The lesson:** A statement to Kam (or steps for anyone he passes them to) is sent only after the fact in it has been checked at its live source in the same action. When my own tooling warns on a sentence (an absence claim, an unmeasured count), I either name the measurement or rewrite it; I never send past the warning. A wrong statement corrected afterwards is not "small": it is the thing he relies on being right.
+
+**How to apply:**
+1. Before any message to Kam: each fact in it (machine, path, URL, ruling state, "no/none/only/never") has a read in the same action, or the sentence says "unmeasured". Rulings: run `decision_queue.sh prior` on the subject before a conclusion about design or scope.
+2. Steps for people outside the team (staff, HP, customers) are read once by an independent checker (an agent with no context but the steps and the system's record) for "would this person know where to type this?" before they reach Kam.
+3. chat_reply.sh's absence-claim warning becomes a REFUSAL for messages to Kam unless the message carries the measurement or an explicit override with the reason (mechanism owed same day; a quotation of a retracted claim is the expected override case).
+4. Corrections are named for what they are, never minimised ("small", "minor") in a message to Kam.
+5. One Kam thread answered at a time; agent wakes wait behind his message.
 

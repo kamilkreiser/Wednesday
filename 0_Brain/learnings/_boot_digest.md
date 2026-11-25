@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-25 08:11 from 290 lesson files (1,222,047 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-25 11:50 from 291 lesson files (1,225,223 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -8259,4 +8259,17 @@ sections (open the file for these): The rule · Why · The failure behind it (le
 - Every action Kam puts on himself for OXPd becomes an OXPD2 ticket assigned to Kam (Jira's "Kamil Kreiser"), with its BLUF and the one thing needed; a card may still go to the fleet-activity board when a decision is needed. When his action is done (his word), the ticket is moved by a records pass.
 - Scope: Datasec/OXPd only. Do not retrofit other projects' boards without his word (a rule for creation is not a mandate to retrofit).
 - Jira writes go through a project seat's kit (create, attach, assign; never delete), never by Tuesday's own hand.
+
+
+## Check every sentence to Kam at its source before it goes; a tool's warning on it is a stop, not advice
+`2026-11-25_check-every-sentence-to-kam-a-warning-is-a-stop.md` · correction · 2026-11-25 · status: live
+
+**The lesson:** A statement to Kam (or steps for anyone he passes them to) is sent only after the fact in it has been checked at its live source in the same action. When my own tooling warns on a sentence (an absence claim, an unmeasured count), I either name the measurement or rewrite it; I never send past the warning. A wrong statement corrected afterwards is not "small": it is the thing he relies on being right.
+
+**How to apply:**
+1. Before any message to Kam: each fact in it (machine, path, URL, ruling state, "no/none/only/never") has a read in the same action, or the sentence says "unmeasured". Rulings: run `decision_queue.sh prior` on the subject before a conclusion about design or scope.
+2. Steps for people outside the team (staff, HP, customers) are read once by an independent checker (an agent with no context but the steps and the system's record) for "would this person know where to type this?" before they reach Kam.
+3. chat_reply.sh's absence-claim warning becomes a REFUSAL for messages to Kam unless the message carries the measurement or an explicit override with the reason (mechanism owed same day; a quotation of a retracted claim is the expected override case).
+4. Corrections are named for what they are, never minimised ("small", "minor") in a message to Kam.
+5. One Kam thread answered at a time; agent wakes wait behind his message.
 
