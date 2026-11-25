@@ -1,0 +1,182 @@
+/**
+ * @jest-environment node
+ */
+'use strict';
+// Gate B2081 probe (scratch only, never committed). Attacks the RD-1040 property on the real server:
+// route spellings, methods, role shapes, sibling routes, deleted/deactivated users, open mode with a cookie,
+// 403-vs-404 and timing, and the REQUEST_DENIED row's contents. Prints one JSON object to G2081_OUT.
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const http = require('http');
+const crypto = require('crypto');
+const inventory = require('../scripts/role-capability-inventory');
+const { bootServer } = require('./helpers/rd395-server-harness');
+const { reservePort } = require('./helpers/test-server');
+const { ZERO_GUID, SESSION_LIFETIME_MS } = require('./helpers/roles-inventory-seed');
+
+const WS = '3b4c5d6e-7f80-4a9b-8c1d-2e3f4a5b6c7d';
+const TENANT = '00000000-0000-0000-0000-0000000000a5';
+const CLIENT = '00000000-0000-0000-0000-0000000000a6';
+const SECRET = 'g2081-made-up-value';
+const NAMES = ['g2081 one', 'g2081 two'];
+const REGION = 'g2081 region';
+const MARKS = { names: NAMES[0], ws: WS, tenant: TENANT, client: CLIENT, secret: SECRET, region: REGION, masked: '"***"' };
+const made = [];
+const out = { started: new Date().toISOString() };
+
+const ROLE_SHAPES = {
+    end_user: 'end_user', partner_manager: 'partner_manager', viewer: 'viewer', admin: 'admin',
+    sp_viewer: ' viewer', viewer_sp: 'viewer ', VIEWER: 'VIEWER', tab_viewer: 'viewer\t', nul_viewer: 'viewer\u0000',
+    proto: '__proto__', hasOwn: 'hasOwnProperty', toString: 'toString', valueOf: 'valueOf', constructor: 'constructor',
+    num: 7, numzero: 0, obj: { role: 'viewer' }, arr: ['viewer'], arrcfg: ['config.read'], boolT: true, boolF: false,
+    endUserSp: 'end_user ', dummyDel: 'end_user', dummyDeact: 'end_user', dummyPutViewer: 'end_user',
+};
+
+function raw(base, method, p, cookie) {
+    const u = new URL(base);
+    return new Promise((resolve) => {
+        const t0 = process.hrtime.bigint();
+        const req = http.request({ host: u.hostname, port: u.port, method, path: p, headers: cookie ? { Cookie: cookie } : {} }, (res) => {
+            let b = '';
+            res.on('data', (c) => { b += c; });
+            res.on('end', () => resolve({ status: res.statusCode, text: b, ms: Number(process.hrtime.bigint() - t0) / 1e6, allow: res.headers.allow || null }));
+        });
+        req.on('error', (e) => resolve({ status: 'ERR ' + e.message, text: '', ms: 0 }));
+        req.end();
+    });
+}
+const leaks = (t) => Object.entries(MARKS).filter(([, v]) => t.includes(v)).map(([k]) => k);
+const brief = (r) => ({ s: r.status, leaks: leaks(r.text), len: r.text.length, ...(r.allow ? { allow: r.allow } : {}) });
+
+async function bootEnforced(tag) {
+    const token = crypto.randomBytes(16).toString('hex');
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nx-g2081-'));
+    made.push(dir);
+    const env = inventory.serverEnv({ token, dialsFile: path.join(dir, 'dials.jsonl'), tableFile: path.join(dir, 'route-table.json'), deadPort: await reservePort() });
+    const seed = async (store) => {
+        await store.setSetting('entraTenantId', ZERO_GUID);
+        await store.setSetting('entraClientId', ZERO_GUID);
+        await store.setSetting('authEnforced', true);
+        await store.setSetting('firstRunComplete', true);
+        const exp = new Date(Date.now() + SESSION_LIFETIME_MS);
+        const sessions = {};
+        let n = 0;
+        for (const [k, role] of Object.entries(ROLE_SHAPES)) {
+            const email = `p${n++}@g2081.test`;
+            const id = await store.addAuthorizedUser(email, `G2081 ${k}`, role);
+            const s = crypto.randomBytes(24).toString('hex');
+            await store.createSession(s, id, email, exp);
+            sessions[k] = { s, email };
+        }
+        return sessions;
+    };
+    return bootServer({ tag, made, env, seed });
+}
+
+beforeAll(async () => {
+    const h = await bootEnforced('g2081-enforced');
+    try {
+        const S = h.seeded;
+        const ck = (k) => `session_token=${S[k].s}`;
+        // the stored roles as the store holds them (to show which shapes the store kept)
+        const users = JSON.parse(fs.readFileSync(path.join(h.dir, 'authorized_users.json'), 'utf8'));
+        out.storedRoles = Object.fromEntries(Object.keys(ROLE_SHAPES).map((k) => [k, JSON.stringify((users.find((u) => u.email === S[k].email) || {}).role)]));
+        const admin = await h.as(S.admin.s);
+        const ids = [];
+        for (const n of NAMES) {
+            const res = await fetch(h.base + '/api/data-sources', { method: 'POST', headers: admin.json,
+                body: JSON.stringify({ name: n, workspaceId: WS, authMode: 'service-principal', tenantId: TENANT, clientId: CLIENT, clientSecret: SECRET, region: REGION }) });
+            const b = await res.json().catch(() => ({}));
+            ids.push(b.id);
+        }
+        out.ids = ids;
+        const id = ids[0];
+
+        // 1. every role shape on the two plain reads
+        out.roles = {};
+        for (const k of Object.keys(ROLE_SHAPES)) {
+            out.roles[k] = { list: brief(await raw(h.base, 'GET', '/api/data-sources', ck(k))), item: brief(await raw(h.base, 'GET', `/api/data-sources/${id}`, ck(k))) };
+        }
+
+        // 2. route spellings and methods, end_user and viewer, sent verbatim
+        const spell = ['/api/data-sources', '/api/data-sources/', '/API/DATA-SOURCES', '/Api/Data-Sources/', '//api/data-sources', '/api//data-sources',
+            '/api/data-sources//', '/api/data%2Dsources', '/api/data%2dsources', '/%61pi/data-sources', '/api/data-sources%2F', '/api/data-sources?x=1',
+            '/api/data-sources;x', '/api/data-sources.json', '/api/data-sources/./', '/api/./data-sources', '/api/data-sources/%2e', '/api/x/../data-sources',
+            `/api/data-sources/${id}`, `/api/data-sources/${id}/`, `/api/data-sources/%3${String(id)[0]}${String(id).slice(1)}`, `/API/DATA-SOURCES/${id}`, `//api/data-sources/${id}`,
+            `/api/data-sources/${id}?a=b`, '/api/data-sources/999999', `/api/data-sources/${id}/describe-table?table=T`, `/api/data-sources/${id}/discover-tables`,
+            '/api/data-sources/%00', '/api/data-sources/__proto__', '/api/data-sources/constructor'];
+        out.spell = {};
+        for (const role of ['end_user', 'viewer']) {
+            out.spell[role] = {};
+            for (const p of spell) out.spell[role][p] = brief(await raw(h.base, 'GET', p, ck(role)));
+            out.spell[role]['HEAD /api/data-sources'] = brief(await raw(h.base, 'HEAD', '/api/data-sources', ck(role)));
+            out.spell[role][`HEAD /api/data-sources/${id}`] = brief(await raw(h.base, 'HEAD', `/api/data-sources/${id}`, ck(role)));
+            out.spell[role]['OPTIONS /api/data-sources'] = brief(await raw(h.base, 'OPTIONS', '/api/data-sources', ck(role)));
+            out.spell[role][`OPTIONS /api/data-sources/${id}`] = brief(await raw(h.base, 'OPTIONS', `/api/data-sources/${id}`, ck(role)));
+            out.spell[role]['TRACE /api/data-sources'] = brief(await raw(h.base, 'TRACE', '/api/data-sources', ck(role)));
+        }
+
+        // 3. sibling routes that might return a stored source's fields, for end_user, partner_manager, viewer, admin
+        const sib = ['/api/setup/status', '/api/log-analytics/diagnostics', '/api/setup/validate-all', '/api/models/active', '/api/service-check',
+            '/api/setup/data-sources', '/api/debug/data-sources', '/api/admin/health', '/api/auth/status', '/api/csrf-token', '/api/ai/audit-log/summary',
+            '/api/user-data/export', '/api/log-analytics/status', '/api/segments', '/api/health', '/api/stats', '/api/admin/audit-log/export?format=json'];
+        out.sib = {};
+        for (const role of ['end_user', 'partner_manager', 'viewer', 'admin']) {
+            out.sib[role] = {};
+            for (const p of sib) out.sib[role][p] = brief(await raw(h.base, 'GET', p, ck(role)));
+        }
+
+        // 4. 403 vs 404 and timing for end_user: an existing id vs a missing id, 40 each, interleaved
+        const tA = []; const tB = [];
+        for (let i = 0; i < 40; i++) {
+            tA.push((await raw(h.base, 'GET', `/api/data-sources/${id}`, ck('end_user'))).ms);
+            tB.push((await raw(h.base, 'GET', '/api/data-sources/987654321', ck('end_user'))).ms);
+        }
+        const med = (a) => { const s = [...a].sort((x, y) => x - y); return Number(s[Math.floor(s.length / 2)].toFixed(2)); };
+        out.timing = { existing_median_ms: med(tA), missing_median_ms: med(tB), n: 40 };
+
+        // 5. user lifecycle: admin deletes one end_user; admin PUTs another inactive; admin PUTs a third to viewer
+        const del = await fetch(`${h.base}/api/auth/users/${encodeURIComponent(S.dummyDel.email)}`, { method: 'DELETE', headers: admin.json });
+        out.lifecycle = { deleteStatus: del.status, afterDelete: brief(await raw(h.base, 'GET', '/api/data-sources', ck('dummyDel'))) };
+        const deact = await fetch(`${h.base}/api/auth/users/${encodeURIComponent(S.dummyDeact.email)}`, { method: 'PUT', headers: admin.json, body: JSON.stringify({ is_active: false }) });
+        out.lifecycle.deactStatus = deact.status;
+        out.lifecycle.afterDeact = brief(await raw(h.base, 'GET', '/api/data-sources', ck('dummyDeact')));
+        const pv = await fetch(`${h.base}/api/auth/users/${encodeURIComponent(S.dummyPutViewer.email)}`, { method: 'PUT', headers: admin.json, body: JSON.stringify({ role: 'viewer' }) });
+        out.lifecycle.putViewerStatus = pv.status;
+        out.lifecycle.afterPutViewer = brief(await raw(h.base, 'GET', '/api/data-sources', ck('dummyPutViewer')));
+        // a role the create route stores verbatim (by API, as an administrator could)
+        const cr = await fetch(`${h.base}/api/auth/users`, { method: 'POST', headers: admin.json, body: JSON.stringify({ email: 'made@g2081.test', name: 'made', role: ' Viewer ' }) });
+        out.lifecycle.createOddRole = cr.status;
+        const users2 = JSON.parse(fs.readFileSync(path.join(h.dir, 'authorized_users.json'), 'utf8'));
+        out.lifecycle.createdStoredRole = JSON.stringify((users2.find((u) => u.email === 'made@g2081.test') || {}).role);
+
+        // 6. the denial rows this probe caused: every key and value
+        const ex = await fetch(`${h.base}/api/admin/audit-log/export?format=json&action=REQUEST_DENIED`, { headers: admin.noCsrf });
+        const rows = ((await ex.json()).rows || []);
+        const mine = rows.filter((r) => r.details && typeof r.details.path === 'string' && /data/i.test(r.details.path));
+        out.denial = { rowsTotal: rows.length, dsRows: mine.length, sampleKeys: mine[0] ? Object.keys(mine[0]).sort() : null,
+            detailKeys: mine[0] ? Object.keys(mine[0].details).sort() : null, sample: mine[0] || null,
+            anyLeak: mine.some((r) => leaks(JSON.stringify(r)).length > 0), roleValues: [...new Set(mine.map((r) => JSON.stringify(r.details.userRole)))] };
+    } finally {
+        out.serverTail = (h.output || '').split('\n').filter((l) => /TypeError|ReferenceError|Unhandled|500/.test(l)).slice(0, 10);
+        await h.stop();
+    }
+
+    // 7. open mode (no sign-in configured, first run incomplete), a stale end_user cookie sent anyway
+    const open = await inventory.bootShape({ shape: 'open', tag: 'g2081-open', made });
+    try {
+        const any = await open.as(undefined);
+        await fetch(open.base + '/api/data-sources', { method: 'POST', headers: any.json, body: JSON.stringify({ name: NAMES[0], workspaceId: WS, region: REGION }) });
+        out.open = { anon: brief(await raw(open.base, 'GET', '/api/data-sources')), withCookie: brief(await raw(open.base, 'GET', '/api/data-sources', 'session_token=abc')) };
+    } finally {
+        await open.stop();
+    }
+}, 600000);
+
+afterAll(() => {
+    fs.writeFileSync(process.env.G2081_OUT || path.join(os.tmpdir(), 'g2081-probe.json'), JSON.stringify(out, null, 1));
+    out.madeDirs = made; // left in place (the gate deletes nothing)
+});
+
+test('probe ran', () => { expect(out.roles && Object.keys(out.roles).length).toBe(Object.keys(ROLE_SHAPES).length); });

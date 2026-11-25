@@ -1,0 +1,14 @@
+RD-1040: suite counts 6362 tests in 401 suites, written by the project's own command
+
+scripts/verify-expected-counts.json is the output of npm run verify -- --maxWorkers=2 --update-counts at the commit before this one.
+
+RD-1040: the plain data-source reads refuse a role the permission table does not grant config.read
+
+GET /api/data-sources and GET /api/data-sources/:id answered every signed-in session 200 with every stored field of every source except the client key, whatever the session's role. The permission table (backend/services/capabilities.js) puts both routes under config.read and gives that capability to neither end_user nor the two partner roles, but no server code read the table. This follows the product owner's 2026-11-25 ruling: refuse the route to roles the permission table excludes, and keep the fields as they are for allowed roles.
+
+Both handlers now start with one role check, refuseDataSourceReadForRole, defined beside them. It reads ROLE_CAPABILITIES from the table and answers 403 before the store is read when the session's stored role is not a key of the table or its entry does not hold config.read. Today that refuses end_user, partner_manager and partner_technician, and any stored role value the table does not name (another case such as End_User, a built-in property name, a made-up word). A role that holds config.read (admin, viewer and the five proposed roles) is answered exactly as before, field for field. With no session (open mode) nothing changes; with sign-in enforced a request without a session is still answered 401 by the global check. The refusal is audited as every other denial is (a REQUEST_DENIED row). The role is the stored one, read on every request, so a stored role that changes takes effect on the next request.
+
+The dashboard's region filter asks GET /api/data-sources and fills itself only from an ok answer; for a refused role it keeps its single All Regions option. Which fields an allowed role that is not an administrator receives is not changed here.
+
+A new test file holds the cells: each role of the table on both reads on the real server (refused roles 403 with no stored field, allowed roles 200 with exactly the administrator's answer), role values the table does not name, roles that read as viewer, a stored role changed during a session, HEAD, an upper-case path, a trailing slash and an unknown id, the audit row, open mode, the source of the check, and the region filter refused and answered.
+

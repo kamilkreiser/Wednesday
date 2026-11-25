@@ -315,15 +315,15 @@ RECORDS DONE by your Step-0 clock plus 50 minutes, HARD STOP plus 80 (the Stamp'
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands. The unstamped copy reads 11 such lines (the slot lines and the last line).
-- STAMP (what Tuesday read whole and re-printed at source, and the clock): ____
-- LAUNCH WINDOW (until; panes whose name holds OXPd2 at the stamp): ____
-- BASE (the eight files' sha256 against B2072's manifest and THE SOURCES rows 2 to 4; B2072's READY line; no B2083 folder or STATUS; OXPD2-56 and OXPD2-57 in Backlog with 0 comments; the four cards' status by `decision_queue.sh show`): ____
-- CHASING (exactly `no correction` or the correction: kam_rulings_today.sh at the stamp, any word of his after 10:17:56 that corrects the reading "sent"): ____
-- RECORDS (exactly WRITE or HOLD; default HOLD): ____
-- JIRA (exactly WRITE or HOLD; default HOLD): ____
-- Q-ANSWERS (Q1 to Q10; defaults as written): ____
-- STOP-CHECKS (which of the never-run checks Tuesday accepts as never run on a real output, or what Tuesday ran): ____
-- Hard stop (the absolute outer limit AEDT): ____
-- MODEL RECEIPT (level; `BRIEF_SEAT_LEVEL=` inside the quotes; model id per the project's `CLAUDE.md` line 7): ____
+- STAMP (what Tuesday read whole and re-printed at source, and the clock): Tuesday s326, 2026-11-25 11:12:50 AEDT. Kit read whole with the Read tool (lines 1-110, 110-219, 219-329); the drafter's 10-line return read. Re-printed at source at the stamp: the B2072 READY.manifest lines; the sha256 of BACKLOG.md 2674ba7d, history.md e004089b, CLAUDE.md 0f1fccc0, CLARIFICATIONS.md f67eceaa (each equal to the manifest), 02 6370d26c, 03 37e45679, QUESTIONS_BY_OWNER.md ce2d65d1 (each equal to THE SOURCES rows 2-4); B2072 STATUS last line 'READY B2072: 26bb1132b677a74fbc5fcd0e0036ed7c7f566af4 | new ...'; no .tools/b2083 and no B2083 STATUS (ls: No such file). Tuesday earlier read at source the 1.9 release notes lines 1-9 and the M577 discovery tree (OXPd:Action, OXPd:Security, OXPd:CallbackOperation).
+- LAUNCH WINDOW (until; panes whose name holds OXPd2 at the stamp): until 12:30 AEDT 2026-11-25; panes whose name holds OXPd2 at the stamp: 0 (tmux list-panes, case-blind count).
+- BASE (the eight files' sha256 against B2072's manifest and THE SOURCES rows 2 to 4; B2072's READY line; no B2083 folder or STATUS; OXPD2-56 and OXPD2-57 in Backlog with 0 comments; the four cards' status by `decision_queue.sh show`): seven project files equal as in STAMP (the deviation register not re-hashed by Tuesday: P-2 names it); B2072 READY as printed; no B2083 folder or STATUS; OXPD2-56/57 Backlog with 0 comments per the drafter's Jira GETs (not re-read by Tuesday: the seat's P-J re-reads them); cards by decision_queue.sh show: datasec-oxpd-hp-19-target-1125 ruled a at 2026-11-25T10:53:01.942292+11:00; datasec-oxpd-hp-questions-wording-1125 open; datasec-oxpd-passkey-route-1125 open; datasec-oxpd-two-labelled-docs-1125 open.
+- CHASING (exactly `no correction` or the correction: kam_rulings_today.sh at the stamp, any word of his after 10:17:56 that corrects the reading "sent"): no correction
+- RECORDS (exactly WRITE or HOLD; default HOLD): WRITE
+- JIRA (exactly WRITE or HOLD; default HOLD): WRITE
+- Q-ANSWERS (Q1 to Q10; defaults as written): Q1 default (a): the two change-log entries now, text edits with the SDK, owed item carries the Word/PDF/Jira gap; Q2 In Progress; Q3 every word of his on this project today, as written; Q4 QUESTIONS_BY_OWNER.md; Q5 HD-1 to HD-7; Q6 one comment on OXPD2-1; Q7 as written; Q8 no tickets for his own questions; Q9 as written (his note recorded, card open); Q10 section 11 not carried.
+- STOP-CHECKS (which of the never-run checks Tuesday accepts as never run on a real output, or what Tuesday ran): Tuesday accepts as never run on a real output: the seat's helper and selftest, HOLD R and R2 on the live files, every Jira POST and read-back (the paragraph read-back and the 31 move are new to this project's kits), the numbers at the seat's run; a failure traceable to this kit's wording is a STOPPED question, never the seat's to amend.
+- Hard stop (the absolute outer limit AEDT): 12:45 AEDT on 2026-11-25.
+- MODEL RECEIPT (level; `BRIEF_SEAT_LEVEL=` inside the quotes; model id per the project's `CLAUDE.md` line 7): opus; BRIEF_SEAT_LEVEL=opus inside the quotes of the launch line; claude-opus-5-5 (models_latest.json, its checked_at 2026-11-25 08:04:25); OXPd CLAUDE.md line 7 read by Tuesday at 10:00 (every agent on the newest Opus).
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE (Tuesday s326, 2026-11-25 11:12:50 AEDT; Read tool, lines 1-329 in three pages)
