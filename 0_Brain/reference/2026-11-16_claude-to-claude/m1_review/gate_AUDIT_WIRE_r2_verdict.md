@@ -1,4 +1,4 @@
-IN PROGRESS
+VERDICT: GO WITH NOTES — head e049cec8f69d9e2cda4f0f4fcdb63ebd64068785
 
 # QA-AUDIT-WIRE-R2: the second and last check of branch `audit-wire` (the fix round `510124b..e049cec` only)
 
@@ -9,7 +9,7 @@ Work dir `/private/tmp/claude-501/qaw2`: my own clone `c` (head), worktree `o` (
 ## BLUF (for a phone)
 
 - **The false "sealed" is gone.** The first check's own run, reused unchanged, now gets "not sealed" (row 7), the log's segment and seal count are unchanged, and the next command seals for real. The same run against the old head still shows the false "sealed". My answer harness: 798 seal answers with the segment unknown, 0 "sealed", 0 seal calls.
-- **The round changed nothing else.** My before/after run of the same scripted session (switch off and switch on, two runs per build) differs only by item B's new "nothing could be filed" text, which by Friday's design also appears when the store is healthy (and is true there). The decision functions are byte-identical. Scope: exactly the seven paths, no byte of the audit host crate, protected files unchanged. Red rows: RESULT-PENDING.
+- **The round changed nothing else.** My before/after run of the same scripted session (switch off and switch on, two runs per build) differs only by item B's new "nothing could be filed" text (and the random invitation, as in round 1), which by Friday's design also appears when the store is healthy (and is true there). The decision functions are byte-identical. Scope: exactly the seven paths, no byte of the audit host crate, protected files unchanged. Red rows: 12 of 12 red (the new one on F-1's own false "sealed"), the final clean run green (335 passed).
 - **Still open for the next audit lane** (all in BACKLOG, true to the first verdict): F-2 (a message refused after its record landed stays in the log), F-4 (any reply id is charged to the peer), F-6 (the creation failure's reason is lost), Notes N-1 to N-9. New Notes here are small (section Findings).
 
 ## Proofs (section 0)
@@ -154,6 +154,49 @@ The record path's one behavioural change (READ, `:708-716`): a re-open is now tr
 
 **`aw_answers.rs`, 9 removed lines:** 1 doc line (`//! \`seal_err_retried\`.` extended with AW-5b), 8 lines of the existing `drive_seal(|| { calls += 1; (all[pick].clone(), Around{…}) })` call reshaped to `drive_seal(Some(before), || { calls += 1; (all[pick].clone(), closed_after) })`. **No assertion removed or changed**; the 50 added lines append the unknown-segment pass after the existing property's last assertion.
 
+## Task 5: the red rows (TESTED)
+
+- **`build.rs` and the red script, READ by diff:** `build.rs` `1 0`: `"segment_before_falls_back",` appended as the last entry of `AW_RED` (after `seal_error_ends_the_engine`), nothing else. Red script `2 0`: one comment line (`# Lane AUDIT-WIRE addendum 2 (fix round, item A: F-1, the segment before a seal).`) and one row, `COAGENT_RED_AW|segment_before_falls_back|coagent-daemon|aw_answers|every_answer_the_host_can_give_has_one_action_and_it_obeys_its_row|AW-5b`, appended after AW-7's row, in the block's six-field form, the same as the round-1 AW comment-plus-rows form. **0 removed lines in either file.** Rows: 198 at `510124b`, 199 at the head.
+- **The builder's regex (STATUS line 188), counted by program over `ROWS`: it selects 12 rows of 199**, one per variant: AW-1, AW-2, AW-3, AW-3b, AW-4, the four AW-5, AW-6, AW-7, AW-5b. No other lane's row uses any of the 12 names; AW-3/3b share a test, the four AW-5 rows share one too.
+- **Run:**
+  - Command: `RED_ONLY='^(audit_always_on|…|segment_before_falls_back)$' bash scripts/red-controls-daemon.sh`, through my wrapper.
+  - Tree: my clone at `e049cec`, clean `git status`.
+  - Settings: `COAGENT_TOOLS=/private/tmp/claude-501/qaw2/tools`, own empty target `qaw2/tr`.
+  - Before the start: heavy counter 0, no other `red-controls`, `check.sh`, `test-p1p` or `test-daemon` run.
+  - Time: 2026-11-26 06:24:41 to 06:54:41, exit 0.
+  - My logs (`qaw2/tools/tmp/m1-daemon-red/`, 13 files) name only `qaw2/c` and `qaw2/tr`; 0 name the builder's worktree or target.
+
+| Row | Variant | First panic line (my run) | Its own reason? |
+|---|---|---|---|
+| AW-1 | `audit_always_on` | `assertion \`left == right\` failed: status key paths, idle` | yes (as round 1) |
+| AW-2 | `recreate_on_restore` | `… failed: a log was created over a session that existed: {"anchor_saved":true,…` | yes |
+| AW-3 | `record_causer_always_local` | `… failed: the reply's record is charged to the peer's requested allowance: [PartStatus { used: (0, 0), …` | yes |
+| AW-3b | `record_full_raw` | `… failed: the stored full tier is the redacted preview` | yes |
+| AW-4 | `nothing_to_seal_retried` | `… failed: NothingToSeal is never retried` | yes |
+| AW-5 | `limits_changed_read_as_done` | `case 26 (seed 00a0d17e5ea10001, call Seal): seal: LimitsChanged { answer: Ok(..) } read as done (m-2)` | yes |
+| AW-5 | `landed_unknown_retried` | `case 18 (…): seal: the daemon seals again by itself for Err(LandedUnknown { … })` | yes |
+| AW-5 | `commit_failed_retried_blind` | `case 88 (…): seal: the daemon seals again by itself for Err(LimitsChanged { … })` | yes |
+| AW-5 | `seal_err_retried` | `case 6 (…): seal: the daemon seals again by itself for Err(LimitsChanged { … })` | yes |
+| AW-6 | `seal_on_peer_message` | `… failed: a peer message caused a filed log` | yes |
+| AW-7 | `seal_error_ends_the_engine` | `ctl inbox_read: no response` | as round 1 (its N-10: red through the helper's time-out) |
+| **AW-5b** | **`segment_before_falls_back`** | `aw_answers.rs:637:21`: `seal: reported sealed with the segment before unknown (row 7 (the commit landed), "sealed: the log was filed away and continues") for Err(SealCommitFailed { cause: Store(Unavailable("disk")), segment_now: 1 })` | **yes: F-1's own false "sealed"** (a commit that failed with the store at segment 1, read against the fallen-back 0). Its log shows `RED CONTROL BUILD: coagent_red="segment_before_falls_back"` and `coagent-daemon` compiling. |
+
+- Result: **12 of 12 `RED (as required)`**, 0 `STILL GREEN`, 0 harness errors; the 11 older AW rows red for the same reasons as round 1.
+- **Final clean run:**
+  - The script's line: `final clean run: green (77 test binaries; ignored under rulings: 2)`.
+  - My sum of its `test result` lines: 77 lines, **335 passed, 0 failed, 2 ignored**, the builder's figures (331 of round 1 plus the 4 `aw_round2` tests, all four `ok` in that log).
+  - The two ignored tests are the project's own, older ones; their ignore text, printed in the log, carries a seat's name, from old code.
+- **The four `aw_round2` tests:**
+  - At the head (`qaw2/t`): 4 passed.
+  - At `510124b`: scratch worktree `qaw2/p`, the head's `aw_round2.rs` copied in (its helper `aw_util.rs` exists at `510124b`). Own empty target `qaw2/tp`; the build log and the test log each show `Compiling coagent-daemon … (/private/tmp/claude-501/qaw2/p/…)`. Result: **4 failed**, each for its own reason:
+
+| Test | Red at `510124b` on | Its own reason |
+|---|---|---|
+| `a_seal_whose_listing_fails_is_never_reported_sealed` | `:81` `a commit that did not land is reported sealed (F-1): {…"row":"7 (the commit landed)","sealed":true…}` (`left: Bool(true)`) | item A: F-1 |
+| `nothing_to_seal_with_the_store_unwritable_claims_no_more_than_it_knows` | `:130` `left: String("not sealed: nothing new to file since the last seal")` | item B: the old text |
+| `a_failed_reopen_is_never_called_opened_again` | `:152` `left: String("the audit log was opened again and its segment read: sealed only if the segment moved")` | item C: the old row-4 text |
+| `status_says_unavailable_when_the_logs_status_cannot_be_read` | `:189` `left: String("on")` | item D: the old state |
+
 ## Task 6: the texts (TESTED)
 
 Each new or changed text of the builder's STATUS lines 211 to 217, re-made and compared byte for byte by program with the builder's bold quote:
@@ -192,3 +235,48 @@ Unchanged and still chosen before its re-open (not in the closed list; the build
   - Controls: a copy of `aw_round2.rs` with one planted line → 5 hits; a planted binary (NUL and 0xff around two planted words) → 4 hits. Both caught.
   - The builder's first-pass hit (a seat's name in its F-4 line, reworded in `e049cec`): the head's F-4 line reads "the coordinator's ruling R-2" (READ).
 
+## Findings
+
+No Blocker, no Major, no Minor. F-1 is closed by run and by harness; the round did exactly its list (items A to F), touched only its seven paths, removed no assertion, and kept every decision function byte for byte.
+
+Each Note below has a reproduction and a suggested fix in words; none is required for the merge.
+
+**R2-N1 — Note — the seal path can no longer re-open a host whose member is gone; not reachable as wired.**
+- **Where:** `crates/coagent-daemon/src/audit.rs:779` (`host.member().ok()…` → `None`) and `:384` (`segment_unknown()`, 0 calls, no `reopen`).
+- **What:** if the daemon ever held a member-less host, `audit_seal` would answer `none (the segment before the seal could not be read)` / "give the command again" every time and never re-open by itself. At `510124b` the seal's `Closed` arm re-opened. A `send` would still recover it (its `Closed` arm re-opens). Never "sealed". Unreachable today: every host answer that clears the member is answered by a re-open (task 2).
+- **Reproduction:** none by run (not reachable); READ `host.rs:1051-1072` at `bcaf119`, and `audit.rs:706-716`, `:789-814`, `:601-648` at the head.
+- **Fix in words:** in `owner_seal`, when `member()` answers `Closed`, call `open_now` first and read the segment from the re-opened host (still never sealing against an unknown figure); or set `reopen` on the segment-unknown action.
+
+**R2-N2 — Note (pre-existing, recorded by the builder) — row 11's text says "the audit log was opened again" when that re-open fails.**
+- **Where:** `audit.rs:180` / `:792-795` (`!reopened && !a.done` excludes row 11).
+- **Reproduction:** none by folder rights (row 11 needs a poisoned store after a landed commit); READ.
+- **Fix in words:** for a done action whose re-open failed, use "sealed: the log was filed away; the audit log could not be opened again; see status.audit".
+
+**R2-N3 — Note — item B's `NothingToSeal` text no longer says which of its two causes applies.**
+- **Where:** `audit.rs:112`.
+- **What:** with a healthy store (a second seal with nothing new) it now reads "nothing could be filed (nothing new since the last filed point, or the log could not write)". True, but the owner cannot tell a full disk from a quiet log. This is Friday's chosen wording. The addendum's item E "0 differences at all with a healthy store" cannot hold literally with it.
+- **Reproduction:** `python3 -B qa_diff.py <head bin> <new dir> out.json --audit-a`, labels `paired: a audit_seal {}`.
+- **Fix in words (optional, later lane):** choose between the two halves by comparing `status().own_seq` with the last stored checkpoint, as the first verdict's F-3 suggested.
+
+**R2-N4 — Note — the first verdict's N-10 (AW-7 goes red through the helper's time-out, not its own `alive(pid)` assertion) is not in BACKLOG.**
+- **Where:** `BACKLOG.md` (the N-1 to N-9 entry).
+- **What:** the addendum asked only for N-1 to N-9, so not a defect of the round.
+- **Reproduction:** `grep -n 'N-10' BACKLOG.md` at `e049cec`: 0 hits.
+- **Fix in words:** one line under the Notes entry at the next audit lane.
+
+Carried, unchanged, for the next audit lane (BACKLOG, true to the first verdict): F-2, F-4, F-6, N-1 to N-9.
+
+## What was NOT checked
+
+| Not checked | Why / where it rests |
+|---|---|
+| A row-4 re-open that SUCCEEDS (same segment → not sealed, moved → sealed) by a run | Folder rights that fail the host's in-call re-open also fail the daemon's `open_now` (as round 1 found). Rests on READ of `audit.rs:792-811` and the TESTED equality of `status().segment` and `member().segment()` on a real host. |
+| The segment-unknown reply by a run | Not reachable while the daemon holds a host (task 2). Harness only (798 drives). |
+| Row 11 with a failed re-open, the seal's `Closed` arm by a run | Unreachable / needs a poisoned store after a landed commit; READ only. |
+| The whole red script, `scripts/test-daemon.sh`, `scripts/check.sh`, the Windows kit, `cargo fmt`/`clippy` | Not run by the brief's rule (Friday's merge check runs them on the merged head). The daemon suite ran green as the `RED_ONLY` run's final clean run (77 binaries). |
+| Main's `184b35e` merged into the branch | Not merged, not judged (the brief's rule). |
+| Anything the first check confirmed at `510124b` and the round does not touch (content kept, peer-caused seals, lifecycle, switch-absent base, engine hunks) | Stands by the first verdict; the round's diff touches none of it (task 4: `engine.rs` untouched, decision functions byte-identical, differential 0 unattributed). |
+| Windows | No Windows run; the round changes no Windows path. |
+| The builder's own heavy-counter and scan discipline | Not graded; my own figures are above. |
+
+Nothing of mine is left running: every daemon, relay and test binary was stopped by its harness (`left: []` in every run), and a process check at the end found no `coagentd`, `coagent relay` or `coagent-mcp` and nothing under `qaw2`. Everything I made is under `/private/tmp/claude-501/qaw2` and the two named folders (this verdict and `gate_audit_wire_r2_tests/`); in the project I wrote only my STATUS file. Nothing was deleted.
