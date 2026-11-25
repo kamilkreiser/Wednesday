@@ -1,0 +1,13 @@
+diff --git a/docs/POLICY.md b/docs/POLICY.md
+index 7dcd222..298e4aa 100644
+--- a/docs/POLICY.md
++++ b/docs/POLICY.md
+@@ -645,7 +645,7 @@ Every bound is checked BEFORE the work it limits. Over a bound the input is `Unc
+ | distinct words of an `execute` checked as paths | 160 | denied |
+ | path components across those words (the work is words × depth) | 2 048 | denied |
+ | path | 2 048 bytes, 64 components | `Uncertain` without any system call; an action targeting it is denied |
+-| free text checked against the exclusions | the 1 000 characters a card can show + 200, at most 161 distinct pieces (a word with `=`, `:` or `,` counts as more than one; JSON keys included; the scan's own bound; `MAX_FREE_PIECES`, 1 024, is never reached: measured by POLICY-AT, BACKLOG) | not checked: a name past the 161st distinct piece (about the 160th distinct word, fewer when words split) is not checked against the exclusions |
++| free text checked against the exclusions | the 1 000 characters a card can show + 200, at most 161 distinct words (the scan's own bound, JSON keys included; `MAX_FREE_PIECES`, 1 024, is never reached: measured by POLICY-AT, BACKLOG) | not checked: a name past the 160th distinct word is not checked against the exclusions |
+ | pattern | 32 components | refused at compile time |
+ | hook JSON nesting | serde_json's limit (128) | parse error |
+ 
