@@ -21,5 +21,6 @@ supersedes: ""
 3. chat_reply.sh's absence-claim check is a REFUSAL (rc 6) unless the sentence states what was measured or `CHAT_ALLOW_ABSENCE="<measurement or reason, 15+ chars>"` is set, which is logged to fleet/state/absence_overrides.log (BUILT same day, 2026-11-25; proved by Tuesday in CHAT_DRY=1: fire rc 6, quiet rc 0; arms A1-A11 pass; .pre-1125-absenceblock copies kept). A quotation of a retracted claim is the expected override case.
 4. Corrections are named for what they are, never minimised ("small", "minor") in a message to Kam.
 5. One Kam thread answered at a time; agent wakes wait behind his message.
+6. **Test, don't hedge (Kam, live board 11:53, verbatim: "You should have tested. I did. It works").** When a fact can be measured quickly and safely (a GET of a sign-in page, a read-only list), measure it before the message; "I haven't tested it" is acceptable only when the test is unsafe, approval-class or out of reach, and the message says why.
 
 **Related:** [[2026-08-14_i-read-representations-they-read-sources]], [[2026-09-18_a-premise-under-a-question-to-kam-is-load-bearing-verify-it]], [[2026-09-10_steps-to-kam-are-a-claim-about-his-screen]], [[2026-09-04_decisions-held-narration-drifted]], [[../people/kam]]

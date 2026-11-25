@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-25 11:51 from 291 lesson files (1,225,400 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-25 11:54 from 291 lesson files (1,225,750 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -8272,4 +8272,5 @@ sections (open the file for these): The rule · Why · The failure behind it (le
 3. chat_reply.sh's absence-claim check is a REFUSAL (rc 6) unless the sentence states what was measured or `CHAT_ALLOW_ABSENCE="<measurement or reason, 15+ chars>"` is set, which is logged to fleet/state/absence_overrides.log (BUILT same day, 2026-11-25; proved by Tuesday in CHAT_DRY=1: fire rc 6, quiet rc 0; arms A1-A11 pass; .pre-1125-absenceblock copies kept). A quotation of a retracted claim is the expected override case.
 4. Corrections are named for what they are, never minimised ("small", "minor") in a message to Kam.
 5. One Kam thread answered at a time; agent wakes wait behind his message.
+6. **Test, don't hedge (Kam, live board 11:53, verbatim: "You should have tested. I did. It works").** When a fact can be measured quickly and safely (a GET of a sign-in page, a read-only list), measure it before the message; "I haven't tested it" is acceptable only when the test is unsafe, approval-class or out of reach, and the message says why.
 
