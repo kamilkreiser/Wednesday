@@ -1,0 +1,17 @@
+# B2090 GATE COMMISSION (in-session, READ-ONLY on every project) -- G2 review of the B2089 drafter's fix to the OXPd heavy-job runner (owed item 138), BEFORE Tuesday adopts it
+
+Commissioned by Tuesday (s327). Tuesday answered the B2089 drafter's Q1 as **c: no seat; the drafter's own patched file is adopted after this gate reads its runs** (the drafter built and measured it; a seat would redo the same work). Model: Opus (OXPd `CLAUDE.md` line 7), tier G2 (`/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/specs/model-routing.md` line 109, tooling). `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/DRAFTER_RULES.md` binds whole (you are a reader in its sense: no write to any project, Jira, GitHub or card store; no `cd`; never delete; nothing to any human or device). Write only `VERDICT.md` (line 1 `GATE B2090: GO | GO WITH FINDINGS | NO GO @ <sha256 prefix 16 of the file you judged>`) and your evidence under `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-25_B2090_verify/`; scratch only there. No clock typed: print `date`.
+
+## What you judge
+- The patched runner `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s327/d2089/scratch/heavy_new.py` (sha256 begins `70933ea1b513a637`, per the drafter), against the canonical runner `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s327/d2089/seat-tools/heavy.py` (sha256 begins `31adedc88371ae8d`) and the patch `.../seat-tools/heavy-fix.diff` (81 lines). Confirm by your own hash and by applying the patch to a COPY of the canonical file that it yields the judged file byte for byte.
+- The drafter's evidence: `2026-11-25_B2089_DRAFTER-REPORT.md`, the kit `2026-11-25_B2089_SEAT-X73_oxpd2-heavy-pgkill.md` (its design and cells sections) and the cell and mutant programs in `.../d2089/seat-tools/` (`cells_heavy.py`, `mutants_heavy.py`, `real_bound.py`). Read the runner and the patch whole.
+
+## What you must establish (each with its instrument; a zero is a suspect until a control fires)
+1. **The defect is real on the canonical runner:** re-run the cells on a copy of the canonical runner (private lock, load wait off, as the drafter's D5 says) and see the two bound cells leave a grandchild (the drafter: 3 of 5 PASS).
+2. **The fix closes it:** the same cells on a copy of the patched runner, 5 of 5, and `pgrep` (or `ps`) by the run's marker reads 0 after each bound cell (control: the canonical run's leftover is found by the same read).
+3. **Nothing else changed:** a normal run's exit code, printed line and log are byte-equal between the two runners on the same trivial job; a bound run still prints rc 124; the lock is released after the group is gone (read the order in the code: SIGTERM to the group, grace, SIGKILL, wait for empty, THEN the `finally`).
+4. **Adversarial:** a child that calls `setsid` itself (leaves the group), a child that ignores SIGTERM and SIGHUP, a bound shorter than the grace, the runner run from macOS bash 3.2 and from zsh, a job command with spaces or quotes. Each either works or is a named limit; say which. A shape that escapes the group and survives is a FINDING (not necessarily a NO GO: say whether today's runner handles it any better).
+5. Do NOT run a real `dotnet test` (a NexusAI build seat is verifying beside you; the drafter already ran one); load stays under the project's heavy-job rule.
+
+## Verdict
+GO if 1-3 hold and 4 finds nothing worse than the canonical runner. NO GO only for a regression against the canonical runner or a fix that does not close the defect. Round 1 of 2.
