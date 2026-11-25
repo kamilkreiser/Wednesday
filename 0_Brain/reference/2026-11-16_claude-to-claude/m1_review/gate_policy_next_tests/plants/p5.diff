@@ -1,0 +1,17 @@
+diff --git a/crates/coagent-policy/tests/t27_owner_dark.rs b/crates/coagent-policy/tests/t27_owner_dark.rs
+index b9b8217..6f30bd6 100644
+--- a/crates/coagent-policy/tests/t27_owner_dark.rs
++++ b/crates/coagent-policy/tests/t27_owner_dark.rs
+@@ -86,6 +86,12 @@ fn scan_crates(crates: &Path) -> (Vec<PathBuf>, Vec<PathBuf>) {
+ /// a line holding `package = "coagent-policy"`. NOT a plain "contains": the root manifest lists
+ /// `"crates/coagent-policy",` as a workspace member, and a comment may name the crate.
+ fn depends_on_policy(manifest: &str) -> bool {
++    if true {
++        // PNX PLANT: the base closure
++        return manifest
++            .lines()
++            .any(|l| l.trim_start().starts_with("coagent-policy"));
++    }
+     const NAME: &str = "coagent-policy";
+     let unquote = |k: &str| -> String {
+         let k = k.trim();

@@ -1,0 +1,51 @@
+diff --git a/crates/coagent-policy/tests/owner_common/mod.rs b/crates/coagent-policy/tests/owner_common/mod.rs
+index a01c873..79757b0 100644
+--- a/crates/coagent-policy/tests/owner_common/mod.rs
++++ b/crates/coagent-policy/tests/owner_common/mod.rs
+@@ -50,7 +50,7 @@ pub fn owner_both() -> Vec<OwnerAllow> {
+ /// made), i.e. one `classify` resolved against `/` (`rel`, `rel/dir`, `./x`, `../up`;
+ /// `t25::fixture_facts_refuses_a_relative_working_folder`). RESIDUAL: `~/x` expands into the fixture's home, inside
+ /// the base, so it is not caught here; a hook with such a `cwd` must use [`with_owner_facts`].
+-pub fn fixture_facts(a: &Action) -> OwnerInputFacts {
++pub fn fixture_facts_guarded(a: &Action) -> OwnerInputFacts {
+     match &a.cwd {
+         NormPath::Uncertain { raw, .. }
+             if !raw.is_empty() && !std::path::Path::new(raw).is_absolute() =>
+@@ -76,6 +76,37 @@ pub fn fixture_facts(a: &Action) -> OwnerInputFacts {
+     }
+ }
+ 
++
++/// QA-POLICY-NEXT instrumentation (scratch only): the BASE body of `fixture_facts`, verbatim (7fc6188 :47-52).
++pub fn fixture_facts_base(a: &Action) -> OwnerInputFacts {
++    OwnerInputFacts {
++        sandbox_flag_not_false: a.sandbox_disabled,
++        cwd_not_absolute: matches!(&a.cwd, NormPath::Uncertain { raw, .. } if raw.is_empty()),
++    }
++}
++
++/// QA-POLICY-NEXT instrumentation: every call compares the guarded helper with the base body and logs SAME/DIFF/FIRE.
++pub fn fixture_facts(a: &Action) -> OwnerInputFacts {
++    let base = fixture_facts_base(a);
++    let r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| fixture_facts_guarded(a)));
++    let v = match &r {
++        Ok(f) if *f == base => "SAME",
++        Ok(_) => "DIFF",
++        Err(_) => "FIRE",
++    };
++    if let Ok(p) = std::env::var("QPX_FF_LOG") {
++        use std::io::Write;
++        let t = std::thread::current().name().unwrap_or("?").to_string();
++        let mut f = std::fs::OpenOptions::new().create(true).append(true).open(p).unwrap();
++        let line = format!("{v}\t{t}\t{:?}\n", a.cwd);
++        let _ = f.write_all(line.as_bytes()); // one write per line (O_APPEND), so threads do not interleave
++    }
++    match r {
++        Ok(f) => f,
++        Err(e) => std::panic::resume_unwind(e),
++    }
++}
++
+ pub fn with_owner(a: &Action, st: &State, m: &OwnerAllow, s: Surface) -> Decision {
+     decide_with_owner_allow(a, st, Some(m), &fixture_facts(a), s, NOW)
+ }

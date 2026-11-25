@@ -1,0 +1,23 @@
+diff --git a/crates/coagent-policy/src/shell/mod.rs b/crates/coagent-policy/src/shell/mod.rs
+index a7d9a89..f763876 100644
+--- a/crates/coagent-policy/src/shell/mod.rs
++++ b/crates/coagent-policy/src/shell/mod.rs
+@@ -84,7 +84,7 @@ pub fn scan_execute(text: &str, dialect: ShellKind) -> ExecScan {
+     // other piece is collected, so the old pieces are a prefix of the new list and a name after `@` never pushes
+     // another name out of the bound; it stops at the bound. `words` and `exact` are not touched.
+     #[cfg(not(feature = "red_at_name_unread"))]
+-    {
++    if false /* DIFFERENTIAL PLANT P-2: the pass moved inline into scan_one */ {
+         let snapshot: Vec<String> = scan
+             .exact
+             .iter()
+@@ -157,6 +157,9 @@ fn scan_one(text: &str, scan: &mut ExecScan, seen: &mut std::collections::BTreeS
+         add_word(piece, scan);
+         add_piece(piece, scan, seen);
+         attached_candidates(piece, scan, seen);
++        for (i, _) in piece.match_indices('@') {
++            add_piece(&piece[i + 1..], scan, seen); // DIFFERENTIAL PLANT P-2: inline
++        }
+     }
+     // quoted strings and escaped words WHOLE, and up to 8 zipped brace variants of each
+     for w in lenient_words(text) {

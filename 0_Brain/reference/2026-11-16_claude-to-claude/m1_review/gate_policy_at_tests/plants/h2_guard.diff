@@ -1,0 +1,15 @@
+diff --git a/crates/coagent-policy/tests/owner_common/mod.rs b/crates/coagent-policy/tests/owner_common/mod.rs
+index 7693155..2e8b83c 100644
+--- a/crates/coagent-policy/tests/owner_common/mod.rs
++++ b/crates/coagent-policy/tests/owner_common/mod.rs
+@@ -73,6 +73,10 @@ pub fn fixture_facts(a: &Action) -> OwnerInputFacts {
+                  (a relative hook cwd resolved against /); use with_owner_facts"
+             )
+         }
++        // CHECK PLANT h2: also panic for a cwd that IS the fixture home (the bare `~`)
++        NormPath::Certain { lexical, .. } if lexical.file_name().is_some_and(|n| n == "home") => {
++            panic!("OWNER-FACTS: check plant: the fixture home")
++        }
+         _ => {}
+     }
+     OwnerInputFacts {

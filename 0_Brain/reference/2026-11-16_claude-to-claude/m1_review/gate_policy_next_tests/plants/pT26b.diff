@@ -1,0 +1,34 @@
+diff --git a/crates/coagent-policy/src/engine.rs b/crates/coagent-policy/src/engine.rs
+index 7aa6a6d..ef829a4 100644
+--- a/crates/coagent-policy/src/engine.rs
++++ b/crates/coagent-policy/src/engine.rs
+@@ -1097,7 +1097,7 @@ fn refused_class(
+         has(&|r| *r == Reason::PermissionModeChange),
+         has(&|r| *r == Reason::SandboxBypass) || owner_flag,
+         has(&|r| *r == Reason::ShareFlaggedOrUnscanned),
+-        has(&|r| *r == Reason::UnknownTool),
++        has(&|r| *r == Reason::UnknownTool) || owner_cwd, // QA PLANT
+         has(&|r| *r == Reason::RemoteSubagent),
+         has(&|r| *r == Reason::PossibleTeammate),
+         has(&|r| *r == Reason::WorktreeRemoval),
+@@ -1106,7 +1106,7 @@ fn refused_class(
+         a.gate_read,
+         a.later_run,
+         words || owner_words,
+-        unresolved || owner_cwd,
++        unresolved, // QA PLANT
+         non_web_fetch,
+     ];
+     // RED CONTROLS ONLY: one refused class switched off each
+diff --git a/crates/coagent-policy/tests/t26_owner_property.rs b/crates/coagent-policy/tests/t26_owner_property.rs
+index 4525081..c1da79b 100644
+--- a/crates/coagent-policy/tests/t26_owner_property.rs
++++ b/crates/coagent-policy/tests/t26_owner_property.rs
+@@ -101,6 +101,7 @@ fn as_owner(d: &Decision) -> Decision {
+ fn the_owner_mode_never_weakens_what_comes_before_it() {
+     let fx = mode_fixture("t26-prop");
+     let mut items = corpus(&fx);
++    items.clear(); // QA PLANT RUN: generated items only
+     let corpus_len = items.len();
+     items.extend(generated_actions(&fx, SEED, GENERATED));
+     let sts = states(&fx);

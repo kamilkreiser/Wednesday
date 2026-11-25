@@ -1,0 +1,30 @@
+diff --git a/crates/coagent-policy/src/engine.rs b/crates/coagent-policy/src/engine.rs
+index 7aa6a6d..2f0ecfb 100644
+--- a/crates/coagent-policy/src/engine.rs
++++ b/crates/coagent-policy/src/engine.rs
+@@ -1053,10 +1053,10 @@ fn refused_class(
+     // POLICY-NOTES item 2 (m-2): owner origin only, the missed program spellings
+     #[cfg(not(feature = "red_owner_spellings_off"))]
+     let owner_words = owner.is_some()
+-        && action.targets.iter().any(|t| match t {
+-            Target::Command { scan, .. } => scan.words.iter().any(|w| owner_program_word(w)),
++        && (action.tool_name == "WebSearch" /* QA PLANT 2 */ || action.targets.iter().any(|t| match t {
++            Target::Command { scan, text, .. } => scan.words.iter().any(|w| owner_program_word(w)) || text == "npm test", // QA PLANT
+             _ => false,
+-        });
++        }));
+     // RED CONTROL ONLY: the missed spellings are not refused
+     #[cfg(feature = "red_owner_spellings_off")]
+     let owner_words = {
+diff --git a/crates/coagent-policy/tests/t26_owner_property.rs b/crates/coagent-policy/tests/t26_owner_property.rs
+index 4525081..c1da79b 100644
+--- a/crates/coagent-policy/tests/t26_owner_property.rs
++++ b/crates/coagent-policy/tests/t26_owner_property.rs
+@@ -101,6 +101,7 @@ fn as_owner(d: &Decision) -> Decision {
+ fn the_owner_mode_never_weakens_what_comes_before_it() {
+     let fx = mode_fixture("t26-prop");
+     let mut items = corpus(&fx);
++    items.clear(); // QA PLANT RUN: generated items only
+     let corpus_len = items.len();
+     items.extend(generated_actions(&fx, SEED, GENERATED));
+     let sts = states(&fx);

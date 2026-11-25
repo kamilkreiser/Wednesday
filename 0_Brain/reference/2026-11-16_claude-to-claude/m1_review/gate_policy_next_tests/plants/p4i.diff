@@ -1,0 +1,40 @@
+diff --git a/crates/coagent-policy/tests/t26_owner_property.rs b/crates/coagent-policy/tests/t26_owner_property.rs
+index 4525081..5183eab 100644
+--- a/crates/coagent-policy/tests/t26_owner_property.rs
++++ b/crates/coagent-policy/tests/t26_owner_property.rs
+@@ -123,6 +123,10 @@ fn the_owner_mode_never_weakens_what_comes_before_it() {
+     let (mut owner_allows, mut bash_allows, mut still_ask_fall, mut changed, mut compared) =
+         (0usize, 0usize, 0usize, 0usize, 0usize);
+     let mut item_reach: BTreeMap<&'static str, usize> = BTreeMap::new();
++    let (mut q_total, mut q_b, mut q_reach, mut q_gen, mut q_corp, mut q_d3, mut q_d4, mut q_p3b, mut q_p4, mut q_corp_p4, mut q_corp_p3b) = (0usize,0usize,0usize,0usize,0usize,0usize,0usize,0usize,0usize,0usize,0usize);
++    { let mut fl: BTreeMap<String, usize> = BTreeMap::new(); let mut cw: BTreeMap<String, usize> = BTreeMap::new();
++      for it in &items { if let Some((c, f)) = &it.hook_raw { *fl.entry(format!("{f:?}")).or_default() += 1; *cw.entry(if c.is_empty() {"empty".into()} else if c.starts_with('/') {"absolute".into()} else {format!("relative {c:?}")}).or_default() += 1; } }
++      eprintln!("QPX generated items {} corpus {}; sandbox flag values {fl:?}; cwd kinds {cw:?}", items.len()-corpus_len, corpus_len); }
+     for i in 0..CASES {
+         let (ai, si, vi, fi) = (
+             g.below(items.len()),
+@@ -147,6 +151,7 @@ fn the_owner_mode_never_weakens_what_comes_before_it() {
+             .or_insert_with(|| decide(a, st, surface, NOW))
+             .clone();
+         let d = decide_with_owner_allow(a, st, view, &it.facts, surface, NOW);
++        q_total += 1; if view.is_none() { q_b += 1; }
+         // (b)
+         let Some(m) = view else {
+             assert_eq!(d, plain, "(b) {}", ctx());
+@@ -229,6 +234,8 @@ fn the_owner_mode_never_weakens_what_comes_before_it() {
+             .hook_raw
+             .as_ref()
+             .map_or(it.facts.cwd_not_absolute, |(cwd, _)| !cwd.starts_with('/'));
++        q_reach += 1; if it.hook_raw.is_some() { q_gen += 1; } else { q_corp += 1; if it.facts.cwd_not_absolute { q_corp_p4 += 1; } if it.facts.sandbox_flag_not_false { q_corp_p3b += 1; } }
++        if p3b != it.facts.sandbox_flag_not_false { q_d3 += 1; } if p4 != it.facts.cwd_not_absolute { q_d4 += 1; } if p3b { q_p3b += 1; } if p4 { q_p4 += 1; }
+         // (k)
+         if p3a {
+             assert!(!is_owner_allow(&d), "(k) {}", ctx());
+@@ -283,6 +290,7 @@ fn the_owner_mode_never_weakens_what_comes_before_it() {
+         views.len()
+     );
+     eprintln!("REACH owner allow: {owner_allows}");
++    eprintln!("QPX cases {q_total}; left at (b) {q_b}; reached the predicates {q_reach} (generated {q_gen}, corpus {q_corp}); old/new differ p3b {q_d3} p4 {q_d4}; p3b true {q_p3b} p4 true {q_p4}; corpus cases with fixture p4 true {q_corp_p4} p3b true {q_corp_p3b}");
+     eprintln!("REACH POLICY-NOTES owner-only differences from both-agree: {item_reach:?}");
+     eprintln!("REACH terminal-allowed Bash allow: {bash_allows}");
+     eprintln!("REACH StillAsk shell fall-through: {still_ask_fall}");

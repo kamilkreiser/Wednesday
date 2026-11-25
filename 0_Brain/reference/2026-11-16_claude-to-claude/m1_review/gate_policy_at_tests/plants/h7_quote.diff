@@ -1,0 +1,14 @@
+diff --git a/crates/coagent-policy/src/shell/mod.rs b/crates/coagent-policy/src/shell/mod.rs
+index a7d9a89..a9236a5 100644
+--- a/crates/coagent-policy/src/shell/mod.rs
++++ b/crates/coagent-policy/src/shell/mod.rs
+@@ -92,6 +92,9 @@ pub fn scan_execute(text: &str, dialect: ShellKind) -> ExecScan {
+             .cloned()
+             .collect();
+         'words: for w in &snapshot {
++            if text.contains('"') {
++                continue; // CHECK PLANT h7: words of a text with a double quote skipped
++            }
+             for (i, _) in w.match_indices('@') {
+                 if scan.pieces.len() >= PIECE_CAP {
+                     break 'words;

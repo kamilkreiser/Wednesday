@@ -1,0 +1,67 @@
+diff --git a/crates/coagent-policy/tests/owner_common/mod.rs b/crates/coagent-policy/tests/owner_common/mod.rs
+index a01c873..68f6e19 100644
+--- a/crates/coagent-policy/tests/owner_common/mod.rs
++++ b/crates/coagent-policy/tests/owner_common/mod.rs
+@@ -44,32 +44,7 @@ pub fn owner_both() -> Vec<OwnerAllow> {
+ /// `sandbox_disabled`; an empty hook `cwd` is kept as the raw text of the action's uncertain `cwd`. A hook with any
+ /// other flag value or a non-empty relative `cwd` must use [`owner_input_facts`] on the hook itself
+ /// ([`with_owner_facts`]); `t25::fixture_facts_are_the_hooks_facts` checks this helper against `owner_input_facts`.
+-/// POLICY-NEXT item 3 (the check's n-2): it now PANICS (`OWNER-FACTS:`) instead of answering "absolute" when the
+-/// action's `cwd` cannot have come from an absolute or empty hook `cwd`: an uncertain `cwd` whose raw text is non-empty
+-/// and not absolute, or a certain one outside the canonicalised fixture base (`tmp_base()`, where every fixture root is
+-/// made), i.e. one `classify` resolved against `/` (`rel`, `rel/dir`, `./x`, `../up`;
+-/// `t25::fixture_facts_refuses_a_relative_working_folder`). RESIDUAL: `~/x` expands into the fixture's home, inside
+-/// the base, so it is not caught here; a hook with such a `cwd` must use [`with_owner_facts`].
+ pub fn fixture_facts(a: &Action) -> OwnerInputFacts {
+-    match &a.cwd {
+-        NormPath::Uncertain { raw, .. }
+-            if !raw.is_empty() && !std::path::Path::new(raw).is_absolute() =>
+-        {
+-            panic!(
+-                "OWNER-FACTS: an action from the relative hook cwd {raw:?}; use with_owner_facts"
+-            )
+-        }
+-        NormPath::Certain { lexical, .. }
+-            if !lexical
+-                .starts_with(std::fs::canonicalize(tmp_base()).unwrap_or_else(|_| tmp_base())) =>
+-        {
+-            panic!(
+-                "OWNER-FACTS: an action whose cwd {lexical:?} is outside the fixture base \
+-                 (a relative hook cwd resolved against /); use with_owner_facts"
+-            )
+-        }
+-        _ => {}
+-    }
+     OwnerInputFacts {
+         sandbox_flag_not_false: a.sandbox_disabled,
+         cwd_not_absolute: matches!(&a.cwd, NormPath::Uncertain { raw, .. } if raw.is_empty()),
+@@ -133,10 +108,6 @@ pub struct Item {
+     pub recursive: bool,
+     /// POLICY-NOTES (FR-2 (a)): the owner facts of the hook this action came from.
+     pub facts: OwnerInputFacts,
+-    /// POLICY-NEXT item 4 (the check's n-3): for a generated item, the raw facts of the very hook it came from (its `cwd`
+-    /// text and its `tool_input["dangerouslyDisableSandbox"]` if present), so `t26` reads them without the crate's
+-    /// reader; `None` for a corpus item.
+-    pub hook_raw: Option<(String, Option<serde_json::Value>)>,
+ }
+ 
+ pub fn item(action: Action, labels: &[RefusedClass]) -> Item {
+@@ -155,7 +126,6 @@ pub fn item(action: Action, labels: &[RefusedClass]) -> Item {
+         labels: labels.iter().map(|c| c.text()).collect(),
+         recursive,
+         facts,
+-        hook_raw: None,
+     }
+ }
+ 
+@@ -677,10 +647,6 @@ pub fn generated_actions(fx: &Fx, seed: u64, n: usize) -> Vec<Item> {
+         }
+         let mut it = item(a, &[]);
+         it.facts = owner_input_facts(&hook);
+-        it.hook_raw = Some((
+-            hook.cwd.clone(),
+-            hook.tool_input.get("dangerouslyDisableSandbox").cloned(),
+-        ));
+         out.push(it);
+     }
+     out

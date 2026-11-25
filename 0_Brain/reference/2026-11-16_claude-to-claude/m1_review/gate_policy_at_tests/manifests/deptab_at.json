@@ -1,0 +1,401 @@
+[
+[
+"P1-plain",
+"pos",
+"[dependencies]\ncoagent-policy = { path = \"../coagent-policy\" }",
+true,
+true
+],
+[
+"P2-table",
+"pos",
+"[dependencies.coagent-policy]\npath = \"../coagent-policy\"",
+true,
+true
+],
+[
+"P3-dev-table",
+"pos",
+"[dev-dependencies.coagent-policy]\npath = \"../coagent-policy\"",
+true,
+true
+],
+[
+"P4-build-table",
+"pos",
+"[build-dependencies.coagent-policy]\npath = \"../coagent-policy\"",
+true,
+true
+],
+[
+"P5-target-cfg-table",
+"pos",
+"[target.'cfg(windows)'.dependencies.coagent-policy]\npath = \"../coagent-policy\"",
+true,
+true
+],
+[
+"P6-target-triple-dev-quoted",
+"pos",
+"[target.x86_64-pc-windows-msvc.dev-dependencies.\"coagent-policy\"]\npath = \"../coagent-policy\"",
+true,
+true
+],
+[
+"P7-table-quoted",
+"pos",
+"[dependencies.\"coagent-policy\"]\npath = \"../coagent-policy\"",
+true,
+true
+],
+[
+"P8-quoted-key",
+"pos",
+"[dependencies]\n\"coagent-policy\" = { path = \"../coagent-policy\" }",
+true,
+true
+],
+[
+"P9-renamed",
+"pos",
+"[dependencies]\npolicy = { package = \"coagent-policy\", path = \"../coagent-policy\" }",
+true,
+true
+],
+[
+"P10-renamed-tight",
+"pos",
+"[dependencies]\npolicy={package=\"coagent-policy\",path=\"../coagent-policy\"}",
+true,
+true
+],
+[
+"E1-inline-blanks-comment",
+"pos",
+"[dependencies]\npolicy = {   package   =   \"coagent-policy\" ,  path = \"../coagent-policy\" }   # renamed",
+true,
+true
+],
+[
+"E2-package-key-quoted",
+"pos",
+"[dependencies]\npolicy = { \"package\" = \"coagent-policy\", path = \"../coagent-policy\" }",
+false,
+true
+],
+[
+"E2b-package-key-single-quoted",
+"pos",
+"[dependencies]\npolicy = { 'package' = \"coagent-policy\", path = \"../coagent-policy\" }",
+false,
+true
+],
+[
+"E3-package-own-line",
+"pos",
+"[dependencies.p]\npackage = \"coagent-policy\"\npath = \"../coagent-policy\"",
+true,
+true
+],
+[
+"E3b-package-own-line-indented-comment",
+"pos",
+"[dependencies.p]\n  package='coagent-policy' # c\npath = \"../coagent-policy\"",
+true,
+true
+],
+[
+"E3c-package-multiline-string",
+"pos",
+"[dependencies.p]\npackage = \"\"\"coagent-policy\"\"\"\npath = \"../coagent-policy\"",
+false,
+true
+],
+[
+"E3d-dotted-package",
+"pos",
+"[dependencies]\np.package = \"coagent-policy\"\np.path = \"../coagent-policy\"",
+true,
+true
+],
+[
+"E4-workspace-dotted",
+"pos-ws",
+"[dependencies]\ncoagent-policy.workspace = true",
+true,
+true
+],
+[
+"E5-workspace-inline",
+"pos-ws",
+"[dependencies]\ncoagent-policy = { workspace = true }",
+true,
+true
+],
+[
+"E6-target-cfg-dots-brackets",
+"pos",
+"[target.'cfg(target_feature = \"a.b[c]\")'.dependencies.coagent-policy]\npath = \"../coagent-policy\"",
+false,
+true
+],
+[
+"E6b-target-cfg-basic-escaped",
+"pos",
+"[target.\"cfg(target_os = \\\"x.y\\\")\".dependencies.coagent-policy]\npath = \"../coagent-policy\"",
+false,
+true
+],
+[
+"E6c-target-cfg-dots",
+"pos",
+"[target.'cfg(target_env = \"gnu.x\")'.dependencies.coagent-policy]\npath = \"../coagent-policy\"",
+true,
+true
+],
+[
+"E6d-target-cfg-any",
+"pos",
+"[target.'cfg(any(unix, windows))'.build-dependencies.coagent-policy]\npath = \"../coagent-policy\"",
+true,
+true
+],
+[
+"E7-top-dotted",
+"pos-top",
+"dependencies.coagent-policy.path = \"../coagent-policy\"",
+false,
+true
+],
+[
+"E8-top-dotted-target",
+"pos-top",
+"target.'cfg(unix)'.dependencies.coagent-policy = { path = \"../coagent-policy\" }",
+false,
+true
+],
+[
+"E8b-top-dotted-renamed",
+"pos-top",
+"dependencies.p = { package = \"coagent-policy\", path = \"../coagent-policy\" }",
+true,
+true
+],
+[
+"E9-header-blanks",
+"pos",
+"[ dependencies . \"coagent-policy\" ]\npath = \"../coagent-policy\"",
+true,
+true
+],
+[
+"E10-header-comment",
+"pos",
+"[dependencies.coagent-policy] # the policy crate\npath = \"../coagent-policy\"",
+true,
+true
+],
+[
+"E11-workspace-deps-table",
+"ws-root",
+"[workspace.dependencies.coagent-policy]\npath = \"../coagent-policy\"",
+false,
+false
+],
+[
+"E12-target-renamed-inline",
+"pos",
+"[target.'cfg(unix)'.dependencies]\np = { package = \"coagent-policy\", path = \"../coagent-policy\" }",
+true,
+true
+],
+[
+"E13-underscore-table",
+"pos",
+"[dev_dependencies.coagent-policy]\npath = \"../coagent-policy\"",
+true,
+true
+],
+[
+"E14-dotted-path-key",
+"pos",
+"[dependencies]\ncoagent-policy.path = \"../coagent-policy\"",
+true,
+true
+],
+[
+"N1-root-member-line",
+"neg",
+"    \"crates/coagent-policy\",",
+false,
+false
+],
+[
+"N2-hook-comment",
+"neg",
+"# Deliberately NOT depending on coagent-daemon, coagent-crypto or coagent-policy (the same shape as",
+false,
+false
+],
+[
+"N3-package-x",
+"neg",
+"[package]\nname = \"coagent-policy-x\"\nversion = \"0.0.0\"\nedition = \"2021\"",
+false,
+false
+],
+[
+"N4-feature-list",
+"neg",
+"[features]\nx = [\"coagent-policy/x\"]",
+false,
+false
+],
+[
+"N4b-feature-list-multiline",
+"neg",
+"[features]\nx = [\n  \"coagent-policy/x\",\n]",
+false,
+false
+],
+[
+"N5-description-literal",
+"neg",
+"[package]\nname = \"n5\"\nversion = \"0.0.0\"\nedition = \"2021\"\ndescription = 'package = \"coagent-policy\"'",
+true,
+true
+],
+[
+"N5b-description-basic",
+"neg",
+"[package]\nname = \"n5b\"\nversion = \"0.0.0\"\nedition = \"2021\"\ndescription = \"package = \\\"coagent-policy\\\"\"",
+false,
+false
+],
+[
+"N6-extra-crate",
+"neg",
+"[dependencies]\ncoagent-policy-extra = { path = \"../coagent-policy-extra\" }",
+true,
+true
+],
+[
+"N7-trailing-comment",
+"neg",
+"[dependencies]\nserde = \"1\" # package = \"coagent-policy\"",
+true,
+true
+],
+[
+"N8-patch-section",
+"neg",
+"[patch.crates-io]\ncoagent-policy = { path = \"../coagent-policy\" }",
+true,
+true
+],
+[
+"X1-header-bracket-comment",
+"pos",
+"[dependencies.coagent-policy] # ] x\npath = \"../coagent-policy\"",
+true,
+true
+],
+[
+"X2-dotted-after-header",
+"neg",
+"[package]\nname = \"x2\"\nversion = \"0.0.0\"\nedition = \"2021\"\ndependencies.coagent-policy.path = \"../coagent-policy\"",
+false,
+false
+],
+[
+"X3-top-build-dotted",
+"pos-top",
+"build-dependencies.coagent-policy = { path = \"../coagent-policy\" }",
+false,
+true
+],
+[
+"X4-top-target-quoted-dev",
+"pos-top",
+"target.\"cfg(unix)\".dev-dependencies.coagent-policy.path = \"../coagent-policy\"",
+false,
+true
+],
+[
+"X5-quoted-package-tight",
+"pos",
+"[dependencies]\npolicy = {\"package\"=\"coagent-policy\",path=\"../coagent-policy\"}",
+false,
+true
+],
+[
+"X6-literal-triple",
+"pos",
+"[dependencies.p]\npackage = '''coagent-policy'''\npath = \"../coagent-policy\"",
+false,
+true
+],
+[
+"X7-cfg-bracket-quote",
+"pos",
+"[target.'cfg(target_os = \"]\")'.dependencies.coagent-policy]\npath = \"../coagent-policy\"",
+false,
+true
+],
+[
+"X8-top-quoted-table",
+"pos-top",
+"\"dependencies\".coagent-policy.path = \"../coagent-policy\"",
+false,
+true
+],
+[
+"X9-single-quoted-key",
+"pos",
+"[dependencies]\n'coagent-policy' = { path = \"../coagent-policy\" }",
+true,
+true
+],
+[
+"X10-members-inline",
+"ws-root",
+"members = [\"crates/coagent-policy\"]",
+false,
+false
+],
+[
+"X11-top-inline-table",
+"pos-top",
+"dependencies = { coagent-policy = { path = \"../coagent-policy\" } }",
+false,
+false
+],
+[
+"X12-version-only",
+"pos",
+"[dependencies]\ncoagent-policy = { version = \"0.0.1\", path = \"../coagent-policy\" }",
+true,
+true
+],
+[
+"X13-header-target-dev-quoted-escape",
+"pos",
+"[target.\"cfg(target_os = \\\"a]b\\\")\".dev-dependencies.coagent-policy]\npath = \"../coagent-policy\"",
+false,
+true
+],
+[
+"X14-top-dev-underscore",
+"pos-top",
+"dev_dependencies.coagent-policy.path = \"../coagent-policy\"",
+false,
+true
+],
+[
+"X15-comment-before-header",
+"pos-top",
+"# comment\ndependencies.coagent-policy.path = \"../coagent-policy\"",
+false,
+true
+]
+]

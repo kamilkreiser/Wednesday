@@ -1,0 +1,14 @@
+diff --git a/crates/coagent-policy/src/shell/mod.rs b/crates/coagent-policy/src/shell/mod.rs
+index a7d9a89..4d075c0 100644
+--- a/crates/coagent-policy/src/shell/mod.rs
++++ b/crates/coagent-policy/src/shell/mod.rs
+@@ -104,6 +104,9 @@ pub fn scan_execute(text: &str, dialect: ShellKind) -> ExecScan {
+ }
+ 
+ fn add_piece(p: &str, scan: &mut ExecScan, seen: &mut std::collections::BTreeSet<String>) {
++    if p.ends_with(".env.local") {
++        return; // DIFFERENTIAL PLANT P-1: a planted loosening
++    }
+     if scan.pieces.len() < PIECE_CAP
+         && !p.is_empty()
+         && !p.starts_with('-')

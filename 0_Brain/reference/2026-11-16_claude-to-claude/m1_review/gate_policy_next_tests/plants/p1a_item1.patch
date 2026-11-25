@@ -1,0 +1,84 @@
+commit b6af26c592ab2be1a5809e57bd602ad709c8ea11
+Author: <masked in this copy by QA-POLICY-NEXT>
+Date:   Wed Nov 25 09:45:55 2026 +1100
+
+    Revert "policy-notes item 1 (m-1): in the owner origin a terminal command runs unasked only while nothing is excluded"
+    
+    This reverts commit d9ef9a63d2efef9591be9adf0396c0ac56d24165 (POLICY-NOTES addendum 1: the owner's ruling
+    on card general-c2c-allow-terminal-vs-exclusions-1125 is b, "Keep unasked, state the limit"; item 1 is not built).
+    
+    - engine.rs: nothing_is_excluded and its use in the owner [7d] condition gone; feature
+      red_owner_terminal_ignores_exclusions and its two red rows gone
+    - t25: terminal_allowed_asks_while_anything_is_excluded gone; the "grep -r with exclusions" known-limit row
+      back to main's assertions (owner-allowed under Allowed, StillAsk == decide); conflict with 535b017 resolved by
+      hand: the row's body is main's, bound by one let instead of a one-element loop (clippy single_element_loop)
+    - t26: clause (j) and the item 1 predicate of clause (i) gone; clause (i)'s form accepted (Q1 (a))
+    - docs/POLICY.md: 7d item 1 sentence and §10 rule 39 gone (rule 39 left as a stated gap; 40-42 keep their
+      numbers); §11 terminal bullet and switch-screen bullet state the limit, plus one bullet with the owner's ruling
+    - BACKLOG.md: the item 1 entry is now "owed to the switch lane: state this limit on the switch screen";
+      M0-OUTCOMES entry corrected
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+diff --git a/crates/coagent-policy/Cargo.toml b/crates/coagent-policy/Cargo.toml
+index 1dde423..32247f9 100644
+--- a/crates/coagent-policy/Cargo.toml
++++ b/crates/coagent-policy/Cargo.toml
+@@ -90,7 +90,6 @@ red_owner_text_as_both_agree = []
+ red_owner_spellings_off = []
+ red_owner_odd_inputs_allowed = []
+ red_owner_relative_cwd_resolved = []
+-red_owner_terminal_ignores_exclusions = []
+ 
+ # Addendum 7: the workspace's lints (root Cargo.toml `[workspace.lints.cargo]`) copied here, plus ONE style lint allowed.
+ # The round-5 gate's own file tests/r5b_shell_t3.rs line 240 reads `if r.next() % 4 == 0 {`, which clippy's
+diff --git a/crates/coagent-policy/src/engine.rs b/crates/coagent-policy/src/engine.rs
+index 0debccb..7aa6a6d 100644
+--- a/crates/coagent-policy/src/engine.rs
++++ b/crates/coagent-policy/src/engine.rs
+@@ -912,7 +912,7 @@ fn mode_steps(
+ ) -> Option<Decision> {
+     // [7c] what stays refused even with approvals off (D1; for the owner origin C-5's "the always-refused list still
+     // holds", FR-A5): a deny, never a card. The same 16 classes in the same order for both origins.
+-    let _ = state; // read by the owner origin's [7d] (POLICY-NOTES item 1) and its red control `red_owner_shell_needs_sandbox`
++    let _ = state; // read only by the owner origin's red control `red_owner_shell_needs_sandbox`
+     #[cfg(not(feature = "red_owner_skips_refused"))]
+     let check_refused = true;
+     #[cfg(feature = "red_owner_skips_refused")]
+@@ -968,8 +968,7 @@ fn mode_steps(
+                 || (terminal_on
+                     && sandbox_ok
+                     && is_owner_terminal_command(action)
+-                    && has_command_text(action)
+-                    && nothing_is_excluded(state))
++                    && has_command_text(action))
+             {
+                 return Some(Decision::Allow {
+                     why: owner_allow_why(),
+@@ -994,26 +993,6 @@ fn is_owner_terminal_command(action: &Action) -> bool {
+     }
+ }
+ 
+-/// POLICY-NOTES item 1 (m-1; the owner's card `general-c2c-allow-terminal-vs-exclusions-1125`, its default a): a
+-/// terminal command runs unasked in the owner origin only while NOTHING is excluded, the owner's exclusion list AND the
+-/// grant's exclude list (applied even while the grant is inactive, as in `assess`) both empty. No command's reach can be
+-/// bounded from its text (a script, `cd`, `xargs`, `tar`, an interpreter), so whether it reads an excluded file cannot
+-/// be recognised soundly; while anything is excluded it continues to [8] and asks, as `decide`. Removing this item
+-/// is this one function (and its call in [7d]).
+-fn nothing_is_excluded(state: &State) -> bool {
+-    #[cfg(not(feature = "red_owner_terminal_ignores_exclusions"))]
+-    return state.exclusions.pats.is_empty()
+-        && !state
+-            .grant
+-            .as_ref()
+-            .is_some_and(|gs| !gs.grant.exclude.pats.is_empty());
+-    #[cfg(feature = "red_owner_terminal_ignores_exclusions")]
+-    {
+-        let _ = state;
+-        true // RED CONTROL ONLY: terminal commands run unasked whatever is excluded
+-    }
+-}
+-
+ /// POLICY-NOTES item 3 (a) (n-2): a shell call whose command text is empty (missing, not a string, or `""`: all are
+ /// classified as the empty command) is never the owner's terminal command; it continues to [8] and asks, as `decide`.
+ fn has_command_text(action: &Action) -> bool {

@@ -1,0 +1,13 @@
+diff --git a/crates/coagent-policy/src/shell/mod.rs b/crates/coagent-policy/src/shell/mod.rs
+index a7d9a89..84b0c50 100644
+--- a/crates/coagent-policy/src/shell/mod.rs
++++ b/crates/coagent-policy/src/shell/mod.rs
+@@ -134,7 +134,7 @@ fn add_word(w: &str, scan: &mut ExecScan) {
+ /// Characters that end a scanned piece. `,` and `:` are in it so that `x:/abs/.zshrc` and `a,~/.zshrc` are seen
+ /// (round-4 surviving mutant B5: red row `red_comma_colon_kept`).
+ #[cfg(not(feature = "red_comma_colon_kept"))]
+-const SPLIT: &str = ";&|<>()`$={},:";
++const SPLIT: &str = ";&|<>()`$={},:!"; // DIFFERENTIAL PLANT P-3
+ #[cfg(feature = "red_comma_colon_kept")]
+ const SPLIT: &str = ";&|<>()`$={}";
+ 

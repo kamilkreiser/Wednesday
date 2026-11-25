@@ -1,0 +1,113 @@
+diff --git a/crates/coagent-policy/tests/t27_owner_dark.rs b/crates/coagent-policy/tests/t27_owner_dark.rs
+index d73baee..fd8c6c5 100644
+--- a/crates/coagent-policy/tests/t27_owner_dark.rs
++++ b/crates/coagent-policy/tests/t27_owner_dark.rs
+@@ -105,18 +105,8 @@ fn depends_on_policy(manifest: &str) -> bool {
+     // a table header's keys, split at dots outside quotes
+     let keys = |h: &str| -> Vec<String> {
+         let (mut out, mut cur, mut quote) = (Vec::new(), String::new(), None::<char>);
+-        let mut esc = false;
+         for c in h.chars() {
+-            if esc {
+-                esc = false;
+-                cur.push(c);
+-                continue;
+-            }
+             match (quote, c) {
+-                (Some('"'), '\\') => {
+-                    esc = true;
+-                    cur.push(c);
+-                }
+                 (None, '.') => out.push(unquote(&std::mem::take(&mut cur))),
+                 (None, '"' | '\'') => {
+                     quote = Some(c);
+@@ -143,34 +133,7 @@ fn depends_on_policy(manifest: &str) -> bool {
+         )
+     };
+     let after_blanks_is = |rest: &str, c: char| rest.trim_start().starts_with(c);
+-    // the text before the first `stop` outside quotes (a basic string's `\"` does not end it), if there is one
+-    let until_outside_quotes = |t: &str, stop: char| -> Option<String> {
+-        let (mut quote, mut esc) = (None::<char>, false);
+-        for (i, c) in t.char_indices() {
+-            if esc {
+-                esc = false;
+-                continue;
+-            }
+-            match (quote, c) {
+-                (Some('"'), '\\') => esc = true,
+-                (Some(q), _) if c == q => quote = None,
+-                (None, '"' | '\'') => quote = Some(c),
+-                (None, _) if c == stop => return Some(t[..i].to_string()),
+-                _ => {}
+-            }
+-        }
+-        None
+-    };
+-    // a dependency key path: `<table>.coagent-policy…` or `target.<x>.<table>.coagent-policy…`
+-    let dep_path = |k: &[String]| {
+-        (k.len() >= 2 && dep_table(&k[0]) && k[1] == NAME)
+-            || (k.len() >= 4 && k[0] == "target" && dep_table(&k[2]) && k[3] == NAME)
+-    };
+-    let first_header = manifest
+-        .lines()
+-        .position(|l| l.trim_start().starts_with('['))
+-        .unwrap_or(usize::MAX);
+-    manifest.lines().enumerate().any(|(line_no, l)| {
++    manifest.lines().any(|l| {
+         let t = l.trim_start();
+         // the old disjunct, unchanged
+         if t.starts_with(NAME) {
+@@ -179,12 +142,8 @@ fn depends_on_policy(manifest: &str) -> bool {
+         if t.starts_with('#') {
+             return false;
+         }
+-        // a table header (its closing `]` found outside quotes)
+-        if let Some(h) = t
+-            .strip_prefix('[')
+-            .and_then(|h| until_outside_quotes(h, ']'))
+-        {
+-            let h = h.as_str();
++        // a table header
++        if let Some(h) = t.strip_prefix('[').and_then(|h| h.split(']').next()) {
+             if !t.starts_with("[[") {
+                 let k = keys(h);
+                 let n = k.len();
+@@ -197,14 +156,6 @@ fn depends_on_policy(manifest: &str) -> bool {
+                 }
+             }
+         }
+-        // a top-level dotted key, before any header
+-        if line_no < first_header {
+-            if let Some(k) = until_outside_quotes(t, '=') {
+-                if dep_path(&keys(&k)) {
+-                    return true;
+-                }
+-            }
+-        }
+         // a quoted key
+         for q in ["\"coagent-policy\"", "'coagent-policy'"] {
+             if let Some(rest) = t.strip_prefix(q) {
+@@ -221,21 +172,11 @@ fn depends_on_policy(manifest: &str) -> bool {
+                 .chars()
+                 .last()
+                 .is_none_or(|c| !(c.is_ascii_alphanumeric() || c == '_' || c == '-'));
+-            let mut rest = t[at + "package".len()..].trim_start();
+-            // a quoted key `"package"` / `'package'`: skip its closing quote
+-            if let Some(q @ ('"' | '\'')) = t[..at].chars().last() {
+-                if let Some(r) = t[at + "package".len()..].strip_prefix(q) {
+-                    rest = r.trim_start();
+-                }
+-            }
++            let rest = t[at + "package".len()..].trim_start();
+             if before_ok {
+                 if let Some(v) = rest.strip_prefix('=') {
+                     let v = v.trim_start();
+-                    if v.starts_with("\"coagent-policy\"")
+-                        || v.starts_with("'coagent-policy'")
+-                        || v.starts_with("\"\"\"coagent-policy\"\"\"")
+-                        || v.starts_with("'''coagent-policy'''")
+-                    {
++                    if v.starts_with("\"coagent-policy\"") || v.starts_with("'coagent-policy'") {
+                         return true;
+                     }
+                 }

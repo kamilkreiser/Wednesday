@@ -1,0 +1,20 @@
+diff --git a/crates/coagent-policy/src/shell/mod.rs b/crates/coagent-policy/src/shell/mod.rs
+index a7d9a89..38b951e 100644
+--- a/crates/coagent-policy/src/shell/mod.rs
++++ b/crates/coagent-policy/src/shell/mod.rs
+@@ -96,9 +96,14 @@ pub fn scan_execute(text: &str, dialect: ShellKind) -> ExecScan {
+                 if scan.pieces.len() >= PIECE_CAP {
+                     break 'words;
+                 }
+-                add_piece(&w[i + 1..], &mut scan, &mut seen);
++                // CHECK PLANT Q-1 (the check's own loosening): a suffix holding `/` is dropped
++                if !w[i + 1..].contains('/') {
++                    add_piece(&w[i + 1..], &mut scan, &mut seen);
++                }
+             }
+         }
++        // CHECK PLANT Q-1: every existing piece that starts with `@` is removed (replaced by its suffix above)
++        scan.pieces.retain(|p| !p.starts_with('@'));
+     }
+     scan
+ }
