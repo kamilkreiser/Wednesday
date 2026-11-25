@@ -1,0 +1,22 @@
+runner tty=not a tty ps_tt=  ??  server=qm2-<random>
+## route r1
+  pane modes: A crw--w---- B crw--w----
+  r1 send-keys to B exit=0
+  r1 send-keys to A exit=0
+  screen A: reader A: QAr1A|RUNNERA|
+  A_GOT=[QAr1A] rc=0   B_GOT=[QAr1B] rc=0
+## route r2
+  pane modes: A crw--w---- B crw--w----
+  r2 to B: TIOCSTI ioctl failed after 0 bytes errno=13 (EACCES)
+  r2 to A: TIOCSTI ioctl failed after 0 bytes errno=13 (EACCES)
+  screen A: reader A: RUNNERA|
+  A_GOT=[RUNNERA] rc=0   B_GOT=[RUNNERB] rc=0
+## route r3
+  pane modes: A crw--w---- B crw--w----
+  r3 write to B ok
+  r3 write to A ok
+  screen A: RUNNERAA: QAr3A|
+  A_GOT=[RUNNERA] rc=0   B_GOT=[RUNNERB] rc=0
+server after kill: no server running on <tmux dir>/qm2-cc1hsx
+socket file left: 1
+(after each route the readers' line is my own r1 typing RUNNERA/RUNNERB: it shows the reader was still waiting if the route delivered nothing)
