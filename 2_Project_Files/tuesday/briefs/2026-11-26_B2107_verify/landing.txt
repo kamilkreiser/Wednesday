@@ -1,0 +1,163 @@
+LANDING FORM for lane L1 round 1 of 2 of the MPS Commercial Calculator: MPSCALC-233 (a clone refuses a typed reference
+that another quote's current version already holds; `QuoteStore.AddIfRefFree` under a new store lock), MPSCALC-316 (the
+agreed unit sentence beside `maxLength` 100 in the two schema places) and MPSCALC-120 (the contract version rule in its
+own section of docs/API.md); kit B2106, seat M176; stamp S5: Q1 195 out, Q3 the seat pushes and Tuesday lands, Q11
+build the descriptions as Tuesday's reading of C-108, the rest the defaults; every choice the coordinator's. Head to
+land: b740f5486e2058c1d899153e41fe492c2500edb8 on the branch b2106/m176-mps-l1-233-316-120, TWO commits (f8644cce the
+contract commit, b740f548 the generated files), the first's parent 56f508a779ea5add1655d1c8a824cde635d6a53c (main = PR
+228's squash; no rebase). The landing is ONE SQUASH, head-pinned (`--match-head-commit`), one parent on main. Source of
+the rule: the kit's FACT 1 (RELAYED from PRs 226, 227 and 228: each opened and merged by the Datasec account, each
+squash commit ONE parent; re-read by the gate: PR 228 merge_commit 56f508a7 with 1 parent, opened and merged by that
+account) and stamp S5 Q3; the project CLAUDE.md:50-51 still names "Friday opens the PR and merges once CodeQL is green"
+(the kit's Q3 reading: the landings since 2026-10-16 are this seat's; a records line). The repository allows squash,
+merge and rebase (GET 06:17); main's rules (org ruleset "Security scan rule", active): deletion, non_fast_forward,
+code_scanning (CodeQL, alerts_threshold errors, security_alerts_threshold high_or_higher), required_status_checks with
+an EMPTY list. Gate verdict (G1, round 1 of 2 of lane L1): VERDICT.md in this folder (B2107). Land only when this
+folder's VERDICT.md reads GO or GO WITH FINDINGS. Who decides to land, and when: the coordinator (Tuesday), never the
+product owner. No other MPS lane is open (open pull requests 0). Landing deploys nothing (below).
+
+MAIN AT THE GATE: 56f508a779ea5add1655d1c8a824cde635d6a53c, read by gh api -X GET (matching-refs/heads/main) at 06:01:24
+AEDT and by a fresh clone (clone_mps.py, push URL invalid://no-push, no identity) at about 06:02; open pull requests 0
+(06:01:24); PR 228 (the last merged, head e0dcea68, merge 56f508a7, merged 2026-11-22T07:58:13Z). Main's check-runs
+at 56f508a7: 12, all success (Analyze csharp, python, actions, javascript-typescript twice each; dotnet, web, python,
+package). Code-scanning analyses at 56f508a7: csharp, javascript-typescript, python, actions results_count 0 (newest
+2026-11-25T10:5x; GET 06:07); open alerts repository-wide 0 (GET 06:07). compare main...b740f548: ahead 2, behind 0,
+8 files (GET 06:01):
+  M docs/API.md                                            +4 -1     blob cd6c5eab
+  M docs/api/openapi.json                                  +3 -3     blob c41077c0
+  M src/MpsCalc.Api/Quotes/QuoteEndpoints.cs               +9 -1     blob 69d61e12
+  M src/MpsCalc.Api/Quotes/QuoteStore.cs                   +26 -0    blob fb257452
+  M tests/MpsCalc.Api.Tests/QuoteApiTests.V0Duplicate.cs   +110 -1   blob bfb9506f
+  M web/src/api/generated/SOURCE.txt                       +2 -2     blob 2a1a6324
+  M web/src/api/generated/openapi.snapshot.json            +3 -3     blob c41077c0
+  M web/src/api/generated/schema.ts                        +5 -4     blob 96be2214
+
+THE HEAD THE GATE MEASURED (scratch fleet/state/s328/g2107/, see VERDICT.md): the head's tree
+d63fa0c47825d833aa9f35ef14aa97fa2e7c3519 (735 files); its five hand-edited blobs = `apply_edits_l1.py` (the kit's
+frozen text, sha256 6d9b7ef2...) replayed on 56f508a7 (E3 then -E3), byte for byte; its three generated blobs = the
+output of `node scripts/sync-contract.mjs f8644cce85cc802f6091d14286cbdf9ea010ce1b` run by the gate on a clone at
+f8644cce (node v24.22.2; last line `contract f8644cce... blob c41077c0... sha256 ea0768a1...`). Main IS the branch's
+merge base and is not behind, so a squash's tree equals the head's tree d63fa0c4. Gate runs (Debug, the project's
+`.tools/dotnet-10.0.404`): red first `Failed: 10, Passed: 136, Total: 146`; green `V0_` `Passed: 146`; the whole Api
+test project `Passed: 3681, Failed: 0, Total: 3681`; m2 and m3 each `Failed: 2, Passed: 18, Total: 20` on exactly N8
+and N6, both hosts. The branch push has NO check runs (ci runs on push to main, pull_request and workflow_dispatch
+only: `.github/workflows/ci.yml:10-14`; check-runs at b740f548 total 0, GET 06:07), so the pull request's runs are the
+first hosted build, test and CodeQL analysis of this head.
+
+Never land a head or a merge a gate did not read: if the branch moves off b740f548, stop. If main moves off 56f508a7
+before step 5, see MAIN MOVES.
+
+Environment for every gh line: GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/Datasec MPS Commercial Calculator/4_Credentials/.gh-config'
+Every line below is a GET except opening the pull request, the one re-trigger of step 2 if it is needed, and the one
+merge line of step 5.
+
+1. THE PULL REQUEST TEXT. Base main, head b2106/m176-mps-l1-233-316-120. Title: pr-title.txt (one line, 197
+   characters, under GitHub's 256; not the commit subject). Body: pr-body.md (why; what changed; the choices named as
+   the coordinator's; MPSCALC-195 out and why; what proves it; still open, with VERDICT.md's findings in words; who
+   decides: the coordinator; nothing deployed). If a word changes, scan again (SCANS-2 in VERDICT.md). The next number
+   on the origin is most likely 229 (issues and pull requests share numbers; the newest is 228, a pull request, GET
+   06:16): use the number GitHub gives.
+
+2. PROVE WHICH TREE THE PULL REQUEST'S CHECKS BUILT:
+
+   gh api -X GET 'repos/datasecau/MPS-Commercial-Calculator/actions/runs?head_sha=b740f5486e2058c1d899153e41fe492c2500edb8&event=pull_request' --jq '.workflow_runs[] | [.id, .name, .status, .conclusion, .created_at] | @tsv'
+   bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_retrigger.sh --check datasecau/MPS-Commercial-Calculator <run id> b740f5486e2058c1d899153e41fe492c2500edb8 <main sha40 at that moment>
+
+   rc 0 (MATCH: `HEAD is now at ... Merge b740f548... into <main>...`) = go on. rc 3 (STALE) = run the default mode
+   once (`pr_retrigger.sh datasecau/MPS-Commercial-Calculator PRNUM`) and check the NEW run again. rc 4 (no Merge
+   line) is NOT a match. The one re-trigger here is for a STALE merge ref only, never for a red job.
+
+3. THE CHECK WAIT (head pinned, distinct NAMES). Run as a tracked background task:
+
+   GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/Datasec MPS Commercial Calculator/4_Credentials/.gh-config' bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_checks_wait.sh datasecau/MPS-Commercial-Calculator PRNUM b740f5486e2058c1d899153e41fe492c2500edb8 60 60 --min-checks 9
+
+   9 = the distinct check names on the head of the last merged MPS PR (PR 228, head e0dcea68, check-runs read by GET at
+   06:07, 9 runs, 9 distinct names; pr_checks_wait.sh has no MPS default, so --min-checks is required): Analyze
+   (actions), Analyze (csharp), Analyze (javascript-typescript), Analyze (python), CodeQL, dotnet (build Release, 0
+   warnings; test), package (I-4 layout; B2 scan; kept on main only, 7 days), python (demo harness, infra static tests,
+   deploy tooling), web (npm ci, lint, test, production build). PR 228's runs: ci (pull_request) 44999293964 and the
+   CodeQL dynamic run "PR #228" 44999291675. Read the pull_request ci run's jobs and their logs (GET):
+
+   gh api -X GET 'repos/datasecau/MPS-Commercial-Calculator/actions/runs/<pull_request run id>/jobs' --jq '.jobs[] | [.id, .name, .conclusion] | @tsv'
+   gh api -X GET --allow-escape-sequences repos/datasecau/MPS-Commercial-Calculator/actions/jobs/<job id>/logs | /usr/bin/grep -i -E 'Passed!|Failed!|Warning\(s\)|Error\(s\)|Test Files|Tests  |found 0 vulnerabilities|passed|failed|markers found'
+
+   Required on the merge ref, with <M> = the main the merge ref is built on: four jobs dotnet, web, python and package
+   success; dotnet: `0 Warning(s)` and `0 Error(s)`, then three `Passed!` lines and no `Failed!` line, MpsCalc.Api.Tests
+   `Total: <A>` with <A> = <M>'s Api total PLUS 18 (with <M> = 56f508a7: 3681, MEASURED by the gate and the seat in
+   Debug; the CI run is Release), MpsCalc.Engine.Tests 743 and MpsCalc.Import.Tests 198 (the seat's MEASURED Release run;
+   not re-run by the gate); web: lint rc 0, `Test Files  149 passed (149)` and `Tests  1742 passed (1742)` (the seat's,
+   MEASURED; the gate ran the two contract test files only: `Tests  4 passed (4)`), both Playwright steps green (NOT RUN
+   by the seat or the gate: the first measurement of this head), the production build and `check-bundle.mjs` rc 0;
+   python: every test file green (NOT RUN by the gate: no python test reads any of the eight paths, by the gate's grep
+   of tools/, infra/ and scripts/ for the eight paths' names, 0 readers; the job is a repo-wide build gate all the same);
+   package: success (NOT RUN by the gate or the seat; it publishes the Api and builds the web bundle and scans both, so
+   it reads the changed C#; this is its first run on this head). A red test = STOP: a new finding, never a re-run. A
+   red Playwright step is a STOP for the coordinator, never a skip or a retry.
+
+   CODE SCANNING (the CodeQL authority for this change; no local CodeQL was run by the seat or the gate; the branch push
+   had no Analyze rows: check-runs 0 at b740f548, so the pull request's own analysis is the first of this head). Read
+   the analyses FIRST, then the alerts:
+
+   gh api -X GET 'repos/datasecau/MPS-Commercial-Calculator/code-scanning/analyses?ref=refs/pull/PRNUM/head&per_page=10' --jq '.[] | [.commit_sha, .category, .results_count, .created_at] | @tsv'
+   gh api -X GET 'repos/datasecau/MPS-Commercial-Calculator/code-scanning/alerts?ref=refs/pull/PRNUM/head&state=open' --jq 'length'
+   gh api -X GET 'repos/datasecau/MPS-Commercial-Calculator/code-scanning/alerts?state=open' --jq 'length'
+   gh api -X GET repos/datasecau/MPS-Commercial-Calculator/pulls/PRNUM --jq '[.head.sha, .mergeable, .mergeable_state] | @tsv'
+
+   Required: a `/language:csharp` row with results_count 0 (and javascript-typescript, python and actions rows,
+   results 0) for this pull request's analysis; open alerts on the PR ref 0 and repository-wide 0 (0 at the gate); the
+   head b740f548...; mergeable true and state clean. No csharp row for this pull request = not yet analysed: wait,
+   never read it as 0. Any open alert, a csharp results_count above 0, or blocked = STOP: an alert is fixed in the code
+   by a new commit and a new gate, never dismissed. What a reader of the Analyze (csharp) rows looks for in THIS diff:
+   a nested lock (`lock (_refLock)` then `lock (other.Lock)`, `QuoteStore.cs:140` and `:144`), a loop over a concurrent
+   dictionary's values under a lock (`:142`), a string from a request body compared with stored strings
+   (`string.Equals(..., StringComparison.Ordinal)`, `:146`), a nullable return checked at the call
+   (`QuoteEndpoints.cs:563-567`); in the tests, `Task.WhenAll` of eight requests and synthetic references. A
+   "potential deadlock", "lock on a non-private field", "user-controlled bypass" or "information exposure" alert on
+   these lines is still a STOP: the coordinator reads it before any landing, never a dismissal.
+
+4. LAST READ BEFORE THE MERGE: the branch ref equals b740f548...; main equals the <M> that step 2 proved.
+
+   gh api -X GET repos/datasecau/MPS-Commercial-Calculator/git/matching-refs/heads/b2106 --jq '.[] | [.ref, .object.sha] | @tsv'
+   gh api -X GET repos/datasecau/MPS-Commercial-Calculator/git/matching-refs/heads/main --jq '.[] | [.ref, .object.sha] | @tsv'
+
+5. THE SQUASH (one parent, head pinned; the real number in place of PRNUM; the body exactly the file). The gate scanned
+   both files with #229 in place of #PRNUM (SCANS-2 in VERDICT.md: gitleaks rc 0 after its planted control rc 1; the
+   twelve-name underscore-aware scan quiet, 12 controls fired; no B-number, seat id or card id); a different number
+   changes characters: scan again with the same two tools.
+
+   gh pr merge PRNUM --repo datasecau/MPS-Commercial-Calculator --squash --match-head-commit b740f5486e2058c1d899153e41fe492c2500edb8 --subject "$(sed 's/#PRNUM/#'PRNUM'/' squash-subject.txt)" --body-file squash-body.txt
+
+   No --admin and no bypass. If the merge is refused, stop and read why.
+
+6. AFTER, on main (GET only): the new main commit has ONE parent (<M>) and its tree equals the head's tree the gate
+   measured (d63fa0c47825d833aa9f35ef14aa97fa2e7c3519, 735 files, when <M> is 56f508a7); its push run reads the four
+   ci jobs success (dotnet, web, python, package; the package job then also keeps `deploy-mpscalc-<sha>` for 7 days:
+   a kept artefact, not a deploy) and the four Analyze rows success; code-scanning analyses at the new main sha:
+   csharp, javascript-typescript, python and actions with results_count 0; open code-scanning alerts on main 0.
+
+   gh api -X GET repos/datasecau/MPS-Commercial-Calculator/commits/main --jq '[.sha, (.parents | length), .commit.tree.sha, .commit.message[0:130]] | @tsv'
+   gh api -X GET 'repos/datasecau/MPS-Commercial-Calculator/commits/<new main sha40>/check-runs?per_page=100' --jq '.check_runs[] | [.name, .status, .conclusion] | @tsv'
+   gh api -X GET 'repos/datasecau/MPS-Commercial-Calculator/code-scanning/analyses?ref=refs/heads/main&per_page=8' --jq '.[] | [.commit_sha, .category, .results_count] | @tsv'
+   gh api -X GET 'repos/datasecau/MPS-Commercial-Calculator/code-scanning/alerts?state=open' --jq 'length'
+
+   A red here is a NEW finding, never a re-run. Then the records pass reads FOR-RECORDS.md (the acceptance clauses of
+   233, 316 and 120, the owed lines, MPSCALC-195 and 316's open reading).
+
+MAIN MOVES (measured from 56f508a7 at 06:01).
+(A) THIS LANE NOW (main 56f508a7): steps 1 to 6 with <M> = 56f508a7: Api total 3681; the new main's tree d63fa0c4.
+(B) ANY OTHER LANDING FIRST (none is open at the gate): do not merge on this reading; measure `git merge-tree
+    --write-tree <new main> b740f548...` IN A SCRATCH CLONE (never the project checkout): rc 0, no conflict, AND `git
+    diff --name-only 56f508a7 <new main>` names none of this change's eight paths and no path under
+    src/MpsCalc.Api/Quotes/**, tests/MpsCalc.Api.Tests/**, docs/API.md, docs/api/**, web/src/api/**, web/scripts/**,
+    and no `Directory.Build.props`, `Directory.Packages.props`, `global.json`, `MpsCalc.slnx`, `.github/**`,
+    `web/package.json` or lock file = go on with the new main's own Api total PLUS 18, and prove the merge ref against
+    the NEW main (step 2). A change of docs/api/openapi.json on the new main ALSO stales `web/src/api/generated/**`
+    (`contract.sync.test.ts` compares the snapshot with the contract byte for byte): that is a STOP and a new sync
+    commit, never a land. NOT MEASURED by this gate: no such merge was built. A path in the list above, or a conflict
+    = STOP: a new gate.
+
+A merge deploys nothing: the repository's one workflow (.github/workflows/ci.yml) builds, tests and packages and has no
+deploy step ("NO cloud credentials, NO deploy job, NO repository secret", ci.yml:1); on main the package job keeps the
+package as a 7-day artefact, and deploying it is a separate runbook step under the product owner's login (ci.yml:2-3),
+not in this landing. No line above reaches a hosted site or Azure. No setting is changed by any line above. No Jira
+call in any line above. No human is messaged by any line above.
