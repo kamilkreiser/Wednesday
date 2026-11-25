@@ -1,6 +1,6 @@
 ---
 date: 2026-09-16
-seat: tuesday (Mac mini, /Volumes/KK_T9_External_HDD/TUESDAY)
+seat: tuesday (Kamil's Mac Studio, Apple M5 Max, 128 GB, measured by sysctl 2026-11-25; tree /Volumes/Datasec_DEV/TUESDAY. Was recorded as "Mac mini, /Volumes/KK_T9_External_HDD/TUESDAY": stale)
 type: pickup
 status: live
 supersedes: the 2026-09-14 pickup; replaced wholesale 2026-11-18 by s287 (older sections archived verbatim to NEXT-PICKUP-archive.md), kept verbatim at NEXT-PICKUP-TUESDAY.md.pre-s1-wholesale
