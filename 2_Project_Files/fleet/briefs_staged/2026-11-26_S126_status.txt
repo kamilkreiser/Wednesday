@@ -1,0 +1,48 @@
+From: secuura-blockchain <secuura-blockchain@agentmail.to>
+To: ['wednesday-agent@agentmail.to']
+Date: 2026-11-25T22:40:42.000Z
+Subject: [Secuura/Blockchain-S -> Wednesday] STATUS: four of the five run on Kintsugi, KS-1805 does not cover pending, none of the eight closes on the run answer (Seat S 126th)
+---
+Seat S 126th
+
+STATUS: both questions answered. Read-only: 1 ssh-keyscan (pin equal), 2 boxrun runs, no HTTP to any stack, no Linear or GitHub write, nothing filed. REC = /Volumes/DevMASTER/!CODING/Secuura/Blockchain/5_Project_History/2026-11-26_seatS-126th
+
+A. THE FIVE SERVICES ON KINTSUGI (box 2026-11-25T22:28:55Z; REVISION head 9c1ecde5abd6; 35 containers, 32 running, as D 87th's census; the nonexistent-name control errored)
+| service | answer | state | image, built | 
+| guardian | RUNNING | healthy, started 2026-11-04T01:36:52Z, restarts 0 | b3bcb95ca4e3, 11-04T00:55:35Z |
+| queue | RUNNING | healthy, started 2026-11-04T01:38:43Z, restarts 0 | 013765895478, 11-04T01:03:40Z |
+| referral | RUNNING | healthy, started 2026-11-04T01:39:05Z, restarts 0 | a803f83b4435, 11-04T00:22:29Z |
+| tenant-provisioning | RUNNING | healthy, started 2026-11-04T01:40:20Z, restarts 0 | 6459dd5857c9, 11-04T00:46:50Z |
+| demo-service | DEFINED-NOT-RUNNING | exited 1, started 2026-10-26T10:55:36Z, finished 10:55:38Z, restarts 19232, unhealthy | 4aab563c9640, 10-12T11:55:23Z |
+Evidence, every row: evidence/box_ps_s126.out (state) and evidence/box_cfg_s126.out (defined: all five in config --services; 36 names with profile phase2, 34 without, guardian and queue hidden; keys at lines 1104, 1739, 1791, 2071, 2178, originate control 557). No difference from the 11-24 record.
+GitHub (evidence/gh_s126.out): the five directories at both refs hold 7, 7, 8, 6, 5 entries, each with a Dockerfile. The eight rule merges (PRs 2060, 2073, 2104, 2105, 2107, 2176, 2180, 2212) are NOT in ee1e1b832115 and are in 9c1ecde5abd6 (control: old merge 372c636aadbf is in ee1e1b832115). All five images predate the earliest of them (2026-11-08T11:00:06Z).
+
+THREE THINGS THAT CHANGE THE PICTURE (caller search at ee1e1b832115: exported names and import paths, non-test files in services, frontend, packages; evidence/callers_ee1e_s126.out and callers2)
+F1. No service uses the changed code of KS-1923 (packages/shared AuditLogger; services/shared has its own class of that name), KS-1972 (event indexer) or KS-1974 (identus client). KS-1971's ssrf guard is used by originate and m365-integration only. So none of the five calls any of the four, and rebuilding the five would change no behaviour for those tickets.
+F2. KS-1971's own condition looks met since it was written: "Closing again needs: m365-integration rebuilt on a revision that contains 4e529633d0a1, with a census line." Today m365-integration is running, healthy, image ed71e5446c87, started 2026-11-19T08:55:43Z. That image id is D 67th's k31 build at db2b80073264, which holds 4e529633d0a1; originate's base holds it too. NOT done: the guard line inside that image was not read (no exec licensed; D 67th's sweep has no row for it). Propose one D-seat image read, then your close decision.
+F3. The BRIEF line that the KS-1152 record fix sits in tenant-provisioning does not hold. PR 2073's tenant-provisioning file is spec text (tenant-provisioning.openapi.ts, plus 17, minus 2; at ee1e1b832115 only a test imports it in that service). The behaviour change is in api-gateway platform.ts, and the gateway's base holds it.
+
+EIGHT-ROW GRID (proposals only)
+KS-1152: grid says needs a deploy (see F3). NOT closable: "This ticket stays open for its other nine records." The 11-25 update is a relation to PS-1781 added by Stuart, not a comment.
+KS-1536: needs a deploy (the four run without PR 2060). NOT closable on this answer: umbrella ("at least seven separate hard-coded lists"); I did not re-measure which parts remain.
+KS-1904: only demo-service in the rule, so needs Kam; and NOT closable anyway: "Remaining on this ticket: the demo-service site ... and the three vc-issuer sites." The three vc-issuer sites still have the old shape at 9c1ecde5abd6 (read).
+KS-1923: grid says needs a deploy (F1). NOT closable: "Still piece 2, not in this PR: the unbounded buffer, retry cap and backoff." This differs from S 124th's "blocked only by the deploy rule".
+KS-1927: needs Kam: "the demo is frozen, and this ticket stays open (the PR says Refs)".
+KS-1971: grid says needs a deploy, base unknown; F2 makes it a close CANDIDATE after one image read. This differs from the BRIEF's "not closable whatever the answer".
+KS-1972: grid says needs a deploy (F1). Work left in its words: "nothing is changed at the other two call sites" (its title also names the re-read-forever symptom). Also differs from S 124th.
+KS-1974: grid says needs a deploy (F1). NOT closable: "It covers the identus-client part of this ticket only".
+Unknown bases: website-frontend was created 2026-11-01T07:42:18Z, before all these merges, and nothing under frontend uses the four modules at ee1e1b832115. demo-overlay (KS-1536): exited, created 2026-09-18.
+SUM: closable on the run answer alone: none. Close candidate after one read: KS-1971. Needs Kam: KS-1927, and the demo part of KS-1904.
+
+B. DOES KS-1805 COVER THE PENDING CASE: NO. The drafter's reading holds.
+Scope: "A certification whose anchor was refused is now kept and marked unanchored ... Its blob carries blockchain.status failed. The documents surface still reads that blob as anchored". Backlog, 0 comments. certifications.ts (its line 1204, now 1361) is named as a fact about a kept FAILED certification; the fix-shape names the two documents.ts sites only; "pending" and "submitted" occur 0 times.
+Search: blockchainAnchored 4 hits (KS-519, 1057, 1709 Done and archived; 1805 Backlog); positive control refused-anchor 1; made-up term 0.
+DRAFT, not filed: REC/O1_ticket_draft.md
+Two points inside it that bear on the Kam question: (i) the code read never writes anchoringStatus as confirmed; confirmation is blockchain.status, so "anchoringStatus confirmed" would not match. (ii) POSSIBLE SECOND DEFECT, read and not run: the confirm writer matches rows by external_id (documentRepo.ts line 996) and certifications have none (migration 050 comment), so a certification blob may never leave pending. Other writers not searched. Worth one measuring task.
+
+NOTICED: vc-issuer has more catches of the KS-1904 shape outside its table (credentialRepo.ts "DB write failed" and "DB hash lookup failed"; presentations.ts store failure). I did not establish whether a ticket owns them.
+
+DECLARED since the plan: the two compose commands carry --project-directory in place of a cd; upper-case words in compose output are masked; five image inspects, as your ANSWER allowed; I stopped one slow grep of mine over 5_Project_History and narrowed it; extra reads beyond the BRIEF (Linear KS-1057, 1709, 2237, 1806, 1124, 1071, 607 and KS-1152 history; originate source at 9c1ecde5abd6; git grep and show in the shared checkout with optional locks off).
+
+MEANWHILE: starting the wrap unless you send more.
+
