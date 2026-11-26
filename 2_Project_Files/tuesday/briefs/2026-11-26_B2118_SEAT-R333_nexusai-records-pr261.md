@@ -179,19 +179,19 @@ Let `<T0>` be your Step-0 date. JIRA DONE by `<T0>` plus 60 minutes (the EVIDENC
 
 ## Stamp
 Tuesday stamps; leave every slot as it stands. The unstamped copy reads 15 such lines (14 slots and the last line).
-- STAMP (what Tuesday read whole and re-printed at source): ____
-- LAUNCH WINDOW (now or after; every pane whose name holds NexusAI): ____
-- BASE (code main, `CLARIFICATIONS.md` sha256, whether any `Datasec/NexusAI-*` pane writes, the check-runs of the merge commit as Tuesday reads them): ____
-- JIRA (exactly `WRITE` or `DRY`; default DRY; DRY runs Steps 0 to 4 and posts nothing): ____
-- MOVE-1044 (exactly `NONE` or `YES`; default NONE; the drafter recommends `YES`: RD-1044 to Testing, by the project's rule, after its own move check): ____
-- MOVE-1043 (exactly `NONE` or `YES`; default NONE; the drafter recommends `YES`): ____
-- MOVE-1045 (exactly `NONE` or `YES`; default NONE; the drafter recommends `YES`, with NEW-B holding the residue: Q-4): ____
-- MOVE-983 (exactly `NONE` or `YES`; default NONE; the drafter recommends `YES`: RD-983 to Testing with no new comment: Q-5): ____
-- CREATE-A (exactly `NONE` or `NEW`; default NONE; the drafter recommends `NEW`: the stand script ticket, Bug, Low): ____
-- CREATE-B (exactly `NONE` or `NEW`; default NONE; the drafter recommends `NEW`: the 58 files ticket, Task, Low): ____
-- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD writes no section): ____
-- HISTORY (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs no Step 7; the drafter recommends `WRITE`): ____
-- Q-ANSWERS (Q-1 to Q-9 of the drafter's report; defaults as the report says): ____
-- Hard stop (absolute outer limit AEDT; the commission names none; the drafter's default is the stamp clock plus 3 hours; no Jira write from 15 minutes before it): ____
+- STAMP (what Tuesday read whole and re-printed at source): Tuesday s330 (Opus 5.5) at 11:54: kit read whole with the Read tool in two pages (lines 1-100, 101-197) and the 17 lines over 1900 columns re-printed by awk to their last character, none cut; the drafter report read whole (58 lines); stamp_check 158 of 158, rc 0; pre-stamp copy made and cmp rc 0. Re-printed at source by Tuesday this session (gh api -X GET under the project's GH_CONFIG_DIR, account kamilDatasec): code main 89663a44 (the merge of 261); the merge commit's 8 check-runs all completed, 6 success and the two Deploy demo jobs (build, deploy) skipped; open PRs 0; Actions variables total_count 0. CLARIFICATIONS.md 999670 bytes, sha256 prefix 6cc82c52c25f3ebb, section 115 at line 3298, C-334 at 3300 and C-335 at 3306 the newest. The project's CLAUDE.md line 302 holds the Code change -> Testing rule and line 273 lists ticket create, triage, priority, status among what Tuesday may authorise. Relayed for the seat's context only, no text changes: the NexusAI demo hold of C-224 (CLARIFICATIONS line 2412: no NexusAI demo deploy until RD-876 part 2 lands) stands at the stamp as Tuesday reads it; this kit puts nothing on a host and states no deploy decision, and a Deploy demo run that is not skipped stays the STOP of Step 3. Item 12 of the stamp checklist: the helpers, the posting path, the append helper and the Step 7 helper were never run on a real output; a failure traceable to this kit's own wording is a STOPPED: NEEDS TUESDAY question (HOLDS 3).
+- LAUNCH WINDOW (now or after; every pane whose name holds NexusAI): now, until 12:53 AEDT; at the stamp no pane name holds NexusAI (tmux list-panes: %0 tuesday, %530 Datasec/MPS-R332 (another project, records of MPS: not a hit under REFUSE 6), and unnamed panes)
+- BASE (code main, `CLARIFICATIONS.md` sha256, whether any `Datasec/NexusAI-*` pane writes, the check-runs of the merge commit as Tuesday reads them): code main 89663a4441979c7806f83478ebbd0291bfb81ad8; CLARIFICATIONS.md sha256 prefix 6cc82c52c25f3ebb (999670 bytes); no Datasec/NexusAI-* pane runs or writes; the merge commit's check-runs, read by Tuesday this session: 8 completed, 6 success (three Analyze, scan, audit-production-deps, build) and Deploy demo build and deploy skipped
+- JIRA (exactly `WRITE` or `DRY`; default DRY; DRY runs Steps 0 to 4 and posts nothing): WRITE
+- MOVE-1044 (exactly `NONE` or `YES`; default NONE; the drafter recommends `YES`: RD-1044 to Testing, by the project's rule, after its own move check): YES
+- MOVE-1043 (exactly `NONE` or `YES`; default NONE; the drafter recommends `YES`): YES
+- MOVE-1045 (exactly `NONE` or `YES`; default NONE; the drafter recommends `YES`, with NEW-B holding the residue: Q-4): YES
+- MOVE-983 (exactly `NONE` or `YES`; default NONE; the drafter recommends `YES`: RD-983 to Testing with no new comment: Q-5): YES
+- CREATE-A (exactly `NONE` or `NEW`; default NONE; the drafter recommends `NEW`: the stand script ticket, Bug, Low): NEW
+- CREATE-B (exactly `NONE` or `NEW`; default NONE; the drafter recommends `NEW`: the 58 files ticket, Task, Low): NEW
+- RECORDS (exactly `WRITE` or `HOLD`; default HOLD; HOLD writes no section): WRITE
+- HISTORY (exactly `WRITE` or `HOLD`; default HOLD; HOLD runs no Step 7; the drafter recommends `WRITE`): WRITE
+- Q-ANSWERS (Q-1 to Q-9 of the drafter's report; defaults as the report says): all defaults, each Tuesday's: Q-1 Sonnet (model-routing rows C7 line 97, C8 line 98, G3 line 110; models_latest line 23 claude-sonnet-5-5). Q-2 one entry C-336 for pull request 261 only. Q-3 one Low Bug NEW-A. Q-4 move RD-1045 to Testing and file NEW-B for the 58 files and the lint cell. Q-5 move RD-983 to Testing with no new comment. Q-6 the jest leak line and the /tmp QA surface note in the records only. Q-7 the slots as stamped here. Q-8 launch now; the hard stop below. Q-9 move RD-1044 to Testing: Testing is not Release Ready, the comment states the partial-first-boot limit and NEW-A holds it.
+- Hard stop (absolute outer limit AEDT; the commission names none; the drafter's default is the stamp clock plus 3 hours; no Jira write from 15 minutes before it): 14:53 AEDT Thu 26 Nov 2026
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 11:54 AEDT Thu 26 Nov 2026 (Tuesday s330, kit 197 lines in two Read pages, long lines re-printed whole, report 58 lines)

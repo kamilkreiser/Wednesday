@@ -172,15 +172,15 @@ Size in bytes and the first 16 hex of sha256, printed by python at drafting (the
 
 ## Stamp
 Tuesday fills each slot at launch; one word, clock, list or quoted sentence each. The unstamped copy reads one four-underscore line per slot below plus the last line.
-- STAMP: ____
-- LAUNCH WINDOW: ____
-- BASE (root `main` head, code `main` head, pull request 134's squash sha, the gate's line 1, PCOMP-23's comment count; each a 40-hex token, a short sha, a number or a quoted line, read by Tuesday): ____
-- JIRA (`WRITE` or `DRY`; the drafter recommends `WRITE`): ____
-- COMMENTS (`PCOMP-23` or `NONE`; approves TEXT-23 byte for byte, `model-routing.md:97`; the drafter recommends `PCOMP-23`): ____
-- MOVES (`NONE`, or `PCOMP-23`; a move needs the key in COMMENTS and its table MET by program; the drafter recommends `PCOMP-23`, Question Q1 of the report): ____
-- RECORDS (`WRITE` or `DRY`; `WRITE` allows the worktree, the one commit and, with REC-MERGE, the merge): ____
-- REC-MERGE (`MERGE` or `HOLD`; default `HOLD`): ____
-- STATE-ROWS (`APPEND` or `NONE`; default `NONE`; `APPEND` appends the sentences on rows #315 and #456; the drafter recommends `APPEND`): ____
-- HARD STOP (clock; READY aimed at your Step-0 date plus 75 minutes; the earlier of that and this clock wins): ____
+- STAMP: Tuesday s330 (Opus 5.5) at 11:57: kit read whole with the Read tool in two pages (lines 1-70, 71-186; a first larger page was refused for size and re-read smaller) and the 11 lines over 1900 columns re-printed by awk to their last character, none cut; the drafter report read whole (64 lines); stamp_check 188 of 188, rc 0; pre-stamp copy made and cmp rc 0; brief_seat.sh line 31 re-read (LEVEL defaults to opus, so the level stays inside the quotes). Re-printed at source by Tuesday this session, in place of the report's five sidecar spot-checks: code main 3222c898 (gh api -X GET under the project's GH_CONFIG_DIR, account kamilDatasec), the squash's check runs Analyze (csharp) and Analyze (javascript-typescript) completed success, open PRs 0, open code-scanning alerts on main 0, release-demo CONTENT_HASH 23cd95f5 and release-draft CONTENT_HASH 09d597c6 at the squash (equal to THE FACTS 3); root main fa153806 with the four record files clean and C-160 the newest heading (line 2996); by Jira GET: PCOMP-23 Backlog, labels composer-seed-1023 and plan-comp-315, 2 comments, newest 40958; PCOMP-120, 121, 122 Done; PCOMP-123 Backlog; pickup line 9 still holds the standing words (count 1). Answers: Q1 MOVES PCOMP-23, Tuesday's reading, only if the seven-row table reads MET by program (both closing clauses of comment 40721 met on main; PCOMP-123 is its own ticket; Done here means merged to main, not deployed). Q2 F1 to F6 as one sentence on row #456, no ticket (default). Q3 STATE-ROWS APPEND (default). Q4 Sonnet, no gate (model-routing rows C7, C8, G3; models_latest line 23 claude-sonnet-5-5). Q5 REC-MERGE MERGE. The standing refusal of C-155 (no Composer deploy of a changed content release without the product owner's own card) binds: this kit deploys nothing and no text says a deploy is due. Never run on a real output (item 12 of the stamp checklist): --apply and its read-back, the seat's own check scripts, the records script, the commit and the merge; a failure traceable to this kit's own wording is a STOPPED: NEEDS TUESDAY question.
+- LAUNCH WINDOW: now, until 12:55 AEDT; no pane name holds Composer at the stamp (tmux list-panes: %0 tuesday, %530 Datasec/MPS-R332 (MPS records, not a hit under REFUSE 2), and unnamed panes)
+- BASE (root `main` head, code `main` head, pull request 134's squash sha, the gate's line 1, PCOMP-23's comment count; each a 40-hex token, a short sha, a number or a quoted line, read by Tuesday): root main fa1538060d9518f03e0af372652c11f84850ec85; code main 3222c898f6b6057edd91b7d137a4b7d56cf34791; pull request 134's squash 3222c898f6b6057edd91b7d137a4b7d56cf34791; the gate's line 1 as the kit quotes it, `GATE B2117: GO WITH FINDINGS @ 75d2789 on main d06508f` (relayed from the kit; the seat re-reads it, REFUSE 10); PCOMP-23 comment count 2 (newest id 40958), read by Tuesday by Jira GET this session
+- JIRA (`WRITE` or `DRY`; the drafter recommends `WRITE`): WRITE
+- COMMENTS (`PCOMP-23` or `NONE`; approves TEXT-23 byte for byte, `model-routing.md:97`; the drafter recommends `PCOMP-23`): PCOMP-23
+- MOVES (`NONE`, or `PCOMP-23`; a move needs the key in COMMENTS and its table MET by program; the drafter recommends `PCOMP-23`, Question Q1 of the report): PCOMP-23
+- RECORDS (`WRITE` or `DRY`; `WRITE` allows the worktree, the one commit and, with REC-MERGE, the merge): WRITE
+- REC-MERGE (`MERGE` or `HOLD`; default `HOLD`): MERGE
+- STATE-ROWS (`APPEND` or `NONE`; default `NONE`; `APPEND` appends the sentences on rows #315 and #456; the drafter recommends `APPEND`): APPEND
+- HARD STOP (clock; READY aimed at your Step-0 date plus 75 minutes; the earlier of that and this clock wins): 14:25 AEDT Thu 26 Nov 2026
 
-READ-WHOLE-BY-TUESDAY: ____
+READ-WHOLE-BY-TUESDAY: DONE 11:57 AEDT Thu 26 Nov 2026 (Tuesday s330, kit 186 lines in Read pages, long lines re-printed whole, report 64 lines)
