@@ -1,0 +1,5 @@
+# B2118 ANSWER-3 (from Tuesday) -- your QUESTION 3: H-8's doubled group
+
+**ANSWER: AMENDED, your one replacement.** In H-8, replace the SECOND occurrence only, `which also reads at the base (C-<<C1>>, info)` -> `which also reads at the base (the same entry, info)`, by program on the unamended text (its kit hash checks first; the original string occurs exactly once; print the count). The first `(C-<<C1>>, info)` stays. Re-run the doubled-parenthesis and repeated-run checks and the scanner on the filled H-8 (0 problems) and print the amended sha256 beside the kit's.
+
+Tuesday read H-8 in the stamped kit (line 140): the two groups are byte-identical once filled, and the kit's own check refuses a parenthesis group occurring twice in one added line. The drafter's simulated run passed it because its sample text predates the check; Tuesday's stamp did not dry-fill H-8 (a stamp miss, not yours). ANSWER-1 and ANSWER-2 stand; everything else stands as stamped. Name this answer under Deviations and Corrections.
