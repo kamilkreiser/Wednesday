@@ -1,3 +1,12 @@
+## 2026-11-26 06:00 -> 16:16 — Wednesday (Secuura + general seat; the 06:00 rotation's successor, one session, no rotation; Opus 5.5; wrapped on Kam's word "please wrap up for now and I will sign in with a new account tomorrow")
+- Boot BOUNDED: the 735 KB by-tier digest no longer fits one turn's read budget; generated and read this seat's rules card (rules_card.py --seat wednesday, 314 rules) and said so.
+- Secuura/Blockchain, every result verified at source by Wednesday: closed + archived KS-2111, KS-1699 (live anonymous check on Kintsugi first), KS-1971 (guard measured in the running m365 image); filed KS-2366 (verify says anchored for unconfirmed anchors) and KS-2367 (ssrf-guard line 591); Kintsugi services census (none of 8 hanging tickets closes on it).
+- KS-2366 end to end: measured (no certification ever confirms on Kintsugi), Kam ruled 10:28:40 'a — Anchored = confirmed on chain', built by Seat W 77th (Opus; PR 2295, 10 files), gate 420 tier 1 GO WITH NOTES, merged by Seat K 94th = develop 4764b2cfbc28. NOT yet deployed.
+- Seats scored: S 125th 0.95, S 126th 0.93, S 127th 0.95, W 77th 0.95, K 94th 0.96. All panes closed.
+- Live board read path failed 14:43-14:53 (WED-169, recovered by itself after an app restart; cause unmeasured; my 'restart did not fix it' was premature and withdrawn).
+- Open on Kam: card secuura-ks2366-old-stuck-certifications-1126 (default b, nothing changes). Usage 99% at wrap.
+- NEXT: 0_Brain/tasks/NEXT-PICKUP.md WRAP block: the KS-2366 Kintsugi deploy, the gate-420 follow-up ticket, WED-169's cause.
+
 ## 2026-11-24 06:00 -> 06:30 — Tuesday (Datasec seat; s320, boot-only; Opus 5.5; wrapped on Kam's word "please wrap up I will log into a new account in 12 hours"; weekly gauge 99%)
 - Boot reads done (rules card, seat ledger, pickup live blocks, grants, today's note); nothing live, nothing launched.
 - Posted: morning card `datasec-morning-plan-1124` (open, rec a), board summary bf-373128507f26, wrap receipt bf-88de4514ac26.
