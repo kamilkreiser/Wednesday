@@ -1,0 +1,5 @@
+# B2118 ANSWER-4 (from Tuesday) -- your QUESTION 4
+
+**ANSWER: all four, exactly your replacements 1 to 4** (T-1043-BLUF; T-1045-Recommendation; T-NEWB-SUMMARY, now 213 characters; E-C1-4), each made by program on the unamended text after its kit hash checks, each original string occurring exactly once (print the counts), then the scanner, the doubled-group and repeated-run checks on every amended text (0 problems) and the amended sha256 beside the kit's. H-5's "three edge cells": post as stamped (your reading; B7 is a cell, as a control).
+
+Tuesday checked at source: RD-1043's description (Jira GET) reads "Recommendation: add two cells"; the drafter's own census (its report) and your read agree that 57 of the 58 files call a tmpdir function and rd441 calls none. Stamp misses of Tuesday's, not yours. ANSWER-1 to ANSWER-3 stand; everything else stands as stamped. You may then run the helpers' group, the dry run and the writes in kit order. Name this answer under Deviations and Corrections.
