@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-27 10:02 from 291 lesson files (1,225,750 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 21 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-27 10:31 from 292 lesson files (1,229,231 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 22 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -8273,4 +8273,33 @@ sections (open the file for these): The rule · Why · The failure behind it (le
 4. Corrections are named for what they are, never minimised ("small", "minor") in a message to Kam.
 5. One Kam thread answered at a time; agent wakes wait behind his message.
 6. **Test, don't hedge (Kam, live board 11:53, verbatim: "You should have tested. I did. It works").** When a fact can be measured quickly and safely (a GET of a sign-in page, a read-only list), measure it before the message; "I haven't tested it" is acceptable only when the test is unsafe, approval-class or out of reach, and the message says why.
+
+
+## Fleet-structure project (Kam's priority beside Secuura): Fable for Wednesday and its agents; Postgres-backed brain, tiered project briefs, specialist skill loads
+`2026-11-27_fleet-structure-project-fable-postgres-brain-tiered-briefs-skills.md` · instruction · 2026-11-27 · status: live
+
+(no rules-shaped section — file included WHOLE)
+
+# Fleet-structure project (Kam's priority beside Secuura): Fable for Wednesday and its agents; Postgres-backed brain, tiered project briefs, specialist skill loads
+
+**The operative case.** Wednesday is choosing what to work on, launching an agent for this project, or designing boot/brief/skill loading for any seat. **This project is prioritised alongside Secuura, and Wednesday and every agent working on it run on the newest Fable.**
+
+## Kam's words, verbatim
+
+"In addition to working on Secuura I have a new project I would like you to prioritise.  Use fable for yourself and agents working on this project.  1)I would like to review and improve the structure for you Tuesday and Friday.  2) I saw that using a postgress datavase is a more efficient and better than .md files.  recently we revised the learning brain files but this would be a much better improvement.  Please look at this video and structure mentioed in it.  Anything else along the same line and improve the setup we use.  https://youtu.be/eNhiHP7t5bo?si=uWXQJ4MuXn3sRS0u  3)for each project, I would like to create a structure where, you, tuesday and friday can load the full project brief and info.  As you spin up worker agents for each task, the agents go through a cut down version of the brief on load, that includes project intent, architecture and key info (high level for context.  4) in addition to the before context, specialised agents will load specialised skills.  E.g. security review agent will load security skills including NIST guidelines, essential 8 for australia, GDPR, etc.  Each load it checks if they have been updated and reviews against these.  5)Please review the following skills and apply.  general ones to all loaders, specific ones to specialised agents https://www.linkedin.com/posts/yrebryk_12-github-repos-for-founders-to-ship-secure-share-7531386388663975936-agWC/?utm_source=social_share_send&utm_medium=ios_app&rcm=ACoAAAB0lV0BkPTMAUZBwf7qDXkSIFyZLethBus&utm_campaign=copy_link"
+
+## Wednesday's reading (told to him on the panel, bf-6bfcb92a1ea4e355)
+
+1. Review and improve the structure of Wednesday, Tuesday and Friday.
+2. Study the video's Postgres-backed memory structure (and similar work) against the markdown brain; improve the set-up.
+3. Per project: coordinators load the FULL brief; worker agents load a CUT-DOWN brief (intent, architecture, key info).
+4. Specialist agents also load specialist skills (security: NIST, Essential Eight, GDPR and so on), with a check on each load that the source has not been updated.
+5. Review the twelve repos in the LinkedIn post; general ones to all loaders, specific ones to specialists.
+
+## Boundaries (Wednesday's, stated)
+
+- "Use fable" is scoped to THIS project: Secuura seats keep routing by fleet/specs/model-routing.md. Kam set this pane's model himself; a seat's model is still set at launch, never by /model from Wednesday.
+- Research and a design come to Kam before anything is rebuilt: the brain, launchers and boot path are shared by three seats (claim with the sister seats before touching shared tooling).
+- Datasec project briefs are Tuesday's to write; the STRUCTURE is shared and client-neutral.
+- Third-party skills and repos are read before adoption; nothing external is installed into a loader unread.
 
