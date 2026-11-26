@@ -19,7 +19,18 @@ mkdir -p "$STATE/.gh-config" "$STATE/.azure" || exit 2
 unset GH_TOKEN GITHUB_TOKEN GIT_SSH_COMMAND AZURE_CLIENT_ID AZURE_CLIENT_SECRET AZURE_TENANT_ID AGENTMAIL_API_KEY LINEAR_API_KEY WED_AGENT
 export GH_CONFIG_DIR="$STATE/.gh-config" AZURE_CONFIG_DIR="$STATE/.azure"
 # The Claude login lives in Friday's config dir (tmux panes do not inherit it): name it, never rely on ~/.claude.
-export CLAUDE_CONFIG_DIR="$ROOT/4_Credentials/.claude"
+# (2026-11-26, Kam's card general-c2c-settings-folder-plugin-path-1126 = a, "please create one": a project with a sign-in
+#  folder of its OWN uses it, so nothing a seat records carries Friday's folder name through this route. The project's
+#  folder is <start dir>/coagent/4_Credentials/.claude for the one project that has one today. If that folder exists but
+#  holds no sign-in, REFUSE loudly: a silent fall back to Friday's folder is the defect this change removes.
+#  The line it replaces: export CLAUDE_CONFIG_DIR="$ROOT/4_Credentials/.claude")
+CFG="$ROOT/4_Credentials/.claude"
+if [ -d "$DIR/coagent/4_Credentials/.claude" ]; then
+  CFG="$DIR/coagent/4_Credentials/.claude"
+  /usr/bin/grep -q '"oauthAccount"' "$CFG/.claude.json" 2>&1 || { echo "general_seat: REFUSED: the project's own sign-in folder $CFG holds no sign-in (no oauthAccount in its .claude.json). Kam signs in there once; no fall back to Friday's folder." >&2; exit 2; }
+fi
+export CLAUDE_CONFIG_DIR="$CFG"
+echo "[general_seat] config=$CFG"
 cd "$DIR" || exit 2
 echo "[general_seat] dir=$DIR model=$MODEL (level $LEVEL) brief=$BRIEF"
 PROMPT="ultrathink
