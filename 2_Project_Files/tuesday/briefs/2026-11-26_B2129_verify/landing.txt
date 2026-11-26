@@ -1,0 +1,54 @@
+B2129 LANDING TEXT for Tuesday. Gate G1 (Opus), round 1 of 2: see VERDICT.md for the grade; this text assumes a grade with no Blocker.
+Repo datasecau/Reporting_Dashboard_Au. NO pull request exists yet (open PRs 0, gate read 22:03 AEDT 26 Nov). Branch b2127/lane2-scim-csp.
+HEAD (pin) a38a078aec721ad1adf01cb2e79b3120905d13f0 (K; three commits A 9fc20e95, B 86d22a99, K a38a078a; K~3 = BASE e20b30cf798624b76ea9f9c05c9f8d9cab8ecd56).
+Main at gate e8d5f7f1a6a78512a7ccfc41c691a60269f20049 (the merge of records PR 264; BASE..main = HISTORY.md only; the counts file blob at main 53b3bc45 = BASE's, so main's pair is still 6504 / 409 and the branch's 6530 / 411 needs no regeneration), read 22:03 AEDT by gh api -X GET.
+Every gh call is made with GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config'.
+
+0. RE-MEASURE BEFORE OPENING
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/ref/heads/main --jq .object.sha  -> e8d5f7f1a6a78512a7ccfc41c691a60269f20049
+     If main moved again: git diff --name-only e8d5f7f1..<new main> must touch none of backend/services/scimProvisioning.js, backend/services/cspReport.js, backend/services/accessAudit.js, __tests__/**, scripts/**, package*.json, jest.config.js, .github/**; backend/server.js may move only if `app.use('/scim/v2',` and `buildCspEntries(req.body` each still count 1 (cells H1 and S2 read them).
+     A move touching scripts/verify-expected-counts.json, or adding tests, means the counts must be regenerated (the verify fails on a difference in either direction): back to a seat, never edit the file by hand.
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/ref/heads/b2127/lane2-scim-csp --jq .object.sha -> a38a078aec721ad1adf01cb2e79b3120905d13f0
+   gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/compare/main...a38a078aec721ad1adf01cb2e79b3120905d13f0' --jq '[.ahead_by,.behind_by,.merge_base_commit.sha[0:8],([.files[]|[.filename,.additions,.deletions]])]'
+     -> [3,2,"e20b30cf",[rd1023 test 211/0, rd759-796 test 2/2, rd759 data test 98/0, cspReport.js 3/0, scimProvisioning.js 3/2, verify-expected-counts.json 3/3]]
+   Behind 2 is fine: the ruleset's required_status_checks has strict_required_status_checks_policy false (gate read of rules/branches/main, 22:1x), so no update of the branch is needed, and an update would move the pinned head. Never press "Update branch".
+
+1. OPEN THE PULL REQUEST (Tuesday's verb, the seat never)
+   Title: pr-title.txt. Body: pr-body.md (no name, card, seat or build id; choices named as the coordinator's; the three named limits).
+   Base main, head b2127/lane2-scim-csp, NOT a draft. build.yml builds pull requests to main, so the PR's own checks include the hosted `build` job: the FIRST real Linux run of the two new files (Q-8).
+
+2. WAIT FOR THE CHECKS
+   bash '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_checks_wait.sh' datasecau/Reporting_Dashboard_Au <n> a38a078aec721ad1adf01cb2e79b3120905d13f0 60 40 --min-checks 7
+   Seven distinct names, eight runs (gate read of PR 263 head 408b8655 and PR 264 head df127ce3, each `total 8`): Analyze (actions) | Analyze (javascript-typescript) | Analyze (python) | CodeQL | audit-production-deps (twice: push and pull_request) | build | scan.
+     NOTE: an `audit-production-deps` run (npm-audit, push to any branch) ALREADY exists on a38a078a from the seat's branch push (success; gate read 22:03). The PR adds the pull_request one. Exit 0 = all green; exit 1 or 5 = STOP: read the run, never re-run blindly.
+   Read the `build` job log (gh api -X GET repos/datasecau/Reporting_Dashboard_Au/actions/jobs/<id>/logs) for: `VERDICT: PASS` with `6530/6530 tests passed across 411 suites` (match the words, the dash may be an em dash); `PASS __tests__/rd1023-scim-audit-entries-record-the-full-path.test.js`, `PASS __tests__/rd759-data-address-with-at-sign-refused.test.js`, `PASS __tests__/rd759-796-csp-intake-edges-and-typed-fields.test.js`; counts of `FAIL ` lines 0 and `EADDRINUSE` 0 (print a control for each literal on a line known to hold it).
+   Q-8: a red on a NEW cell (F1-F5, L1-L3, T1, N1-N3, C1, H1 of the SCIM file; D1-D5, K1, L1, N1-N3, S1, S2 of the CSP file; C-DATA) = NO MERGE, a fix round of the B2099 class: read the failure text, send it to a seat, never re-run to a green. The cell most exposed to Linux is H1 (one real-server boot through inventory.bootShape, store folder from persistentTempDir), the same call the hosted-green RD-1013 file makes.
+   Code scanning: the ruleset's code_scanning rule is `security_alerts_threshold: high_or_higher` AND `alerts_threshold: errors` (gate read of rules/branches/main). Main's baseline (gate read 22:1x): javascript-typescript analysis 2255623191 at e8d5f7f1 reads 29 results (python 0, actions 0); 22 open alerts.
+     gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/code-scanning/analyses?ref=refs/pull/<n>/head&per_page=6' --jq '.[]|[.commit_sha[0:8],.results_count,.category]|@tsv'
+       DRAFTER_RULES: a 0 or "no new alert" read here cannot fail as proof of absence; it is NOT a landing condition. The check that can fail is 3b.
+     The one data-flow path the gate found in a changed file: open alert #235 (js/http-to-file-access, medium, primary backend/jsonStorage.js:524) has related and flow-step locations in scimProvisioning.js at BASE lines 92 and 235 to 304 (the SCIM user write paths). No location of any result is on a changed line (BASE 35-36, 120, 156), and none is in cspReport.js or accessAudit.js. At K those lines shift down by one (the import line); alert matching is by fingerprint, and the seat's local CodeQL read KEPT 0 / NEW 0 (head 29 = base 29). If the PR's code-scanning check names #235 or any alert as new: NO MERGE, read it; never dismiss.
+
+3. LAND: A MERGE COMMIT PINNED TO THE HEAD. NEVER SQUASH, NEVER REBASE.
+   Rule: C-190 (/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/1_Project_Definition/CLARIFICATIONS.md line 2067, read by the gate with awk NR==2067): "2. Merge path: open a PR from the gated branch, wait for CodeQL (a background wait that EXITS), then land the SAME commit. Never squash, never rebase ([[C-68]])."
+   gh pr merge <n> --repo datasecau/Reporting_Dashboard_Au --merge --match-head-commit a38a078aec721ad1adf01cb2e79b3120905d13f0
+   Then: gh api -X GET repos/datasecau/Reporting_Dashboard_Au/pulls/<n> --jq .merge_commit_sha   (call it M)
+         gh api -X GET repos/datasecau/Reporting_Dashboard_Au/commits/<M> --jq '[.parents[].sha]'
+           -> two parents: e8d5f7f1a6a78512a7ccfc41c691a60269f20049 (or the main before the merge) and a38a078aec721ad1adf01cb2e79b3120905d13f0; one parent = squashed or rebased: STOP.
+         gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/ref/heads/main --jq .object.sha -> M
+   3b. AFTER THE MERGE (the check that can fail): gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/code-scanning/analyses?ref=refs/heads/main&per_page=6' --jq '.[]|[.commit_sha[0:8],.results_count,.category]|@tsv'
+       -> the javascript-typescript analysis at M reads 29 (as main). A higher count is a new round: read each new alert; never dismiss one. Open alerts expected 22.
+   3c. Main's own push `build` at M: read it for `VERDICT: PASS` 6530/411 as in step 2.
+
+4. DEPLOY DEMO: READ ONLY. A RUN WILL START; BOTH JOBS MUST READ SKIPPED; APPROVE NOTHING. C-224 HOLD STANDS.
+   .github/workflows/deploy-demo.yml at main e8d5f7f1 (gate read with git show, line 29 paths-ignore): `on: push` to main with `paths-ignore: '**.md', 'docs/**', 'tests/**'` (backend/** and __tests__/** are NOT ignored) plus workflow_dispatch. This merge touches backend/** and __tests__/**, so the push STARTS a `Deploy demo` run (workflow id 333076536).
+   Both jobs need vars.CI_DEPLOY_ENABLED == 'true' (the `if:` of build, line 53, and of deploy, line 91); the deploy job is also bound to environment `demo` (line 95). Gate read of the repo's Actions variables: total_count 0 (22:1x). Newest runs: 45757473204 at e20b30cf completed/skipped, 45722722201 at 89663a44 completed/skipped; e8d5f7f1 (HISTORY.md only) started no run (paths-ignore).
+   The gate read nothing about the `demo` environment's protection rules and makes no claim about them. Package (deploy.yml) is workflow_dispatch only: it does not start.
+     gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/actions/workflows/333076536/runs?head_sha=<M>' --jq '.workflow_runs[] | [.id,.event,.status,.conclusion] | @tsv'
+       Expect one push run, completed/skipped within about a minute. If none appears after about 5 minutes read runs?per_page=5 and say so. Do not dispatch one.
+     gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/actions/runs/<run id>/jobs' --jq '.jobs[] | [.name,.status,.conclusion] | @tsv'
+       Expected: build completed skipped, deploy completed skipped. BOTH must read skipped: the landing reads it as NOT DEPLOYING.
+   IF EITHER JOB RUNS (queued, in_progress, waiting, success), THE SWITCH IS ON: do NOT approve the pending deployment; do not cancel, re-run or dispatch. Approving or rejecting is approval-class: card it to the product owner under the C-224 hold (CLARIFICATIONS.md line 2412: no NexusAI demo deploy until RD-876 part 2 lands) with the run id and job states. Record in the records pass that the switch read ON at <M>.
+   Make no HTTP request to the demo site in any case.
+
+5. AFTER THE LANDING
+   Hand FOR-RECORDS.md to the records pass (RD-1023 and RD-759 comments and moves; the owed hunk-comment rewording and the stale test-file header; the ticket candidates).
