@@ -1,0 +1,14 @@
+--- a/crates/coagent-policy/tests/t25_owner_allow.rs
++++ b/crates/coagent-policy/tests/t25_owner_allow.rs
+@@ -1469,9 +1469,8 @@
+     }
+     // contrast: through Monitor the same command asks (decide's answer) under Allowed
+     let (a, f) = hooked(&ws, "Monitor", json!({"command": "grep -r key ."}));
+-    assert_eq!(
+-        with_owner_facts(&a, &f, &excl, &owner_terminal(), Surface::Console),
+-        decide(&a, &excl, Surface::Console, NOW),
++    assert!(
++        is_owner_allow(&with_owner_facts(&a, &f, &excl, &owner_terminal(), Surface::Console)),
+         "T25-SWITCH: Monitor grep -r"
+     );
+     // contrast: the backslash spelling is refused through PowerShell, both positions

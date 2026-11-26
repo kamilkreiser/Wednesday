@@ -1,0 +1,22 @@
+--- a/crates/coagent-policy/tests/t28_at_names.rs
++++ b/crates/coagent-policy/tests/t28_at_names.rs
+@@ -654,3 +654,19 @@
+     }
+     assert_eq!(counts.values().sum::<usize>(), 4_000);
+ }
++
++/// QA-POLICY-WORDS plant (never committed): T-2's mechanism, a row built at run time from the fixture root.
++#[test]
++fn qpw_t2_plant() {
++    let fx = mode_fixture("qpw-t2-plant");
++    let (open, _, _) = states(&fx);
++    let canon = std::fs::canonicalize(&fx.root).unwrap();
++    let parent = canon.parent().unwrap().to_str().unwrap().to_string();
++    let cmd = match std::env::var("QPW_T2").as_deref() {
++        Ok("rel") => "scp a dev@build-host:srv/app/".to_string(),
++        _ => format!("scp a dev@build-host:{parent}/"),
++    };
++    let (got, nov) = cols(&fx, &open, "Bash", &cmd);
++    eprintln!("QPW-T2 cmd={cmd:?} got={got} nov={nov:?}");
++    assert_eq!(got, "a3 a3 U B", "T28-SHAPES-PLANT: `{cmd}` (nothing excluded)");
++}

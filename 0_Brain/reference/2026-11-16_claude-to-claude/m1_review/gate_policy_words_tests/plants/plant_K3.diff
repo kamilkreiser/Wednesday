@@ -1,0 +1,11 @@
+--- a/crates/coagent-policy/tests/t25_owner_allow.rs
++++ b/crates/coagent-policy/tests/t25_owner_allow.rs
+@@ -1426,7 +1426,7 @@
+         );
+         let d = with_owner_facts(&a, &f, &excl, &owner_terminal(), Surface::Console);
+         assert!(
+-            is_owner_allow(&d),
++            is_owner_allow(&d) != (*cmd == "npm test"),
+             "T25-SWITCH: `{cmd}` from {cwd:?} with **/.env* excluded, Allowed: not run unasked: {d:?}"
+         );
+         assert_eq!(

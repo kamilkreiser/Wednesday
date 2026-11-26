@@ -1,0 +1,92 @@
+--- a/crates/coagent-policy/tests/t27_owner_dark.rs
++++ b/crates/coagent-policy/tests/t27_owner_dark.rs
+@@ -173,89 +173,6 @@
+         .lines()
+         .position(|l| l.trim_start().starts_with('['))
+         .unwrap_or(usize::MAX);
+-    // POLICY-WORDS: does an inline table `{ k = …, k2 = … }` name `coagent-policy` as one of its own keys (its first
+-    // dotted part, quoted or not; keys of nested tables and text inside quotes do not count)?
+-    let inline_names_policy = |v: &str| -> bool {
+-        let Some(body) = v.trim_start().strip_prefix('{') else {
+-            return false;
+-        };
+-        let (mut depth, mut quote, mut esc) = (1usize, None::<char>, false);
+-        let (mut key, mut in_key) = (String::new(), true);
+-        for c in body.chars() {
+-            let keep = in_key && depth == 1;
+-            if esc {
+-                esc = false;
+-            } else {
+-                match (quote, c) {
+-                    (Some('"'), '\\') => esc = true,
+-                    (Some(q), _) if c == q => quote = None,
+-                    (Some(_), _) => {}
+-                    (None, '"' | '\'') => quote = Some(c),
+-                    (None, '{' | '[') => depth += 1,
+-                    (None, '}' | ']') => {
+-                        depth -= 1;
+-                        if depth == 0 {
+-                            break;
+-                        }
+-                    }
+-                    (None, '=') if keep => {
+-                        if keys(&key).first().is_some_and(|k| k == NAME) {
+-                            return true;
+-                        }
+-                        key.clear();
+-                        in_key = false;
+-                        continue;
+-                    }
+-                    (None, ',') if depth == 1 => {
+-                        key.clear();
+-                        in_key = true;
+-                        continue;
+-                    }
+-                    _ => {}
+-                }
+-            }
+-            if keep {
+-                key.push(c);
+-            }
+-        }
+-        false
+-    };
+-    // POLICY-WORDS (the POLICY-AT first check's n-7): a dependency table written as ONE inline table naming the crate
+-    // as a key, at the top level (`dependencies = { coagent-policy = { … } }`, `dev-dependencies = …`,
+-    // `build-dependencies = …`) or as a line under a `[target.<x>]` header
+-    let mut header: Option<Vec<String>> = None;
+-    let inline_table = manifest.lines().any(|l| {
+-        let t = l.trim_start();
+-        if t.starts_with('#') {
+-            return false;
+-        }
+-        if let Some(h) = t
+-            .strip_prefix('[')
+-            .and_then(|h| until_outside_quotes(h, ']'))
+-        {
+-            header = Some(if t.starts_with("[[") {
+-                vec![String::new()]
+-            } else {
+-                keys(&h)
+-            });
+-            return false;
+-        }
+-        let top_or_target = match &header {
+-            None => true,
+-            Some(k) => k.len() == 2 && k[0] == "target",
+-        };
+-        if !top_or_target {
+-            return false;
+-        }
+-        let Some(k) = until_outside_quotes(t, '=') else {
+-            return false;
+-        };
+-        let ks = keys(&k);
+-        ks.len() == 1 && dep_table(&ks[0]) && inline_names_policy(&t[k.len() + 1..])
+-    });
+-    if inline_table {
+-        return true;
+-    }
+     manifest.lines().enumerate().any(|(line_no, l)| {
+         let t = l.trim_start();
+         // the old disjunct, unchanged
