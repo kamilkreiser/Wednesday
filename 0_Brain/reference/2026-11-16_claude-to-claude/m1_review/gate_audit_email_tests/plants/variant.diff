@@ -1,0 +1,55 @@
+--- /private/tmp/claude-501/qae/c/crates/coagent-audit/src/redact.rs	2026-11-26 15:29:22
++++ /private/tmp/claude-501/qae/pv/crates/coagent-audit/src/redact.rs	2026-11-26 15:40:59
+@@ -792,7 +792,11 @@
+                 e -= 1;
+             }
+             if !email_domain_ok(&b[at + 1..e]) {
+-                continue;
++                // QA SCRATCH VARIANT (not the lane's code): the longest valid prefix of the run.
++                match email_longest_ok(&b[at + 1..e]) {
++                    Some(t) => e = at + 1 + t,
++                    None => continue,
++                }
+             }
+             if exclude && e + 1 < b.len() && b[e] == b':' && !b[e + 1].is_ascii_whitespace() {
+                 continue;
+@@ -806,6 +810,39 @@
+         }
+     }
+ 
++    /// QA SCRATCH VARIANT: the length of the longest prefix of `d` that, trimmed of trailing `.`
++    /// and `-`, passes [`email_domain_ok`] (one linear pass), or `None`.
++    fn email_longest_ok(d: &[u8]) -> Option<usize> {
++        let mut best = None;
++        let mut done = 0usize;
++        let mut empty = false;
++        let mut ls = 0usize;
++        let mut alpha = true;
++        for t in 1..=d.len() {
++            let c = d[t - 1];
++            if c == b'.' {
++                if t - 1 == ls {
++                    empty = true;
++                }
++                done += 1;
++                ls = t;
++                alpha = true;
++                continue;
++            }
++            if !c.is_ascii_alphabetic() {
++                alpha = false;
++            }
++            if c == b'-' || empty || done == 0 {
++                continue;
++            }
++            let cur = &d[ls..t];
++            if (cur.len() >= 2 && alpha) || (cur.len() >= 4 && cur[..4].eq_ignore_ascii_case(b"xn--")) {
++                best = Some(t);
++            }
++        }
++        best
++    }
++
+     /// The domain test of [`emails`]: two or more labels, none empty, the last one ASCII letters
+     /// only (at least 2) or starting `xn--`.
+     fn email_domain_ok(d: &[u8]) -> bool {

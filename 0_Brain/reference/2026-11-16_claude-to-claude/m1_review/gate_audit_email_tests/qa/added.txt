@@ -1,0 +1,976 @@
++  - 2026-11-26: a new rule masks email addresses whole (`patterns::emails`, the owner's ruling), in previews and summaries; a summary near the 4096-byte limit can now be refused, because the mask is longer than a short address (measured: 585 six-byte addresses in 4,094 bytes become 6,434 bytes after redaction); its misses are listed in their own entry below
++  - 2026-11-26: email addresses are now masked (`patterns::emails`, the owner's ruling), so the delta gate's over-masking report now prints `CHANGED` for its `email` sample (`mail bob@example.com: thanks` -> `mail [REDACTED]: thanks`); the owner's ruling supersedes that sample's "ordinary text" reading
++  - Resolved: 2026-11-26 (N-6 only): `PatternRedactor` now masks email addresses (`patterns::emails`, the owner's ruling: email addresses blanked in previews); previews already stored, and previews received from a peer, are kept as written (entries below)
++- [ ] A preview or summary received from a peer is stored as the peer wrote it: an email address its build did not mask stays in this member's log
++  - Where: crates/coagent-audit/src/received.rs (`tier_ok`: a peer's tier bodies are checked against their commitments and for size only)
++  - Symptom: a peer on a build without the email rule, or a hostile one, sends previews holding addresses; they are stored, exported and verified unchanged
++  - Why deferred: the body is committed under the author's signature, so a receiver cannot re-mask it without breaking the commitment; the coordinator's ruling: recorded, nothing built. The owner will be told
++  - Discovered: 2026-11-26 while adding the email rule (the owner's ruling)
++- [ ] The comment of `REDACT_WINDOW_BYTES` is false: a word cut by the 64 KiB window end can reach a preview unmasked
++  - Where: crates/coagent-audit/src/redact.rs, the comment of `REDACT_WINDOW_BYTES` ("every byte that can reach a preview is redacted with its full context") and `preview`
++  - Symptom: masks shrink the text (a long masked run becomes `[REDACTED]`), so text cut by the window reaches the preview; measured: 65,522 bytes of `a1a1…`, then ` alice@example.com tail` (65,545 bytes) gives the preview `[REDACTED] alice@example`; the same holds for every rule (a token cut by the window can fall below its minimum length). Not reachable through the daemon (a send is at most 16 KiB); reachable through the library (`EventInput.full` has no size bound)
++  - Why deferred: a change to `preview` for every rule on inputs over 65,536 bytes is its own piece of work (the coordinator's ruling); the comment is left as it is until then
++  - Discovered: 2026-11-26 while adding the email rule (the owner's ruling)
++- [ ] Email addresses the new rule does not catch
++  - Where: crates/coagent-audit/src/redact.rs `patterns::emails` (its doc comment lists them)
++  - Symptom: kept in a preview: a quoted local part (`"john doe"@example.com`); any address with a non-ASCII byte (`alice@bücher.example` keeps `alice@b`); `%40`, `&#64;`, `alice at example dot com`; an address split across lines or by spaces; a single-label or numeric domain (`a@localhost`, `a@[192.0.2.1]`); an address followed directly by more domain characters that make its last label something other than letters; an address cut by the 64 KiB window end; an address inside a `scheme://` token (`https://user@host.example/`, masked by neither rule); an scp or ssh target (`user@host.example.com:/path` keeps its user name)
++  - Why deferred: the coordinator's ruling on the grammar (ASCII, dotted domain, URL tokens left to the URL rule, scp targets not masked)
++  - Discovered: 2026-11-26 while adding the email rule (the owner's ruling)
++# The owner's ruling: email addresses blanked in previews
++[[test]]
++name = "ae_email"
++    // AUDIT-EMAIL (the owner's ruling: email addresses blanked in previews)
++    "redact_no_email",
++    "email_keeps_domain",
++    "email_eats_scp_and_urls",
++        // The owner's ruling: email addresses are blanked in previews (and summaries) as well.
++        // RED CONTROL `redact_no_email`: the broken variant skips the rule.
++        if !cfg!(coagent_audit_red = "redact_no_email") {
++            emails(b, &mut r);
++        }
++
++    /// Email addresses (the owner's ruling: email addresses are blanked in previews). The whole
++    /// address (local part, `@` and domain) is one span, so it becomes one [`super::MASK`].
++    ///
++    /// **What it matches**, at each `@` of the text (the text [`super::PatternRedactor`] matches
++    /// on, after [`super::strip_format_chars`]):
++    /// - the local part: the longest run of ASCII `[A-Za-z0-9._%+-]` ending just before the `@`
++    ///   (plus-tags and dotted local parts included), leading `.` trimmed, at least 1 byte. The run
++    ///   stops at any other byte: `@`, `:`, `/`, `<`, `"`, `'`, whitespace, and every non-ASCII byte;
++    /// - the domain: the longest run of ASCII `[A-Za-z0-9.-]` starting just after the `@`, trailing
++    ///   `.` and `-` trimmed, holding at least two labels separated by `.`, no empty label, and a last
++    ///   label of at least 2 ASCII letters only, or a last label starting `xn--` (punycode; compared
++    ///   case-insensitively).
++    ///
++    /// So an address is found inside angle brackets (`<a@b.example>`), quotes and JSON strings,
++    /// after `mailto:` (the `:` is not a local-part byte: `mailto:` is kept), in a `Signed-off-by:`
++    /// trailer, and before `.`, `,`, `)` or `: `.
++    ///
++    /// **Not an address** (not masked by this rule; other rules may still mask part of it):
++    /// - an `@` inside a `scheme://` token, from the `://` to the end of the token as
++    ///   [`url_userinfo`] delimits it (whitespace, `"`, `'`, `<`, `>`, `` ` ``, a non-ASCII byte):
++    ///   that token is the URL rule's, so `https://user@host.example/` (no password) is masked by
++    ///   neither rule;
++    /// - an scp or ssh target: a domain followed immediately by `:` and then a byte that is not
++    ///   whitespace (`user@host.example.com:/path`, `git@host.example:org/repo`); such a target keeps
++    ///   its user name. A `:` followed by whitespace or the end of the text does not stop the match;
++    /// - `@mentions` and decorators (`@name`, `@app.route`): no local part;
++    /// - version pins (`pkg@1.2.3`): the last label is not letters;
++    /// - `a@b`, `user@localhost`: no dot in the domain.
++    ///
++    /// **Not caught:** quoted local parts (`"john doe"@example.com`); any address with a non-ASCII
++    /// byte in it (the domain run stops at the first one, so `alice@bücher.example` keeps
++    /// `alice@b`); a percent-encoded `@` (`%40`), HTML entities (`&#64;`), spelled-out forms
++    /// (`alice at example dot com`), an address split across lines or by spaces; a single-label or
++    /// numeric domain (`a@localhost`, `a@[192.0.2.1]`); an address cut by the end of
++    /// [`super::REDACT_WINDOW_BYTES`]; an address directly followed by more domain bytes that make
++    /// the last label something other than letters (`alice@example.com9f86…`,
++    /// `alice@example.com--flag`: the run is not a domain); addresses inside a `scheme://` token
++    /// or an scp target (above).
++    ///
++    /// **Over-masking** (accepted, like the other rules): anything of the shape, such as a file-like
++    /// `name@file.rs` or a Python matrix product with an attribute `x@self.weight`.
++    ///
++    /// **Linear time.** Neither run includes `@`, so a byte is visited at most twice: once as a
++    /// domain byte of the `@` before it and once as a local byte of the `@` after it; the domain
++    /// check reads the domain run once; the `scheme://` tokens are found in one pass before the scan
++    /// and walked with one forward index.
++    pub fn emails(b: &[u8], r: &mut Vec<(usize, usize)>) {
++        let local =
++            |c: u8| c.is_ascii_alphanumeric() || matches!(c, b'.' | b'_' | b'%' | b'+' | b'-');
++        let domain = |c: u8| c.is_ascii_alphanumeric() || matches!(c, b'.' | b'-');
++        // RED CONTROL `email_eats_scp_and_urls`: the broken variant drops both exclusions.
++        let exclude = !cfg!(coagent_audit_red = "email_eats_scp_and_urls");
++        // `scheme://` tokens, delimited as `url_userinfo` delimits them, found once (sorted, disjoint)
++        let mut urls: Vec<(usize, usize)> = Vec::new();
++        if exclude {
++            let mut i = 0;
++            while let Some(p) = find_from(b, b"://", i) {
++                let start = p + 3;
++                let mut end = start;
++                while end < b.len()
++                    && !b[end].is_ascii_whitespace()
++                    && !matches!(b[end], b'"' | b'\'' | b'<' | b'>' | b'`')
++                    && b[end] < 0x80
++                {
++                    end += 1;
++                }
++                urls.push((start, end));
++                i = end.max(start);
++            }
++        }
++        let mut u = 0;
++        for at in 0..b.len() {
++            if b[at] != b'@' {
++                continue;
++            }
++            while u < urls.len() && urls[u].1 <= at {
++                u += 1;
++            }
++            if u < urls.len() && urls[u].0 <= at {
++                continue;
++            }
++            let mut s = at;
++            while s > 0 && local(b[s - 1]) {
++                s -= 1;
++            }
++            while s < at && b[s] == b'.' {
++                s += 1;
++            }
++            if s == at {
++                continue;
++            }
++            let mut e = at + 1;
++            while e < b.len() && domain(b[e]) {
++                e += 1;
++            }
++            while e > at + 1 && matches!(b[e - 1], b'.' | b'-') {
++                e -= 1;
++            }
++            if !email_domain_ok(&b[at + 1..e]) {
++                continue;
++            }
++            if exclude && e + 1 < b.len() && b[e] == b':' && !b[e + 1].is_ascii_whitespace() {
++                continue;
++            }
++            // RED CONTROL `email_keeps_domain`: the broken variant masks the local part only.
++            if cfg!(coagent_audit_red = "email_keeps_domain") {
++                r.push((s, at));
++            } else {
++                r.push((s, e));
++            }
++        }
++    }
++
++    /// The domain test of [`emails`]: two or more labels, none empty, the last one ASCII letters
++    /// only (at least 2) or starting `xn--`.
++    fn email_domain_ok(d: &[u8]) -> bool {
++        let mut labels = 0usize;
++        let mut last: &[u8] = &[];
++        for label in d.split(|&c| c == b'.') {
++            if label.is_empty() {
++                return false;
++            }
++            labels += 1;
++            last = label;
++        }
++        labels >= 2
++            && ((last.len() >= 2 && last.iter().all(u8::is_ascii_alphabetic))
++                || (last.len() >= 4 && last[..4].eq_ignore_ascii_case(b"xn--")))
++    }
++//! The owner's ruling: email addresses are blanked in the audit log's short previews.
++//!
++//! `patterns::emails` (crates/coagent-audit/src/redact.rs) masks an address whole (local part, `@`
++//! and domain) as one `[REDACTED]`. These tests check the shapes it claims to catch, the shapes it
++//! must leave exactly as they were, a generated property against hostile placement, its cost on
++//! hostile input, and that logs already written are kept as written.
++//!
++//! "Never appears" is stricter here than in `redaction.rs`, because addresses are short: for each
++//! planted address the preview holds (a) no 8-byte window of it, (b) no substring of it that holds
++//! its `@` with at least one byte on each side, and (c) when it is shorter than 8 bytes, not the
++//! address itself. Every listed sample has a positive control through an identity "redactor".
++//! Every address here uses a reserved example domain.
++mod common;
++
++use std::cell::RefCell;
++use std::collections::BTreeMap;
++use std::time::Instant;
++
++use coagent_audit::bundle::verify;
++use coagent_audit::chain::EventInput;
++use coagent_audit::redact::{
++    patterns, preview, PatternRedactor, Redactor, PREVIEW_MAX_CHARS, PREVIEW_MAX_LINES,
++};
++use coagent_audit::session::SessionAudit;
++use coagent_audit::store::MemStore;
++use common::{contains, every, t, windows8, World};
++use proptest::prelude::*;
++use proptest::test_runner::{Config, RngSeed, TestError, TestRunner};
++
++struct Identity;
++impl Redactor for Identity {
++    fn redact(&self, text: &str) -> String {
++        text.to_string()
++    }
++}
++
++/// What of `addr` survives in `p`: `Some("address")` when a piece holding its `@` with a byte on
++/// each side does (or the whole address, if it is shorter than 8 bytes); `Some("domain")` when its
++/// `@` and domain do; `Some("part of the address")` when any other 8-byte window does; else `None`.
++fn survives(p: &str, addr: &str) -> Option<&'static str> {
++    let (pb, ab) = (p.as_bytes(), addr.as_bytes());
++    let at = ab
++        .iter()
++        .position(|&c| c == b'@')
++        .expect("an address has an @");
++    for s in 0..at {
++        for e in at + 2..=ab.len() {
++            if contains(pb, &ab[s..e]) {
++                return Some("address");
++            }
++        }
++    }
++    if ab.len() < 8 && contains(pb, ab) {
++        return Some("address");
++    }
++    if contains(pb, &ab[at..]) {
++        return Some("domain");
++    }
++    if windows8(ab).iter().any(|w| contains(pb, w)) {
++        return Some("part of the address");
++    }
++    None
++}
++
++/// (name, text, the address in it that must not survive). The "matches" and "found inside" shapes.
++fn listed() -> Vec<(&'static str, &'static str, &'static str)> {
++    vec![
++        // first: a sample no other rule touches (the red controls' evidence comes from it)
++        (
++            "followed by a colon and a space",
++            "mail bob@example.com: thanks",
++            "bob@example.com",
++        ),
++        (
++            "from header",
++            "from: alice@example.com",
++            "alice@example.com",
++        ),
++        ("to header", "To: carol@example.org", "carol@example.org"),
++        (
++            "flag --email",
++            "git config --email dave@example.net",
++            "dave@example.net",
++        ),
++        (
++            "json string",
++            "{\"email\": \"erin@example.com\", \"n\": 1}",
++            "erin@example.com",
++        ),
++        (
++            "mailto",
++            "see mailto:frank@example.org for help",
++            "frank@example.org",
++        ),
++        (
++            "angle brackets",
++            "Reply-To: <a.person@example.org>",
++            "a.person@example.org",
++        ),
++        (
++            "signed-off-by trailer",
++            "Signed-off-by: A Person <a.person@example.net>",
++            "a.person@example.net",
++        ),
++        (
++            "plus tag, dotted local, deep domain",
++            "cc alice.smith+tag@mail.sub.example.com now",
++            "alice.smith+tag@mail.sub.example.com",
++        ),
++        (
++            "percent, hyphen and underscore local",
++            "x%y-z_w@example.net",
++            "x%y-z_w@example.net",
++        ),
++        ("upper case", "BOB@EXAMPLE.COM wrote", "BOB@EXAMPLE.COM"),
++        ("reserved tld", "user@host.test", "user@host.test"),
++        (
++            "hyphenated domain label",
++            "ops@mail-relay.example.org",
++            "ops@mail-relay.example.org",
++        ),
++        (
++            "punycode last label",
++            "user@shop.example.xn--zckzah",
++            "user@shop.example.xn--zckzah",
++        ),
++        (
++            "single quotes",
++            "author='grace@example.com'",
++            "grace@example.com",
++        ),
++        (
++            "followed by a period",
++            "write to heidi@example.com.",
++            "heidi@example.com",
++        ),
++        (
++            "followed by a comma",
++            "ivan@example.com, judy@example.org",
++            "ivan@example.com",
++        ),
++        (
++            "second of a list",
++            "ivan@example.com, judy@example.org",
++            "judy@example.org",
++        ),
++        (
++            "in parentheses",
++            "(mallory@example.net)",
++            "mallory@example.net",
++        ),
++        ("short", "a@b.example", "a@b.example"),
++        (
++            "leading dot trimmed",
++            ".oscar@example.com",
++            "oscar@example.com",
++        ),
++    ]
++}
++
++#[test]
++fn ae_listed_addresses_never_appear_in_a_preview() {
++    let filler = "word ".repeat(40); // 200 characters: places an address across the 240-character cut
++    for (name, text, addr) in listed() {
++        // positive control: the sample fits in a preview and the scan sees it unredacted
++        assert_eq!(
++            survives(&preview(&Identity, text), addr),
++            Some("address"),
++            "control: {name} not visible without redaction"
++        );
++        for placed in [
++            text.to_string(),
++            format!("{filler}{text}"),
++            format!("line one\nline two {text} trailing"),
++            format!("prefix text ({text}) suffix"),
++            format!("{text}\n{text}"),
++        ] {
++            let p = preview(&PatternRedactor, &placed);
++            if let Some(what) = survives(&p, addr) {
++                panic!("{name}: {what}: leaked in preview {p:?}");
++            }
++            // the redactor itself, on the whole text, masks it too
++            let r = PatternRedactor.redact(&placed);
++            if let Some(what) = survives(&r, addr) {
++                panic!("{name}: {what}: leaked by redact {r:?}");
++            }
++        }
++    }
++    // the mask is the crate's one mask, the whole address one span; what is around it is kept
++    assert_eq!(
++        preview(&PatternRedactor, "mail bob@example.com: thanks"),
++        "mail [REDACTED]: thanks"
++    );
++    assert_eq!(
++        preview(&PatternRedactor, "see mailto:frank@example.org for help"),
++        "see mailto:[REDACTED] for help"
++    );
++    assert_eq!(
++        preview(&PatternRedactor, "Reply-To: <a.person@example.org>"),
++        "Reply-To: <[REDACTED]>"
++    );
++    assert_eq!(
++        preview(&PatternRedactor, "write to heidi@example.com."),
++        "write to [REDACTED]."
++    );
++    assert_eq!(
++        preview(&PatternRedactor, ".oscar@example.com"),
++        ".[REDACTED]"
++    );
++    assert_eq!(
++        patterns_emails("mail bob@example.com: thanks"),
++        vec![(5, 20)]
++    );
++}
++
++fn patterns_emails(text: &str) -> Vec<(usize, usize)> {
++    let mut r = Vec::new();
++    patterns::emails(text.as_bytes(), &mut r);
++    r
++}
++
++/// (name, text, the preview at the base: written out, not computed). The "not an address" shapes.
++fn not_addresses() -> Vec<(&'static str, &'static str, &'static str)> {
++    vec![
++        // first: the shapes the exclusions keep (the red control's evidence comes from them)
++        (
++            "scp target",
++            "scp build.tar user@host.example.com:/tmp/x",
++            "scp build.tar user@host.example.com:/tmp/x",
++        ),
++        (
++            "ssh git remote",
++            "git@git.example.com:org/repo.git",
++            "git@git.example.com:org/repo.git",
++        ),
++        (
++            "url user, no password",
++            "git clone https://bob@example.com/r",
++            "git clone https://bob@example.com/r",
++        ),
++        (
++            "url user and password",
++            "git clone https://bob:hunter2pw@example.com/r",
++            "git clone https://[REDACTED]@example.com/r",
++        ),
++        (
++            "address in a url query",
++            "open https://example.com/c?to=alice@example.org now",
++            "open https://example.com/c?to=alice@example.org now",
++        ),
++        (
++            "url with @path",
++            "https://example.com/users/@alice:profile",
++            "https://example.com/users/@alice:profile",
++        ),
++        (
++            "mention",
++            "thanks @alice for the review",
++            "thanks @alice for the review",
++        ),
++        (
++            "decorator",
++            "@Override\npublic void run()",
++            "@Override\npublic void run()",
++        ),
++        ("dotted decorator", "@app.route(\"/\")", "@app.route(\"/\")"),
++        (
++            "version pin",
++            "npm install pkg@1.2.3",
++            "npm install pkg@1.2.3",
++        ),
++        (
++            "scoped version pin",
++            "npm install @types/node@18.0.0",
++            "npm install @types/node@18.0.0",
++        ),
++        ("bare a@b", "a@b", "a@b"),
++        (
++            "single-label domain",
++            "ssh user@localhost",
++            "ssh user@localhost",
++        ),
++        ("numeric domain", "a@[192.0.2.1]", "a@[192.0.2.1]"),
++        ("empty label", "bob@example..com", "bob@example..com"),
++        ("one-letter last label", "bob@example.c", "bob@example.c"),
++        ("lone at", "a @ b", "a @ b"),
++    ]
++}
++
++#[test]
++fn ae_what_is_not_an_address_is_kept_exactly() {
++    for (name, text, want) in not_addresses() {
++        let p = preview(&PatternRedactor, text);
++        assert_eq!(
++            p, want,
++            "{name}: not an address: changed: {text:?} -> {p:?}"
++        );
++        assert!(
++            patterns_emails(text).is_empty(),
++            "{name}: not an address: changed (spans)"
++        );
++    }
++    // positive control: the same exclusions next to a real address leave the address masked
++    let p = preview(
++        &PatternRedactor,
++        "git@git.example.com:org/repo.git by bob@example.com via https://bob@example.com/r",
++    );
++    assert_eq!(
++        p,
++        "git@git.example.com:org/repo.git by [REDACTED] via https://bob@example.com/r"
++    );
++    // a `:` followed by a space (or the end) is not an scp target
++    assert_eq!(
++        preview(&PatternRedactor, "to bob@example.com:"),
++        "to [REDACTED]:"
++    );
++}
++
++// ---------------------------------------------------------------------------------------------
++// The generated property
++// ---------------------------------------------------------------------------------------------
++
++/// An existing rule's input, placed next to the address.
++const NEIGHBOURS: &[(&str, &str)] = &[
++    ("bearer", "Bearer Zm9vYmFyYmF6cXV4MTIz"),
++    (
++        "authorization line",
++        "Authorization: Basic dXNlcjpwYXNzd29yZA==",
++    ),
++    ("assignment", "API_KEY=q8Fz21xPLm90aa"),
++    ("password flag", "--password s3cr3tValue"),
++    ("prefix token", "ghp_16C7e42F292c6912E7710c838347Ae178B4a"),
++    ("hex run", "9f86d081884c7d659a2feaa0c55ad015"),
++    (
++        "url with password",
++        "https://admin:Pa55w0rd@db.example.com/app",
++    ),
++    (
++        "pem header",
++        "-----BEGIN PRIVATE KEY-----\nab/cd.ef/gh_ij\n-----END PRIVATE KEY-----",
++    ),
++];
++const JOINS: &[&str] = &[" ", "", ":", "="];
++const POSITIONS: &[&str] = &[
++    "start",
++    "end",
++    "inside a line",
++    "line 1",
++    "line 2",
++    "line 3",
++    "line 4",
++    "across the 240 cut",
++    "after a collapsed masked run",
++];
++const DECOR: &[&str] = &[
++    "none",
++    "2-byte neighbours",
++    "3-byte neighbours",
++    "4-byte neighbours",
++    "U+200B inside and around",
++    "U+00AD inside and around",
++    "U+202E inside and around",
++    "double quotes",
++    "single quotes",
++    "angle brackets",
++    "mailto:",
++];
++
++#[derive(Debug, Clone)]
++struct Case {
++    local: String,
++    labels: Vec<String>,
++    tld: String,
++    position: usize,
++    filler: usize,
++    neighbour: usize, // NEIGHBOURS.len() = none
++    join: usize,
++    after: bool,
++    decor: usize,
++    cut: usize,
++}
++
++fn case() -> impl Strategy<Value = Case> {
++    (
++        "[A-Za-z0-9._%+-]{1,300}",
++        prop::collection::vec("[A-Za-z0-9-]{1,20}", 1..=5),
++        prop_oneof!["[A-Za-z]{2,10}", "xn--[a-z0-9]{1,10}"],
++        0..POSITIONS.len(),
++        200usize..=260,
++        0..=NEIGHBOURS.len(),
++        0..JOINS.len(),
++        any::<bool>(),
++        0..DECOR.len(),
++        any::<usize>(),
++    )
++        .prop_map(
++            |(local, labels, tld, position, filler, neighbour, join, after, decor, cut)| Case {
++                // a local part of dots only is not an address (leading dots are trimmed)
++                local: if local.bytes().all(|c| c == b'.') {
++                    format!("a{local}")
++                } else {
++                    local
++                },
++                labels,
++                tld,
++                position,
++                filler,
++                neighbour,
++                join,
++                after,
++                decor,
++                cut,
++            },
++        )
++}
++
++/// The join actually used: the generator does not produce the shapes the rule does not catch by
++/// design (item 1's "not an address" and "not caught" lists), and falls back to a space for them:
++/// - before the address, a `scheme://` token joined by nothing, `:` or `=` (the address would be
++///   inside the URL token);
++/// - after the address, `:` (an scp target);
++/// - after the address, nothing, when the neighbour starts with domain bytes that are not letters
++///   only, or with letters then `:` and a non-space (the run is not a domain, or an scp target).
++fn effective_join(n: &str, join: usize, after: bool) -> usize {
++    let j = JOINS[join];
++    let ok = if !after {
++        !(n.contains("://") && j != " ")
++    } else if j == ":" {
++        false
++    } else if j.is_empty() {
++        let b = n.as_bytes();
++        let run = b
++            .iter()
++            .take_while(|c| c.is_ascii_alphanumeric() || **c == b'.' || **c == b'-')
++            .count();
++        let letters = b[..run].iter().all(u8::is_ascii_alphabetic);
++        let scp = run + 1 < b.len() && b[run] == b':' && !b[run + 1].is_ascii_whitespace();
++        letters && !scp
++    } else {
++        true
++    };
++    if ok {
++        join
++    } else {
++        0
++    }
++}
++
++/// (raw text, the clean address, reach keys)
++fn build(c: &Case) -> (String, String, Vec<String>) {
++    let mut reach = Vec::new();
++    let domain = format!("{}.{}", c.labels.join("."), c.tld);
++    let addr = format!("{}@{}", c.local, domain);
++    reach.push(format!("labels {}", c.labels.len() + 1));
++    reach.push(format!(
++        "tld {}",
++        if c.tld.starts_with("xn--") {
++            "xn--"
++        } else {
++            "letters"
++        }
++    ));
++    reach.push(format!(
++        "local {}",
++        match c.local.len() {
++            1 => "1",
++            2..=8 => "2-8",
++            9..=64 => "9-64",
++            _ => "65-300",
++        }
++    ));
++    // decoration
++    let fmt = |ch: char| {
++        let k = c.cut % (addr.len() + 1);
++        format!("{ch}{}{ch}{}{ch}", &addr[..k], &addr[k..])
++    };
++    let decorated = match c.decor {
++        1 => format!("é{addr}é"),
++        2 => format!("€{addr}€"),
++        3 => format!("😀{addr}😀"),
++        4 => fmt('\u{200B}'),
++        5 => fmt('\u{00AD}'),
++        6 => fmt('\u{202E}'),
++        7 => format!("\"{addr}\""),
++        8 => format!("'{addr}'"),
++        9 => format!("<{addr}>"),
++        10 => format!("mailto:{addr}"),
++        _ => addr.clone(),
++    };
++    reach.push(format!("decor {}", DECOR[c.decor]));
++    // neighbour
++    let line = if c.neighbour < NEIGHBOURS.len() {
++        let (nname, n) = NEIGHBOURS[c.neighbour];
++        let j = effective_join(n, c.join, c.after);
++        let side = if c.after { "after" } else { "before" };
++        reach.push(format!("neighbour {nname} {side} join {:?}", JOINS[j]));
++        if c.after {
++            format!("{decorated}{}{n}", JOINS[j])
++        } else {
++            format!("{n}{}{decorated}", JOINS[j])
++        }
++    } else {
++        reach.push("neighbour none".into());
++        decorated
++    };
++    // position
++    let raw = match c.position {
++        0 => format!("{line} tail words"),
++        1 => format!("head words {line}"),
++        2 => format!("some words {line} more words"),
++        3..=6 => {
++            let before = "a line of text\n".repeat(c.position - 3);
++            format!("{before}{line}\nthe next line")
++        }
++        7 => {
++            let filler: String = "word ".repeat(60).chars().take(c.filler).collect();
++            format!("{filler}{line}")
++        }
++        _ => format!("{} {line}", "a1".repeat(c.filler)),
++    };
++    reach.push(format!("position {}", POSITIONS[c.position]));
++    (raw, addr, reach)
++}
++
++/// The reach keys every run must hit at least once.
++fn expected_reach() -> Vec<String> {
++    let mut v: Vec<String> = Vec::new();
++    v.extend((2..=6).map(|n| format!("labels {n}")));
++    v.extend(["tld xn--", "tld letters"].map(String::from));
++    v.extend(["1", "2-8", "9-64", "65-300"].map(|s| format!("local {s}")));
++    v.extend(DECOR.iter().map(|d| format!("decor {d}")));
++    v.extend(POSITIONS.iter().map(|p| format!("position {p}")));
++    v.push("neighbour none".into());
++    for (nname, n) in NEIGHBOURS {
++        for after in [false, true] {
++            for (j, join) in JOINS.iter().enumerate() {
++                if effective_join(n, j, after) == j {
++                    let side = if after { "after" } else { "before" };
++                    v.push(format!("neighbour {nname} {side} join {join:?}"));
++                }
++            }
++        }
++    }
++    v
++}
++
++#[test]
++fn ae_prop_generated_addresses_never_survive() {
++    let cases = 4096;
++    let reach: RefCell<BTreeMap<String, usize>> = RefCell::new(BTreeMap::new());
++    let mut runner = TestRunner::new(Config {
++        cases,
++        max_shrink_iters: 256,
++        failure_persistence: None,
++        rng_seed: RngSeed::Fixed(0x0ae_e3a1_1126),
++        ..Config::default()
++    });
++    let result = runner.run(&case(), |c| {
++        let (raw, addr, keys) = build(&c);
++        let p = preview(&PatternRedactor, &raw);
++        if let Some(what) = survives(&p, &addr) {
++            return Err(TestCaseError::fail(format!(
++                "AE-3: {what}: leaked {addr:?} in {p:?} (raw {raw:?})"
++            )));
++        }
++        prop_assert!(p.chars().count() <= PREVIEW_MAX_CHARS);
++        prop_assert!(p.matches('\n').count() < PREVIEW_MAX_LINES);
++        let mut m = reach.borrow_mut();
++        for k in keys {
++            *m.entry(k).or_default() += 1;
++        }
++        Ok(())
++    });
++    if let Err(e) = result {
++        match e {
++            TestError::Fail(reason, c) => panic!("{reason} (minimal case {c:?})"),
++            TestError::Abort(reason) => panic!("aborted: {reason}"),
++        }
++    }
++    let m = reach.into_inner();
++    eprintln!("AE-3: {cases} cases, seed 0x0ae_e3a1_1126; reach counters:");
++    for (k, n) in &m {
++        eprintln!("  {n:5} {k}");
++    }
++    let want = expected_reach();
++    let missing: Vec<&String> = want.iter().filter(|k| !m.contains_key(*k)).collect();
++    eprintln!(
++        "AE-3: {} reach classes, {} reached",
++        want.len(),
++        want.len() - missing.len()
++    );
++    assert!(missing.is_empty(), "AE-3: classes not reached: {missing:?}");
++}
++
++// ---------------------------------------------------------------------------------------------
++// Linear time
++// ---------------------------------------------------------------------------------------------
++
++/// Release: time of `patterns::emails` alone and of the whole redactor on hostile families at 64,
++/// 128 and 256 KiB; 4x the input must take under 8x the time (best of 3 runs per size).
++#[test]
++#[ignore]
++fn ae_email_time_scales_linearly() {
++    let mix = "Bearer Zm9vYmFy Authorization: Basic eA== API_KEY=v --password w \
++               ghp_16C7e42F292c6912E7710c838347Ae178B4a 9f86d081884c7d65 \
++               https://u:p@h.example/ -----BEGIN PRIVATE KEY----- a@b.example ";
++    type Family = (&'static str, Box<dyn Fn(usize) -> String>);
++    let families: Vec<Family> = vec![
++        ("a@ repeated", Box::new(|n| "a@".repeat(n / 2))),
++        (
++            "a. repeated then @b.example",
++            Box::new(|n| format!("{}@b.example", "a.".repeat(n / 2))),
++        ),
++        ("@ repeated", Box::new(|n| "@".repeat(n))),
++        ("local run, no @", Box::new(|n| "a".repeat(n))),
++        ("a@b. repeated", Box::new(|n| "a@b.".repeat(n / 4))),
++        ("x://a@ repeated", Box::new(|n| "x://a@".repeat(n / 6))),
++        (
++            "every rule's trigger",
++            Box::new(move |n| mix.repeat(n / mix.len())),
++        ),
++    ];
++    let time = |f: &dyn Fn()| {
++        (0..3)
++            .map(|_| {
++                let t0 = Instant::now();
++                f();
++                t0.elapsed().as_micros()
++            })
++            .min()
++            .unwrap()
++    };
++    let mut out = Vec::new();
++    for (name, make) in &families {
++        let mut e_times = Vec::new();
++        let mut r_times = Vec::new();
++        for kib in [64usize, 128, 256] {
++            let s = make(kib * 1024);
++            e_times.push((kib, time(&|| patterns_emails_len(&s))));
++            r_times.push((
++                kib,
++                time(&|| {
++                    std::hint::black_box(PatternRedactor.redact(&s));
++                }),
++            ));
++        }
++        out.push((*name, e_times, r_times));
++    }
++    for (name, e, r) in &out {
++        eprintln!("AE-4 {name}: emails (KiB, us) {e:?}; redact (KiB, us) {r:?}");
++    }
++    for (name, e, r) in &out {
++        for (what, times) in [("emails", e), ("redact", r)] {
++            let (a, b) = (times[0].1.max(1) as f64, times[2].1 as f64);
++            assert!(
++                b / a < 8.0,
++                "AE-4 {name} {what}: 4x input took {}x time: {times:?}",
++                b / a
++            );
++        }
++    }
++}
++
++fn patterns_emails_len(s: &str) {
++    let mut r = Vec::new();
++    patterns::emails(std::hint::black_box(s.as_bytes()), &mut r);
++    std::hint::black_box(r);
++}
++
++// ---------------------------------------------------------------------------------------------
++// Logs already written
++// ---------------------------------------------------------------------------------------------
++
++fn own_previews(b: &coagent_audit::bundle::Bundle) -> Vec<(u64, String)> {
++    b.own_events
++        .iter()
++        .filter_map(|e| {
++            e.full
++                .as_ref()
++                .map(|f| (e.header.author_seq, f.body.clone()))
++        })
++        .collect()
++}
++
++/// A log written before the rule (an identity redactor stands in for it: its previews keep an
++/// address), resumed, sealed and exported with `PatternRedactor`: every stored preview is kept byte
++/// for byte, and the export and the sealed bundle verify.
++#[test]
++fn ae_old_previews_are_kept_as_written() {
++    let w = World::new(0xae, 2, 2);
++    let me = &w.ids[0];
++    let raw = |n: u64| format!("event {n}: mail bob@example.com: thanks");
++    let mut old = SessionAudit::start(
++        MemStore::new(),
++        me,
++        &w.ids[0].verified(),
++        &w.rosters[0],
++        every(1_000),
++        Box::new(Identity),
++        t(0),
++    )
++    .unwrap();
++    for n in 1..=4u64 {
++        let text = raw(n);
++        old.record(
++            me,
++            EventInput {
++                kind: "ae.old",
++                summary: Some(&text),
++                full: Some(&text),
++            },
++            t(n),
++        )
++        .unwrap();
++        if n == 3 {
++            old.checkpoint_now(me, t(n)).unwrap();
++        }
++    }
++    let written = own_previews(&old.export(me).unwrap());
++    assert_eq!(written.len(), 4);
++    for (n, body) in &written {
++        // positive control: the old log does hold the address
++        assert_eq!(
++            body,
++            &raw(*n),
++            "control: the old preview {n} is not as written"
++        );
++    }
++    let store = old.store().clone();
++    drop(old);
++
++    // resumed with the pattern redactor: nothing is re-masked
++    let mut a = SessionAudit::resume(
++        store,
++        w.s,
++        me,
++        &w.ids[0].verified(),
++        every(1_000),
++        Box::new(PatternRedactor),
++        t(100),
++    )
++    .unwrap();
++    let resumed = a.export(me).unwrap();
++    assert_eq!(
++        own_previews(&resumed),
++        written,
++        "a resumed log changed a stored preview"
++    );
++    verify(&resumed).expect("the resumed export verifies");
++
++    // sealed: the sealed bundle holds the old previews as written and verifies
++    let plan = a.seal_export(me).unwrap();
++    assert_eq!(
++        own_previews(&plan.bundle),
++        written,
++        "the sealed bundle changed a stored preview"
++    );
++    verify(&plan.bundle).expect("the sealed bundle verifies");
++    a.seal_commit(me, &plan, t(200)).unwrap();
++
++    // after the seal: the event the seal did not cut is kept as written; a new event is masked
++    let text = raw(5);
++    a.record(
++        me,
++        EventInput {
++            kind: "ae.new",
++            summary: Some(&text),
++            full: Some(&text),
++        },
++        t(300),
++    )
++    .unwrap();
++    let after = a.export(me).unwrap();
++    verify(&after).expect("the export after the seal verifies");
++    let kept = own_previews(&after);
++    assert_eq!(
++        kept.first(),
++        Some(&(4, raw(4))),
++        "the uncut old preview changed: {kept:?}"
++    );
++    assert_eq!(
++        kept.last(),
++        Some(&(5, "event 5: mail [REDACTED]: thanks".to_string())),
++        "control: a new event is masked by the new rule: {kept:?}"
++    );
++}
++Email addresses are masked whole as the other shapes are (the owner's ruling), in summaries too, where the mask can
++make the text longer than the address (measured: one 6-byte address adds 4 bytes; 585 of them in a 4,094-byte summary
++make 6,434 bytes, now refused); a preview received from a peer is stored as the peer wrote it, since its body is
++committed under the author's signature and a receiver cannot re-mask it.
++  `--password value` flags, known key prefixes, JWTs, URL user-info, long mixed runs, and email addresses
++  (ASCII, dotted domain; not inside a URL or an scp target)). A plain-word password, a token glued to other
++  letters, an unusual encoding, a secret split across lines, or a format nobody listed passes through. So
++  does an email address with a non-ASCII byte, a quoted local part, an encoded or spelled-out `@`, a
++  single-label or numeric domain, more domain characters glued after it, or one cut by the 64 KiB window
++  end; one inside a `scheme://` token is left to the URL rule (so `https://user@host.example/` is masked by
++  neither rule), and an scp or ssh target keeps its user name. It also over-masks (hashes, UUIDs, `PATH=`,
++  file-like `name@file.rs`). It is a seatbelt.
++| Email addresses masked whole (ASCII, dotted domain; not in a URL or an scp target) | the owner's ruling | `ae_listed_addresses_never_appear_in_a_preview` (redact_no_email, email_keeps_domain), `ae_prop_generated_addresses_never_survive` (redact_no_email, email_keeps_domain), `ae_what_is_not_an_address_is_kept_exactly` (email_eats_scp_and_urls), `ae_email_time_scales_linearly` (release, ignored; `emails` alone 0.30/0.61/1.20 ms for 64/128/256 KiB of `a@`) |
++
++## 2026-11-26 — Email addresses blanked in the audit log's previews
++
++The owner ruled that email addresses are blanked in the audit log's short previews. The audit library's default
++redactor has one more rule, `patterns::emails`: an ASCII address with a dotted domain is replaced whole by the same
++`[REDACTED]` mask as every other shape, in previews and in summaries. A `scheme://` link stays with the URL rule (so a
++link with a user name and no password is not masked) and an scp or ssh target keeps its user name; addresses with a
++non-ASCII byte, encoded or spelled-out forms and the other misses are listed in BACKLOG. Every other rule answers as
++before: over 38,225 inputs the old and new redactor differ only where an address was masked (0 unattributed). Logs
++already written are kept as written, and a preview received from a peer is stored as the peer wrote it. Three red
++controls (`redact_no_email`, `email_keeps_domain`, `email_eats_scp_and_urls`) and five red rows.
++  # The owner's ruling: email addresses blanked in previews (patterns::emails)
++  "redact_no_email|ae_email|ae_listed_addresses_never_appear_in_a_preview|AE-1|address: leaked"
++  "email_keeps_domain|ae_email|ae_listed_addresses_never_appear_in_a_preview|AE-1b|domain: leaked"
++  "email_eats_scp_and_urls|ae_email|ae_what_is_not_an_address_is_kept_exactly|AE-1c|not an address: changed"
++  "redact_no_email|ae_email|ae_prop_generated_addresses_never_survive|AE-3|leaked"
++  "email_keeps_domain|ae_email|ae_prop_generated_addresses_never_survive|AE-3b|leaked"

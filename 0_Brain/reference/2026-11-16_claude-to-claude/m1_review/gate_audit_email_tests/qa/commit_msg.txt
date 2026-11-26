@@ -1,0 +1,15 @@
+Mask email addresses in audit previews and summaries (the owner's ruling)
+
+The default redactor gains one rule, patterns::emails: an ASCII address with
+a dotted domain is replaced whole by the crate's one mask. A scheme:// token
+stays with the URL rule and an scp or ssh target is not masked (the
+coordinator's ruling on the grammar). Every other rule, apply_mask, truncate
+and preview are unchanged byte for byte; find gains added lines only.
+
+Three red controls (redact_no_email, email_keeps_domain,
+email_eats_scp_and_urls), five red rows, tests in tests/ae_email.rs. The
+docs and BACKLOG record the misses, the peer-preview limit and the
+window-end comment.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
