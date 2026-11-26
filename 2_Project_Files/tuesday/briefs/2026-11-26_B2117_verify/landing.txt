@@ -1,0 +1,33 @@
+THIS LANDING IS NOT A CONTENT RELEASE AND NOTHING DEPLOYS. The squash changes two renderer source files and adds one test file; no release file changes.
+The content-release refusal stands: a deploy of a changed content release needs the product owner's own card, and the live demo site is the product owner's. This landing does neither; nobody deploys anything after it.
+The instrument every deploy order runs (rc 1 = changed release = REFUSE) must read rc 0 across this squash:
+  git diff --quiet d06508f8a69267542b92959a2048198055a7b473 <new main> -- content/release-demo content/release-draft
+The reviewer re-measured the four release blobs at the pinned head against main: content/release-demo/CONTENT_HASH 23cd95f58dd0ceabecac0c3f5796aeba9b0edd62, content/release-draft/CONTENT_HASH 09d597c64f07d19c98aeb0859086499ea74300b7, content/release-draft/bundle.json 3ed9445ba35faed5f7e821161a58c8e9f54c931d, content/sources/SOURCES.json 30269393179065c9f023e0f0a0081cb9e8dd1449: each equal at both (values begin 5db37614db639330 and 5679855b0b9c7948).
+What the live demo runs was NOT measured (no request to a hosted site). Customer PDF and DOCX bytes for a long name change only when someone deploys; nobody does here.
+
+LANDING (coordinator steps; the reviewer ran none of them). Who decided: the coordinator, on the coordinator's own gate. No text in this folder says the product owner decided anything about this lane.
+Pinned head: 75d27893764632fdf6583ef1e321caacafaf4d01, one commit, parent = main d06508f8a69267542b92959a2048198055a7b473, tree 340948986b3a5603349a4099572066b8d5b5e0d0. Branch b2113/policy-footer-budget (GitHub ref equal to the pin at 2026-11-26 10:24:09 AEDT). No pull request exists yet; open pull requests 0.
+0. Re-read immediately before opening: refs/heads/b2113/policy-footer-budget == 75d27893764632fdf6583ef1e321caacafaf4d01; refs/heads/main == d06508f8a69267542b92959a2048198055a7b473 (else MAIN MOVES below). If the branch moved: STOP. A head nobody reviewed is never landed.
+1. Open the pull request (Tuesday):
+   gh pr create --repo datasecau/Datasec-Security-Composer --base main --head b2113/policy-footer-budget --title "$(cat pr-title.txt)" --body-file pr-body.md
+   Record PRNUM. Re-read pulls/PRNUM: head.sha == the pin, base main, 1 commit, 3 files (+160 -2).
+2. Checks on the head, read by name: the expected set (re-read from the last merged Composer pull request, #133, head 7e10c623) is CodeQL (github-advanced-security), Analyze (javascript-typescript) and Analyze (csharp), each completed success. Poll until all three are completed. A missing or failed check is a STOP, never bypassed, no alert dismissed.
+   Code scanning: open alerts on refs/pull/PRNUM/head = 0 and on refs/heads/main = 0 (main's baseline at d06508f8: 0 open; analyses js and csharp results 0). Note: a zero on the PR ref is a weak read (see the drafter rules); the read that can fail is main's analysis at the merge commit, step 4.
+   Re-read pulls/PRNUM: head sha == the pin, mergeable_state clean.
+3. Merge, SQUASH pinned to the head (one parent):
+   gh pr merge PRNUM --repo datasecau/Datasec-Security-Composer --squash --match-head-commit 75d27893764632fdf6583ef1e321caacafaf4d01 --subject "$(sed "s/PRNUM/$PRNUM/" squash-subject.txt)" --body-file squash-body.txt
+   (main's newest squash subject ends with its number, (#133); the subject file ends "(#PRNUM)": replace it with the real number. Do not pass --delete-branch.)
+4. Read after the merge:
+   - pulls/PRNUM: merged true, merge_commit_sha = <new main>.
+   - refs/heads/main = <new main>, ONE parent d06508f8a69267542b92959a2048198055a7b473; tree of <new main> == 340948986b3a5603349a4099572066b8d5b5e0d0 (when main did not move).
+   - git diff --name-only d06508f8... <new main>: exactly packages/renderers/src/change-report.ts, packages/renderers/src/policy-document.ts, packages/renderers/test/policy-footer-budget.test.ts; blobs 1f8c612f49191009c974fd97d670a31e1f684258, e1857e06b8605d51c2b10be0ee265e59ec4b773f, 7c8dd4013c893db0caaeea1d6cefb5b87bffa738; packages/renderers/src/document-pdf.ts blob still 2ece0c78916985840aed4323e9d3e879cf0240f8.
+   - stored message of <new main>: subject == squash-subject.txt with the real number, ONE Co-Authored-By trailer; scans for a word-bounded B-number, PCOMP, a person name, a seat id, a card id, the words ruled, ruling, approved by: 0, each with a planted control.
+   - git diff --quiet d06508f8... <new main> -- content/release-demo content/release-draft -> rc 0 (record it).
+   - check runs on <new main> (poll until completed; both Analyze legs success) and open code-scanning alerts on refs/heads/main (expected 0).
+5. Nothing deploys. No release is cut. The examples are not rebuilt. The demo site is not touched. The head branch is kept.
+
+MAIN MOVES (read refs/heads/main at step 0 and again before step 3): if it is no longer d06508f8, ALL THREE must pass or STOP and re-gate:
+ (1) git diff --name-only d06508f8 <new main> names nothing under content/, packages/renderers/, packages/db/migrations/, nor vitest.config.ts, .prettierignore, eslint.config.js, package.json, package-lock.json, tsconfig*.json, docker/Dockerfile, scripts/ci.sh;
+ (2) at the new main, packages/renderers/src/policy-document.ts blob == 8afaa41cc49549d6692f522c9f233b89b20cfa4f and packages/renderers/src/change-report.ts blob == 2474e3852f5e966dab9fc301efd2a9129c4633c7, and packages/renderers/test/policy-footer-budget.test.ts does not exist;
+ (3) no other open pull request's file list holds one of the three paths.
+If all pass the reviewed head stands; the squash tree then differs from the head's, so the tree line of step 4 becomes "moved main tree plus the three files". The reviewer's runs were at base d06508f8 only; a move touching anything in (1) voids them.

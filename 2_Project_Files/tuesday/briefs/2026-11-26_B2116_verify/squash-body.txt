@@ -1,0 +1,24 @@
+web/src/api/stub/heldRentalFlow.ts (new), stubApi.ts, purchaseQuotes.ts,
+stubApi.test.ts (MPSCALC-135):
+- A rental quote the stub created itself because no API answered is now
+  calculated, submitted, approved and proposed by the stub, as its update
+  already was: calculate prices nothing (every figure zero, every line marked
+  STUB), submit and approve move the quote Draft to Submitted to Approved by
+  the caller's role, and the proposal is a draft until approved. A purchase
+  draft, and an id the stub did not create, still go to the real API.
+- Eight rows pin it; three comments that said calculate still goes to the
+  real API are corrected.
+web/e2e/smoke.spec.ts, web/playwright.config.ts (MPSCALC-135, 297):
+- The proposal's first table reads 4 rows: three device lines and the
+  pointer row, as the short form has capped it since MPSCALC-110.
+- With the dev stub on, the one console message of the stub's create (a
+  refused proxy request) is allowed once, as in bom.spec.ts.
+- With the dev stub off and no API behind the proxy the test skips itself
+  with its reason.
+- The smoke entry leaves the list of specs CI leaves out and joins the specs
+  of both modes; the journey against an API on a synthetic store is run by
+  hand.
+Dev stub and tests only: no production build holds the stub, and no word of
+any document or screen changes. Nothing is deployed.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
