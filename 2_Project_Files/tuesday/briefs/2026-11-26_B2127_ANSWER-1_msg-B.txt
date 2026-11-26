@@ -1,0 +1,9 @@
+RD-759: the CSP intake refuses a data: address that carries an at-sign
+
+The intake kept "data:text/plain,u:p@h" as sent: the hostless userinfo strip looks only at the first path segment ("text"), so a forged userinfo-shaped payload came out unchanged. Two other shapes of the same ticket (a leading Unicode space or BOM, an at-sign only as %40) landed earlier and are not touched.
+
+stripQueryAndFragment now answers null for a data: address with no host whose kept text (after the query string and the fragment are cut) holds an at-sign, so the field is not stored and not logged. A report with no other violation field is dropped as an empty entry, and the route answers its own 400 for it; a report with a directive is kept with a null address. Any other data: address, "data" alone, a %40 in a data: payload and every other scheme are as before.
+
+One new test file (D1 to D5 read red before the change; K1, L1, N1 to N3 are controls that read green before and after; S1 reads the source text and S2 the route's one call). The existing cell C-DATA of the earlier RD-759 file recorded this shape as unchanged; its expectation is now the refusal (two lines of that file, nothing else in it). Each of six mutations of the refusal turns the cells named for it red.
+
+Not part of this change: a %40 inside a data: payload; a data: address written with a host after two slashes, whose at-sign is path text after the host and is kept as for https (no userinfo is kept); and any other scheme.
