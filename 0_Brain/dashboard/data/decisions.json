@@ -88525,5 +88525,39 @@
    "CARD datasec-oxpd-site-to-azure-path-1123",
    "CARD datasec-oxpd-azure-path-test-resource-1123"
   ]
+ },
+ {
+  "id": "secuura-ks2366-old-stuck-certifications-1126",
+  "client_project": "Secuura/Blockchain",
+  "title": "KS-2366 follow-up: certifications made before the fix can never confirm. Leave them, or repair them?",
+  "bluf": "(Prior-ruling override: 2 cards read. secuura-ks2366-what-anchored-means-1126 ruled what anchored MEANS; its build explicitly does not reach these old rows, which is this question. secuura-ks1385-null-issuer-certifications-1015 ruled an anchoring-guard skip, a different subject.) No action needed today; the default changes nothing. The KS-2366 fix (merged to develop, not yet deployed) lets NEW certifications confirm on chain. Certifications made before it never recorded the anchor's create time, so nothing can safely match their anchor: they stay 'submitted' for ever and, after the deploy, verify reads 'not anchored' for them (true of their stored state). MEASURED on Kintsugi (dev) yesterday, read-only: 10 such certifications, oldest 69 days. NOT MEASURED: whether demo has any; Wednesday has not looked. Repairing them is either a data change (a one-off script) or a new matching rule on the anchor-identity code; both are your call.",
+  "default_action": "If no answer: option b for now (nothing is changed or written anywhere). Demo is not touched without your word.",
+  "options": [
+   {
+    "key": "a",
+    "label": "Measure demo first, read-only",
+    "detail": "a seat counts stuck certifications on demo (no writes) and I bring the number back to you before anything else"
+   },
+   {
+    "key": "b",
+    "label": "Leave them as they are",
+    "detail": "old ones read 'not anchored' everywhere; only new certifications confirm"
+   },
+   {
+    "key": "c",
+    "label": "Repair them on Kintsugi now",
+    "detail": "a seat designs a one-off repair (data change, Kintsugi only, gated); demo waits for its own decision"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-26T12:33:05.344607+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null,
+  "prior_rulings_overridden": [
+   "2026-08-21 20:01",
+   "CARD secuura-ks1385-null-issuer-certifications-1015",
+   "CARD secuura-ks2366-what-anchored-means-1126"
+  ]
  }
 ]
