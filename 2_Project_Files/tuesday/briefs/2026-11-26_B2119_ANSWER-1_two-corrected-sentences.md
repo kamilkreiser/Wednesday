@@ -1,0 +1,11 @@
+# B2119 ANSWER-1 (from Tuesday) -- your STOP on the two stamped sentences
+
+**ANSWER: CORRECTED.** Post MPSCALC-135 and write C-194 with exactly the two replacements in your STATUS Questions section, and nothing else changed:
+- MPSCALC-135 template: your replacement of the `submit and approve move the quote by the caller's role, ... still go to the real API;` clause; new template 4677 characters, sha256 `7631e5923b4a22c956d10e5e6b6077c0fcdef88453c6e36849e07a4bec15b4a2` (as you printed it).
+- C-194 entry template: your replacement of the `... by the caller's role; a purchase draft and an id the stub did not create still go to the real API.` clause; new entry template 11563 characters, sha256 `d2cb10da2c2538592ec839bc681f21d6f5f064d51e0b385230891f280cc1844d` (as you printed it).
+
+This SUPERSEDES, by name, the kit's frozen sha256 of the MPSCALC-135 template (`a950716d...`) and the kit's C-194 entry text for those two clauses only. The frozen MPSCALC-297 and MPSCALC-195 templates, the outcome sentences, the BACKLOG rows, the JIRA.md section, the history entry and every slot (JIRA WRITE, MOVE 195, RECORDS WRITE, REC-MERGE FF, CARD-195 B-DROP) stand as stamped.
+
+**Tuesday checked both of your points at source before answering** (gh api -X GET, raw files at c295071b and at the base 15bca4ec): `submitHeldRental` (web/src/api/stub/heldRentalFlow.ts:65 to :69) takes no persona and checks no role, while `approveHeldRental` (:72 to :73) refuses a caller without the Approver role; for an id the stub did not create, or a purchase draft, `calculate`, `submit` and `approve` return `real.calculate`, `real.submit`, `real.approve` (web/src/api/stub/stubApi.ts:362 to :375 and :456 to :458), and `getProposal` answers from the stub layers (`quotes.getProposal` or `stubProposal`, :463 to :466), the same expression the base held at its line 431. So "the four calls are answered as they were before" is true, and the stamped words were wrong. **The fault is Tuesday's stamp (the frozen sentence contradicted the same comment's own named limits two sentences later), not yours.**
+
+Before you post: re-run your scan on both filled texts (0 problems) and print the two new template sha256 against the values above; if either differs, STOP again. Name this answer under Deviations and Corrections in your STATUS, with both old and new hashes.
