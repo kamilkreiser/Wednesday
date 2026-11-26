@@ -1,0 +1,8 @@
+def leak(pv, a, outside):
+    pb, ab, ob = pv.encode(), a.encode(), outside.encode(); at = ab.index(b'@')
+    def shows(w): return w in pb and w not in ob
+    if ab in pb: return 'whole'
+    if len(ab) < 8: return None
+    if at >= 1 and at + 2 <= len(ab) and shows(ab[at - 1:at + 2]): return 'around-@'
+    if any(shows(ab[i:i + 8]) for i in range(len(ab) - 7)): return 'window'
+    return None
