@@ -1,0 +1,158 @@
+cb6ddf0a | date -> Thu 26 Nov 2026 20:37:52 AEDT (run at the measuring step)
+13481333 | /usr/bin/grep -c -F 'READY B2118: identity be76c2c1baf03ec1' over the B2118 STATUS file -> 1 (the last line also reads 'History branch: records/b2118-history 028091f')
+2897680a | gh api -X GET pulls/262 --jq merged,merge_commit_sha -> True 523856de
+cbacac39 | head -1 of 2026-11-26_B2125_verify/VERDICT.md -> GATE B2125: GO WITH FINDINGS
+ac655536 | actions/runs?head_sha=<merge> (saved runs_e20b30cf.json) -> run names ['Build', 'Deploy demo', 'Gitleaks Scan', 'Push on main', 'Scheduled', 'npm-audit']; Gitleaks Scan rows 1, conclusion success
+0dca4033 | count of conclusion success in commits/<merge>/check-runs (saved cr_e20b30cf.json) -> 9 of 11 (workflow runs: 5 of 6; the head: 8 of 8)
+4c6f859f | gh api -X GET pulls/263 --jq .head.sha -> 408b8655cbd360c8d09fe21ec70d944f56ec8d1b (pulls/263/commits lists 3 commits, the last 408b8655)
+1189d4ba | count of status completed in the merge commit check-runs -> 11 of 11 (head: 8 of 8; runs: 6 of 6)
+faca14d0 | gh api -X GET repos/datasecau/Reporting_Dashboard_Au/actions/variables --jq .total_count -> 0
+bce668df | /usr/bin/grep -c -F 'VERDICT: PASS' log_merge.txt -> 1 and log_head.txt -> 1 (gh api -X GET --allow-escape-sequences actions/jobs/139699378094/logs and /139683415417/logs, saved); the line reads 6504/6504 tests passed across 409 suites
+bd7841ed | /usr/bin/grep -c -F 'VERDICT: FAIL' log_merge.txt -> 0 and log_head.txt -> 0 (control: the PASS count in the same file -> 1)
+67c7e84a | /usr/bin/grep -c -F 'Z PASS __tests__/' log_merge.txt -> 409 and log_head.txt -> 409 (control: the pattern 'PASS ' with a prefix of at most 40 characters reads 410 and 410)
+70a158d8 | /usr/bin/grep -c -F 'Z FAIL ' log_merge.txt -> 0 and log_head.txt -> 0 (control: 'Z PASS __tests__/' -> 409)
+b4317c76 | python re.findall over the log with ^.{0,40}PASS  (a line prefix of at most 40 characters) -> 410 on log_merge.txt and 410 on log_head.txt (409 suite lines plus the verdict line)
+9e234b3f | /usr/bin/grep -c -F EADDRINUSE log_merge.txt -> 0 and log_head.txt -> 0 (control: 'VERDICT: PASS' -> 1)
+dfd3949a | /usr/bin/grep -c -F 'A worker process has failed to exit gracefully' log_merge.txt -> 1 and log_head.txt -> 1
+a5afc4f5 | /usr/bin/grep -n -F 'PASS __tests__/rd893-risk-condition-put-field-types' and 'PASS __tests__/rd1009-chat-stream-unparsed-body' -> merge lines [14418] and [19539], head lines [14433] and [19552]
+441a4c46 | /usr/bin/grep -n -F 'PASS __tests__/rd893-risk-condition-put-field-types' log_merge.txt -> [14418] and log_head.txt -> [14433]
+6f46a4ae | python json over code-scanning/alerts (saved alerts.json) -> key most_recent_instance.location.start_line present on 251 of 251 rows (e.g. alert 280: 3366)
+fa41bbdc | python over alerts.json: open alerts of backend/server.js with a primary line in 7881-7890 or 21695-21720 -> []; alert 235 severity medium rule js/http-to-file-access path backend/jsonStorage.js
+0719964e | /usr/bin/grep -c -F 'the alert reads fixed or absent on `refs/pull/N/head`' over DRAFTER_RULES.md -> 1 (the 2026-11-06 s249 line, which this clause quotes)
+1113c128 | jira search/jql project = RD AND ( created >= "2000-01-01" ) paged -> 1043 issues, highest key RD-1047
+577441b9 | jira GET issue/RD-99999999 -> status 404
+5f54d937 | jira search labels = "records-pass-1126" -> 4 issues (RD-1047, RD-1046, RD-1045, RD-1044); control labels = "records-pass-1125" -> 4
+b23d6722 | /usr/bin/grep -n -F 'When completing work' /Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/CLAUDE.md -> [299]
+e55eb748 | gh api -X GET -H 'Accept: application/vnd.github.raw' contents/HISTORY.md?ref=e20b30cf... (saved M_HISTORY.md) -> 1153837 bytes, 10533 lines
+4db23728 | gh api -X GET git/matching-refs/heads/records/b2126 --jq length -> 0 (control records/b2118 -> 1)
+f6e7ac6d | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 4
+3716cfe4 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+9b4f756c | python word-boundary scan over the briefs folder's .md files -> R335 1 files; control R333 -> 16 files
+c0cadcf7 | python word-boundary scan over the briefs folder's .md files -> R335 1 files; control R333 -> 16 files
+1a9c7dd8 | ls of the project's Briefs folder piped to /usr/bin/grep -c -> R335 0; control R333 1
+70c93ea4 | ls of the project's Briefs folder piped to /usr/bin/grep -c -> R335 0; control R333 1
+f91991a9 | ls of the project's Briefs folder piped to /usr/bin/grep -c -> R335 0; control R333 1
+f2d08f9d | lsof -nP -iTCP:20000-32767 -sTCP:LISTEN | wc -l -> 3 (0 rows; control: lsof -nP -iTCP -sTCP:LISTEN | wc -l -> 16)
+e723c062 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 2
+60dfc892 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; a path of the seat's tree (absent at drafting: ls -d on .tools/b2126* printed no match); kit count 34
+5885e83c | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; a path of the seat's tree (absent at drafting: ls -d on .tools/b2126* printed no match); kit count 24
+555cca72 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+35db3c75 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 6
+3cd2b788 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 8
+8ad3b318 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 264
+deddac53 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+1b40a318 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+688f0a62 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+63c1bbb1 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 3
+c1611f26 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; a slot word; kit count 17
+d6859221 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 13
+023bab52 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 3
+116df348 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 2
+c0d3a515 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; a path of the seat's tree (absent at drafting: ls -d on .tools/b2126* printed no match); kit count 24
+66f8d180 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+721c46e3 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+e76ff688 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 82
+770ef92b | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+6a170ef1 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+49001617 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+f78bf329 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+397ea3a6 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+4bae27fb | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 6
+34eec420 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 9
+b2782962 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; the seat runs it at Step 2 and compares with the sha above (branches/main read e20b30cf by gh); kit count 2
+c396f456 | gh api -X GET branches/main --jq .commit.sha -> e20b30cf798624b76ea9f9c05c9f8d9cab8ecd56 (git ls-remote origin refs/heads/main is the seat's own read at Step 2: UNMEASURED by the drafter, git transport not used)
+4568f49a | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+3ae222ea | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+923cf4e1 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; a slot word; kit count 50
+71533998 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+308bf870 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+8f8d66d8 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+792524eb | scan1947.scan('completed') in mode jira -> [('substr:complet', 'complet')]; mode entry -> []
+c2587991 | scan1947.scan('408b8655') -> [('B-number', 'b8655')]; scan('408b8') -> []
+5ecc4940 | scan1947.scan('408b8655') -> [('B-number', 'b8655')]; scan('408b8') -> []
+513b1fe0 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; the form of the fetch that saved M_server.js, M_jsonStorage.js and M_verify-expected-counts.json (each rc 0; sizes [1143878, 218532, 496]); kit count 1
+58e94787 | /usr/bin/grep -n -F 'if (!isPlainRequestObject(req.body)) return res.status(400).json({ error: '\''Message is r' M_server.js (the file at the merge commit) -> lines [7884] (1)
+85930c47 | /usr/bin/grep -n -F 'const { message, conversationId = '\''default'\'', filterState } = req.body;' M_server.js (the file at the merge commit) -> lines [7885] (1)
+279f29ef | /usr/bin/grep -n -F 'app.post('\''/api/chat/stream'\'', aiGate.requireAiEnabled, async (req, res) => {' M_server.js (the file at the merge commit) -> lines [7881] (1)
+40831891 | /usr/bin/grep -n -F 'if (!isPlainRequestObject(req.body)) {' M_server.js (the file at the merge commit) -> lines [3621] (1)
+d15abf9f | /usr/bin/grep -n -F 'function isPlainRequestObject(body) {' M_server.js (the file at the merge commit) -> lines [20731] (1)
+4f11a387 | /usr/bin/grep -n -F 'app.put('\''/api/risk-conditions/:id'\'', requireRiskConditionAdmin, refuseSqlText, async ' M_server.js (the file at the merge commit) -> lines [21687] (1)
+ed044e34 | /usr/bin/grep -n -F 'const RISK_CONDITION_PUT_FIELDS = ['\''condition_text'\'', '\''risk_level'\'', '\''is_acti' M_server.js (the file at the merge commit) -> lines [21397] (1)
+66ed518e | /usr/bin/grep -n -F 'if ('\''condition_text'\'' in updates && typeof updates.condition_text !== '\''string'\'')' M_server.js (the file at the merge commit) -> lines [21706] (1)
+1bc6b464 | /usr/bin/grep -n -F 'if ('\''is_active'\'' in updates && typeof updates.is_active !== '\''boolean'\'') {' M_server.js (the file at the merge commit) -> lines [21709] (1)
+2b65c62d | /usr/bin/grep -n -F 'if ('\''email_recipients'\'' in updates && !Array.isArray(updates.email_recipients)) {' M_server.js (the file at the merge commit) -> lines [21712] (1)
+a0cafcf6 | /usr/bin/grep -n -F 'const affectedRows = await jsonStorage.updateRiskCondition(parseInt(id), updates);' M_server.js (the file at the merge commit) -> lines [21719] (1)
+cc781f37 | /usr/bin/grep -n -F 'const needsRegeneration = !kqlQuery' M_server.js (the file at the merge commit) -> lines [5141, 21544] (2)
+f796a172 | /usr/bin/grep -n -F 'const needsRegeneration = !kqlQuery ||' M_server.js (the file at the merge commit) -> lines [21544] (1)
+3c27df78 | /usr/bin/grep -n -F 'if (!kqlQuery) {' M_server.js (the file at the merge commit) -> lines [21613] (1)
+b43fedf3 | /usr/bin/grep -n -F 'async updateRiskCondition(id, updates) {' M_jsonStorage.js (the file at the merge commit) -> lines [3796] (1)
+c515c6c3 | /usr/bin/grep -n -F '...updates,' M_jsonStorage.js (the file at the merge commit) -> lines [3803, 4021, 4250] (3)
+e52d8795 | /usr/bin/grep -n -F '"tests": 6504' M_verify-expected-counts.json (the file at the merge commit) -> lines [4] (1)
+2a0edb75 | /usr/bin/grep -n -F '"suites": 409' M_verify-expected-counts.json (the file at the merge commit) -> lines [5] (1)
+f422a6d4 | the saved Build logs hold 'across 409 suites' -> 1 and 1 times
+a26ae636 | python3 -I -B pointers2126.py last lines -> pointer rows 18 / control absent []
+34e034f6 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+41d4eb63 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 2
+812bb13f | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; the call name of a jest cell, counted by the grep of the next line; kit count 2
+8e8fa2fa | /usr/bin/grep -n -F 'for (const cell of R_CELLS)' M_rd1009-chat-stream-unparsed-body.test.js -> [98]
+345a2279 | /usr/bin/grep -c -E '^[[:space:]]+test\(' on M_rd893-risk-condition-put-field-types.test.js -> 7 and on M_rd1009-chat-stream-unparsed-body.test.js -> 7
+6edff550 | /usr/bin/grep -c -E '^test\(' on the two M_ test files -> 0 and 0 (exit 1 each: no match)
+5cbee21e | /usr/bin/grep -c -E "id: '[TR][0-9]+'" on M_rd893-... -> 12 (T1 to T12) and on M_rd1009-... -> 3 (R1 to R3)
+b3371077 | /usr/bin/grep -n -F FIELD_NOT_ACCEPTED M_server.js -> lines [21692]
+4ba019aa | /usr/bin/grep -c -E "id: '[TR][0-9]+'" on M_rd893-... -> 12 (T1 to T12) and on M_rd1009-... -> 3 (R1 to R3)
+26e65fa2 | gh api -X GET pulls/263/files status per file -> [('added', 'rd1009-chat-stream-unparsed-body.test.js'), ('added', 'rd893-risk-condition-put-field-types.test.js'), ('modified', 'server.js'), ('modified', 'verify-expected-counts.json')]
+f6fd0fe6 | gh api -X GET compare/408b8655...e20b30cf -> status ahead, files [('HISTORY.md', 20, 0)]
+e1e7b224 | count of conclusion skipped in the merge commit check-runs -> 2 [('build', 139699435092), ('deploy', 139699413916)]; Deploy demo run 45757473204 jobs -> [["deploy","skipped"],["build","skipped"]]
+6e90c547 | count of conclusion success in commits/<merge>/check-runs (saved cr_e20b30cf.json) -> 9 of 11 (workflow runs: 5 of 6; the head: 8 of 8)
+f03e45e4 | the call without the flag on job 139699378094 -> rc 1, message 'the response contains terminal escape sequences; pass --allow-escape-sequences to output it anyway'; with the flag -> 2079061 bytes saved to log_merge.txt (and 2086198 bytes for the head job)
+c8a67e97 | /usr/bin/grep -c -F 'VERDICT: PASS' log_merge.txt -> 1 and log_head.txt -> 1 (gh api -X GET --allow-escape-sequences actions/jobs/139699378094/logs and /139683415417/logs, saved); the line reads 6504/6504 tests passed across 409 suites
+4aac99c2 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 11
+2c4cbdc1 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+fe70fea0 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+82bed7ba | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+1238f1e9 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+79afc471 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 639
+51010986 | jira search labels = records-pass-1125 -> 4 issues
+96819969 | jira search labels = qa-gate-finding -> 152 issues
+5b4827b4 | dup3.py narrow guard a1 pattern B contains the alternative 'stale by text' -> True
+fba15f3f | dup3.py narrow guard a1 pattern B contains the alternative 'changed text' -> True
+4aa1ac5f | dup3.py control: near('kql_query is cached', A, B) -> False (quiet), near('the stored kql_query keeps running after an edit; the old text', A, B) -> True (fires)
+5b17e540 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+9d07b492 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+1aef87f7 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 2
+bd58d2dd | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 2
+2df29d47 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 2
+b0767590 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 2
+e713a7c0 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+3ab6306e | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 5
+de78bb2a | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+be01f8ac | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 4
+08091b00 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 6
+5c9f2a0c | gh api -X GET pulls/263 --jq .merged,.merge_commit_sha,.merged_at -> True e20b30cf798624b76ea9f9c05c9f8d9cab8ecd56 2026-11-26T04:47:53Z
+dd8e0dec | check-run 139683415417 of the head 408b8655 -> [('build', 'success', 123787764305)]
+3feb4e00 | code-scanning/analyses ref main -> 100 rows; field commit_sha present on 100 rows (e.g. e20b30cf798624b76ea9f9c05c9f8d9cab8ecd56)
+d9dfec75 | code-scanning/analyses ref main -> 100 rows; field category present on 100 rows (e.g. /language:javascript-typescript)
+3807c124 | count of conclusion skipped in the merge commit check-runs -> 2 [('build', 139699435092), ('deploy', 139699413916)]; Deploy demo run 45757473204 jobs -> [["deploy","skipped"],["build","skipped"]]
+29feaebd | gh api -X GET actions/runs/45757473204/pending_deployments -> []
+f5d29d02 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+96fd2a07 | gh api -X GET git/matching-refs/heads/records/b2118 --jq length -> 1
+ef95fbf4 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 3
+f8cdc89e | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; a slot word; kit count 50
+c3d38dbb | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 6
+ad59d5a5 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 2
+a00798f5 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; a slot word; kit count 17
+50ae7a3e | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; the seat runs it at Step 2 and compares with the sha above (branches/main read e20b30cf by gh); kit count 2
+a78c6063 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 2
+bdfc3d5b | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 34
+51511fbe | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+00fea902 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 1
+1bbe24c7 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 3
+25ed7b8e | jira GET issue/RD-893 -> 200, status To Do, comments 2
+fcd93bbb | jira GET issue/RD-99999999 -> status 404
+ba5bbc84 | sha256 of M_HISTORY.md (saved at the merge commit) first 16 -> c48af5a3d37eae74
+af7f9360 | df -g /Volumes/Datasec_DEV -> /dev/disk5s1      1862  993       868    54% 30115019 9108993520    0%   /Volumes/Datasec_DEV
+0bd9ecbd | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; a slot word; kit count 17
+a5ce7010 | gh api -X GET git/matching-refs/heads/records/b2126 --jq length -> 0 (control records/b2118 -> 1)
+eb18f1d1 | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 2
+dccf41fc | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 2
+519c03cc | instruction literal (a word, flag, command, template or slot word the seat types or a clause the texts define), not an output anyone expects to match; kit count 11
