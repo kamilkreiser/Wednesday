@@ -1,0 +1,1626 @@
+diff --git a/BACKLOG.md b/BACKLOG.md
+index aec3203..45b6cd5 100644
+--- a/BACKLOG.md
++++ b/BACKLOG.md
+@@ -1675,9 +1675,31 @@
+   - Symptom: `audit/` 0755 (or a plain file) at session setup: reason "audit/ is not a directory of this user with mode 0700"; after the first send it reads "this session's log is missing or empty; …"; fixing `audit/` does not help, every send of the session is refused until it ends
+   - Why deferred: not in the fix round's closed list (addendum 2); open
+   - Discovered: 2026-11-26 by the independent check of AUDIT-WIRE (F-6)
++  - Resolved: 2026-11-26 by AUDIT-NEXT-A: the creation failure's reason is kept in status.audit with what to do; the log is not re-opened after it in the same process (tests/an_create.rs; red creation_reason_overwritten). Creating the log again in the same process is not built
+ - [ ] AUDIT-WIRE (Notes N-1 to N-9 of QA-AUDIT-WIRE): open, none changed in the fix round
+   - Where: the check's verdict, Notes N-1 to N-9 (the 0700 check of `audit/` only at creation; `red_seal` compiled into every build; the refusal's error code; `audit_seal` refused by the daemon's own unsaved state; the "unavailable" seal reply has no `limits` key; email addresses not masked; USAGE and "give the command again" wording; leftover temp files at 64 stop the log opening; BACKLOG not a byte prefix by item 9's form)
+   - N-3 (the refusal's error code): a send refused because its record did not land answers `state_not_saved`, whose documented meaning (ipc.rs, "A state file could not be saved; state-changing commands are refused until one is") is false after an audit refusal; a dedicated code (or a doc line) would avoid the wrong reading. The owner will be told
+   - N-6 (an email address is not masked): `PatternRedactor` of `coagent-audit` does not mask email addresses, so a stored preview can keep one; a limit of the audit crate, not of the daemon. The owner will be told
+   - Why deferred: notes, no action required for the merge (the check); not in the round's closed list
+   - Discovered: 2026-11-26 by the independent check of AUDIT-WIRE (N-1 to N-9)
++  - N-5 (the "unavailable" seal reply has no `limits` key): Resolved: 2026-11-26 by AUDIT-NEXT-A: the reply carries `"limits": null`, the same keys as every other seal reply; no value changed (tests/an_texts.rs)
++  - N-7, the seal replies' half ("give the command again" omits "after the cause is fixed"): Resolved: 2026-11-26 by AUDIT-NEXT-A: the three texts end "fix the cause (see status.audit), then give the command again"; constants and rows unchanged (tests/an_texts.rs)
++  - N-10 of the same check (AW-7 went red through the helper's time-out): resolved 2026-11-26 by AUDIT-NEXT-A, tests/aw_disk.rs asserts an answer and the process before the inbox read
++  - N-1 (2026-11-26, record only, the coordinator's ruling): the 0700 check of `audit/` stays at creation only; checking it at open would refuse every send after a restart where records land today (a fail-closed tightening the owner sees); the host checks its own folders
++  - N-2 (2026-11-26, record only, the coordinator's ruling): `red_seal` stays compiled into every build; no received input reaches it, and gating it by `#[cfg]` would change the crate's red-control form and touch engine.rs
++  - N-3 (2026-11-26): open for a later audit lane (it needs ipc.rs and engine.rs, and changes an answer code pinned by three `aw_*` assertions)
++  - N-4 (2026-11-26, record only, the coordinator's ruling): `audit_seal` keeps the base's rule for every state-changing command (refused while the daemon's own state is unsaved; a landed seal can be answered "state could not be saved" if the flush after the reply fails); `status.audit.last_seal` tells the truth; changing it touches `on_ipc`
++  - N-6 (2026-11-26): open; the owner's ruling of 2026-11-26 is to blank email addresses in a preview; that is a change of the audit crate's pattern list (it changes what every preview keeps), for a later lane that owns the crate; nothing built here
++  - N-7, the USAGE half (2026-11-26, record only, the coordinator's ruling): USAGE is not changed; it would change `--help` with the switch absent
++  - N-8 (2026-11-26, record only, the coordinator's ruling): leftover temp files (at 64 the host refuses to open) are host behaviour, in the host crate; the owner is told
++  - N-9 (2026-11-26, record only, the coordinator's ruling): a check-method note; nothing to fix
++- [x] AUDIT-WIRE (R2-N1 of the lane's second check): the seal path could not re-open a host that had no member (the segment read failed and the seal answered "segment unknown" without trying to open the log again)
++  - Resolved: 2026-11-26 by AUDIT-NEXT-A: a host with no member before the seal is opened again once and its segment read from the re-opened host; only if that read also fails is the answer "segment unknown" (no seal call). Unreachable with folder rights; pinned by the pure-function property in tests/an_after.rs (red member_less_never_reopened)
++- [x] AUDIT-WIRE (R2-N2 of the lane's second check): row 11 (and "12 and 11") said "the audit log was opened again" when the re-open after the seal failed
++  - Resolved: 2026-11-26 by AUDIT-NEXT-A: the text is chosen after the re-open; a failed one answers "sealed: the log was filed away; the audit log could not be opened again; see status.audit". Pinned by tests/an_after.rs and tests/an_texts.rs (red row11_text_before_reopen)
++- [x] AUDIT-WIRE (R2-N3 of the lane's second check): the `NothingToSeal` reply could not tell a log that could not write from a quiet one
++  - Resolved: 2026-11-26 by AUDIT-NEXT-A: the member's own seq and last own checkpoint, read before the seal, choose "the log could not write its checkpoint; fix the cause (see status.audit), then give the command again" (seq above the checkpoint) or "nothing new since the last filed point" (equal: an own checkpoint is listed only after it is stored); the old text stays when neither can be read. Row, calls and the never-retried rule unchanged. Pinned by tests/an_nothing.rs and tests/aw_round2.rs (red nothing_text_guessed)
++- [x] AUDIT-WIRE (R2-N4 of the lane's second check): N-10 of the first check was not in BACKLOG
++  - Resolved: 2026-11-26 by AUDIT-NEXT-A: recorded under the Notes entry above, and fixed (tests/aw_disk.rs)
++- [ ] AUDIT-WIRE doc debt: docs/AUDIT-HOST.md:3-4 still says "nothing depends on it yet (the daemon's wiring is lane L8)"; since AUDIT-WIRE the daemon depends on the audit host (lane AUDIT-WIRE). The file is pinned by crates/coagent-audit-host/tests/notes_docs.rs and left for a lane that owns it
++  - Discovered: 2026-11-26; recorded 2026-11-26 by lane AUDIT-NEXT-A
+diff --git a/crates/coagent-daemon/build.rs b/crates/coagent-daemon/build.rs
+index cf3f7fb..4d9ce6c 100644
+--- a/crates/coagent-daemon/build.rs
++++ b/crates/coagent-daemon/build.rs
+@@ -396,4 +396,44 @@ fn main() {
+         );
+         println!("cargo::rustc-cfg=coagent_red=\"{v}\"");
+     }
++    // Lane AUDIT-NEXT-A: the same, for COAGENT_RED_AN (at most one red variable per build).
++    println!("cargo::rerun-if-env-changed=COAGENT_RED_AN");
++    let an: Vec<String> = AN_RED.iter().map(|v| format!("\"{v}\"")).collect();
++    println!(
++        "cargo::rustc-check-cfg=cfg(coagent_red, values({}))",
++        an.join(",")
++    );
++    if let Ok(v) = std::env::var("COAGENT_RED_AN") {
++        assert!(
++            AN_RED.contains(&v.as_str()),
++            "COAGENT_RED_AN={v} is not a known red control"
++        );
++        assert!(
++            std::env::var("COAGENT_RED_DAEMON").is_err()
++                && std::env::var("COAGENT_RED_P1P").is_err()
++                && std::env::var("COAGENT_RED_RR").is_err()
++                && std::env::var("COAGENT_RED_WD").is_err()
++                && std::env::var("COAGENT_RED_LA").is_err()
++                && std::env::var("COAGENT_RED_DN").is_err()
++                && std::env::var("COAGENT_RED_AW").is_err(),
++            "COAGENT_RED_AN cannot be set together with COAGENT_RED_DAEMON, COAGENT_RED_P1P, COAGENT_RED_RR, COAGENT_RED_WD, COAGENT_RED_LA, COAGENT_RED_DN or COAGENT_RED_AW"
++        );
++        assert!(
++            std::env::var("PROFILE").as_deref() != Ok("release"),
++            "COAGENT_RED_AN is for test builds only"
++        );
++        println!(
++            "cargo::warning=RED CONTROL BUILD: coagent_red=\"{v}\" (a deliberately broken variant)"
++        );
++        println!("cargo::rustc-cfg=coagent_red=\"{v}\"");
++    }
+ }
++
++// Lane AUDIT-NEXT-A: its red controls, switched on by `COAGENT_RED_AN`. Rows in
++// `scripts/red-controls-daemon.sh`.
++const AN_RED: &[&str] = &[
++    "creation_reason_overwritten",
++    "row11_text_before_reopen",
++    "member_less_never_reopened",
++    "nothing_text_guessed",
++];
+diff --git a/crates/coagent-daemon/src/audit.rs b/crates/coagent-daemon/src/audit.rs
+index c750bf7..52f03e5 100644
+--- a/crates/coagent-daemon/src/audit.rs
++++ b/crates/coagent-daemon/src/audit.rs
+@@ -106,12 +106,26 @@ const T_REFUSED_REOPEN: &str =
+     "not recorded: the message was refused and not queued; the audit log was opened again";
+ const T_SEALED: &str = "sealed: the log was filed away and continues";
+ const T_SEALED_REOPEN: &str = "sealed: the log was filed away; the audit log was opened again";
+-const T_NOT_SEALED: &str = "not sealed: give the command again";
++// AUDIT-NEXT-A item 2 (R2-N2): a done seal (row 11, "12 and 11") whose re-open FAILED.
++const T_SEALED_NOT_REOPENED: &str =
++    "sealed: the log was filed away; the audit log could not be opened again; see status.audit";
++// AUDIT-NEXT-A item 5 (N-7): "give the command again" says to fix the cause first.
++const T_NOT_SEALED: &str =
++    "not sealed: fix the cause (see status.audit), then give the command again";
+ // AUDIT-WIRE addendum 2, item B (F-3): `NothingToSeal` also comes when step 0's checkpoint could
+ // not be written (the seal cuts at the last STORED checkpoint), so the text claims no more than that.
++// It stays the text whenever the daemon cannot tell which of the two causes applies.
+ const T_NOTHING: &str = "not sealed: nothing could be filed (nothing new since the last filed point, or the log could not write)";
++// AUDIT-NEXT-A item 3 (R2-N3): `NothingToSeal` told apart by the member's own figures read before
++// the call. Own seq above the last own checkpoint's number: step 0's checkpoint was not stored (a
++// stored one would have moved the own cut to the own seq, so the seal would have removed events).
++const T_NOTHING_UNWRITTEN: &str = "not sealed: the log could not write its checkpoint; fix the cause (see status.audit), then give the command again";
++// Own seq equal to it: nothing new. An own checkpoint enters `AuthorChain::checkpoints()` only
++// after it is stored (`SessionAudit::checkpoint_now` writes first, then `commit_head`; a rebuild
++// reads the checkpoints from the store), so an equal number is a stored point.
++const T_NOTHING_NEW: &str = "not sealed: nothing new since the last filed point";
+ const T_NOT_SEALED_REOPEN: &str =
+-    "not sealed: the audit log was opened again; give the command again";
++    "not sealed: the audit log was opened again; fix the cause (see status.audit), then give the command again";
+ // Addendum 2, item C (F-5): the texts when the re-open after row 4 or `Closed` FAILED (chosen
+ // after `open_now`'s result is known).
+ const T_NOT_SEALED_NOT_REOPENED: &str =
+@@ -121,7 +135,10 @@ const T_REFUSED_NOT_REOPENED: &str =
+ // Addendum 2, item A (F-1): the segment before the seal could not be read, so `seal` is not called.
+ const ROW_SEGMENT_UNKNOWN: &str = "none (the segment before the seal could not be read)";
+ const T_SEGMENT_UNKNOWN: &str =
+-    "not sealed: the log's segment could not be read, so the seal was not called; give the command again";
++    "not sealed: the log's segment could not be read, so the seal was not called; fix the cause (see status.audit), then give the command again";
++// AUDIT-NEXT-A item 1 (F-6): added to `status.audit.reason` after a creation failure in this process.
++const T_CREATION_FAILED: &str =
++    "; this session has no audit log: end it and pair again to keep one";
+ const T_LANDED_UNKNOWN: &str =
+     "the audit log was opened again and its segment read: sealed only if the segment moved";
+ const T_UNREACHABLE: &str = "not done: an answer the daemon never asks for (reported, not retried)";
+@@ -400,6 +417,105 @@ pub fn drive_seal(
+     }
+ }
+ 
++/// The member's own figures, read before a seal with no folder listing (AUDIT-NEXT-A items 2
++/// and 3).
++#[derive(Debug, Clone, Copy, PartialEq, Eq)]
++pub struct Figures {
++    /// The member's segment (`SessionAudit::segment`).
++    pub segment: u64,
++    /// Its own last number (`own().seq()`).
++    pub own_seq: u64,
++    /// The number of its last own checkpoint (`own().checkpoints()`'s last `head.author_seq`; 0
++    /// when it holds none).
++    pub own_checkpoint: u64,
++}
++
++/// The owner's seal, step by step, with no host (AUDIT-NEXT-A item 2): `owner_seal` gives it the
++/// host's steps as closures over `cx`, a test gives it a model.
++///
++/// * `figures` reads the member's figures; `None` = the host has no member (`Closed`).
++/// * (a, R2-N1) a host with no member is opened again ONCE (`reopen`) before its figures are
++///   read; only if that read also fails is the answer [`segment_unknown`] (no `seal` call).
++/// * [`drive_seal`] then makes the command's ONE `seal` (`seal_once`); `limits` receives the
++///   answer's limits report, at once.
++/// * After the answer: a re-open when the action asks for one; the text is chosen AFTER its result
++///   is known (b, R2-N2: a done seal whose re-open failed says so); row 4 reads the segment of the
++///   host opened again against the one read before.
++/// * (item 3, R2-N3) a `NothingToSeal` answer (by its variant, bare or inside `LimitsChanged`)
++///   says which cause the figures read before the call show; the old text when they show neither.
++///
++/// Returns the action, the number of `seal` calls, and whether the answer was an `Err`.
++pub fn owner_seal_steps<C>(
++    cx: &mut C,
++    figures: impl Fn(&C) -> Option<Figures>,
++    mut reopen: impl FnMut(&mut C) -> bool,
++    mut seal_once: impl FnMut(&mut C) -> (Result<SealReport, HostError>, bool),
++    mut limits: impl FnMut(&mut C, &LimitsReport),
++) -> (Action, u32, bool) {
++    fn nothing_to_seal<T>(answer: &Result<T, HostError>) -> bool {
++        match answer {
++            Err(HostError::Audit(AuditError::NothingToSeal)) => true,
++            Err(HostError::LimitsChanged { answer, .. }) => nothing_to_seal(answer.as_ref()),
++            _ => false,
++        }
++    }
++    let mut fig = figures(cx);
++    // RED CONTROL `member_less_never_reopened` (AN-2b): the broken variant never opens a member-less
++    // host again here (the seal then answers `segment_unknown`, 0 calls).
++    if fig.is_none() && !cfg!(coagent_red = "member_less_never_reopened") {
++        reopen(cx);
++        fig = figures(cx);
++    }
++    // the same figure serves row 7 (in `act_on_seal`) and row 4 (below)
++    let read = fig.map(|f| f.segment);
++    let before = segment_before_for_seal(read);
++    let mut nothing = false;
++    let (mut a, calls, was_err) = drive_seal(read, || {
++        let (answer, closed_after) = seal_once(cx);
++        nothing = nothing_to_seal(&answer);
++        (answer, closed_after)
++    });
++    if let Some(l) = &a.limits {
++        limits(cx, l);
++    }
++    if a.reopen {
++        let reopened = reopen(cx);
++        if !reopened {
++            if !a.done {
++                a.text = T_NOT_SEALED_NOT_REOPENED;
++            } else if !cfg!(coagent_red = "row11_text_before_reopen") {
++                // RED CONTROL `row11_text_before_reopen` (AN-2): the broken variant keeps row 11's
++                // "opened again" when the re-open failed.
++                a.text = T_SEALED_NOT_REOPENED;
++            }
++        }
++        if a.read_segment && reopened {
++            // row 4: whether the seal landed is read from the segment of the host opened again,
++            // against the same figure read before the call
++            match (figures(cx).map(|f| f.segment), before) {
++                (Some(s), Some(b)) if s != b => {
++                    a.done = true;
++                    a.text = T_SEALED_REOPEN;
++                }
++                // not moved; or (not reachable: a host just opened has its member, and `seal` is
++                // called only with a known segment) unknown: never "sealed"
++                _ => a.text = T_NOT_SEALED_REOPEN,
++            }
++        }
++    }
++    if nothing && !a.done {
++        a.text = match fig {
++            // RED CONTROL `nothing_text_guessed` (AN-3): the broken variant says "nothing new"
++            // whatever the figures say.
++            _ if cfg!(coagent_red = "nothing_text_guessed") => T_NOTHING_NEW,
++            Some(f) if f.own_seq > f.own_checkpoint => T_NOTHING_UNWRITTEN,
++            Some(f) if f.own_seq == f.own_checkpoint => T_NOTHING_NEW,
++            _ => T_NOTHING,
++        };
++    }
++    (a, calls, was_err)
++}
++
+ fn now() -> AuditTime {
+     let ms = std::time::SystemTime::now()
+         .duration_since(std::time::UNIX_EPOCH)
+@@ -456,6 +572,10 @@ pub struct Audit {
+     bound: Option<Bound>,
+     /// Why the log is unavailable (a fixed description and the host's answer; no content).
+     unavailable: Option<String>,
++    /// AUDIT-NEXT-A item 1 (F-6): the bound session's log could not be CREATED in this process;
++    /// why is `unavailable`, which `created` set. While true the log is not opened again (that
++    /// would replace the reason), and `status.audit.reason` says what to do.
++    creation_failed: bool,
+     last_seal: Option<Value>,
+     limits: Option<Value>,
+ }
+@@ -469,6 +589,7 @@ impl Audit {
+             host: None,
+             bound: None,
+             unavailable: None,
++            creation_failed: false,
+             last_seal: None,
+             limits: None,
+         }
+@@ -538,6 +659,7 @@ impl Audit {
+             convener: convener.clone(),
+         });
+         if let Err(why) = self.ensure_dir() {
++            self.creation_failed = true;
+             return self.set_unavailable(why);
+         }
+         match AuditHost::create(
+@@ -552,9 +674,13 @@ impl Audit {
+             Ok((h, _)) => {
+                 self.host = Some(h);
+                 self.unavailable = None;
++                self.creation_failed = false;
+                 log!("audit log created for this session");
+             }
+-            Err(e) => self.set_unavailable(format!("the log could not be created ({e:?})")),
++            Err(e) => {
++                self.creation_failed = true;
++                self.set_unavailable(format!("the log could not be created ({e:?})"))
++            }
+         }
+     }
+ 
+@@ -640,9 +766,15 @@ impl Audit {
+         }
+     }
+ 
+-    /// A host for the bound session, opened again if it is closed or was unavailable.
++    /// A host for the bound session, opened again if it is closed or was unavailable; never after
++    /// its creation failed in this process (AUDIT-NEXT-A item 1).
+     fn ensure_open(&mut self, me: &DeviceIdentity) {
+-        if self.host.is_none() && self.bound.is_some() {
++        // RED CONTROL `creation_reason_overwritten` (AN-1): the broken variant opens again after a
++        // creation failure, so the open's `NotCreated` replaces the creation's reason.
++        if self.host.is_none()
++            && self.bound.is_some()
++            && (!self.creation_failed || cfg!(coagent_red = "creation_reason_overwritten"))
++        {
+             let _ = self.open_now(me);
+         }
+     }
+@@ -652,6 +784,7 @@ impl Audit {
+         self.host = None;
+         self.bound = None;
+         self.unavailable = None;
++        self.creation_failed = false;
+         self.last_seal = None;
+         self.limits = None;
+     }
+@@ -744,6 +877,7 @@ impl Audit {
+                 "action": "not sealed: the audit log is unavailable (see status.audit)",
+                 "calls": 0,
+                 "segment": null,
++                "limits": null,
+             });
+             return (Response::ok(id, r), false);
+         }
+@@ -769,50 +903,42 @@ impl Audit {
+     /// THE one seal of the daemon (item 4; D-S1): `seal` with `OwnerCommand`, in this engine step.
+     /// Returns the action, the number of `seal` calls made, and whether the answer was an `Err`.
+     fn owner_seal(&mut self, me: &DeviceIdentity) -> (Action, u32, bool) {
+-        let Some(host) = self.host.as_mut() else {
++        if self.host.is_none() {
+             return (action("unavailable", T_NOT_SEALED), 0, true);
+-        };
++        }
+         // Addendum 2, item A (F-1): the segment before comes from the member's own figure, a read
+         // with no folder listing (`AuditHost::member` fails only with `Closed`; `HostStatus.segment`
+-        // is the same `segment()`). If it cannot be read, `seal` is not called. The same figure
+-        // serves row 7 (in `act_on_seal`) and row 4 (below).
+-        let read = host.member().ok().map(|m| m.segment());
+-        let before = segment_before_for_seal(read);
+-        let (mut a, calls, was_err) = drive_seal(read, || {
+-            let answer = host.seal(me, SealTrigger::OwnerCommand, now());
+-            let closed_after = matches!(host.member(), Err(HostError::Closed));
+-            (answer, closed_after)
+-        });
+-        if let Some(l) = &a.limits {
+-            self.limits = Some(limits_json(l));
+-        }
+-        if a.reopen {
+-            // addendum 2, item C: rows 4 and `Closed` (not done) choose their text AFTER the
+-            // re-open; row 11 (done, closed after) keeps its text
+-            let reopened = self.open_now(me).is_ok();
+-            if !reopened && !a.done {
+-                a.text = T_NOT_SEALED_NOT_REOPENED;
+-            }
+-            if a.read_segment && reopened {
+-                // row 4: whether the seal landed is read from the segment of the host opened
+-                // again, against the same figure read before the call
+-                let now_seg = self
+-                    .host
++        // is the same `segment()`); own seq and checkpoint likewise (`HostStatus.own_seq` is the
++        // same `own().seq()`). The steps and every choice are `owner_seal_steps`'s.
++        owner_seal_steps(
++            self,
++            |s: &Audit| {
++                s.host
+                     .as_ref()
+                     .and_then(|h| h.member().ok())
+-                    .map(|m| m.segment());
+-                match (now_seg, before) {
+-                    (Some(s), Some(b)) if s != b => {
+-                        a.done = true;
+-                        a.text = T_SEALED_REOPEN;
+-                    }
+-                    // not moved; or (not reachable: a host just opened has its member, and
+-                    // `seal` is called only with a known segment) unknown: never "sealed"
+-                    _ => a.text = T_NOT_SEALED_REOPEN,
++                    .map(|m| Figures {
++                        segment: m.segment(),
++                        own_seq: m.own().seq(),
++                        own_checkpoint: m
++                            .own()
++                            .checkpoints()
++                            .last()
++                            .map_or(0, |c| c.head.author_seq),
++                    })
++            },
++            |s: &mut Audit| s.open_now(me).is_ok(),
++            |s: &mut Audit| match s.host.as_mut() {
++                Some(host) => {
++                    let answer = host.seal(me, SealTrigger::OwnerCommand, now());
++                    let closed_after = matches!(host.member(), Err(HostError::Closed));
++                    (answer, closed_after)
+                 }
+-            }
+-        }
+-        (a, calls, was_err)
++                // not reachable: `seal_once` is called only after the figures were read from a
++                // host that has its member; answered as a closed host, never as a seal
++                None => (Err(HostError::Closed), true),
++            },
++            |s: &mut Audit, l: &LimitsReport| s.limits = Some(limits_json(l)),
++        )
+     }
+ 
+     /// The red control `seal_on_peer_message` (AW-6) only: the broken receive path seals.
+@@ -843,7 +969,16 @@ impl Audit {
+             "on"
+         };
+         let reason = if state == "unavailable" {
+-            unreadable.or_else(|| self.unavailable.clone())
++            // AUDIT-NEXT-A item 1: after a creation failure, what to do follows its reason
++            unreadable.or_else(|| {
++                self.unavailable.clone().map(|r| {
++                    if self.creation_failed {
++                        format!("{r}{T_CREATION_FAILED}")
++                    } else {
++                        r
++                    }
++                })
++            })
+         } else {
+             None
+         };
+diff --git a/crates/coagent-daemon/tests/an_after.rs b/crates/coagent-daemon/tests/an_after.rs
+new file mode 100644
+index 0000000..c490b81
+--- /dev/null
++++ b/crates/coagent-daemon/tests/an_after.rs
+@@ -0,0 +1,635 @@
++//! Lane AUDIT-NEXT-A item 2 (R2-N1, R2-N2): the owner's seal driven step by step with NO host,
++//! through `coagent_daemon::audit::owner_seal_steps` and a model of the host's steps.
++//!
++//! PROPERTY, GENERATED over (every seal answer of the `aw_answers` alphabet: its builders are
++//! private to that file, so they are rebuilt here by copying its builder functions verbatim) ×
++//! (the re-open answers ok / fails) × (the segment before: known k, unknown) × (the segment after
++//! a re-open made after the answer: k, k+1, unreadable) × (the host has its member at the start or
++//! not) × (the own figures: own seq above the last own checkpoint, or equal to it) × (the host
++//! closed after the answer or not). Asserted for every draw:
++//! * no text says "opened again" unless a re-open after the answer succeeded, and none says "could
++//!   not be opened again" unless it failed;
++//! * `sealed: true` (and a text starting `sealed:`) only for an `Ok` answer, or a segment that moved
++//!   against a KNOWN segment before (row 7's `segment_now`, row 4's read after the re-open);
++//! * a host with no member at the start is opened again exactly ONCE before any figure is read and
++//!   before the seal; a host with its member is not opened before the seal;
++//! * the answer is `segment_unknown` (0 calls) only when the read after that re-open also failed,
++//!   and then no `seal` is made; otherwise exactly one;
++//! * (item 3) a `NothingToSeal` answer, bare or wrapped, says "could not write" when own seq is
++//!   above the checkpoint and "nothing new" when they are equal.
++//!
++//! `AN_SEED` (hex) and `AN_CASES` choose the run; both are printed, with the reach counters. Red
++//! controls: `row11_text_before_reopen` (AN-2), `member_less_never_reopened` (AN-2b).
++mod common;
++
++use std::cell::RefCell;
++use std::collections::BTreeMap;
++
++use coagent_audit::anchor::AnchorError;
++use coagent_audit::bundle::Bundle;
++use coagent_audit::chain::EventInput;
++use coagent_audit::checkpoint::{CheckpointPolicy, Countersignature, SignedHead};
++use coagent_audit::received::Accepted;
++use coagent_audit::redact::PatternRedactor;
++use coagent_audit::segment::SegmentInfo;
++use coagent_audit::session::{SessionAudit, StoreLimits};
++use coagent_audit::store::{MemStore, StoreError};
++use coagent_audit::time::AuditTime;
++use coagent_audit::AuditError;
++use coagent_audit_host::{
++    DirError, HostError, LimitsReport, Outcome, Percent, SealReport, SealTrigger,
++};
++use coagent_crypto::identity::DeviceIdentity;
++use coagent_daemon::audit::{owner_seal_steps, segment_unknown, Figures};
++use coagent_proto::bytes::{Digest32, KeyId, SessionId, Signature64};
++use coagent_roster::{Applied, Member, Role, RosterBody, CAP};
++
++// ---- the `aw_answers` alphabet, its builder functions copied verbatim ----
++
++/// A small deterministic generator (xorshift64*), seeded and printed.
++struct Rng(u64);
++impl Rng {
++    fn next(&mut self) -> u64 {
++        let mut x = self.0;
++        x ^= x >> 12;
++        x ^= x << 25;
++        x ^= x >> 27;
++        self.0 = x;
++        x.wrapping_mul(0x2545_f491_4f6c_dd1d)
++    }
++    fn below(&mut self, n: usize) -> usize {
++        (self.next() % n as u64) as usize
++    }
++}
++
++/// Real values the host would carry (a head, a bundle), from a real member on a `MemStore`.
++struct Real {
++    head: SignedHead,
++    bundle: Bundle,
++    sid: SessionId,
++    peer: KeyId,
++}
++
++fn real() -> Real {
++    let id = DeviceIdentity::generate().unwrap();
++    let peer = DeviceIdentity::generate().unwrap();
++    let sid = SessionId([7; 32]);
++    let me = id.key_id();
++    let ts = "2026-11-25T00:00:00Z";
++    let body = RosterBody {
++        session_id: sid,
++        version: 1,
++        prev_hash: Digest32([0; 32]),
++        convener: me,
++        cap: CAP,
++        members: vec![
++            Member::new(&id.public_keys(), me, Role::Guest, 0, 1, ts),
++            Member::new(&peer.public_keys(), peer.key_id(), Role::Guest, 1, 1, ts),
++        ],
++        removed: vec![],
++    };
++    let signed = coagent_roster::sign(&id, body).unwrap();
++    let t = AuditTime::from_unix_ms(1_700_000_000_000);
++    let mut m = SessionAudit::start(
++        MemStore::new(),
++        &id,
++        &id.verified(),
++        &signed,
++        CheckpointPolicy::default(),
++        Box::new(PatternRedactor),
++        t,
++    )
++    .unwrap();
++    m.record(
++        &id,
++        EventInput {
++            kind: "chat",
++            summary: None,
++            full: Some("x"),
++        },
++        t,
++    )
++    .unwrap();
++    let head = m.checkpoint_now(&id, t).unwrap();
++    let bundle = m.export(&id).unwrap();
++    Real {
++        head,
++        bundle,
++        sid,
++        peer: peer.key_id(),
++    }
++}
++
++fn limits_report() -> LimitsReport {
++    LimitsReport {
++        before: Some(StoreLimits {
++            bytes: 1000,
++            records: 10,
++        }),
++        offered: StoreLimits {
++            bytes: 1000,
++            records: 10,
++        },
++        in_force: StoreLimits::default(),
++        refused: Some(AuditError::LogFull),
++    }
++}
++
++fn dir_errors() -> Vec<DirError> {
++    let io = |n: &str| DirError::Io {
++        what: "sync the directory",
++        name: n.into(),
++        kind: std::io::ErrorKind::PermissionDenied,
++    };
++    // every DirError variant (13), the Io one under several names
++    vec![
++        DirError::Unsupported("this system"),
++        io("anchors"),
++        io("anchors/limits"),
++        io("anchors/pending"),
++        io("archive"),
++        io("archive/seg-00000000000000000000-0000.bundle"),
++        io("store"),
++        DirError::NotADirectory("store".into()),
++        DirError::Symlink("lock".into()),
++        DirError::Rights {
++            name: "anchors".into(),
++            mode: 0o755,
++        },
++        DirError::NotOwned("archive".into()),
++        DirError::HardLink("anchors/current".into()),
++        DirError::UnknownFile("x".into()),
++        DirError::Unreadable {
++            name: "anchors/current".into(),
++            why: "digest",
++        },
++        DirError::TooManyLeftovers(65),
++        DirError::InUse,
++        DirError::Poisoned,
++        DirError::Bounds("archive attempts for one segment"),
++    ]
++}
++
++fn audit_errors(peer: KeyId) -> Vec<AuditError> {
++    vec![
++        AuditError::NothingToSeal,
++        AuditError::LogFull,
++        AuditError::ExportTooLarge,
++        AuditError::Store(StoreError::Unavailable("disk")),
++        AuditError::NotAuthor,
++        AuditError::FieldLimit("type"),
++        AuditError::NotMember(peer),
++        AuditError::WrongAuthor,
++        AuditError::SealStale,
++    ]
++}
++
++fn triggers() -> Vec<SealTrigger> {
++    vec![
++        SealTrigger::OwnerCommand,
++        SealTrigger::Timer,
++        SealTrigger::OwnFreePartAt(Percent::new(50).unwrap()),
++        SealTrigger::OwnSeatAt(Percent::new(90).unwrap()),
++    ]
++}
++
++/// Every `HostError` value of the alphabet except `LimitsChanged` (built from these below).
++/// `before` is the segment the daemon read before a seal.
++fn plain_errors(r: &Real, before: u64) -> Vec<HostError> {
++    let mut v: Vec<HostError> = dir_errors().into_iter().map(HostError::Dir).collect();
++    v.extend(audit_errors(r.peer).into_iter().map(HostError::Audit));
++    v.push(HostError::Anchor {
++        pending: None,
++        current: None,
++    });
++    v.push(HostError::Anchor {
++        pending: Some(AnchorError::WrongSession),
++        current: Some(AnchorError::WrongSession),
++    });
++    v.push(HostError::NotCreated);
++    v.push(HostError::AlreadyCreated);
++    v.push(HostError::Closed);
++    v.push(HostError::Busy {
++        queued: 256,
++        bytes: 4096,
++    });
++    v.push(HostError::SealInProgress);
++    v.push(HostError::NoSealInProgress);
++    for t in triggers() {
++        v.push(HostError::TriggerOff(t.clone()));
++        v.push(HostError::NotDue(t));
++    }
++    v.push(HostError::Settings("seal.timer_ms: not a number".into()));
++    v.push(HostError::AnchorNotSaved);
++    for landed in [false, true] {
++        v.push(HostError::Reopened {
++            cause: AuditError::Store(StoreError::Unavailable("disk")),
++            landed,
++        });
++    }
++    v.push(HostError::LandedUnknown {
++        cause: AuditError::Store(StoreError::Unavailable("disk")),
++        reopen: Box::new(HostError::Dir(DirError::Poisoned)),
++    });
++    v.push(HostError::SealStaleTwice);
++    for seg in [before, before + 1] {
++        v.push(HostError::SealCommitFailed {
++            cause: AuditError::Store(StoreError::Unavailable("disk")),
++            segment_now: seg,
++        });
++    }
++    v.push(HostError::ArchiveMismatch(
++        "archive/seg-00000000000000000000-0000.bundle".into(),
++    ));
++    v
++}
++
++fn outcomes(r: &Real) -> Vec<Outcome> {
++    vec![
++        Outcome::Recorded(4),
++        Outcome::Checkpoint(r.head.clone()),
++        Outcome::Received(Accepted {
++            seq: 1,
++            hash: Digest32([1; 32]),
++        }),
++        Outcome::Countersigned(Countersignature {
++            session_id: r.sid,
++            author: r.peer,
++            author_seq: 1,
++            hash: Digest32([2; 32]),
++            roster_v: 1,
++            by: r.peer,
++            held_from: Some(1),
++            sig: Signature64([3; 64]),
++        }),
++        Outcome::Evidence(vec![]),
++        Outcome::Roster(Applied::Unchanged),
++        Outcome::Released(Box::new(r.bundle.clone())),
++        Outcome::Kept,
++        Outcome::Queued(1),
++    ]
++}
++
++fn seal_report(limits: bool) -> SealReport {
++    SealReport {
++        trigger: SealTrigger::OwnerCommand,
++        checkpoint: None,
++        info: SegmentInfo {
++            segment: 1,
++            own_start: Some(3),
++            garbage_left: 0,
++        },
++        files: vec!["seg-00000000000000000000-0000.bundle".into()],
++        stale_retries: 0,
++        limits: limits.then(limits_report),
++    }
++}
++
++/// Every answer of `seal`: `Ok` with and without a limits report, the plain errors, and
++/// `LimitsChanged` around every inner answer a seal's wrapper can hold (the host wraps a step-0
++/// change's answer, an `Outcome`, or a commit failure).
++fn seal_answers(r: &Real, before: u64) -> Vec<Result<SealReport, HostError>> {
++    let mut v: Vec<Result<SealReport, HostError>> =
++        vec![Ok(seal_report(false)), Ok(seal_report(true))];
++    let plain = plain_errors(r, before);
++    v.extend(plain.iter().cloned().map(Err));
++    let mut inner: Vec<Result<Outcome, HostError>> = outcomes(r).into_iter().map(Ok).collect();
++    inner.extend(plain.into_iter().map(Err));
++    for a in inner {
++        v.push(Err(HostError::LimitsChanged {
++            limits: limits_report(),
++            answer: Box::new(a),
++        }));
++    }
++    v
++}
++
++// ---- the model of the host's steps ----
++
++#[derive(Debug, Clone, Copy, PartialEq, Eq)]
++enum Ev {
++    /// A read of the figures: whether it gave figures.
++    Read(bool),
++    /// A re-open: its result.
++    Reopen(bool),
++    Seal,
++}
++
++/// One draw.
++#[derive(Debug, Clone)]
++struct Case {
++    answer: Result<SealReport, HostError>,
++    closed_after: bool,
++    member_at_start: bool,
++    reopen_ok: bool,
++    /// The segment a read gives before the seal (`None`: unreadable).
++    before: Option<u64>,
++    /// The segment a read gives after a re-open made after the answer (`None`: unreadable).
++    after: Option<u64>,
++    own_seq: u64,
++    own_checkpoint: u64,
++}
++
++struct Model {
++    case: Case,
++    member: bool,
++    sealed_yet: bool,
++    events: RefCell<Vec<Ev>>,
++}
++
++fn run_case(c: &Case) -> (coagent_daemon::audit::Action, u32, bool, Vec<Ev>) {
++    let mut m = Model {
++        case: c.clone(),
++        member: c.member_at_start,
++        sealed_yet: false,
++        events: RefCell::new(vec![]),
++    };
++    let (a, calls, was_err) = owner_seal_steps(
++        &mut m,
++        |m: &Model| {
++            let seg = if !m.member {
++                None
++            } else if m.sealed_yet {
++                m.case.after
++            } else {
++                m.case.before
++            };
++            let f = seg.map(|segment| Figures {
++                segment,
++                own_seq: m.case.own_seq,
++                own_checkpoint: m.case.own_checkpoint,
++            });
++            m.events.borrow_mut().push(Ev::Read(f.is_some()));
++            f
++        },
++        |m: &mut Model| {
++            m.events.borrow_mut().push(Ev::Reopen(m.case.reopen_ok));
++            m.member = m.case.reopen_ok;
++            m.case.reopen_ok
++        },
++        |m: &mut Model| {
++            m.events.borrow_mut().push(Ev::Seal);
++            m.sealed_yet = true;
++            m.member = !m.case.closed_after;
++            (m.case.answer.clone(), m.case.closed_after)
++        },
++        |_m: &mut Model, _l: &LimitsReport| {},
++    );
++    let ev = m.events.into_inner();
++    (a, calls, was_err, ev)
++}
++
++/// The answer under its `LimitsChanged` wrappers (an `Outcome` inside one stays wrapped: from a
++/// seal it means the seal did not run).
++fn core(a: &Result<SealReport, HostError>) -> Result<(), &HostError> {
++    fn peel(e: &HostError) -> &HostError {
++        match e {
++            HostError::LimitsChanged { answer, .. } => match answer.as_ref() {
++                Err(inner) => peel(inner),
++                Ok(_) => e,
++            },
++            _ => e,
++        }
++    }
++    match a {
++        Ok(_) => Ok(()),
++        Err(e) => Err(peel(e)),
++    }
++}
++
++fn check(c: &Case) -> Result<(String, String), String> {
++    let (a, calls, _was_err, ev) = run_case(c);
++    let ctx = || format!("case {c:?}: action {a:?}, calls {calls}, events {ev:?}");
++    let seal_at = ev.iter().position(|e| *e == Ev::Seal);
++    let first_read_ok = ev.iter().position(|e| *e == Ev::Read(true));
++    let reopens_before = ev[..seal_at.unwrap_or(ev.len())]
++        .iter()
++        .filter(|e| matches!(e, Ev::Reopen(_)))
++        .count();
++    let reopens_after: Vec<bool> = match seal_at {
++        Some(i) => ev[i..]
++            .iter()
++            .filter_map(|e| match e {
++                Ev::Reopen(ok) => Some(*ok),
++                _ => None,
++            })
++            .collect(),
++        None => vec![],
++    };
++    let member_less = ev.first() == Some(&Ev::Read(false));
++    // a member-less host: exactly one re-open, before any figure is read and before the seal
++    if member_less {
++        if reopens_before != 1 {
++            return Err(format!(
++                "a member-less host was opened again {reopens_before} times before the seal: {}",
++                ctx()
++            ));
++        }
++        let reopen_at = ev.iter().position(|e| matches!(e, Ev::Reopen(_))).unwrap();
++        if first_read_ok.is_some_and(|r| r < reopen_at) {
++            return Err(format!("a figure was read before the re-open: {}", ctx()));
++        }
++    } else if reopens_before != 0 {
++        return Err(format!(
++            "a host with its member was opened again before the seal: {}",
++            ctx()
++        ));
++    }
++    // segment_unknown only when the read after that re-open failed; then no seal
++    let unknown = segment_unknown();
++    let read_failed = !ev[..seal_at.unwrap_or(ev.len())].contains(&Ev::Read(true));
++    if a.row == unknown.row {
++        if !(member_less && read_failed) && !(c.before.is_none() && read_failed) {
++            return Err(format!(
++                "segment_unknown with a readable segment: {}",
++                ctx()
++            ));
++        }
++        if calls != 0 || seal_at.is_some() {
++            return Err(format!("segment_unknown made a seal: {}", ctx()));
++        }
++        if a.done {
++            return Err(format!("segment_unknown said sealed: {}", ctx()));
++        }
++    } else {
++        if read_failed {
++            return Err(format!(
++                "the segment was unreadable but the seal was called: {}",
++                ctx()
++            ));
++        }
++        if calls != 1 || ev.iter().filter(|e| **e == Ev::Seal).count() != 1 {
++            return Err(format!("not exactly one seal: {}", ctx()));
++        }
++    }
++    // texts about the re-open
++    let says_failed = a.text.contains("could not be opened again");
++    let says_opened = a.text.contains("opened again") && !says_failed;
++    if says_opened && reopens_after.last() != Some(&true) {
++        return Err(format!(
++            "says opened again without a successful re-open: {}",
++            ctx()
++        ));
++    }
++    if says_failed && reopens_after.last() != Some(&false) {
++        return Err(format!(
++            "says could not be opened again without a failed re-open: {}",
++            ctx()
++        ));
++    }
++    // sealed only for an Ok answer or a moved segment against a known segment before
++    if a.done != a.text.starts_with("sealed:") {
++        return Err(format!("sealed flag and text disagree: {}", ctx()));
++    }
++    if a.done {
++        let known = c.before.filter(|_| !read_failed);
++        let ok = match core(&c.answer) {
++            Ok(()) => true,
++            Err(HostError::SealCommitFailed { segment_now, .. }) => {
++                known.is_some_and(|b| *segment_now != b)
++            }
++            Err(HostError::LandedUnknown { .. }) => known.is_some_and(|b| {
++                reopens_after.last() == Some(&true) && c.after.is_some_and(|s| s != b)
++            }),
++            Err(_) => false,
++        };
++        if !ok {
++            return Err(format!(
++                "sealed without an Ok answer or a moved segment: {}",
++                ctx()
++            ));
++        }
++    }
++    // item 3: NothingToSeal says which cause the figures show
++    if matches!(
++        core(&c.answer),
++        Err(HostError::Audit(AuditError::NothingToSeal))
++    ) && calls == 1
++    {
++        let want = if c.own_seq > c.own_checkpoint {
++            "not sealed: the log could not write its checkpoint; fix the cause (see status.audit), then give the command again"
++        } else {
++            "not sealed: nothing new since the last filed point"
++        };
++        if a.text != want {
++            return Err(format!("NothingToSeal text: {}", ctx()));
++        }
++    }
++    // reach label
++    let pair = match (c.before, c.after) {
++        (Some(b), Some(s)) if s == b => "k,k",
++        (Some(_), Some(_)) => "k,k+1",
++        (Some(_), None) => "k,unreadable",
++        (None, _) => "unknown",
++    };
++    let label = match (a.row, reopens_after.last()) {
++        ("11", Some(false)) => "row 11, re-open failed".to_string(),
++        ("12 and 11", Some(false)) => "row 12 and 11, re-open failed".to_string(),
++        ("4", Some(true)) if !read_failed => format!("row 4, re-open ok, segments {pair}"),
++        ("4", Some(false)) => "row 4, re-open failed".to_string(),
++        _ if member_less && c.reopen_ok => "member-less, re-open ok".to_string(),
++        _ if member_less => "member-less, re-open failed".to_string(),
++        (r, _) => format!("other: {r}"),
++    };
++    Ok((label, a.text.to_string()))
++}
++
++fn seed() -> u64 {
++    std::env::var("AN_SEED")
++        .ok()
++        .and_then(|s| u64::from_str_radix(s.trim_start_matches("0x"), 16).ok())
++        .unwrap_or(0x00a0_a17e_5ea1_0002)
++}
++
++fn cases() -> usize {
++    std::env::var("AN_CASES")
++        .ok()
++        .and_then(|s| s.parse().ok())
++        .unwrap_or(6000)
++}
++
++#[test]
++fn the_after_seal_step_never_says_sealed_without_a_landed_seal_and_never_says_opened_when_it_was_not(
++) {
++    let r = real();
++    let (seed, n) = (seed(), cases());
++    println!("AN after: seed {seed:016x}, cases {n}");
++    let mut rng = Rng(seed | 1);
++    let mut reach: BTreeMap<String, u64> = BTreeMap::new();
++    let mut failures: Vec<String> = vec![];
++    for _ in 0..n {
++        let k = [0u64, 1, 5][rng.below(3)];
++        let alphabet = seal_answers(&r, k);
++        // a quarter of the draws from the answers whose after-step differs (Ok, row 4, Closed,
++        // NothingToSeal), so each reach line is made in every run
++        let focus: Vec<&Result<SealReport, HostError>> = alphabet
++            .iter()
++            .filter(|a| {
++                matches!(
++                    core(a),
++                    Ok(())
++                        | Err(HostError::LandedUnknown { .. })
++                        | Err(HostError::Closed)
++                        | Err(HostError::Audit(AuditError::NothingToSeal))
++                )
++            })
++            .collect();
++        let answer = if rng.below(4) == 0 {
++            focus[rng.below(focus.len())].clone()
++        } else {
++            alphabet[rng.below(alphabet.len())].clone()
++        };
++        let before = if rng.below(4) == 0 { None } else { Some(k) };
++        let after = [Some(k), Some(k + 1), None][rng.below(3)];
++        let own_checkpoint = rng.below(4) as u64;
++        let own_seq = own_checkpoint + rng.below(2) as u64;
++        let c = Case {
++            answer,
++            closed_after: rng.below(2) == 0,
++            member_at_start: rng.below(3) != 0,
++            reopen_ok: rng.below(2) == 0,
++            before,
++            after,
++            own_seq,
++            own_checkpoint,
++        };
++        match check(&c) {
++            Ok((label, _)) => *reach.entry(label).or_default() += 1,
++            Err(e) => failures.push(e),
++        }
++    }
++    let shown: BTreeMap<&String, &u64> = reach
++        .iter()
++        .filter(|(k, _)| !k.starts_with("other"))
++        .collect();
++    println!("AN after reach: {shown:?}");
++    println!(
++        "AN after other rows: {}",
++        reach
++            .iter()
++            .filter(|(k, _)| k.starts_with("other"))
++            .map(|(_, v)| v)
++            .sum::<u64>()
++    );
++    assert!(
++        failures.is_empty(),
++        "{} of {n} draws broke the after-seal step; the first: {}",
++        failures.len(),
++        failures[0]
++    );
++    for want in [
++        "row 11, re-open failed",
++        "row 12 and 11, re-open failed",
++        "row 4, re-open ok, segments k,k",
++        "row 4, re-open ok, segments k,k+1",
++        "row 4, re-open ok, segments k,unreadable",
++        "row 4, re-open failed",
++        "member-less, re-open ok",
++        "member-less, re-open failed",
++    ] {
++        assert!(
++            reach.contains_key(want),
++            "reach not made: {want}: {reach:?}"
++        );
++    }
++}
+diff --git a/crates/coagent-daemon/tests/an_create.rs b/crates/coagent-daemon/tests/an_create.rs
+new file mode 100644
+index 0000000..dcad5e8
+--- /dev/null
++++ b/crates/coagent-daemon/tests/an_create.rs
+@@ -0,0 +1,161 @@
++//! Lane AUDIT-NEXT-A item 1 (F-6 of AUDIT-WIRE's first check): a session whose audit log could not
++//! be CREATED keeps the creation's own reason in `status.audit.reason`, followed by what the owner
++//! can do, and the log is not opened again in the same process (an open would answer `NotCreated`
++//! and replace the reason). Made by folder rights only: `audit/` mode 0755 before pairing (the
++//! check's `auditdir_0755_at_create`), and `audit/` a plain file. Every send is still refused, the
++//! seal answers `unavailable` with 0 calls. Restarted, the daemon keeps the restore path's own
++//! reason exactly (no session's log is ever created again). Red control:
++//! `creation_reason_overwritten` (AN-1).
++mod common;
++
++use std::os::unix::fs::PermissionsExt;
++use std::path::Path;
++
++use common::*;
++use serde_json::{json, Value};
++
++const REFUSED_BY_THE_DIR: &str = "audit/ is not a directory of this user with mode 0700";
++const WHAT_TO_DO: &str = "; this session has no audit log: end it and pair again to keep one";
++const RESTORE_REASON: &str =
++    "this session's log is missing or empty; it is never created again for a session that existed";
++
++fn mode(p: &Path, m: u32) {
++    std::fs::set_permissions(p, std::fs::Permissions::from_mode(m)).unwrap();
++}
++
++fn audit(run: &mut Run, i: usize) -> Value {
++    run.status(i)["audit"].clone()
++}
++
++fn check_reason(st: &Value, when: &str) {
++    assert_eq!(st["state"], "unavailable", "{when}: {st}");
++    let reason = st["reason"].as_str().unwrap_or_default();
++    assert!(
++        reason.starts_with(REFUSED_BY_THE_DIR),
++        "{when}: the creation's reason was not kept: {st}"
++    );
++    assert!(
++        reason.ends_with(WHAT_TO_DO),
++        "{when}: the reason does not say what to do: {st}"
++    );
++    assert_eq!(
++        reason,
++        format!("{REFUSED_BY_THE_DIR}{WHAT_TO_DO}"),
++        "{when}"
++    );
++}
++
++/// `audit/` refused at creation by `prepare`; `restore` puts the entry back as the check wants.
++fn creation_refused(prepare: impl Fn(&Path), restore: impl Fn(&Path)) {
++    let mut run = Run::new("ancreate");
++    let a = run.daemon("a", &["--audit"]);
++    let b = run.daemon("b", &[]);
++    let entry = run.dir(a).join("audit");
++    prepare(&entry);
++    run.pair(a, b);
++    check_reason(&audit(&mut run, a), "after pairing");
++
++    let r = run.ctl(a, "send", json!({"kind": "chat", "text": "AN1 first"}));
++    println!("AN1 send: {r}");
++    assert_eq!(
++        r["ok"], false,
++        "a send of a session with no log went out: {r}"
++    );
++    assert_eq!(r["error"]["code"], "state_not_saved", "{r}");
++    assert_eq!(
++        r["error"]["message"],
++        coagent_daemon::audit::SEND_NOT_RECORDED_TEXT,
++        "{r}"
++    );
++    check_reason(&audit(&mut run, a), "after the first send");
++
++    let s = run.ctl(a, "audit_seal", json!({}));
++    println!("AN1 audit_seal: {s}");
++    assert_eq!(s["ok"], true, "{s}");
++    assert_eq!(s["result"]["row"], "unavailable", "{s}");
++    assert_eq!(s["result"]["sealed"], false, "{s}");
++    assert_eq!(s["result"]["calls"], 0, "{s}");
++    let first = audit(&mut run, a);
++    let second = audit(&mut run, a);
++    println!("AN1 status.audit: {second}");
++    check_reason(&first, "status after the seal");
++    check_reason(&second, "status again");
++    // a second send: still refused, the reason still the creation's
++    let r = run.ctl(a, "send", json!({"kind": "chat", "text": "AN1 second"}));
++    assert_eq!(r["ok"], false, "{r}");
++    check_reason(&audit(&mut run, a), "after the second send");
++
++    let log = run.all_stderr();
++    assert!(
++        !log.contains("this session's log is missing or empty"),
++        "the log was opened again after its creation failed: {log}"
++    );
++    assert!(
++        !log.contains("audit log created for this session"),
++        "a log was created: {log}"
++    );
++    // the receive path keeps working
++    let p = run.ctl(
++        b,
++        "send",
++        json!({"kind": "chat", "text": "AN1 from the peer"}),
++    );
++    assert_eq!(p["ok"], true, "{p}");
++    let got = collect(&run.dir(a), 1, std::time::Duration::from_secs(20));
++    assert_eq!(got.len(), 1, "the peer's message arrives");
++    restore(&entry);
++    run.finish();
++}
++
++#[test]
++fn a_creation_failure_keeps_its_reason() {
++    // the first check's case: audit/ made 0755 before pairing
++    creation_refused(
++        |e| {
++            std::fs::create_dir(e).unwrap();
++            mode(e, 0o755);
++        },
++        |e| mode(e, 0o700),
++    );
++    // audit/ a plain file
++    creation_refused(
++        |e| {
++            std::fs::write(e, b"not a directory").unwrap();
++            mode(e, 0o600);
++        },
++        |_| {},
++    );
++}
++
++#[test]
++fn a_restarted_daemon_keeps_the_restore_reason() {
++    let mut run = Run::new("ancreate2");
++    let a = run.daemon("a", &["--audit"]);
++    let b = run.daemon("b", &[]);
++    let entry = run.dir(a).join("audit");
++    std::fs::create_dir(&entry).unwrap();
++    mode(&entry, 0o755);
++    run.pair(a, b);
++    check_reason(&audit(&mut run, a), "after pairing");
++    // a restarted daemon restores the session and only OPENS its log: today's reason, unchanged
++    run.stop(a);
++    run.start(a);
++    let st = audit(&mut run, a);
++    println!("AN1 restarted status.audit: {st}");
++    assert_eq!(st["state"], "unavailable", "{st}");
++    assert_eq!(st["reason"], RESTORE_REASON, "{st}");
++    let r = run.ctl(
++        a,
++        "send",
++        json!({"kind": "chat", "text": "AN1 after restart"}),
++    );
++    assert_eq!(r["ok"], false, "{r}");
++    assert_eq!(audit(&mut run, a)["reason"], RESTORE_REASON);
++    assert!(
++        !run.all_stderr()
++            .contains("audit log created for this session"),
++        "a log was created"
++    );
++    mode(&entry, 0o700);
++    run.finish();
++}
+diff --git a/crates/coagent-daemon/tests/an_nothing.rs b/crates/coagent-daemon/tests/an_nothing.rs
+new file mode 100644
+index 0000000..f51d4fe
+--- /dev/null
++++ b/crates/coagent-daemon/tests/an_nothing.rs
+@@ -0,0 +1,85 @@
++//! Lane AUDIT-NEXT-A item 3 (R2-N3): a seal answered `NothingToSeal` says which of its two causes
++//! the member's own figures show (own seq, and the last own checkpoint's number, read before the
++//! call with no folder listing): equal → nothing new since the last filed point; own seq above it
++//! → step 0's checkpoint could not be written. Row, `sealed: false`, `calls: 1` unchanged. Made by
++//! folder rights only. Red control: `nothing_text_guessed` (AN-3).
++#[path = "aw_util.rs"]
++mod aw_util;
++mod common;
++
++use std::os::unix::fs::PermissionsExt;
++use std::path::Path;
++
++use aw_util::*;
++use common::*;
++use serde_json::{json, Value};
++
++const NOTHING_NEW: &str = "not sealed: nothing new since the last filed point";
++const COULD_NOT_WRITE: &str = "not sealed: the log could not write its checkpoint; fix the cause (see status.audit), then give the command again";
++
++fn mode(p: &Path, m: u32) {
++    std::fs::set_permissions(p, std::fs::Permissions::from_mode(m)).unwrap();
++}
++
++fn audit(run: &mut Run, i: usize) -> Value {
++    run.status(i)["audit"].clone()
++}
++
++fn pair() -> (Run, usize, String) {
++    let mut run = Run::new("annothing");
++    let a = run.daemon("a", &["--audit"]);
++    let b = run.daemon("b", &[]);
++    run.pair(a, b);
++    let sid = session_hex(&run.status(a));
++    (run, a, sid)
++}
++
++fn check_nothing(seal: &Value, text: &str) {
++    assert_eq!(seal["ok"], true, "{seal}");
++    assert_eq!(seal["result"]["row"], "10/14 (NothingToSeal)", "{seal}");
++    assert_eq!(seal["result"]["sealed"], false, "{seal}");
++    assert_eq!(seal["result"]["calls"], 1, "never retried: {seal}");
++    assert_eq!(seal["result"]["action"], text, "{seal}");
++}
++
++#[test]
++fn nothing_to_seal_says_what_it_knows() {
++    // (a) a healthy store, two seals with nothing between them
++    let (mut run, a, sid) = pair();
++    let r = run.ctl(a, "send", json!({"kind": "chat", "text": "AN3 one"}));
++    assert_eq!(r["ok"], true, "{r}");
++    let first = run.ctl(a, "audit_seal", json!({}));
++    assert_eq!(first["result"]["sealed"], true, "{first}");
++    let before = audit(&mut run, a);
++    let second = run.ctl(a, "audit_seal", json!({}));
++    println!("AN3 (a) second seal: {second}");
++    check_nothing(&second, NOTHING_NEW);
++    let after = audit(&mut run, a);
++    assert_eq!(after["last_seal"]["action"], NOTHING_NEW, "{after}");
++    for k in ["segment", "archive_files", "archive_bytes", "own_seq"] {
++        assert_eq!(after[k], before[k], "{k} unchanged");
++    }
++    let _ = sid;
++    run.finish();
++
++    // (b) the first check's `store_unwritable`: store/ 0500, a send refused, then the seal
++    let (mut run, a, sid) = pair();
++    let d = folder(&run.dir(a), &sid);
++    let r = run.ctl(a, "send", json!({"kind": "chat", "text": "AN3 two"}));
++    assert_eq!(r["ok"], true, "{r}");
++    let before = audit(&mut run, a);
++    mode(&d.join("store"), 0o500);
++    let refused = run.ctl(a, "send", json!({"kind": "chat", "text": "AN3 three"}));
++    let seal = run.ctl(a, "audit_seal", json!({}));
++    let during = audit(&mut run, a);
++    mode(&d.join("store"), 0o700);
++    println!("AN3 (b) send: {refused}");
++    println!("AN3 (b) seal: {seal}");
++    assert_eq!(refused["ok"], false, "{refused}");
++    check_nothing(&seal, COULD_NOT_WRITE);
++    assert_eq!(during["last_seal"]["action"], COULD_NOT_WRITE, "{during}");
++    for k in ["segment", "archive_files", "archive_bytes"] {
++        assert_eq!(during[k], before[k], "{k} unchanged");
++    }
++    run.finish();
++}
+diff --git a/crates/coagent-daemon/tests/an_texts.rs b/crates/coagent-daemon/tests/an_texts.rs
+new file mode 100644
+index 0000000..57051eb
+--- /dev/null
++++ b/crates/coagent-daemon/tests/an_texts.rs
+@@ -0,0 +1,226 @@
++//! Lane AUDIT-NEXT-A items 2, 4 and 5: the seal replies' texts and keys, pinned.
++//!
++//! * Item 5 (N-7, the seal replies' half): every "give the command again" says "fix the cause (see
++//!   status.audit), then give the command again"; the old endings are gone.
++//! * Item 2 (R2-N2): a done seal whose re-open failed says the log could not be opened again.
++//! * Item 4 (N-5): the `unavailable` reply carries the same keys as every other seal reply
++//!   (`limits` included, null).
++//!
++//! The texts no folder right reaches are driven through `owner_seal_steps` with a model of the
++//! host's steps; the others through a running daemon (folder rights only).
++#[path = "aw_util.rs"]
++mod aw_util;
++mod common;
++
++use std::os::unix::fs::PermissionsExt;
++use std::path::Path;
++
++use aw_util::*;
++use coagent_audit::session::StoreLimits;
++use coagent_audit::AuditError;
++use coagent_audit_host::{DirError, HostError, LimitsReport, SealReport, SealTrigger};
++use coagent_daemon::audit::{owner_seal_steps, segment_unknown, Figures};
++use common::*;
++use serde_json::{json, Value};
++
++const NOT_SEALED: &str =
++    "not sealed: fix the cause (see status.audit), then give the command again";
++const NOT_SEALED_REOPEN: &str = "not sealed: the audit log was opened again; fix the cause (see status.audit), then give the command again";
++const SEGMENT_UNKNOWN: &str = "not sealed: the log's segment could not be read, so the seal was not called; fix the cause (see status.audit), then give the command again";
++const SEALED_NOT_REOPENED: &str =
++    "sealed: the log was filed away; the audit log could not be opened again; see status.audit";
++const SEALED_REOPEN: &str = "sealed: the log was filed away; the audit log was opened again";
++
++/// A host model: whether it has its member at the start, whether every re-open succeeds, the
++/// answer of its one seal and whether it is closed after it.
++struct M {
++    member: bool,
++    reopen_ok: bool,
++    answer: Result<SealReport, HostError>,
++    closed_after: bool,
++}
++
++fn drive(
++    member: bool,
++    reopen_ok: bool,
++    answer: Result<SealReport, HostError>,
++    closed_after: bool,
++) -> (String, String, bool, u32) {
++    let mut m = M {
++        member,
++        reopen_ok,
++        answer,
++        closed_after,
++    };
++    let (a, calls, _) = owner_seal_steps(
++        &mut m,
++        |m: &M| {
++            m.member.then_some(Figures {
++                segment: 3,
++                own_seq: 9,
++                own_checkpoint: 9,
++            })
++        },
++        |m: &mut M| {
++            m.member = m.reopen_ok;
++            m.reopen_ok
++        },
++        |m: &mut M| {
++            m.member = !m.closed_after;
++            (m.answer.clone(), m.closed_after)
++        },
++        |_: &mut M, _: &LimitsReport| {},
++    );
++    (a.row.to_string(), a.text.to_string(), a.done, calls)
++}
++
++fn ok_report() -> SealReport {
++    SealReport {
++        trigger: SealTrigger::OwnerCommand,
++        checkpoint: None,
++        info: coagent_audit::segment::SegmentInfo {
++            segment: 4,
++            own_start: Some(9),
++            garbage_left: 0,
++        },
++        files: vec!["seg-00000000000000000003-0000.bundle".into()],
++        stale_retries: 0,
++        limits: None,
++    }
++}
++
++#[test]
++fn the_seal_texts_say_what_to_do() {
++    let dir = HostError::Dir(DirError::Poisoned);
++    assert_eq!(
++        drive(true, true, Err(dir.clone()), false),
++        ("13 or 14".into(), NOT_SEALED.into(), false, 1)
++    );
++    assert_eq!(
++        drive(true, true, Err(HostError::AnchorNotSaved), false).1,
++        NOT_SEALED
++    );
++    assert_eq!(
++        drive(
++            true,
++            true,
++            Err(HostError::Audit(AuditError::LogFull)),
++            false
++        )
++        .1,
++        NOT_SEALED
++    );
++    assert_eq!(
++        drive(true, true, Err(HostError::Closed), true),
++        (
++            "4 or 11 (closed earlier)".into(),
++            NOT_SEALED_REOPEN.into(),
++            false,
++            1
++        )
++    );
++    // a host with no member whose re-open fails: the segment is unknown, no seal
++    assert_eq!(
++        drive(false, false, Err(dir), false),
++        (
++            "none (the segment before the seal could not be read)".into(),
++            SEGMENT_UNKNOWN.into(),
++            false,
++            0
++        )
++    );
++    assert_eq!(segment_unknown().text, SEGMENT_UNKNOWN);
++    // row 11 and "12 and 11": the text follows the re-open's result
++    assert_eq!(
++        drive(true, true, Ok(ok_report()), true),
++        ("11".into(), SEALED_REOPEN.into(), true, 1)
++    );
++    assert_eq!(
++        drive(true, false, Ok(ok_report()), true),
++        ("11".into(), SEALED_NOT_REOPENED.into(), true, 1)
++    );
++    let mut with_limits = ok_report();
++    with_limits.limits = Some(LimitsReport {
++        before: None,
++        offered: StoreLimits::default(),
++        in_force: StoreLimits::default(),
++        refused: None,
++    });
++    assert_eq!(
++        drive(true, false, Ok(with_limits), true),
++        ("12 and 11".into(), SEALED_NOT_REOPENED.into(), true, 1)
++    );
++    // no old ending is left: every "give the command again" says to fix the cause first
++    for (_, text, _, _) in [
++        drive(true, true, Err(HostError::AnchorNotSaved), false),
++        drive(true, true, Err(HostError::Closed), true),
++        drive(false, false, Err(HostError::Closed), true),
++    ] {
++        assert!(
++            text.ends_with("fix the cause (see status.audit), then give the command again"),
++            "{text}"
++        );
++    }
++}
++
++fn mode(p: &Path, m: u32) {
++    std::fs::set_permissions(p, std::fs::Permissions::from_mode(m)).unwrap();
++}
++
++fn keys(v: &Value) -> Vec<String> {
++    let mut k: Vec<String> = v.as_object().unwrap().keys().cloned().collect();
++    k.sort();
++    k
++}
++
++#[test]
++fn every_seal_reply_has_the_same_keys_and_a_not_sealed_row_says_what_to_do() {
++    // a healthy daemon: a not-sealed row by archive/ 0500, then a seal that lands
++    let mut run = Run::new("antexts");
++    let a = run.daemon("a", &["--audit"]);
++    let b = run.daemon("b", &[]);
++    run.pair(a, b);
++    let sid = session_hex(&run.status(a));
++    let d = folder(&run.dir(a), &sid);
++    let r = run.ctl(a, "send", json!({"kind": "chat", "text": "AN5 one"}));
++    assert_eq!(r["ok"], true, "{r}");
++    mode(&d.join("archive"), 0o500);
++    let refused = run.ctl(a, "audit_seal", json!({}));
++    mode(&d.join("archive"), 0o700);
++    println!("AN5 archive 0500 seal: {refused}");
++    assert_eq!(refused["result"]["sealed"], false, "{refused}");
++    assert_eq!(refused["result"]["action"], NOT_SEALED, "{refused}");
++    let landed = run.ctl(a, "audit_seal", json!({}));
++    println!("AN5 seal: {landed}");
++    assert_eq!(landed["result"]["sealed"], true, "{landed}");
++    let normal = keys(&landed["result"]);
++    assert_eq!(keys(&refused["result"]), normal);
++    run.finish();
++
++    // the unavailable reply (audit/ 0755 at creation)
++    let mut run = Run::new("antexts2");
++    let a = run.daemon("a", &["--audit"]);
++    let b = run.daemon("b", &[]);
++    let entry = run.dir(a).join("audit");
++    std::fs::create_dir(&entry).unwrap();
++    mode(&entry, 0o755);
++    run.pair(a, b);
++    let u = run.ctl(a, "audit_seal", json!({}));
++    println!("AN4 unavailable reply: {u}");
++    assert_eq!(u["result"]["row"], "unavailable", "{u}");
++    assert_eq!(keys(&u["result"]), normal, "the unavailable reply's keys");
++    assert_eq!(
++        keys(&u["result"]),
++        ["action", "calls", "limits", "row", "sealed", "segment"]
++    );
++    assert_eq!(u["result"]["limits"], Value::Null);
++    assert_eq!(u["result"]["sealed"], false);
++    assert_eq!(u["result"]["calls"], 0);
++    assert_eq!(u["result"]["segment"], Value::Null);
++    assert_eq!(
++        u["result"]["action"],
++        "not sealed: the audit log is unavailable (see status.audit)"
++    );
++    mode(&entry, 0o700);
++    run.finish();
++}
+diff --git a/crates/coagent-daemon/tests/aw_disk.rs b/crates/coagent-daemon/tests/aw_disk.rs
+index 054f121..a5c3e4c 100644
+--- a/crates/coagent-daemon/tests/aw_disk.rs
++++ b/crates/coagent-daemon/tests/aw_disk.rs
+@@ -171,6 +171,17 @@ fn every_disk_failure_gets_a_row_and_nothing_is_recorded_twice() {
+             }
+         }
+         // receiving and the inbox keep working; the daemon never exits
++        // (asked once BEFORE the inbox read, so a daemon that stopped fails on this message and
++        // not inside the inbox helper)
++        let answer = ctl_raw(
++            &run.dir(a),
++            &json!({"v": 1, "id": 7, "cmd": "status", "args": {}}).to_string(),
++        );
++        assert!(
++            answer.is_some(),
++            "the daemon stopped answering after a disk failure (R-6)"
++        );
++        assert!(alive(pid), "the daemon exited on a disk failure");
+         peer_got += inbox(&run.dir(a)).len() as u64;
+         assert!(alive(pid), "the daemon exited on a disk failure");
+         let st = status(&run, a);
+diff --git a/crates/coagent-daemon/tests/aw_round2.rs b/crates/coagent-daemon/tests/aw_round2.rs
+index 1847c17..03e3332 100644
+--- a/crates/coagent-daemon/tests/aw_round2.rs
++++ b/crates/coagent-daemon/tests/aw_round2.rs
+@@ -24,7 +24,7 @@ use aw_util::*;
+ use common::*;
+ use serde_json::{json, Value};
+ 
+-const NOTHING_TEXT: &str = "not sealed: nothing could be filed (nothing new since the last filed point, or the log could not write)";
++const UNWRITTEN_TEXT: &str = "not sealed: the log could not write its checkpoint; fix the cause (see status.audit), then give the command again";
+ const SEAL_NOT_REOPENED: &str =
+     "not sealed: the audit log could not be opened again; see status.audit";
+ const SEND_NOT_REOPENED: &str =
+@@ -127,9 +127,9 @@ fn nothing_to_seal_with_the_store_unwritable_claims_no_more_than_it_knows() {
+     assert_eq!(refused["ok"], false, "{refused}");
+     assert_eq!(seal["result"]["row"], "10/14 (NothingToSeal)", "{seal}");
+     assert_eq!(seal["result"]["sealed"], false, "{seal}");
+-    assert_eq!(seal["result"]["action"], NOTHING_TEXT, "{seal}");
++    assert_eq!(seal["result"]["action"], UNWRITTEN_TEXT, "{seal}");
+     assert_eq!(seal["result"]["calls"], 1, "never retried");
+-    assert_eq!(audit(&mut run, a)["last_seal"]["action"], NOTHING_TEXT);
++    assert_eq!(audit(&mut run, a)["last_seal"]["action"], UNWRITTEN_TEXT);
+     run.finish();
+ }
+ 
+diff --git a/docs/M0-OUTCOMES.md b/docs/M0-OUTCOMES.md
+index a65b3bf..df050e2 100644
+--- a/docs/M0-OUTCOMES.md
++++ b/docs/M0-OUTCOMES.md
+@@ -249,3 +249,15 @@ were made true: "nothing could be filed" replaces "nothing new to file since the
+ says it failed instead of "the audit log was opened again"; and `status.audit` says `unavailable` when the log's status
+ cannot be read. One more red row (`segment_before_falls_back`). Still open (BACKLOG): a record of a message that was
+ not sent (F-2), replies charged to the peer whatever they name (F-4), the creation failure's reason (F-6), the Notes.
++
++## 2026-11-26 — AUDIT-NEXT-A: what the two checks of AUDIT-WIRE left open in the audit module
++
++Only `src/audit.rs` changed in the daemon's source; with `--audit` absent the daemon behaves exactly as before. A session
++whose audit log could not be created now keeps that failure's reason in `status.audit`, followed by what to do (end the
++session and pair again), instead of having it replaced by "missing or empty" at the first send; the log is still never
++created twice in one session (the owner's ruling). The seal's last step is one function that can be driven without a
++host: a host left without its member is opened again once before the seal gives up, and a seal that landed but could
++not reopen the log now says so. "Nothing could be filed" now says which cause the daemon can see (nothing new, or the
++checkpoint could not be written), and keeps the old wording when it cannot tell. The "unavailable" seal reply gained
++`limits: null`; three "give the command again" texts now say to fix the cause first. AW-7 now fails on its own
++message. Four red rows (`AN-1` to `AN-3`). Still open for a later lane: F-2, F-4, N-3, the email-masking ruling (N-6).
+diff --git a/scripts/red-controls-daemon.sh b/scripts/red-controls-daemon.sh
+index de6be1d..9cd4c85 100755
+--- a/scripts/red-controls-daemon.sh
++++ b/scripts/red-controls-daemon.sh
+@@ -281,6 +281,11 @@ ROWS=(
+   "COAGENT_RED_AW|seal_error_ends_the_engine|coagent-daemon|aw_disk|every_disk_failure_gets_a_row_and_nothing_is_recorded_twice|AW-7"
+   # Lane AUDIT-WIRE addendum 2 (fix round, item A: F-1, the segment before a seal).
+   "COAGENT_RED_AW|segment_before_falls_back|coagent-daemon|aw_answers|every_answer_the_host_can_give_has_one_action_and_it_obeys_its_row|AW-5b"
++  # Lane AUDIT-NEXT-A (variable COAGENT_RED_AN, read by crates/coagent-daemon/build.rs only): items 1 to 3.
++  "COAGENT_RED_AN|creation_reason_overwritten|coagent-daemon|an_create|a_creation_failure_keeps_its_reason|AN-1"
++  "COAGENT_RED_AN|row11_text_before_reopen|coagent-daemon|an_after|the_after_seal_step_never_says_sealed_without_a_landed_seal_and_never_says_opened_when_it_was_not|AN-2"
++  "COAGENT_RED_AN|member_less_never_reopened|coagent-daemon|an_after|the_after_seal_step_never_says_sealed_without_a_landed_seal_and_never_says_opened_when_it_was_not|AN-2b"
++  "COAGENT_RED_AN|nothing_text_guessed|coagent-daemon|an_nothing|nothing_to_seal_says_what_it_knows|AN-3"
+ )
+ 
+ fail=0
++// planted /Volumes/Example/x and /private/tmp/y

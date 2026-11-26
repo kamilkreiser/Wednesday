@@ -1,0 +1,33 @@
+# p7: the three old 'give the command again' texts back
+diff --git a/private/tmp/claude-501/qana/c/crates/coagent-daemon/src/audit.rs b/private/tmp/claude-501/qana/p7/crates/coagent-daemon/src/audit.rs
+index 52f03e5..e7c4f64 100644
+--- a/private/tmp/claude-501/qana/c/crates/coagent-daemon/src/audit.rs
++++ b/private/tmp/claude-501/qana/p7/crates/coagent-daemon/src/audit.rs
+@@ -110,8 +110,7 @@ const T_SEALED_REOPEN: &str = "sealed: the log was filed away; the audit log was
+ const T_SEALED_NOT_REOPENED: &str =
+     "sealed: the log was filed away; the audit log could not be opened again; see status.audit";
+ // AUDIT-NEXT-A item 5 (N-7): "give the command again" says to fix the cause first.
+-const T_NOT_SEALED: &str =
+-    "not sealed: fix the cause (see status.audit), then give the command again";
++const T_NOT_SEALED: &str = "not sealed: give the command again";
+ // AUDIT-WIRE addendum 2, item B (F-3): `NothingToSeal` also comes when step 0's checkpoint could
+ // not be written (the seal cuts at the last STORED checkpoint), so the text claims no more than that.
+ // It stays the text whenever the daemon cannot tell which of the two causes applies.
+@@ -125,7 +124,7 @@ const T_NOTHING_UNWRITTEN: &str = "not sealed: the log could not write its check
+ // reads the checkpoints from the store), so an equal number is a stored point.
+ const T_NOTHING_NEW: &str = "not sealed: nothing new since the last filed point";
+ const T_NOT_SEALED_REOPEN: &str =
+-    "not sealed: the audit log was opened again; fix the cause (see status.audit), then give the command again";
++    "not sealed: the audit log was opened again; give the command again";
+ // Addendum 2, item C (F-5): the texts when the re-open after row 4 or `Closed` FAILED (chosen
+ // after `open_now`'s result is known).
+ const T_NOT_SEALED_NOT_REOPENED: &str =
+@@ -135,7 +134,7 @@ const T_REFUSED_NOT_REOPENED: &str =
+ // Addendum 2, item A (F-1): the segment before the seal could not be read, so `seal` is not called.
+ const ROW_SEGMENT_UNKNOWN: &str = "none (the segment before the seal could not be read)";
+ const T_SEGMENT_UNKNOWN: &str =
+-    "not sealed: the log's segment could not be read, so the seal was not called; fix the cause (see status.audit), then give the command again";
++    "not sealed: the log's segment could not be read, so the seal was not called; give the command again";
+ // AUDIT-NEXT-A item 1 (F-6): added to `status.audit.reason` after a creation failure in this process.
+ const T_CREATION_FAILED: &str =
+     "; this session has no audit log: end it and pair again to keep one";

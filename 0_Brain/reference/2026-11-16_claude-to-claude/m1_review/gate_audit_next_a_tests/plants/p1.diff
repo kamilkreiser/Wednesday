@@ -1,0 +1,17 @@
+# p1: ensure_open condition back to the base's
+diff --git a/private/tmp/claude-501/qana/c/crates/coagent-daemon/src/audit.rs b/private/tmp/claude-501/qana/p1/crates/coagent-daemon/src/audit.rs
+index 52f03e5..f867128 100644
+--- a/private/tmp/claude-501/qana/c/crates/coagent-daemon/src/audit.rs
++++ b/private/tmp/claude-501/qana/p1/crates/coagent-daemon/src/audit.rs
+@@ -771,10 +771,7 @@ impl Audit {
+     fn ensure_open(&mut self, me: &DeviceIdentity) {
+         // RED CONTROL `creation_reason_overwritten` (AN-1): the broken variant opens again after a
+         // creation failure, so the open's `NotCreated` replaces the creation's reason.
+-        if self.host.is_none()
+-            && self.bound.is_some()
+-            && (!self.creation_failed || cfg!(coagent_red = "creation_reason_overwritten"))
+-        {
++        if self.host.is_none() && self.bound.is_some() {
+             let _ = self.open_now(me);
+         }
+     }

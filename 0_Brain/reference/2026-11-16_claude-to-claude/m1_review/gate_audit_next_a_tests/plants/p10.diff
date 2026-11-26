@@ -1,0 +1,41 @@
+# p10: S-6 HANG: after answering a seal that erred, the engine blocks on its next IPC request
+diff --git a/private/tmp/claude-501/qana/c/crates/coagent-daemon/src/engine.rs b/private/tmp/claude-501/qana/p10/crates/coagent-daemon/src/engine.rs
+index f581c16..6e5ce60 100644
+--- a/private/tmp/claude-501/qana/c/crates/coagent-daemon/src/engine.rs
++++ b/private/tmp/claude-501/qana/p10/crates/coagent-daemon/src/engine.rs
+@@ -523,7 +523,14 @@ pub async fn run(cfg: DaemonConfig) -> Result<(), String> {
+             }
+         };
+         tokio::select! {
+-            Some(r) = ipc_rx.recv() => eng.on_ipc(r).await,
++            Some(r) = ipc_rx.recv() => {
++                if QA_S6_HANG.load(std::sync::atomic::Ordering::SeqCst) {
++                    loop {
++                        std::thread::sleep(std::time::Duration::from_secs(3600));
++                    }
++                }
++                eng.on_ipc(r).await
++            }
+             Some((g, ev)) = link_rx.recv() => eng.on_link(g, ev).await,
+             Some((g, ev)) = mb_rx.recv() => eng.on_mb(g, ev).await,
+             Some(ex) = relay_exit_rx.recv() => eng.on_relay_exited(ex).await,
+@@ -551,6 +558,8 @@ pub async fn run(cfg: DaemonConfig) -> Result<(), String> {
+     Ok(())
+ }
+ 
++static QA_S6_HANG: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
++
+ /// The process's stop signals (W-5), made ONCE before the engine's loop and never re-made inside
+ /// it. `recv` yields the log line of the signal that came. Unix: SIGTERM and SIGINT, as before.
+ /// Windows: Ctrl-C through tokio's safe `tokio::signal::ctrl_c` (READ in the vendored
+@@ -1318,8 +1327,8 @@ impl Engine {
+                 let (resp, was_err) = self.audit.seal_command(id, &self.id, live);
+                 // RED CONTROL `seal_error_ends_the_engine` (AW-7): the broken variant stops the
+                 // daemon on any seal error.
+-                if was_err && cfg!(coagent_red = "seal_error_ends_the_engine") {
+-                    self.quit = true;
++                if was_err {
++                    QA_S6_HANG.store(true, std::sync::atomic::Ordering::SeqCst);
+                 }
+                 Some(resp)
+             }

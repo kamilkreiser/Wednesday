@@ -1,0 +1,17 @@
+# p4: no re-open before the seal
+diff --git a/private/tmp/claude-501/qana/c/crates/coagent-daemon/src/audit.rs b/private/tmp/claude-501/qana/p4/crates/coagent-daemon/src/audit.rs
+index 52f03e5..d3d8ec3 100644
+--- a/private/tmp/claude-501/qana/c/crates/coagent-daemon/src/audit.rs
++++ b/private/tmp/claude-501/qana/p4/crates/coagent-daemon/src/audit.rs
+@@ -462,10 +462,7 @@ pub fn owner_seal_steps<C>(
+     let mut fig = figures(cx);
+     // RED CONTROL `member_less_never_reopened` (AN-2b): the broken variant never opens a member-less
+     // host again here (the seal then answers `segment_unknown`, 0 calls).
+-    if fig.is_none() && !cfg!(coagent_red = "member_less_never_reopened") {
+-        reopen(cx);
+-        fig = figures(cx);
+-    }
++    let _ = &mut fig;
+     // the same figure serves row 7 (in `act_on_seal`) and row 4 (below)
+     let read = fig.map(|f| f.segment);
+     let before = segment_before_for_seal(read);

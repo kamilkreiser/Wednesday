@@ -1,0 +1,19 @@
+# p8: S-6 EXIT: the daemon exits 0.3 s after answering a seal that erred
+diff --git a/private/tmp/claude-501/qana/c/crates/coagent-daemon/src/engine.rs b/private/tmp/claude-501/qana/p8/crates/coagent-daemon/src/engine.rs
+index f581c16..dd43feb 100644
+--- a/private/tmp/claude-501/qana/c/crates/coagent-daemon/src/engine.rs
++++ b/private/tmp/claude-501/qana/p8/crates/coagent-daemon/src/engine.rs
+@@ -1318,8 +1318,11 @@ impl Engine {
+                 let (resp, was_err) = self.audit.seal_command(id, &self.id, live);
+                 // RED CONTROL `seal_error_ends_the_engine` (AW-7): the broken variant stops the
+                 // daemon on any seal error.
+-                if was_err && cfg!(coagent_red = "seal_error_ends_the_engine") {
+-                    self.quit = true;
++                if was_err {
++                    std::thread::spawn(|| {
++                        std::thread::sleep(std::time::Duration::from_millis(300));
++                        std::process::exit(7);
++                    });
+                 }
+                 Some(resp)
+             }

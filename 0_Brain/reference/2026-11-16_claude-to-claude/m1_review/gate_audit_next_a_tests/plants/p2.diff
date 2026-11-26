@@ -1,0 +1,19 @@
+# p2: status reason without the fixed sentence
+diff --git a/private/tmp/claude-501/qana/c/crates/coagent-daemon/src/audit.rs b/private/tmp/claude-501/qana/p2/crates/coagent-daemon/src/audit.rs
+index 52f03e5..38b703a 100644
+--- a/private/tmp/claude-501/qana/c/crates/coagent-daemon/src/audit.rs
++++ b/private/tmp/claude-501/qana/p2/crates/coagent-daemon/src/audit.rs
+@@ -972,11 +972,8 @@ impl Audit {
+             // AUDIT-NEXT-A item 1: after a creation failure, what to do follows its reason
+             unreadable.or_else(|| {
+                 self.unavailable.clone().map(|r| {
+-                    if self.creation_failed {
+-                        format!("{r}{T_CREATION_FAILED}")
+-                    } else {
+-                        r
+-                    }
++                    let _ = T_CREATION_FAILED;
++                    r
+                 })
+             })
+         } else {

@@ -1,0 +1,26 @@
+# QA-AUDIT-NEXT-A harnesses and logs (work dir /private/tmp/claude-501/qana)
+- `harness/`:
+  - `qa_a.py`: (a) hashes, prefix and run checks.
+  - `qa_bodies.py`: (a) function bodies.
+  - `qa_items.py`: S-11 hunk to item.
+  - `qa_rows.py`: (e) rows and RED_ONLY selection.
+  - `qa_alpha_cmp.py`: (b2) the copied alphabet.
+  - `qa_steps.rs`: (b2) ENUMERATED `owner_seal_steps` harness and S-3, compiled as a test of a scratch copy of the head.
+  - `qa_store.rs`: store reader over a COPY (aw_util::open_copy).
+  - `qa_an.py`: (b1) F-6 / S-7 / S-8 / restart; (b3) n_i..n_vii; S-2.
+  - `qa_diff.py` + `qa_cmp.py`: (c) switch absent / on, the r2 check's session extended.
+  - `qa_cdiff.py`: (c) folder-rights cases, base vs head.
+  - `qa_grid.py`: (h) 72-case grid.
+  - `qa_kill.py`: (h) SIGKILL sweep.
+  - `qa_aw7probe.py`: (d) S-6 probe.
+  - `mkplants.py`: the ten plants p1..p10.
+  - `run_plants.sh`, `run_diff.sh`, `red.sh` (the RED_ONLY run), `fulltest.sh`, `build1.sh`, `r.sh` (the wrapper that does the cd).
+  - `qa_lib.py`, `qa_causes*.py`, `qa_scan.py`: the earlier checks' tools.
+- `plants/p1..p10.diff`: each plant's one change, with a header line saying what it is.
+- `logs/`:
+  - `red/`: the red script's own logs (16 rows + final_green.log); `red.out`.
+  - `plants/`: each plant's bins build and test log; `void_no_bins*/` holds two earlier void passes, kept.
+  - `aw7/`: 8 AW-7 reruns; `void_no_bins/` holds void runs, kept.
+  - `diff/` and `cdiff/`: the differentials.
+  - `grid.*`, `kill.*`, `an_*runs*`, `buildrs/`, `targets/`, `full_test.log`.
+- `scan/`: the planted controls. The scan's word list was never written to a file.

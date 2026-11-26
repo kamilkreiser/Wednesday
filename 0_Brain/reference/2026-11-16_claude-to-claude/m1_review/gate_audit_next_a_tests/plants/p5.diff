@@ -1,0 +1,22 @@
+# p5: NothingToSeal text always the old text
+diff --git a/private/tmp/claude-501/qana/c/crates/coagent-daemon/src/audit.rs b/private/tmp/claude-501/qana/p5/crates/coagent-daemon/src/audit.rs
+index 52f03e5..60ebc19 100644
+--- a/private/tmp/claude-501/qana/c/crates/coagent-daemon/src/audit.rs
++++ b/private/tmp/claude-501/qana/p5/crates/coagent-daemon/src/audit.rs
+@@ -504,14 +504,8 @@ pub fn owner_seal_steps<C>(
+         }
+     }
+     if nothing && !a.done {
+-        a.text = match fig {
+-            // RED CONTROL `nothing_text_guessed` (AN-3): the broken variant says "nothing new"
+-            // whatever the figures say.
+-            _ if cfg!(coagent_red = "nothing_text_guessed") => T_NOTHING_NEW,
+-            Some(f) if f.own_seq > f.own_checkpoint => T_NOTHING_UNWRITTEN,
+-            Some(f) if f.own_seq == f.own_checkpoint => T_NOTHING_NEW,
+-            _ => T_NOTHING,
+-        };
++        let _ = (T_NOTHING_NEW, T_NOTHING_UNWRITTEN, fig);
++        a.text = T_NOTHING;
+     }
+     (a, calls, was_err)
+ }

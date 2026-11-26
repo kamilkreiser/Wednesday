@@ -1,0 +1,34 @@
+# p9: S-6 ENGINE STOPS, PROCESS STAYS: the engine ends on a seal error and the process then sleeps forever
+diff --git a/private/tmp/claude-501/qana/c/crates/coagent-daemon/src/engine.rs b/private/tmp/claude-501/qana/p9/crates/coagent-daemon/src/engine.rs
+index f581c16..74f2098 100644
+--- a/private/tmp/claude-501/qana/c/crates/coagent-daemon/src/engine.rs
++++ b/private/tmp/claude-501/qana/p9/crates/coagent-daemon/src/engine.rs
+@@ -547,10 +547,18 @@ pub async fn run(cfg: DaemonConfig) -> Result<(), String> {
+     eng.shutdown().await;
+     let _ = accept_stop_tx.send(true);
+     let _ = accept_task.await;
++    if QA_S6_STAY.load(std::sync::atomic::Ordering::SeqCst) {
++        log!("QA plant: engine ended, process stays");
++        loop {
++            std::thread::sleep(std::time::Duration::from_secs(3600));
++        }
++    }
+     log!("stopped");
+     Ok(())
+ }
+ 
++static QA_S6_STAY: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
++
+ /// The process's stop signals (W-5), made ONCE before the engine's loop and never re-made inside
+ /// it. `recv` yields the log line of the signal that came. Unix: SIGTERM and SIGINT, as before.
+ /// Windows: Ctrl-C through tokio's safe `tokio::signal::ctrl_c` (READ in the vendored
+@@ -1318,7 +1326,8 @@ impl Engine {
+                 let (resp, was_err) = self.audit.seal_command(id, &self.id, live);
+                 // RED CONTROL `seal_error_ends_the_engine` (AW-7): the broken variant stops the
+                 // daemon on any seal error.
+-                if was_err && cfg!(coagent_red = "seal_error_ends_the_engine") {
++                if was_err {
++                    QA_S6_STAY.store(true, std::sync::atomic::Ordering::SeqCst);
+                     self.quit = true;
+                 }
+                 Some(resp)

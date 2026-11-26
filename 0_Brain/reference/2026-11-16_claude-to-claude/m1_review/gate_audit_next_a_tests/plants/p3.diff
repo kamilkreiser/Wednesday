@@ -1,0 +1,18 @@
+# p3: the base's !a.done condition: a done seal keeps 'opened again' after a failed re-open
+diff --git a/private/tmp/claude-501/qana/c/crates/coagent-daemon/src/audit.rs b/private/tmp/claude-501/qana/p3/crates/coagent-daemon/src/audit.rs
+index 52f03e5..93f152f 100644
+--- a/private/tmp/claude-501/qana/c/crates/coagent-daemon/src/audit.rs
++++ b/private/tmp/claude-501/qana/p3/crates/coagent-daemon/src/audit.rs
+@@ -483,11 +483,8 @@ pub fn owner_seal_steps<C>(
+         if !reopened {
+             if !a.done {
+                 a.text = T_NOT_SEALED_NOT_REOPENED;
+-            } else if !cfg!(coagent_red = "row11_text_before_reopen") {
+-                // RED CONTROL `row11_text_before_reopen` (AN-2): the broken variant keeps row 11's
+-                // "opened again" when the re-open failed.
+-                a.text = T_SEALED_NOT_REOPENED;
+             }
++            let _ = T_SEALED_NOT_REOPENED;
+         }
+         if a.read_segment && reopened {
+             // row 4: whether the seal landed is read from the segment of the host opened again,
