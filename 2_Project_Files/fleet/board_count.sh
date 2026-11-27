@@ -102,8 +102,12 @@ case "${1:-}" in
     KEY="${!2:-}"; [ -n "$KEY" ] || die "env var $2 is empty — source the project's .env first"
     Q="{ issues(first:$PAGE, filter:$3) { nodes { identifier } pageInfo { hasNextPage } } }"
     BODY=$(python3 -c 'import json,sys; print(json.dumps({"query":sys.argv[1]}))' "$Q")
-    RESP=$(curl -sS -X POST https://api.linear.app/graphql \
-             -H "Authorization: $KEY" -H "Content-Type: application/json" -d "$BODY") \
+    # 2026-11-27 (found by a Secuura board seat reading this file before running it): the key was passed as
+    # -H "Authorization: $KEY", i.e. in curl's ARGV, readable in the process table while the call ran. It now
+    # reaches curl as a config line on STDIN (-K -); printf is a shell builtin, so the key is in no argv.
+    # Proven with a recording stub for curl: tests in the 2026-11-27 daily note.
+    RESP=$(printf 'header = "Authorization: %s"\n' "$KEY" | curl -sS -K - -X POST https://api.linear.app/graphql \
+             -H "Content-Type: application/json" -d "$BODY") \
       || die "linear request failed (see stderr above)"
     echo "$RESP" | python3 -c '
 import json,sys
