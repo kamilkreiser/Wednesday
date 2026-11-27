@@ -91458,5 +91458,29 @@
    "CARD secuura-board-grant-reask-1119",
    "CARD wed-live-board-app-goes-dark-daily-1127"
   ]
+ },
+ {
+  "id": "datasec-parallel-builds-decision-1127",
+  "client_project": "Datasec/OXPd",
+  "title": "Parallel builds: what this machine can take (your 'test if the heavy build can be pushed to 2-5', decided)",
+  "bluf": "Datasec/OXPd and NexusAI. No action needed. You asked me to test pushing the heavy build to 2 to 5 at once, with the call left to me. Measured by an agent (tuesday/briefs/2026-11-27_B2157_PARALLEL-HEAVY-BUILD-REPORT.md). OXPd's full test run uses all the CPU: 2 at once gives only about 1.2 times the work, and 5 at once fails on timing checks. But single app test projects run 5 at once cleanly in 8 seconds. NexusAI's full run waits on the clock, not the CPU: 3 at once is about 2.9 times the work and 5 at once about 4.5 times. One NexusAI test file grabs ports from a fixed range, so copies collide until that's fixed. My decision: OXPd gets 2 full runs at a time, plus app lanes running their own project tests side by side, which is what the parallel app plan needs. NexusAI goes to 3 at a time once the port fix lands. The tooling changes are being commissioned now. Override of the prior-ruling gate: this reports a decision you delegated; it re-asks nothing.",
+  "default_action": "a: noted; the tooling change goes ahead",
+  "options": [
+   {
+    "key": "a",
+    "label": "Noted",
+    "detail": "the tooling change goes ahead"
+   },
+   {
+    "key": "b",
+    "label": "Push harder",
+    "detail": "say what in a note"
+   }
+  ],
+  "recommended": "a",
+  "ts": "2026-11-27T20:39:23.294530+11:00",
+  "status": "open",
+  "ruled_choice": null,
+  "ruled_ts": null
  }
 ]
