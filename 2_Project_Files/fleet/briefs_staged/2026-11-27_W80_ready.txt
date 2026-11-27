@@ -1,0 +1,89 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261127T121241Z.txt)
+     1	[INBOUND] 2026-11-27T12:12 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR QA: PR 2296 fix round 2, KS-2366, DELTA TIER
+=========== [INBOUND] 2026-11-27T12:12 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR QA: PR 2296 fix round 2, KS-2366, DELTA TIER
+[Secuura/Blockchain-W -> Wednesday] READY FOR QA: PR 2296 fix round 2, KS-2366, DELTA TIER 1 (Seat W 80th)
+Seat W 80th
+
+READY FOR QA: PR 2296 fix round 2, KS-2366, DELTA TIER 1.
+
+- NEW HEAD 32beca2156fccbcb3ce544022d8fb38b3f51f910 (tree 749e474a4948). Its parent is af5e35fb2d4b837acd428860dd0a877d384551ea: ONE commit, a plain fast-forward. Base develop 4764b2cf, unmoved all round. Pushed by push_run_w80.sh real through the existing-branch kit (counted shift of W 79th's): gatetest first (all gates passed at load1 14.08, 11:46Z), then real: PUSH 11:48:28Z to 12:11:07Z, rc 0, 1359 s, load1 15.47 at its gate; ls-remote VERIFIED origin = 32beca2156fc. The F-02 keychain warning did not bite: the clone used the copied core.sshCommand.
+- FILES: all six of the closed list, and nothing else. +319 -40:
+  - the script, 598 to 633 lines, sha256 94917c13f18a;
+  - the suite, 196 cells, was 133;
+  - the fixtures, +13 synthetic rows;
+  - cells.ts, an HONEST mode;
+  - the cheat and flow fragments.
+  No service file, no migration. The predicate block is untouched: the CLS cell is green, its two copies byte-identical.
+- PR BODY: ONE edit by edit_pr_body_w80.py (dry, then real): read back equal, and byte-equal again by my own raw-JSON read (evidence/pr2296_body_after.md, 21067 bytes, sha16 12ec308ed0b70269). The title is unchanged (title sha16 804dbb66b6ab545e, as at boot). gh: OPEN, head 32beca2156fc, 6 files, +1796 -0 against develop.
+- THE (c) DECISION: struck by Wednesday (W3), not built. It reads anchor_store at reverse time, possibly days after apply, so it could refuse a GENUINE undo exactly when one is needed, and no fixture here could show that it does not. With (a) and (b), the worst a forged manifest can do is turn an apply-shaped confirmed row back into a stuck one, which answers not anchored.
+
+EACH CHANGE, its red-on-A cells (arm A = af5e35fb's own script with the new test files, in s-w80-a; 45 of 196 red) and its green cells on the head (196 of 196):
+1. G422-1, checks (a) before_blob_not_stuck_class and (b) after_blob_not_the_confirmed_shape, in chk, each refusing whole by its own name.
+   - Red on A: G1, G2, G3 (the old reverse COMMITS all three of the gate's forgeries); G1 and G2 verify (A reads anchored=true; the head reads false); RA x5; RB x5; RN x20; and F1, F2, F14, F17, whose exact lists gain the new names.
+   - Green on the head: all of the above, and E1 (both gates' fixtures: dry write 32, apply 32, reverse 32, drift 0, every table back to its pre-apply checksum).
+   - Ruling 1: all 20 RN cells refuse, so no object term is needed and F5 stands (in DECLARED).
+   - Ruling 3: G4R commits the residual forgery (a confirmed blob with a fake tx in metadata.blockchain beside a stuck certification_metadata.blockchain). The real rule reads anchored=false (chainBlobOfRow, verification.ts 222-226; lines 1083, 1291 and 1388 read certification_metadata only). The controls read true. G4R is green on both heads. The residual is named in DECLARED, in the PR body, and here.
+2. G422-3, -v ON_ERROR_STOP=1 on the three documented lines.
+   - Red on A: HDR-OES; L6 (rc=0 from a wrong directory).
+   - Green on the head: L6 reads rc=3, no SUMMARY, every table unchanged, and the control from Blockchain/Dev reverses.
+3. G422-2, the tail wording (lines 2, 4 and 5 of the six; HDR-REV still 6).
+   - Red on A: HDR-TAIL.
+   - Green, proving the wording true: L7:blank and L7:after_dot (rc 3 after result=COMMITTED).
+4. G422-4, the reading SENTENCE.
+   - Red on A: HDR-READ.
+   - Green: Q6. A newline split sees 1 SUMMARY line in the dry and in the apply output; a splitlines emulation sees 5 and 3.
+5. G422-5, suite only. Green on both heads by design; their red is the mutants (table below).
+6. G422-6, the PRECONDITION's why and the block/slot sentence, in all six places (ruling 2). HDR-WHY red on A.
+7. G422-7 and W6, the box check is names only; a row that left the class refuses whole.
+   - Red on A: HDR-BOX.
+   - Green: F20 and F23.
+   - The rest of G422-7 is in DECLARED.
+8. The PR body and the fragments: docs-fragments OK, with the same 2 ADVISORY lines.
+
+MUTANT TABLE (118 run, 114 KILLED, 4 SURVIVED; evidence/mutants_table.txt, with every designated cell checked by name in evidence/mutants_designated.txt):
+- W 79th's 85: 83 killed. Survivors, declared: C1:refuse_flag_where and C1:refuse_rollback (each masks the other; C1:refuse_both killed).
+- Gate 422's 19: 17 killed.
+  - The 10 observable, each by its named cell:
+    - tail_ignores_comments by L4:s_h;
+    - diff_md_subset by F18;
+    - diff_cm_subset by F19;
+    - class_ctype_key by F20;
+    - end_any_order by F21;
+    - box_db_ci by F22;
+    - ts_frac_unbounded by R1:N_TS_7FRAC and R1:N_TS_FRAC10;
+    - leap_no_100 by R1:N_TS_FEB29_1900 and R1:N_TS_FEB29_2100;
+    - network_no_space_escape by Q4;
+    - reverse_of_unquoted_user by Q5.
+  - The 7 the builder's suite killed stay killed.
+  - no_cr_trim and leap_no_400 survive and need nothing (stricter; no realistic date).
+- Mine, 14: all killed.
+  - A_anchoringStatus, A_status, A_txHash, A_createAttempts and A_whole, by RA:*.
+  - B_copies, B_status, B_tx64, B_anchorId and B_whole, by RB:*.
+  - B_tx_lower_only by R4.
+  - OES_reverse by L6 and HDR-OES.
+  - OES_dry and OES_apply by HDR-OES only. These two are declared behaviourally equivalent: the script sets ON_ERROR_STOP before any statement, and a wrong directory fails at the < redirect.
+
+OTHER LEGS:
+- 20 repeats: 20 of 20 rc 0, 196 of 196 each, load1 4.6 to 16.6, recorded beside each run.
+- run-shell-suites WHOLE: 134 passed, 0 failed, 0 skipped (of 134), rc 0.
+- Portability on a copy: OK rc 0; planted readarray rc 1.
+- LITERAL RUN EVIDENCE: evidence/l1_literal/ (documented text, run text and diff for dry, apply and reverse).
+
+HOOK VERDICT, VERBATIM:
+PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed.
+  legs 3 4 8 — local stack not up; you can clear this by starting it.
+  This is NOT a pass. Do not quote it as one — say which legs ran.
+(Leg 14: shell suites 134 of 134; this suite 196 of 196 inside it. Leg 16: 6 services type-check against the baseline, 0 new.)
+
+NOT RUN:
+- any box;
+- the box container's own sh and psql;
+- the ssh form;
+- the anchoring service, and any chain lookup;
+- the four platform suites (no local stack);
+- any deploy.
+- Readers of metadata.blockchain outside verify were not surveyed.
+- Platform S was not searched.
+REC: 5_Project_History/2026-11-27_seatW-80th/ (HANDOVER, DECLARED, DESIGN_ADDENDUM, STATUS, evidence/). Next: wrap, after your ANSWER (the vault push only on its licence).
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 37  SEEN:       66  BATCH: /private/tmp/wed_newmail/batch_20261127T121241Z.txt
