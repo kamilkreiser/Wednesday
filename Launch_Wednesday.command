@@ -991,6 +991,8 @@ bash "$PROJECT_DIR/2_Project_Files/tools/latest_models.sh" || echo "[launcher] W
 # afternoon switch did not survive the 22:42 launch. REVERT = delete the friday branch; backup Launch_Wednesday.command.pre-1116-fable.
 SEAT_MODEL_ARGS=(--model opus)
 [ "$AGENT" = "friday" ] && SEAT_MODEL_ARGS=(--model fable --fallback-model opus)
+# 2026-11-27 (Kam, Wednesday terminal, after his own /model to Fable 5.2: "Use fable for yourself and agents working on this project", the fleet-structure project WED-170, prioritised beside Secuura): the WEDNESDAY seat boots on the `fable` ALIAS with opus as the availability fallback, the same shape as Friday, so his choice survives a rotation (the --model flag overrides a /model default). Tuesday is unchanged on `opus`. REVERT = delete the wednesday branch; backup Launch_Wednesday.command.pre-1127-wed-fable.
+[ "$AGENT" = "wednesday" ] && SEAT_MODEL_ARGS=(--model fable --fallback-model opus)
 # 2026-11-19 (Kam, Tuesday terminal: "i would like you to switch to latest fable and use fable agents when working on this project"): the TUESDAY seat boots on the `fable` ALIAS with opus as the availability fallback, the same shape as Friday. REVERT = delete the tuesday line; backup Launch_Wednesday.command.pre-1119-tuesdayfable.
 # 2026-11-21 (Kam, Tuesday terminal, after /model to Opus 5.5: "the fable limits are killing the flow and causing problems.  Do not use fable any more unless you flag it is necessary.  Continue this project using the latest opus model"):
 # the 2026-11-19 tuesday->fable line is REMOVED; Tuesday boots on the `opus` alias (newest Opus) like Wednesday. Fable only on a flagged, Kam-approved per-task need.
