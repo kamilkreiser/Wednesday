@@ -1,12 +1,10 @@
-WORKING
-
-**INTERIM, 2026-11-27 19:10 AEDT: round 4b below is final EXCEPT the mutant figures; the pane is waiting on its own mutant re-run (about 50 minutes) and will finish this file by itself. Not a stop.**
+READY FOR QA
 
 # ROUND 4b (answer to `ANSWER-7.md`: the client-name test is removed from clause (d))
 
-Same seat, 2026-11-27, 18:58 to (still running) AEDT (from `date`). All HOLDS kept. The drive cluster ran once more, for one rebuild and the ten questions, and is STOPPED. Round 4's report is kept whole below; where the two differ, this section stands.
+Same seat, 2026-11-27, 18:58 to 19:46 AEDT (from `date`). All HOLDS kept. The drive cluster ran once more, for one rebuild and the ten questions, and is STOPPED. Round 4's report is kept whole below; where the two differ, this section stands.
 
-**In one paragraph.** The name test is gone and nothing else in the qualify rule changed. On the real tree 255 lessons are indexed (round 4: 199; round 3: 264) and 38 are left out, all named. Questions 2 and 9 find their lesson first again; the right lesson is in the first five for 8 of 10, as in round 3. The suite is 692 passed, 0 failed, under Python 3.14.10 and 3.9.6. **The mutant re-run on this code is still going as this is written.** The checker's `f1_new.py` still has 0 of its 58 shapes entering: **no shape entered because the name test was removed.**
+**In one paragraph.** The name test is gone and nothing else in the qualify rule changed. On the real tree 255 lessons are indexed (round 4: 199; round 3: 264) and 38 are left out, all named. Questions 2 and 9 find their lesson first again; the right lesson is in the first five for 8 of 10, as in round 3. The suite is 692 passed, 0 failed, under Python 3.14.10 and 3.9.6. 59 mutants are all caught on the assertion named for them. The checker's `f1_new.py` still has 0 of its 58 shapes entering: **no shape entered because the name test was removed.**
 
 ## What changed (and nothing else)
 
@@ -80,7 +78,7 @@ Right lesson in the first five: **8 of 10**, as in rounds 2 and 3 (round 4: 6). 
 ## Suite and mutants
 
 - Suite, final code: **692 passed, 0 failed**, Python 3.14.10 (`evidence/test_run_round4b.log`) and 3.9.6 (`evidence/test_run_round4b_python39.log`).
-- Mutants: RE-RUN IN PROGRESS; the figure goes here.
+- Mutants, final code (`evidence/mutants_round4b.log`, finished 19:45:11): control 692 passed, 0 failed; **59 of 59 caught on the expected assertion** (round 4 had 62: four name mutants removed, one added). `Qd_name_test_put_back` goes red on 25 lines of the must-succeed lessons, so the test that they are indexed can fail. The mutant `F9_stop_trusts_pidfile`, whose `stop` is broken on purpose, left its one scratch server running, as it did in round 3; `pg_ctl` could not stop it because that test overwrites the pid file, so I sent SIGINT to that one pid (my own harness's server, selected by executable and then by its `-D` under my scratchpad) and it exited.
 
 ## What I could not make sound (replaces round 4's items 1 and 2; items 3 to 6 there stand)
 
@@ -96,7 +94,7 @@ Right lesson in the first five: **8 of 10**, as in rounds 2 and 3 (round 4: 6). 
 
 Everything in round 4's list, unchanged. In addition: no timing on a quiet machine; the proposed Tuesday and Friday scopes without their `deny_clients` line ran on fixtures only.
 
-**End state of the drive cluster** (`evidence/measurements_round4b.txt`, 19:02:56): `stop` rc 0 (pid 54882), second `stop` rc 0, `server: STOPPED`, no `postmaster.pid`, socket directory empty, 0 processes whose executable is postgres with a data directory in this lane (1 postgres on this Mac, another project's, not touched; control: 32 bash). 
+**End state of the drive cluster** (`evidence/measurements_round4b.txt`, 19:02:56): `stop` rc 0 (pid 54882), second `stop` rc 0, `server: STOPPED`, no `postmaster.pid`, socket directory empty, 0 processes whose executable is postgres with a data directory in this lane (1 postgres on this Mac, another project's, not touched; control: 32 bash). Checked again at 19:46 after the mutant run: no `postmaster.pid`; 0 postgres processes with a data directory in this lane or under my scratchpad.
 
 ## For the next reader (the coordinator's seat may have rotated)
 
