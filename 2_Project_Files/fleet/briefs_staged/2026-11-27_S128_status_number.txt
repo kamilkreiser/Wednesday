@@ -1,0 +1,194 @@
+SUBJECT: [Secuura/Blockchain-S -> Wednesday] STATUS: demo has 37 stuck certifications (Seat S 128th)
+TS: 2026-11-27T00:30:52.000Z
+
+Seat S 128th
+
+THE NUMBER. Demo (secuura02-demo-vm), box time 2026-11-27T00:29:55Z to 00:29:56Z.
+STUCK CERTIFICATIONS: 37.
+That is every certification row on demo: 37 total, 37 stuck, 0 failed, 0 confirmed, 0 with a tx hash.
+Oldest created 2026-07-31, newest 2026-11-26, oldest age 119 days.
+Two tenants: 34 in the default tenant (2026-07-31 to 2026-11-26), 3 in one other (2026-08-04 to 2026-08-09).
+By status, certification class: documents status certified | anchoringStatus submitted | no blob status | 37.
+
+ALL-TENANT: yes. 3a shows the database role is a superuser (rolsuper t, rolbypassrls f) and no tenant setting in force; row security does not apply to a superuser. The same fact means read-only was a session default here, not a permission barrier: the SQL holds no SET, and 3b shows the default refused a write.
+
+PROOFS AND CONTROLS, all passed
+3a: on|secuura|t|t|f
+3b: create temp table zz_s128_probe(a int) was refused: ERROR cannot execute CREATE TABLE in a read-only transaction, exit 1
+3c: missing table errored, does not exist, exit 1
+census anchor_store: confirmed|f 296, failed|f 11, failed|t 83, no other bucket, so non-final 0 (2026-11-24 read 285, 11, 83)
+schema guard 5; documents total 276; 12 bucket rows summing to 276
+positive control: 155 document-class rows confirmed with a tx hash
+stuck by the explicit predicate 37 = stuck by bucket rows 37; by-status sum 37 = certification bucket rows 37
+made-up state 0; made-up certification type 0
+before and after: documents 276 with the same aggregate hash; census equal
+
+IDENTITY, all passed: hostname secuura02-demo-vm; REVISION revision d4ffc8308249; secuura-anchoring image 0f2b322518fe, running, started 2026-11-16T23:55:34Z; exactly one -postgres container, secuura-postgres; host key PINNED (earlier STATUS). Not proven: I hold no production address to compare against.
+
+WHAT THE NUMBER DOES NOT SHOW
+- It reads stored blob state in documents. Whether any anchor for these 37 rows confirmed in anchor_store was NOT read.
+- createAttempts key present on 0 of 37. The key name was never validated against a blob, so a name mismatch is possible; I infer nothing from it.
+- A further 29 rows of class document read anchoringStatus submitted, no blob status, no tx hash (2026-08-07 to 2026-11-26). They are outside the certification class and outside the 37. Whether they are the derived copies S 127th described, I did not establish.
+- It is a snapshot. The newest is dated 2026-11-26 and demo runs d4ffc8308249, which per the BRIEF predates PR 2295, so I expect new certifications to add to it until demo has the fix. That is inference, not measured.
+
+FOOTPRINT: 1 keyscan; 2 runner runs (4 ssh connections, all returned; no ssh to the address left running here); 14 SQL statements, one exec each; I wrote no file on the box; no az, no HTTP request to any stack host, no Linear or GitHub write, no mail to a human, no repair and no proposal of one.
+PRIVACY CHECK: six evidence files read 0 at-signs and 0 uuid-shaped strings other than the one allowed constant (it appears once, in the echoed bucket statement); planted control read 1 and 1. The licensed REVISION lines saved in evidence carry deploy notes naming Kam and earlier seats; they are not quoted here.
+
+NEXT: I wait for your word before the wrap.
+
+EXACT ARGV, then the raw count output with every statement as run.
+
+ARGV RECORD (Seat S 128th)
+local: /bin/bash demo_run_s128.sh <REC>/tools/<tool> <REC>/evidence/<out>
+ssh (two per run, first runs hostname, second: bash -s < tool), target host 20.212.118.59 user secuura, options:
+SSHO=(-F /dev/null -o ControlMaster=no -o ControlPath=none -i "$K" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$KH" -o ConnectTimeout=20 -o ServerAliveInterval=30)
+run 1 2026-11-27T00:29:43Z: /bin/bash demo_run_s128.sh demo_id_s128.sh R2_id.out
+run 2 2026-11-27T00:29:52Z: /bin/bash demo_run_s128.sh demo_cnt_s128.sh R3_cnt.out
+
+remote rc=0 lines=     145 tool=demo_cnt_s128.sh sha16=e8aa4d1081763056 at 2026-11-27T00:29:56Z
+
+CNT 2026-11-27T00:29:55Z host=secuura02-demo-vm
+--- 3a session proof  2026-11-27T00:29:55Z
+SQL:
+select current_setting('transaction_read_only'), current_database(), (select rolsuper from pg_roles where rolname = current_user), (select rolbypassrls from pg_roles where rolname = current_user), coalesce(nullif(current_setting('app.current_tenant_id', true), ''), 'unset') <> 'unset'
+OUTPUT:
+on|secuura|t|t|f
+exit: 0
+3a ok
+--- 3b refused-write control, MUST be refused  2026-11-27T00:29:55Z
+SQL:
+create temp table zz_s128_probe(a int)
+OUTPUT:
+ERROR:  cannot execute CREATE TABLE in a read-only transaction
+exit: 1
+3b ok: refused as read-only
+--- 3c negative control, must error  2026-11-27T00:29:55Z
+SQL:
+select count(*) from no_such_table_s128
+OUTPUT:
+ERROR:  relation "no_such_table_s128" does not exist
+LINE 1: select count(*) from no_such_table_s128
+                             ^
+exit: 1
+3c ok
+--- 4.1 identity census, anchor_store  2026-11-27T00:29:55Z
+SQL:
+select status, simulated, count(*) from anchor_store group by 1,2 order by 1,2
+OUTPUT:
+confirmed|f|296
+failed|f|11
+failed|t|83
+exit: 0
+census check: confirmed_f=296 (want >=285) failed_f=11 (want >=11) failed_t=83 (want 83) other_buckets=0 (want 0)
+--- 4.1 documents before  2026-11-27T00:29:55Z
+SQL:
+select count(*), md5(string_agg(md5(d::text), ',' order by d.id)) from documents d
+OUTPUT:
+276|6b7c826272c95d51172c58a600a56dc4
+exit: 0
+--- 4.2 schema guard, want 5  2026-11-27T00:29:56Z
+SQL:
+select count(*) from information_schema.columns where table_schema='public' and table_name='documents' and column_name in ('tenant_id','external_id','certification_metadata','metadata','created_at')
+OUTPUT:
+5
+exit: 0
+--- 4.3 total, positive control above 0  2026-11-27T00:29:56Z
+SQL:
+select count(*) from documents
+OUTPUT:
+276
+exit: 0
+--- 4.3 buckets  2026-11-27T00:29:56Z
+SQL:
+select (d.tenant_id = 'a0000000-0000-4000-8000-000000000001'::uuid) as default_tenant,
+       case when d.certification_metadata->>'certificationType' is not null and d.external_id is null then 'certification'
+            when d.certification_metadata->>'certificationType' is not null then 'cert_meta_on_document'
+            when d.external_id is null then 'no_external_id_other'
+            else 'document' end as class,
+       (b.blob is not null) as has_blob,
+       coalesce(left(b.blob->>'anchoringStatus', 24), '-') as anchoring_status,
+       coalesce(left(b.blob->>'status', 24), '-') as blob_status,
+       (b.blob->>'txHash' is not null) as has_tx,
+       count(*) as n,
+       (min(d.created_at) at time zone 'utc')::date::text as oldest_created_at,
+       (max(d.created_at) at time zone 'utc')::date::text as newest_created_at
+  from documents d
+  cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b
+ group by 1,2,3,4,5,6
+ order by 1 desc, 2, 3 desc, 4, 5, 6
+ limit 200
+OUTPUT:
+t|certification|t|submitted|-|f|34|2026-07-31|2026-11-26
+t|document|t|-|-|f|3|2026-08-08|2026-11-20
+t|document|t|-|-|t|4|2026-07-08|2026-07-29
+t|document|t|-|anchor_failed|f|20|2026-07-11|2026-08-10
+t|document|t|-|anchor_failed|t|2|2026-11-13|2026-11-26
+t|document|t|-|confirmed|t|155|2026-07-08|2026-11-26
+t|document|t|-|pending|f|15|2026-08-04|2026-08-10
+t|document|t|-|pending|t|2|2026-08-09|2026-08-09
+t|document|t|-|submitted|t|6|2026-08-04|2026-08-10
+t|document|t|submitted|-|f|29|2026-08-07|2026-11-26
+t|document|f|-|-|f|3|2026-11-20|2026-11-26
+f|certification|t|submitted|-|f|3|2026-08-04|2026-08-09
+exit: 0
+check 4.3: bucket_rows=12 sum=276 total=276 confirmed_document_rows=155 certification_rows=37 stuck_by_buckets=37
+--- 4.4 stuck count  2026-11-27T00:29:56Z
+SQL:
+select count(*) as stuck_n,
+       (min(d.created_at) at time zone 'utc')::date::text as oldest_day,
+       (max(d.created_at) at time zone 'utc')::date::text as newest_day,
+       ((now() at time zone 'utc')::date - (min(d.created_at) at time zone 'utc')::date) as oldest_age_days,
+       count(*) filter (where b.blob ? 'createAttempts') as with_create_attempts,
+       count(distinct d.tenant_id) as tenants
+  from documents d
+  cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b
+ where d.certification_metadata->>'certificationType' is not null and d.external_id is null
+   and b.blob->>'anchoringStatus' = 'submitted' and b.blob->>'status' is null and b.blob->>'txHash' is null
+OUTPUT:
+37|2026-07-31|2026-11-26|119|0|2
+exit: 0
+4.4 ok: stuck 37 equals the bucket rows
+--- 4.5 certification class by status  2026-11-27T00:29:56Z
+SQL:
+select d.status, coalesce(left(b.blob->>'anchoringStatus',24),'-') as anchoring_status, coalesce(left(b.blob->>'status',24),'-') as blob_status, count(*) from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null group by 1,2,3 order by 1,2,3
+OUTPUT:
+certified|submitted|-|37
+exit: 0
+check 4.5: sum=37 certification_rows_by_buckets=37
+--- 4.6a made-up state, must be 0  2026-11-27T00:29:56Z
+SQL:
+select count(*) as stuck_n,
+       (min(d.created_at) at time zone 'utc')::date::text as oldest_day,
+       (max(d.created_at) at time zone 'utc')::date::text as newest_day,
+       ((now() at time zone 'utc')::date - (min(d.created_at) at time zone 'utc')::date) as oldest_age_days,
+       count(*) filter (where b.blob ? 'createAttempts') as with_create_attempts,
+       count(distinct d.tenant_id) as tenants
+  from documents d
+  cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b
+ where d.certification_metadata->>'certificationType' is not null and d.external_id is null
+   and b.blob->>'anchoringStatus' = 'zz-s128-no-such-state-3f9a' and b.blob->>'status' is null and b.blob->>'txHash' is null
+OUTPUT:
+0||||0|0
+exit: 0
+--- 4.6b made-up type, must be 0  2026-11-27T00:29:56Z
+SQL:
+select count(*) from documents where certification_metadata->>'certificationType' = 'zz-s128-no-such-type-7e1c'
+OUTPUT:
+0
+exit: 0
+--- 4.7 documents after  2026-11-27T00:29:56Z
+SQL:
+select count(*), md5(string_agg(md5(d::text), ',' order by d.id)) from documents d
+OUTPUT:
+276|6b7c826272c95d51172c58a600a56dc4
+exit: 0
+--- 4.7 census after  2026-11-27T00:29:56Z
+SQL:
+select status, simulated, count(*) from anchor_store group by 1,2 order by 1,2
+OUTPUT:
+confirmed|f|296
+failed|f|11
+failed|t|83
+exit: 0
+SUMMARY stuck=37 certification_rows=37 documents_total=276 confirmed_document_rows=155 documents_before_after=equal census_before_after=equal
+END 2026-11-27T00:29:56Z
