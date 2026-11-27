@@ -1,0 +1,128 @@
+mutants: output /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/e942fdf4-d0ab-4407-a42c-ece0d6b5d4ac/scratchpad/r4/mut/mutants-20261127-170625-89086 ; 2026-11-27 17:06:25 AEDT
+none                           CONTROL-OK  682 passed, 0 failed
+                                 broke: nothing (control)
+Qa_no_row_qualifies            CAUGHT  21 failing line(s), 3 on the expected assertion  [absent  xcanary301  clause (a): no row at all (round 3 indexed this on the tier alone) ('xcanary301' found 3 time(s) in dump-A.sql)]
+                                 broke: (a) a lesson with no row qualifies on its tier alone, as in round 3
+Qa_unread_lines_ignored        CAUGHT  15 failing line(s), 3 on the expected assertion  [absent  xcanary315  clause (a): a good row scoped all AND a damaged '#x' row for the same lesson ('xcanary315' found 3 time(s) in dump-A.sql)]
+                                 broke: (a) a rules-index line that could not be read no longer leaves out the lesson it names
+Qa_duplicate_rows_ok           SURVIVED  the suite passed (682) with this broken
+                                 broke: (a) two rows with the same key are accepted
+Qa_seats_cell_loose            CAUGHT  14 failing line(s), 1 on the expected assertion  [absent  xcanary328  clause (a): seats cell 'all,tuesday' ('xcanary328' found 3 time(s) in dump-A.sql)]
+                                 broke: (a) a seats cell is no longer held to the spec's words
+Qa_key_any_shape               RED-ELSEWHERE  14 failing line(s), none on the expected assertion /xcanary3(05|06|14)/
+                                 broke: (a) a key need no longer be exactly the file name (paths, outer spaces and #1 accepted)
+Qb_seat_not_tested             CAUGHT  30 failing line(s), 7 on the expected assertion  [absent  xcanary03  clause (b): its only row is scoped friday ('xcanary03' found 3 time(s) in dump-A.sql)]
+                                 broke: (b) the row's seats cell is not tested
+Qb_any_row_counts              CAUGHT  13 failing line(s), 1 on the expected assertion  [absent  xcanary402  clause (b): the plain row is scoped tuesday; only a '#2' row names this seat ('xcanary402' found 5 time(s) in dump-A.sql)]
+                                 broke: (b) a '#n' row naming this seat is enough although the plain row names another
+Qb_other_seat_rule_line_in     CAUGHT  5 failing line(s), 1 on the expected assertion  [absent  xcanary405ruletwo  a '#2' rule line scoped to another seat, inside an indexed lesson ('xcanary405ruletwo' found 3 time(s) in dump-A.sq]
+                                 broke: (b) a rule line scoped to another seat enters with an indexed lesson
+Qc_any_tier                    CAUGHT  24 failing line(s), 2 on the expected assertion  [absent  xcanary502  clause (c): tier MIXED ('xcanary502' found 3 time(s) in dump-A.sql)]
+                                 broke: (c) any tier value is accepted
+Qc_no_tier_is_W                CAUGHT  16 failing line(s), 3 on the expected assertion  [absent  xcanary501  clause (c): no tier line (round 3 called this untagged and indexed it) ('xcanary501' found 3 time(s) in dump-A.sql)]
+                                 broke: (c) a lesson with no tier is treated as W, as in round 3
+Qc_line1_loose                 CAUGHT  15 failing line(s), 3 on the expected assertion  [absent  xcanary533  clause (c): a blank line before the frontmatter ('xcanary533' found 4 time(s) in dump-A.sql)]
+                                 broke: (c) the frontmatter need not open on line 1 with exactly ---
+Qc_odd_lines_skipped           CAUGHT  15 failing line(s), 1 on the expected assertion  [left-out lessons or their clauses differ from the plan]
+                                 broke: (c) a frontmatter line that is not a plain key: value line is skipped, not refused
+Qc_dup_key_ok                  CAUGHT  15 failing line(s), 1 on the expected assertion  [absent  xcanary521  clause (c): tier twice, W last ('xcanary521' found 3 time(s) in dump-A.sql)]
+                                 broke: (c) tier given twice is accepted (the last one wins)
+Qc_keylike_ok                  CAUGHT  15 failing line(s), 1 on the expected assertion  [absent  xcanary518  clause (c): a second key 'tiers:' ('xcanary518' found 3 time(s) in dump-A.sql)]
+                                 broke: (c) a second key that folds to tier (tiers:, tier_project:) is accepted
+Qc_value_tierlike_ok           CAUGHT  3 failing line(s), 1 on the expected assertion  [left-out lessons or their clauses differ from the plan]
+                                 broke: (c) a tier assignment inside another key's value is not refused by (c) (clause (d) still catches it: the clause table goes red)
+Qc_second_block_ok             CAUGHT  3 failing line(s), 1 on the expected assertion  [left-out lessons or their clauses differ from the plan]
+                                 broke: (c) a second frontmatter block is not refused by (c) (clause (d) still catches its tier line: the clause table goes red)
+Qc_closed_list_loose           CAUGHT  20 failing line(s), 4 on the expected assertion  [absent  xcanary504  clause (c): tier P-Acme/Thing ('xcanary504' found 3 time(s) in dump-A.sql)]
+                                 broke: (c) the tier list is not closed: any P- client, and W in other spellings
+Qd_comment_ok                  CAUGHT  15 failing line(s), 3 on the expected assertion  [absent  xcanary706  clause (d): an HTML comment naming a project, without the word tier ('xcanary706' found 6 time(s) in dump-A.sql)]
+                                 broke: (d) an HTML comment no longer leaves the lesson out
+Qd_tierlike_line_ok            CAUGHT  18 failing line(s), 6 on the expected assertion  [absent  xcanary709  clause (d): a body line 'tier: P-Other/X' (a marker without comment syntax) ('xcanary709' found 6 time(s) in dump-A.sql)]
+                                 broke: (d) a tier-like line in the body no longer leaves the lesson out
+Qd_name_ok                     CAUGHT  24 failing line(s), 3 on the expected assertion  [absent  xcanary715  clause (d): the other client's name in the body ('xcanary715' found 3 time(s) in dump-A.sql)]
+                                 broke: (d) the other client's name in the text no longer leaves the lesson out
+Qd_name_not_squeezed           CAUGHT  12 failing line(s), 1 on the expected assertion  [absent  xcanary718  clause (d): the name split by markdown emphasis ('xcanary718' found 3 time(s) in dump-A.sql)]
+                                 broke: (d) the name split by markdown emphasis is not seen
+Qd_name_not_folded             CAUGHT  13 failing line(s), 2 on the expected assertion  [absent  xcanary719  clause (d): the name with an accented letter ('xcanary719' found 3 time(s) in dump-A.sql)]
+                                 broke: (d) the name with an accent or in full-width letters is not seen
+Qd_only_body_tested            CAUGHT  14 failing line(s), 3 on the expected assertion  [absent  xcanary725  clause (d): the other client's name in the lesson's FILE NAME ('xcanary725' found 3 time(s) in dump-A.sql)]
+                                 broke: (d) the name in the file name or in the rule line is not tested
+Qd_entity_ok                   CAUGHT  12 failing line(s), 1 on the expected assertion  [absent  xcanary722  clause (d): a numeric character reference spelling the first letter ('xcanary722' found 3 time(s) in dump-A.sql)]
+                                 broke: (d) a numeric character reference is accepted
+Qt_any_bytes                   CAUGHT  16 failing line(s), 4 on the expected assertion  [absent  xcanary801  clause (t): a Latin-1 file (not valid UTF-8) ('xcanary801' found 3 time(s) in dump-A.sql)]
+                                 broke: (t) a file that is not valid UTF-8 is read anyway
+Qt_controls_ok                 CAUGHT  16 failing line(s), 2 on the expected assertion  [absent  xcanary803  clause (t): a NUL byte ('xcanary803' found 3 time(s) in dump-A.sql)]
+                                 broke: (t) control and format characters are accepted
+Qt_letters_ok                  CAUGHT  16 failing line(s), 3 on the expected assertion  [absent  xcanary812  clause (t): a Cyrillic look-alike letter ('xcanary812' found 3 time(s) in dump-A.sql)]
+                                 broke: (t) look-alike letters of other scripts are accepted
+Qf_hard_link_through           CAUGHT  16 failing line(s), 4 on the expected assertion  [absent  xcanary680  clause (f): a 4_Credentials file HARD-LINKED into learnings/ ('xcanary680' found 3 time(s) in dump-A.sql)]
+                                 broke: (f) a hard link is read
+Qf_symlink_followed            CAUGHT  13 failing line(s), 2 on the expected assertion  [absent  xcanary681  an absolute symlinked FILE in skills/ pointing into 3_Access_Keys ('xcanary681' found 2 time(s) in dump-A.sql)]
+                                 broke: (f, N6) files are opened following symlinks
+no_index_not_refused           CAUGHT  12 failing line(s), 3 on the expected assertion  [rebuild with the rules index missing is refused (rc 0, wanted non-zero)]
+                                 broke: a missing or unusable rules index no longer refuses the rebuild
+builtin_deny_path_off          SURVIVED  the suite passed (682) with this broken
+                                 broke: sync copies and backups are held out by the scope file's lines only
+daily_name_any                 CAUGHT  10 failing line(s), 4 on the expected assertion  [absent  xcanary690  a daily note whose name is not a plain date ('xcanary690' found 3 time(s) in dump-A.sql)]
+                                 broke: a daily note need no longer be named as a plain date
+underscore_names_through       CAUGHT  7 failing line(s), 3 on the expected assertion  [absent  xcanary43  a file named _ledger* in skills/ ('xcanary43' found 2 time(s) in dump-A.sql)]
+                                 broke: a file named _ledger* is taken as a skill
+N5_names_not_closed            CAUGHT  33 failing line(s), 10 on the expected assertion  [NOT refused: allow ledger 0_Brain/learnings/_ledger_friday.md (rc 0): rebuild: done; no file was unreadable and no row was truncated; 128 less]
+                                 broke: (N5, checker's N06) a ledger or pickup line may name any file in the folder
+N5_folders_not_closed          CAUGHT  24 failing line(s), 12 on the expected assertion  [NOT refused: allow daily 0_Brain/daily_tuesday/20*.md (rc 0): rebuild: done; no file was unreadable and no row was truncated; 128 lesson file(]
+                                 broke: (N5, checker's N07) a kind may be indexed from any folder
+N5_rules_not_closed            CAUGHT  5 failing line(s), 3 on the expected assertion  [NOT refused: allow rules 2_Project_Files/CLAUDE.md (rc 0): rebuild: done; no file was unreadable and no row was truncated; 128 lesson file(s) ]
+                                 broke: (N5) any file may be allowed as kind rules
+N7_scope_validated_late        CAUGHT  37 failing line(s), 32 on the expected assertion  [a TUESDAY tree: 'allow ledger 0_Brain/learnings/_ledger.md' rc 2, cluster dir created]
+                                 broke: (N7) a scope file that exists is validated only after the cluster is created and started
+F4_scope_checked_late          CAUGHT  37 failing line(s), 34 on the expected assertion  [a TUESDAY tree: 'allow ledger 0_Brain/learnings/_ledger.md' rc 2, cluster dir created]
+                                 broke: the scope file is tested after the cluster is created and started
+N3_no_assert_in_load           CAUGHT  3 failing line(s), 2 on the expected assertion  [  swapped at that point: REFUSED with rc 4 by the assertion INSIDE the load transaction (rc 0, wanted 4)]
+                                 broke: (N3) the load transaction no longer asserts the data directory
+N3_no_assert_in_reads          CAUGHT  11 failing line(s), 5 on the expected assertion  [  a check addressed to c2 is refused the same way; it does NOT read GREEN off the other cluster (rc 1, wanted 4)]
+                                 broke: (N3, checker's N10) read sessions no longer assert the data directory
+N3_assert_always_true          CAUGHT  30 failing line(s), 2 on the expected assertion  [A. swapped during the lock wait: the rebuild addressed to t1 is REFUSED with rc 4 (rc 0, wanted 4)]
+                                 broke: (N3) the assertion compares nothing
+N9_rules_row_after_the_cut     CAUGHT  2 failing line(s), 2 on the expected assertion  [q1: result 1 is not the rules row:  1. 0.1550  [lesson, live]  0_Brain/learnings/2026-10-01_quillwort-marshwort-1.md:9]
+                                 broke: (N9) the rules row is chosen after the top-N cut again
+N10_no_realpath                CAUGHT  3 failing line(s), 2 on the expected assertion  [the data directory spelled with a trailing slash is the same running cluster (rc 3, wanted 0)]
+                                 broke: (N10) the data directory is used as spelled
+N11_status_rc0                 CAUGHT  1 failing line(s), 1 on the expected assertion  [status addressed to c2 on the main cluster's socket prints REFUSED and exits 4, not 0 (N11) (rc 0, wanted 4)]
+                                 broke: (N11) status exits 0 whatever its indexer part printed
+N11_down_is_rc4                CAUGHT  6 failing line(s), 3 on the expected assertion  [no server on the socket named: rc 3 (rc 4, wanted 3)]
+                                 broke: (N11) an empty answer is reported as another cluster
+N13_no_rebuild_lock            CAUGHT  6 failing line(s), 1 on the expected assertion  [a rebuild behind a holder that never lets go gives up at its limit: rc 75 (N13) (rc 0, wanted 75)]
+                                 broke: (N13, checker's N11) a rebuild no longer takes the cluster lock
+N13_lock_wait_unbounded        CAUGHT  4 failing line(s), 1 on the expected assertion  [a rebuild behind a holder that never lets go gives up at its limit: rc 75 (N13) (rc 0, wanted 75)]
+                                 broke: (N13) the indexer's lock wait has no limit and says nothing
+N14_sock_mode_untested         CAUGHT  4 failing line(s), 2 on the expected assertion  [a socket directory that is not mode 700 is refused (rc 0, wanted non-zero)]
+                                 broke: (N14) the socket directory's mode is not tested
+N15_sock_symlink_ok            RED-ELSEWHERE  1 failing line(s), none on the expected assertion /symlink is refused/
+                                 broke: (N15) a symlinked socket directory is accepted
+N24_scope_change_unseen        CAUGHT  3 failing line(s), 1 on the expected assertion  [a scope file that differs only by a comment line makes check red (N24) (rc 0, wanted 1)]
+                                 broke: (N24) check does not notice a changed scope file
+N8_left_out_not_shown          CAUGHT  2 failing line(s), 2 on the expected assertion  [check prints the same count (no 'left out: 128 lesson file(s) LEFT OUT by the qualify rule' in check1.out)]
+                                 broke: (N8) check and doctor no longer print what was left out
+N8_last_line_silent            CAUGHT  2 failing line(s), 1 on the expected assertion  [the rebuild's LAST line gives the count left out by each clause (no match for /^rebuild: done; .*; 128 lesson file\(s\) LEFT OUT by the qualif]
+                                 broke: (N8) the rebuild's last line no longer counts what was left out
+F5_no_lock                     CAUGHT  3 failing line(s), 2 on the expected assertion  [  stop behind the same holder gives up the same way (rc 0, wanted 75)]
+                                 broke: init, start and stop are no longer serialised by the lock
+F6_stale_pid_unexplained       CAUGHT  3 failing line(s), 3 on the expected assertion  [  it says STALE PID FILE in one line (no 'STALE PID FILE: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/e942fdf4-d0ab-4407-a42c-ece0d6b]
+                                 broke: start no longer explains a pid file that names a live foreign process
+F7_unreadable_aborts           CAUGHT  10 failing line(s), 4 on the expected assertion  [rebuild with one unreadable lesson and one 3 MB section still succeeds (rc 1, wanted 0)]
+                                 broke: an unreadable file is no longer caught
+F7_row_not_capped              CAUGHT  7 failing line(s), 2 on the expected assertion  [rebuild with one unreadable lesson and one 3 MB section still succeeds (rc 1, wanted 0)]
+                                 broke: an over-long row is no longer truncated
+F8_separators_kept             CAUGHT  1 failing line(s), 1 on the expected assertion  [a row holding the separator bytes 0x1F and 0x1E is FOUND by search (ANSWER-3 F8) (no '0_Brain/skills/separator-bytes.md' in s8.out)]
+                                 broke: the two separator bytes are no longer stripped on read
+F9_stop_trusts_pidfile         CAUGHT  29 failing line(s), 3 on the expected assertion  [the foreign process was killed by stop]
+                                 broke: the first checker's M2: stop signals whatever the pid file names
+rules_row_always_first         CAUGHT  1 failing line(s), 1 on the expected assertion  [result 1 is not the lesson:  1. 0.0133  [rules]  CLAUDE.md:9]
+                                 broke: a rules-file row is put first whatever it matched
+lessons_first_off              CAUGHT  6 failing line(s), 1 on the expected assertion  [default: incident rows follow under their own heading (no 'also, incident rows from the ledger and daily notes' in k1.out)]
+                                 broke: the default order is the old mixed one
+seat_follows_WED_AGENT         CAUGHT  4 failing line(s), 2 on the expected assertion  [WED_AGENT=tuesday on a tree named WEDNESDAY is refused with rc 2 (the tree decides the seat; the variable may only agree) (rc 3, wanted 2)]
+                                 broke: the seat follows WED_AGENT and an unknown tree defaults to wednesday
+server processes left under /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/e942fdf4-d0ab-4407-a42c-ece0d6b5d4ac/scratchpad/r4/mut/mutants-20261127-170625-89086: 3
+finished 2026-11-27 17:54:52 AEDT
+MUTANTS: 57 of 61 caught on the expected assertion; 4 not
