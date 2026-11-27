@@ -1,0 +1,32 @@
+ServerHost.Build reads one Suite settings section. With Suite:Tls naming
+two secrets, the HTTPS certificate and its key come from the host's
+secret store: the first secret holds the PEM text of the certificate,
+then its issuers (served as the chain); the second the PKCS#8 PEM text of
+its key. The host makes the certificate, re-imports it as PKCS#12, and
+refuses to build unless it is valid now, allows server authentication
+when it has an enhanced key usage extension, and is named exactly for
+Suite:HostName (subject CN equal, a DNS name matching with no wildcard and
+no CN fallback; an IP address is never a host name). A certificate named
+in the Kestrel section as well is refused (one source); without
+Suite:Tls the store is not read and the Kestrel section serves as before.
+Both store values are disposed and every buffer filled with their text
+is zeroed; the key text never becomes a string in the host's own code.
+
+The landed Graph client (over one HTTP client that follows no redirect,
+keeps no cookie and has no header or base address of its own), the
+OneDrive browser, the session record store, the token broker (over a
+refresher that throws until Entra sign-in is wired), the job spool and
+the scan receiver are registered, each made at its first use: a missing
+or wrong library setting refuses that first use with the setting's key,
+and the host still starts and answers /health. Every refusal is a
+SuiteHostException whose message names its kind and the setting's key
+only.
+
+Cells W01 to W11 (25 cases) start the host on 127.0.0.1 port 0 with
+certificates made in the test; H12 now pins seven project references.
+Not built: the registry, the app module lines, the print sender, the
+Entra refresher, the deployment's copy of the TLS values into the store,
+any chain or revocation check. Nothing ran against a device, a tenant or
+Azure. Nothing is deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

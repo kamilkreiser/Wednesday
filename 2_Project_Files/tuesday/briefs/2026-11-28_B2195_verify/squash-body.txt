@@ -1,0 +1,30 @@
+Twelve of HP's OXPd 1.x description files are added under
+contracts/oxpd1/hp/, copied byte for byte out of the pinned SDK 1.8.4.1
+jar (OXPdLib-1.8.4.jar, SHA-256 f2bb325f...d341, the pin in the
+contracts README): every file of the jar's authenticationagent folder
+(3), the accessories files whose name holds "callback" (2), every file
+of the jar's scan folder (5, its callback pair included), and the two
+schemas they import that were not yet committed (mediadomain.xsd,
+optionsdomain.xsd). Each file's bytes equal the jar entry and the jar's
+signed manifest digest. The Test service's callback pair stays out.
+They are kept under the words the contracts README already quotes from
+the project's clarifications, as the 23 files before them.
+
+inputs.sha256 grows from 23 to 35 lines (the 23 kept byte for byte and
+in order, the list sorted by path); C01's count moves to 35. The stub's
+binding-port pin in StubDevice.cs moves from seven to eleven ports (two
+lines). No other code line changes. The contracts README says which
+files are here and that the stub's table now holds the solution-side
+and callback bindings too.
+
+Every new binding uses the WS-Addressing 2005/08 namespace for its
+endpoint reference (the August 2004 namespace is declared, never used),
+carries a wsdl:service and a soapAction on every operation, and no
+soapAction collides with one already held (106 in all).
+
+Limits: no cell compiles the new schemas or calls the new operations;
+how a printer calls these services and which addressing it sends on the
+wire is not measured. Nothing ran against a printer, device or tenant.
+Nothing is deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

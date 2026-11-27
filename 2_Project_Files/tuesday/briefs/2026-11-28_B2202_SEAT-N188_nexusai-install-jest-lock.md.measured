@@ -1,0 +1,112 @@
+31a0790d | ls session-tools | grep -c -i 'b2175' -> 0 (02:57:55 and 03:03:43); a name, not an output the seat matches
+0a01b950 | grep -c -F 'Every other line stays token for token' tuesday/briefs/2026-11-28_B2192_verify/install-steps.md -> 1
+1672868d | gh api -X GET commits/e98b6fd9 --jq parents -> 826bb7a89bfe9517f5aa538a110ab0b1dea3317f, fc5975f631bb1fdd2536345f8eeee9e2e4eec165 (02:53:29)
+2a350585 | gh api -X GET compare/fc5975f631bb1fdd2536345f8eeee9e2e4eec165...main --jq '[.status,.ahead_by,.behind_by]|@tsv' -> ahead 1 0 (02:53:29)
+f826b54f | same call as 2a350585 -> 'ahead<TAB>1<TAB>0' (02:53:29)
+2d128ed6 | git -C session-tools rev-parse --show-toplevel -> fatal: not a git repository (02:52:38); so check-ignore has no repo; named, not matched
+4c948fa7 | git -C <NexusAI root> rev-parse --show-toplevel -> fatal: not a git repository; git -C 2_Project_Files rev-parse --show-toplevel -> its own path (control) (02:52:38)
+b697125b | /usr/bin/grep -c -i -E 'opus|sonnet|claude model|BRIEF_SEAT_LEVEL' NexusAI/CLAUDE.md -> 0 (03:00)
+dd2d6c27 | /usr/bin/grep -c -i 'model' NexusAI/CLAUDE.md -> 5 (03:00)
+61326e35 | bash -c 'exec -a /scratch/nexusai-lock.sh /bin/sleep 4' & ; pgrep -f -l '<REFUSE 4(c) pattern>' -> '37571 /scratch/nexusai-lock.sh 4' rc 0 (03:00:41); without it -> nothing, rc 1
+4e855d3b | ls session-tools | /usr/bin/grep -c -i -E 'nexusai-lock|slots' -> 13 (03:03:43)
+0e24fccd | ls session-tools | /usr/bin/grep -c -i 'b2175' -> 0 (03:03:43); control ls | grep -c -i 'nexusai-lock' -> 13
+70c10db1 | ls session-tools | /usr/bin/grep -c -i 'b2175' -> 0 (03:03:43): no .new-b2175
+0d79f528 | ls session-tools | /usr/bin/grep -c -i -E 'nexusai-lock|slots' -> 13 (03:03:43)
+b51d23c8 | same pipe -> 13; ls session-tools | /usr/bin/grep -c -i 'b2175' -> 0 (03:03:43)
+d6be8369 | ls session-tools | /usr/bin/grep -c -i 'nexusai-lock' -> 13 (03:04)
+6df3860d | ls session-tools listing (02:57:55) shows nexusai-lock.sh.pre-847-20261025T133618Z as the only .pre-<n>-<UTC 2026-10> name, newest by its stamp
+105af47b | diff install-b2175.sh install-b2202.sh -> hunks 2c2, 4c4,5, 8,10c9,11, 13c14, 16c17 (5 hunks) (02:57)
+8bf45513 | bash -n install-b2202.sh rc=0; /bin/bash -n install-b2202.sh rc=0 (02:57)
+b66d9e71 | git -C .tools/b2181/clone rev-parse 'fc5975f631bb1fdd2536345f8eeee9e2e4eec165^{tree}' -> e3bf2ca0ed22fefe2cae88b073915f8826511701 (02:54)
+abf908fb | git -C .tools/b2181/clone --no-optional-locks show fc5975f6:__tests__/rd977-inventory-sentinel-word.test.js > d2202/rd977.js (02:59:31)
+0d5f6e23 | /usr/bin/grep -n -E "describe\(|test\('" rd977.js -> 22:describe('RD-977 inventory sentinel word', 23: test('the sentinel the tool sends has no digit in it' (02:59:31)
+9c366811 | /usr/bin/grep -c -E '^[[:space:]]+test\(' rd977.js -> 3; /usr/bin/grep -c -E '^test\(' -> 0 (02:59:31)
+2fcc55f6 | gh api -X GET git/commits/e98b6fd9... --jq .tree.sha -> e3bf2ca0ed22fefe2cae88b073915f8826511701; same for fc5975f6 -> e3bf2ca0... (02:54)
+95c1222b | as 2fcc55f6, both read e3bf2ca0ed22fefe2cae88b073915f8826511701 (02:54)
+7c6c730a | git -C .tools/b2181/clone rev-parse 'fc5975f6^{tree}' -> e3bf2ca0ed22fefe2cae88b073915f8826511701 (02:54)
+f4dcfad2 | git -C .tools/b2181/clone cat-file -t e98b6fd9... -> fatal: could not get object info (02:53)
+2ca6d6e5 | jira2202.py show RD-1052 -> labels ['operations', 'tooling'] (02:57:03)
+4a7b19ef | jira2202.py show RD-1052 -> labels ['operations', 'tooling'] (02:57:03)
+5bbe1166 | grep -n -F 'INSTALLED OK: pre-copy' install-b2202.sh -> line 83; N186's dry log install-dry.txt last line 'INSTALLED OK: pre-copy nexusai-lock.sh.pre-b2175-20261127T125355Z' (real run of the form)
+076a7dd6 | /usr/bin/grep -n -F 'STOP:' install-b2202.sh -> lines 26 37 38 40 43 44 45 48 52 53 54 58 59 (03:05; line 26 is the cp -n control's failure branch); none printed in the dry run; PREDICTED wording from source
+9b7a6637 | python3 -I -B jira2202.py search -> last line 'SEARCH2202 PASS 1=NEW 2=NEW 3=NEW 4=NEW' (02:59:14)
+c0347cf5 | jira2202.py search -> 'SEARCH2202 PASS 1=NEW 2=NEW 3=NEW 4=NEW' (02:57:30 and 02:59:14)
+80735f1f | jira2202.py show RD-1052 -> 'SHOW RD-1052 | Task | Medium | To Do | labels [...] ...' (02:57:03)
+fba10576 | NEVER RUN (a Jira write): source line 197 prints 'CREATE2202 %d %s READBACK %s'; line 167 prints 'HELD %d %s'; marked never run in the kit
+c9d8bb39 | jira GET issueLinkType -> ('Relates','relates to','relates to'); RD-1052 issuelinks -> Relates out RD-1051 (02:58)
+bde84748 | N186 dry log install-dry.txt: grep -c 'INSTALLED OK' -> 1 (its last line); the kit's sentence names the dry run
+eb4a2162 | a path named read-only; ls .tools/b2175 exists (02:55); not a matched output
+3b9599f1 | a path named read-only; [ -e .tools/b2181 ] -> yes (02:59:31); not a matched output
+dce56889 | the kit's channel form (copied from kit B2181 line 1); not a tool output
+9402983f | [ -e '.tools/b2181' ] && echo yes -> yes (02:59:31)
+64c1369e | bash: ls -d <LB>/nexusai-*.lock* 2>/dev/null | wc -l -> 0 (02:52:38, 03:03:43; under zsh the same glob printed 'no matches found', hence the bash rule)
+b5cfbb6a | verb named; no owner file existed to cat (no lock dir, 03:03:43)
+f65fa1c6 | released/done-jest-b2192-gate-pair-87375-1795789047/owner cat -> tag=, pid=, cwd=, since=, cmd= lines (02:56); the shape the seat cats
+b0a1a4c4 | ls queue-jest | /usr/bin/grep -c '^[0-9]' -> 0 (03:03:43); control: [ -e queue-jest ] -> present (03:04:38)
+1fb1ac09 | ls queue-docker -> empty (02:52:38)
+1f4d2d17 | ls queue-jest | grep -c '^[0-9]' -> 0 (03:03:43); the five ticket-left-* names in released do not match ^[0-9] (control that the pattern filters names)
+85eeefa1 | pgrep -f -l '<pattern>' -> nothing rc 1 (03:00:41); control exec -a process found rc 0 (03:00:41); pgrep -f 'claud[e]' | wc -l -> 13
+32fe18cd | git -C session-tools rev-parse --show-toplevel -> fatal: not a git repository (02:52:38)
+c344d3fd | as 32fe18cd -> fatal: not a git repository
+a00cc6d6 | git -C 2_Project_Files rev-parse --show-toplevel -> /Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/2_Project_Files (02:52:38)
+5f19057c | gh api -X GET compare/fc5975f6...main --jq '[.status,.ahead_by,.behind_by]|@tsv' -> ahead 1 0 (02:53:29)
+50bbde6b | as 5f19057c -> status 'ahead'
+a81e2723 | GitHub compare status vocabulary (ahead|behind|identical|diverged); 'ahead' read at 02:53:29; identical not observed (UNMEASURED value, a named alternative)
+01dceb2e | shasum -a 256 session-tools/nexusai-lock.sh -> cf01bafbc51f555ca0f14d1711f01885bcec5bc6293b177fe24702226bb4971f (02:52:38)
+e137e981 | GH_CONFIG_DIR=<that path> gh api -X GET user --jq .login | /usr/bin/grep -c -i datasec -> 1 (02:53:29)
+5f430dfc | as e137e981 -> 1
+ab3fde49 | a glob named; zsh 'no matches found' measured on nexusai-*.lock* (03:03:43)
+fda2ee0c | a glob named; see ab3fde49
+9dc17d10 | a form named; no output
+058207de | standing hold copied from DRAFTER_RULES; no tool output
+ff96fb93 | standing hold copied from DRAFTER_RULES; no tool output
+59120687 | [ ! -e <LB>/slots-jest ] && echo slots-absent -> slots-absent (03:04:38)
+99f6e837 | [ -e <LB>/queue-jest ] && echo queue-jest-present -> queue-jest-present (03:04:38)
+8bf1f260 | as 99f6e837 -> present
+e54fd781 | grep -n -F 'STOP: not idle' install-b2202.sh -> lines 38, 40 (03:04:38); never printed in the dry run (PREDICTED wording from source)
+d83d28e7 | a file name the seat makes; nothing to match
+8e92ba89 | NEVER RUN (Jira write); see fba10576
+f0187cfb | python3 dot-part count over '/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/b2202-nodot/t' -> 0 (03:04:38; the path does not exist yet, computed on the string)
+ec84d27f | python3 split of the two paths -> t 0, .tools/b2202/clone 1 (03:04:38)
+43f2f1c4 | python3 dot-part count over '.../.tools/b2202/clone' -> 1 (03:04:38)
+097033d7 | /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tools/node-v24.22.2-darwin-arm64/bin/node -v -> v24.22.2 (02:59:31)
+a23ee5cf | as 097033d7 -> v24.22.2
+d5cec1b0 | stat -f '%Sp %u %g %i %z' session-tools/nexusai-lock.sh -> -rwxr-xr-x 501 20 2494992 18894 (02:52:38)
+465e63c2 | python3 -I -B jira2202.py search -> SEARCH2202 PASS 1=NEW 2=NEW 3=NEW 4=NEW (02:59:14)
+eb3e83ef | NOT RUN by the drafter (a write in the project); its source .tools/b2181/clone holds fc5975f6 (for-each-ref: refs/heads/b2175/rd490-portband fc5975f6..., 02:54)
+ab9eb92c | PREDICTED: worktree add --detach at fc5975f6 makes HEAD fc5975f6; not run by the drafter
+46c0e408 | git -C .tools/b2181/clone rev-parse 'fc5975f6^{tree}' -> e3bf2ca0ed22fefe2cae88b073915f8826511701 (02:54): the tree the worktree will hold
+93882fbe | gh api -X GET git/commits/e98b6fd9 --jq .tree.sha -> e3bf2ca0ed22fefe2cae88b073915f8826511701 (02:54)
+4a8f6dc6 | /usr/bin/grep -c -E '^[[:space:]]+test\(' rd977.js (blob at fc5975f6) -> 3 (02:59:31)
+345c1766 | named as Tuesday's default answer only; not run
+cebd98a1 | [ ! -e <LB>/slots-jest ] && echo slots-absent -> slots-absent (03:04:38)
+9aba014e | the OUT path of install-b2202.sh line 17 (diff, 02:57); the dry run's equivalent install-dry.txt exists
+c6c4d2e2 | N186 dry log install-dry.txt line 2 -> 'control: cp -n left the existing file alone' (real run of the same code, install-b2202.sh line 26)
+f1b10b59 | N186 dry log lines 3-4 -> 'idle read 1 23:53:45: lock dirs=0 jest tickets=0 docker tickets=0' (real run; source line 34)
+00abf4af | shasum -a 256 .tools/b2175/lock/nexusai-lock.sh.candidate -> 52713e55345726abc769c4601cc52daf5b5496eab96b346ebacaada300356260 (02:52:38)
+8d471aea | bash -n install-b2202.sh rc 0 (02:57); the live file's bash -n after install: PREDICTED (the dry run's read-back passed, install-dry.txt 'INSTALLED OK')
+88776550 | /bin/bash -n install-b2202.sh rc 0 (02:57); on the live file after install: PREDICTED
+28f69852 | grep -n -F 'STOPPED: read-back red, rolled back' install-b2202.sh -> line 80 (03:04:38); never printed (PREDICTED wording from source)
+c357e2ec | a log name the seat makes; nothing to match
+707b5a1b | real logs: .tools/b2181/logs/v-plain.out holds '[nexusai-lock] jest lock acquired by b2181-verify-plain after 0s' (03:04); candidate line 486 prints the same form
+eb570551 | released/done-jest-b2192-gate-pair-87375-1795789047/owner exists (the naming form, live script line 287, candidate line 393); the smoke record itself PREDICTED
+f1746ec3 | candidate line 484 printf 'tag=%s ... slot=%s\nwslot=%s\n' (grep -c -F 'slot=%s' cand -> 1, live -> 0); PREDICTED slot=1 with slots-jest absent (install-steps step 6)
+0d6eaacc | [ -e <NexusAI root>/__tests__/helpers/test-server.js ] -> no (root-no-helper); control b2181-nodot/mz has it (03:03:43); candidate lines 129-139 -> unknown; PREDICTED
+a0cd448e | runjest-b2202.sh line 7 O=.../logs/jest-proof.out (frozen file); not run
+0f879613 | as 707b5a1b: the rendered form read in v-plain.out and pair-m2.out; PREDICTED for this tag
+76f01082 | naming form as eb570551; PREDICTED
+b4a6880a | as f1746ec3; PREDICTED
+3dea2536 | as 0d6eaacc; PREDICTED
+dc9f4544 | candidate line 484 prints cmd=%s with "$*" (grep -c -F 'cmd=%s' cand -> 1); the gate-pair owner shows 'cmd=bash .../pair2175.sh ...' (real)
+afcdafbb | proof2202.sh: grep -c -F 'PROOF2202 $L PASS' -> 1; 9 ck lines (grep -c -F 'ck "' -> 9); NEVER RUN on a real output (marked in the kit)
+52cd6255 | proof2202.sh ck lines (9); the waiting line form read in g2192/logs/mut.out: 'waiting for jest lock (queue position 1 of 1), held by: tag=b2192-gate-verify' (real, old script)
+45a9c038 | jira2202.py source line 167 prints 'HELD %d %s ...'; NEVER RUN
+5f901ec4 | search mode prints '<n>=HELD:<keys>' or '<n>=NEW' (line 157 and the states list); 'NEW' read for all four at 02:59:14
+4d797dcd | the re-search rule; no output to match beyond 'NEW' (read at 02:59:14)
+c674619f | ls released | /usr/bin/grep -c -E '^done-jest-(b2192-install-smoke|b2202-)' -> 0 at drafting (03:03:43); control ls released | grep -c -E '^done-jest-b2192-gate' -> 3
+8cac3f55 | as c674619f -> 0 before; PREDICTED 6 after
+b5fdd5bc | the STATUS section name copied from kit B2181 line 130; not a tool output
+16637d43 | ls tuesday/briefs | grep -i -E 'SEAT-N188' -> this kit and its .measured (after writing, 03:05)
+51d06776 | echo "${NEXUSAI_WORKTREE_SLOT:-unset}" in the drafter's shell -> unset (03:06); the seat's shell is read at its own Step 4
+7344e5ef | as 51d06776 -> unset
+0c30fa30 | as 51d06776 -> unset
