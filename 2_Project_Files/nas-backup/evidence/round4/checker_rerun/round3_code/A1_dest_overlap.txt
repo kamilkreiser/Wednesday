@@ -1,0 +1,23 @@
+Fri 27 Nov 2026 22:03:11 AEDT
+22:03  up 12:10, 2 users, load averages: 17.26 15.65 10.17
+== A1 nested destination names, same client
+night1 rc=0 GOOD lines=1 COMPLETE markers=1
+  refused? 
+  destination current/WEDNESDAY/docs/readme.txt holds: INNER-SET-CONTENT (another folder, same file name)!!
+  source of set WEDNESDAY for that path holds:       OUTER-SET-CONTENT of docs/readme (from the seat tree)
+  cmp outer source vs destination: DIFFERENT
+  state last_attempt.status=good  undelivered=None
+  copies of the outer content anywhere on the fake NAS: General/Wednesday/nightly-backup/versions/2026-12-01_010000_48702/WEDNESDAY/docs/readme.txt
+night2 rc=0 GOOD lines=1; to-copy lines:     to copy: 1 files, 54 B (0 new, 1 changed -> previous cop|    to copy: 1 files, 53 B (0 new, 1 changed -> previous cop|
+  after night 2 destination holds: INNER-SET-CONTENT (another folder, same file name)!!; sample line: 
+night3 rc=0 GOOD lines=1; destination holds: INNER-SET-CONTENT (another folder, same file name)!!
+CONTROL (same two sets, the inner one named apart: General|Docs2): 
+  rc=0 GOOD=1 outer cmp: SAME
+== A2 same destination name under two clients: allow_empty and the fall baseline are keyed by the name alone
+night1 rc=0 GOOD=1  refused: 
+  baseline recorded: {'Proj': 1, 'WEDNESDAY': 2}
+night2 (General/Proj fell 12 -> 2) rc=0 GOOD=1  fell-line: 
+night3 (allow_empty=Proj meant for one; General/Proj now EMPTY) rc=0 GOOD=1 empty-lines: 1
+Fri 27 Nov 2026 22:03:13 AEDT
+22:03  up 12:10, 2 users, load averages: 17.08 15.64 10.19
+script exit 0

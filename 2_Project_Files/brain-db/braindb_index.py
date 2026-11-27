@@ -185,7 +185,8 @@ class Unsafe(Exception):
 def open_checked(dirfd, name):
     """Open `name` inside the already-open directory WITHOUT following a symlink, then judge the file by
     fstat on the descriptor the bytes will be read from (N6): the thing judged is the thing read, so a file
-    swapped for a symlink between a test and an open cannot get through. -> raw bytes, or raises Unsafe/OSError."""
+    swapped for a symlink between a test and an open cannot get through.
+    -> (raw bytes, the fstat taken BEFORE the first byte was read), or raises Unsafe/OSError."""
     try:
         fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | getattr(os, "O_CLOEXEC", 0), dir_fd=dirfd)
     except OSError as e:
@@ -205,15 +206,92 @@ def open_checked(dirfd, name):
             if not b:
                 break
             chunks.append(b)
-        return b"".join(chunks)
+        return b"".join(chunks), st
     finally:
         os.close(fd)
 
 
-def enumerate_files(root, sc):
-    """-> ({rel: (kind, raw bytes)}, [(rel, reason)]) for every allow-list match; the second list is what
-    was skipped. Each file is read here, once, through open_checked(): nothing is opened by name later."""
-    out, skipped = {}, []
+# ---- ROUND 5 (F1): ONE SNAPSHOT. A rebuild pairs each lesson's text with its rules-index row. The files are
+# read one after another, so without a check the text of one moment could be paired with the row of a later
+# one (the third checker's F1: text scoped to another seat at every instant it existed, indexed under a row
+# that came later). After every file is read: (1) the rules index is read AGAIN and must hash the same, then
+# (2) every lesson is stat-ed AGAIN, by name, inside the folder descriptor it was read through, and must still
+# be the same version of the same file as the fstat taken when it was read. THE ORDER IS PART OF THE PROOF:
+# all reads come before step 1 and step 1 before step 2, so at the instant the index was re-read every lesson
+# was (by 2) still the version that was read and the index (by 1) held the bytes that were read: one instant
+# at which the tree looked exactly like what is about to be indexed. Anything else is read again, at most
+# SNAPSHOT_TRIES times, and then REFUSED with nothing changed.
+SNAPSHOT_TRIES = 3
+VALIDATE_ORDER = ("rules_index", "lesson")
+
+
+def stamp(st):
+    """One version of one file: device, inode, size, modification time and change time (nanoseconds). A file
+    replaced by another has another inode; one rewritten in place has another change time, which no program
+    can set back."""
+    return (st.st_dev, st.st_ino, st.st_size, st.st_mtime_ns, st.st_ctime_ns)
+
+
+def test_hold(tag):
+    """TESTS ONLY (BRAINDB_TEST_READ_HOLD=<directory>): pause at a named point of the read, so a test can
+    change the tree at exactly that point. A pause is taken only when the test has put a file `at-<tag>` in
+    that directory; the tool then writes `waiting-<tag>` and waits (at most 60 s) for `go-<tag>`."""
+    d = os.environ.get("BRAINDB_TEST_READ_HOLD")
+    if not d or not os.path.exists(os.path.join(d, "at-" + tag)):
+        return
+    open(os.path.join(d, "waiting-" + tag), "w").close()
+    t = time.time()
+    while not os.path.exists(os.path.join(d, "go-" + tag)) and time.time() - t < 60:
+        time.sleep(0.05)
+
+
+def snapshot_moved(out, held, attempt):
+    """-> [rel] of every file that is no longer what was read (see ONE SNAPSHOT above). `held` is
+    {rel: (folder descriptor it was read through, name, fstat taken at the read)}."""
+    moved = []
+    test_hold("%d-VALIDATE" % attempt)
+    for i, kind in enumerate(VALIDATE_ORDER):
+        if i:
+            test_hold("%d-MIDVALIDATE" % attempt)
+        for rel in sorted(out):
+            if out[rel][0] != kind:
+                continue
+            dirfd, name, st = held[rel]
+            if kind == "rules_index":
+                try:
+                    again = hashlib.sha256(open_checked(dirfd, name)[0]).digest()
+                except (Unsafe, OSError):
+                    again = None
+                if again != hashlib.sha256(out[rel][1]).digest():
+                    moved.append(rel)
+            else:
+                try:
+                    now = stamp(os.stat(name, dir_fd=dirfd, follow_symlinks=False))
+                except OSError:
+                    now = None
+                if now != stamp(st):
+                    moved.append(rel)
+    return moved
+
+
+def enumerate_files(root, sc, attempt=1):
+    """-> ({rel: (kind, raw bytes)}, [(rel, reason)] skipped, [rel] moved while it was read). The folder
+    descriptors stay open until the snapshot has been validated, then are closed here."""
+    keep = []
+    try:
+        out, skipped, held = read_allowed(root, sc, attempt, keep)
+        moved = snapshot_moved(out, held, attempt)
+    finally:
+        for fd in keep:
+            os.close(fd)
+    return out, skipped, moved
+
+
+def read_allowed(root, sc, attempt, keep):
+    """-> ({rel: (kind, raw bytes)}, [(rel, reason)], held) for every allow-list match; the second list is what
+    was skipped. Each file is read here, once, through open_checked(): nothing is opened by name later.
+    `held` and `keep` are for snapshot_moved(): the stat of each file read, and a descriptor of each folder."""
+    out, skipped, held = {}, [], {}
     rroot = os.path.realpath(root)
     for kind, glob_ in sc["allow"]:
         d, pat = os.path.split(glob_)
@@ -229,6 +307,7 @@ def enumerate_files(root, sc):
             skipped.append((d + "/", "unreadable: %s" % type(e).__name__))
             continue
         try:
+            keep.append(os.dup(dirfd))               # the SAME open folder, kept for the snapshot validation
             try:
                 names = sorted(os.listdir(dirfd))
             except OSError as e:
@@ -260,14 +339,17 @@ def enumerate_files(root, sc):
                     skipped.append((rel, "another seat's records ('%s' in the folder name)" % hit))
                     continue
                 try:
-                    out[rel] = (kind, open_checked(dirfd, name))
+                    raw, st = open_checked(dirfd, name)
+                    out[rel] = (kind, raw)
+                    held[rel] = (keep[-1], name, st)
+                    test_hold("%d-%s" % (attempt, name))
                 except Unsafe as e:
                     skipped.append((rel, str(e)))
                 except OSError as e:
                     skipped.append((rel, "unreadable: %s" % type(e).__name__))
         finally:
             os.close(dirfd)
-    return out, skipped
+    return out, skipped, held
 
 
 # ---------------------------------------------------------------- ROUND 4: QUALIFY OR STAY OUT
@@ -669,8 +751,40 @@ def scan(root, sc, want_text):
     """Walk the allow-list. -> dict(files={rel: dict(kind, sha, bytes, text)}, skipped=[(rel, reason)] for
     non-lesson files and folders, left_out=[(rel, clause, why)] for LESSON files, idx=the parsed rules index,
     rules={lesson file name: [its rows that name this seat]}, orphan_rows, other_seat_rows).
-    rebuild and check both go through here, so they agree."""
-    listed, skipped0 = enumerate_files(root, sc)
+    rebuild and check both go through here, so they agree. ROUND 5 (F1): what is judged is ONE SNAPSHOT of
+    the tree (see snapshot_moved); a tree that moves under the read is read again, then refused (rc 5)."""
+    for attempt in range(1, SNAPSHOT_TRIES + 1):
+        listed, skipped0, moved = enumerate_files(root, sc, attempt)
+        if not moved:
+            return judge_snapshot(root, sc, want_text, listed, skipped0)
+        print("braindb: the tree changed while it was read (try %d of %d; moved: %s%s)%s"
+              % (attempt, SNAPSHOT_TRIES, ", ".join(moved[:5]), ", +%d more" % (len(moved) - 5) if len(moved) > 5 else "",
+                 "; reading it again" if attempt < SNAPSHOT_TRIES else ""), file=sys.stderr)
+    die("REFUSED: the tree changed while it was read; nothing was changed in the index. %d tries, each found a lesson or the rules index replaced or rewritten between its read and the check that follows every read. Run the command again when the files are still." % SNAPSHOT_TRIES, 5)
+
+
+def fault_class(why):
+    """F2: 'U' when a skip is an unreadable file or folder, 'L' when it is not a plain file (a symlink, a hard
+    link, not a regular file, a folder that is or sits under a symlink), None when it is a naming rule at work."""
+    if why.startswith("unreadable"):
+        return "U"
+    if why.startswith(("symlink", "hard link", "not a regular", "directory is")):
+        return "L"
+    return None
+
+
+def gap_line(u, l, c, f):
+    """F2: the ONE line of counts of files that matched the allow-list and are not (wholly) in the index FOR A
+    FAULT. Two numbers on it: the files that are not lessons, and (round 5b) the LESSON files that are unreadable
+    or not a plain file, which are also named under clause (f) of the left-out list. Either one above 0 is a gap.
+    A lesson left out by clauses (a) to (d) or (t) is the rule at work and is in neither. c is None when it
+    cannot be known (no index to ask how many files had a row cut)."""
+    return ("%d other file(s) matched the allow-list and are NOT indexed (unreadable %d, not a plain file %d, cut %s), "
+            "and %d lesson file(s) unreadable or not a plain file") % (
+        u + l + (c or 0), u, l, "not known without the index" if c is None else "%d" % c, f)
+
+
+def judge_snapshot(root, sc, want_text, listed, skipped0):
     lesson_dir = SHARED_DIRS["lesson"] + "/"
     skipped, left_out = [], []
     for rel, why in skipped0:
@@ -713,6 +827,9 @@ def scan(root, sc, want_text):
     kept = sum(len(v) for v in rules.values())
     return dict(files=files, skipped=skipped, left_out=sorted(left_out), idx=idx, rules=rules, orphan_rows=orphan,
                 unreadable=[rel for rel, why in skipped0 if why.startswith("unreadable")],
+                gap_u=sum(1 for _, why in skipped if fault_class(why) == "U"),
+                gap_l=sum(1 for _, why in skipped if fault_class(why) == "L"),
+                gap_f=sum(1 for _, clause, _ in left_out if clause == "f"),      # 5b: lessons that could not be read as plain files
                 rows_not_joined=len(idx["rows"]) - kept)
 
 
@@ -785,6 +902,7 @@ DO $bdb$ BEGIN
 END $bdb$;
 """
 WRONG = re.compile(r"BRAINDB_WRONG_CLUSTER got=\[(.*?)\] want=\[")
+DOWN_SUFFIX = ""       # check sets it: the count of files not indexed goes on its "not answering" line too (F2)
 
 
 def judge_psql(rc, err, on_down="die"):
@@ -798,7 +916,7 @@ def judge_psql(rc, err, on_down="die"):
             % (env("BRAINDB_SOCKDIR_EFF"), m.group(1), want_dd()), 4)
     if rc == 2 and not re.search(r'database "[^"]*" does not exist', err):
         if on_down == "die":
-            die("the index server is not answering on %s (run: braindb.sh start)" % env("BRAINDB_SOCKDIR_EFF"), 3)
+            die("the index server is not answering on %s (run: braindb.sh start)%s" % (env("BRAINDB_SOCKDIR_EFF"), DOWN_SUFFIX), 3)
         return "down"
     return "ok"
 
@@ -826,7 +944,7 @@ def need_server():
     It is NOT what protects the work: every later session carries the assertion itself."""
     rc, rows = query("select 1", db="postgres")
     if rc != 0 or rows != [["1"]]:
-        die("the index server is not answering on %s (run: braindb.sh start)" % env("BRAINDB_SOCKDIR_EFF"), 3)
+        die("the index server is not answering on %s (run: braindb.sh start)%s" % (env("BRAINDB_SOCKDIR_EFF"), DOWN_SUFFIX), 3)
 
 
 def index_present():
@@ -1056,6 +1174,7 @@ def cmd_rebuild(a, root, sc, seat, lock_held=False):
         if rc != 0:
             die("cannot create database braindb", 1)
     idx_sha, scope_sha = self_hashes(sc)
+    cut_files = len(set(rel for rel, _, _, _ in truncated))        # F2: files with at least one row cut
     kinds = {}
     for (_, _, kind, *_rest) in T["chunks"]:
         kinds[kind] = kinds.get(kind, 0) + 1
@@ -1065,7 +1184,8 @@ def cmd_rebuild(a, root, sc, seat, lock_held=False):
     meta = [("seat", seat), ("root", root), ("built_at", datetime.datetime.now().astimezone().isoformat(timespec="seconds")),
             ("indexer_sha256", idx_sha), ("scope_sha256", scope_sha),
             ("counts", json.dumps(dict(files=fkinds, search_rows=kinds, rules=len(T["rules"])))),
-            ("faults", json.dumps(dict(unreadable=len(sc_res["unreadable"]), truncated=len(truncated)))),
+            ("faults", json.dumps(dict(unreadable=len(sc_res["unreadable"]), truncated=len(truncated),
+                                       other_unreadable=sc_res["gap_u"], not_plain=sc_res["gap_l"], cut_files=cut_files))),
             ("left_out", json.dumps(dict(total=len(sc_res["left_out"]), by_clause=left_out_counts(sc_res))))]
     hold = os.environ.get("BRAINDB_TEST_HOLD")       # tests only: pause here, after every separate session and
     if hold:                                         # before the load session opens, until the named file exists
@@ -1129,7 +1249,7 @@ def cmd_rebuild(a, root, sc, seat, lock_held=False):
         print("  matched an allow line but NOT indexed (files that are not lessons): %d" % len(sc_res["skipped"]))
         for key in sorted(reasons):
             items = reasons[key]
-            full = key.startswith(("unreadable", "hard link", "symlink", "not a regular", "directory is"))
+            full = fault_class(key) is not None
             show = items if full else items[:4]
             print("    %3d  %s%s" % (len(items), key.strip(), "" if full else "  (%s%s)" % (
                 ", ".join(os.path.basename(x.rstrip("/")) or x for x, _ in show), ", ..." if len(items) > 4 else "")))
@@ -1149,10 +1269,11 @@ def cmd_rebuild(a, root, sc, seat, lock_held=False):
     print("  time: %.2f s (read and parse %.2f s, load and index %.2f s)" % (dt, t_parse, dt - t_parse))
     nu, nt = len(sc_res["unreadable"]), len(truncated)
     tail = left_out_line(sc_res)
-    if nu or nt:
-        print("rebuild: DONE WITH FAULTS: %d unreadable file(s) skipped, %d row(s) truncated; they are listed above; %s" % (nu, nt, tail))
+    gaps = gap_line(sc_res["gap_u"], sc_res["gap_l"], cut_files, sc_res["gap_f"])
+    if nu or nt or sc_res["gap_u"] + sc_res["gap_l"] + cut_files + sc_res["gap_f"]:
+        print("rebuild: DONE WITH FAULTS: %d unreadable file(s) skipped, %d row(s) truncated; they are listed above; %s; %s" % (nu, nt, gaps, tail))
     else:
-        print("rebuild: done; no file was unreadable and no row was truncated; %s" % tail)
+        print("rebuild: done; no file was unreadable and no row was truncated; %s; %s" % (gaps, tail))
     if lock_fd is not None:
         os.close(lock_fd)
     return 0
@@ -1160,17 +1281,27 @@ def cmd_rebuild(a, root, sc, seat, lock_held=False):
 
 # ---------------------------------------------------------------- check
 
+CHECK_GAPS_RC = 6      # check: the index matches every file that could be read, but files are missing from it or cut
+
+
 def cmd_check(a, root, sc, seat):
+    # ROUND 5 (F2): the files are read FIRST (that needs no server), so the count of files that matched the
+    # allow-list and are not indexed is on the first line of every answer check gives, the "server is not
+    # answering" one included (doctor reads it there).
+    res = scan(root, sc, want_text=False)
+    gap_u, gap_l, gap_f = res["gap_u"], res["gap_l"], res["gap_f"]
+    global DOWN_SUFFIX
+    DOWN_SUFFIX = "; " + gap_line(gap_u, gap_l, None, gap_f)
     need_server()
     where = "  data directory: %s" % env("BRAINDB_PGDATA_EFF")
     rc, rows = query("select 1 from pg_database where datname = 'braindb'", db="postgres")
     if rc != 0 or not rows:
-        print("check: RED, no index database yet (run: braindb.sh rebuild)")
+        print("check: RED, no index database yet (run: braindb.sh rebuild); %s" % gap_line(gap_u, gap_l, None, gap_f))
         print(where)
         return 1
     rc, rows = query("select to_regclass('brain.files') is not null and to_regclass('brain.meta') is not null")
     if rc != 0 or rows != [["t"]]:
-        print("check: RED, the index schema is missing (run: braindb.sh rebuild)")
+        print("check: RED, the index schema is missing (run: braindb.sh rebuild); %s" % gap_line(gap_u, gap_l, None, gap_f))
         print(where)
         return 1
     rc, rows = query("select path, sha256 from brain.files")
@@ -1179,7 +1310,6 @@ def cmd_check(a, root, sc, seat):
     have = dict((r[0], r[1]) for r in rows)
     rc, mrows = query("select k, v from brain.meta")
     meta = dict((r[0], r[1]) for r in mrows) if rc == 0 else {}
-    res = scan(root, sc, want_text=False)
     disk = dict((rel, f["sha"]) for rel, f in res["files"].items())
     diffs = []
     for rel in sorted(set(disk) | set(have)):
@@ -1203,6 +1333,15 @@ def cmd_check(a, root, sc, seat):
         last = json.loads(meta.get("faults") or "{}")
     except ValueError:
         last = {}
+    if not isinstance(last, dict):
+        last = {}
+    # F2: unreadable and not-a-plain-file are counted on disk NOW; "cut" is what the last rebuild stored (when
+    # every file on disk matches the index and the indexer is unchanged, that is exactly what a rebuild now would cut)
+    gap_c = last.get("cut_files") if isinstance(last.get("cut_files"), int) else None
+    if gap_c is None and have:
+        stale.append("the index does not say how many files it cut (it was built by an older braindb_index.py)")
+    gaps = gap_line(gap_u, gap_l, gap_c, gap_f)
+    n_gaps = gap_u + gap_l + (gap_c or 0) + gap_f
     faults = "  skipped for a fault: %d file(s) unreadable on disk now; at the last rebuild %s unreadable, %s row(s) truncated" % (
         len(res["unreadable"]), last.get("unreadable", "?"), last.get("truncated", "?"))
     def tail_lines():
@@ -1215,12 +1354,25 @@ def cmd_check(a, root, sc, seat):
         if res["idx"]["rejected"]:
             print("  rules index: %d line(s) could not be read as a row (line %s)" % (
                 len(res["idx"]["rejected"]), ", ".join(str(ln) for ln, _ in res["idx"]["rejected"][:20])))
+    if not diffs and not stale and n_gaps:
+        print("check: AMBER, the %d files that could be read match the index (built %s), BUT %s. They are listed below; "
+              "put the files right, then rebuild." % (len(disk), meta.get("built_at", "?"), gaps))
+        for rel, why in res["skipped"]:
+            if fault_class(why):
+                print("  NOT indexed: %s  [%s]" % (rel, why))
+        for rel, clause, why in res["left_out"]:
+            if clause == "f":
+                print("  NOT indexed: %s  [%s]  (a lesson; clause f)" % (rel, why))
+        if gap_c:
+            print("  cut: %d file(s) had a row cut at its size limit at the last rebuild (braindb.sh rebuild names each row)" % gap_c)
+        tail_lines()
+        return CHECK_GAPS_RC
     if not diffs and not stale:
-        print("check: GREEN, %d files on disk match the index (built %s)" % (len(disk), meta.get("built_at", "?")))
+        print("check: GREEN, %d files on disk match the index (built %s); %s" % (len(disk), meta.get("built_at", "?"), gaps))
         tail_lines()
         return 0
-    print("check: RED, %d path(s) differ%s (run: braindb.sh rebuild)"
-          % (len(diffs), "; " + "; ".join(stale) if stale else ""))
+    print("check: RED, %d path(s) differ%s (run: braindb.sh rebuild); %s"
+          % (len(diffs), "; " + "; ".join(stale) if stale else "", gaps))
     for d in diffs[:20]:
         print("  " + d)
     if len(diffs) > 20:

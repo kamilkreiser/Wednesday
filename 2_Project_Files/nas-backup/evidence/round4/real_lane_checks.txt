@@ -1,0 +1,40 @@
+2026-11-27 22:36:20 AEDT
+## the three HOLD files
+-rw-r--r--  1 kamil  staff  465 27 Nov 12:25 /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/nas-backup/HOLD_friday
+-rw-r--r--  1 kamil  staff  468 27 Nov 12:25 /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/nas-backup/HOLD_tuesday
+-rw-r--r--  1 kamil  staff  474 27 Nov 12:25 /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/nas-backup/HOLD_wednesday
+## watch
+nas-backup watch[wednesday]: HELD: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/nas-backup/HOLD_wednesday exists, so real runs are refused by design and the three-day flag is not raised; no good backup on record
+rc=0
+## nightly --decide-only
+nightly[wednesday]: HELD: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/nas-backup/HOLD_wednesday exists; nothing run
+rc=3
+## --run (must refuse: HELD, exit 3; the hold is tested before the conf is read)
+=== nas-backup seat=wednesday mode=RUN 2026-11-27 22:36:20 AEDT ===
+REFUSED — /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/nas-backup/HOLD_wednesday exists: real runs are HELD (arming is the coordinator's word on Kam's instruction); --dry is still allowed; nothing run
+rc=3
+## the state file after that refusal: last attempt status, first_attempt_at, held_seen, recent statuses
+held 1795751178.312686 True ['held', 'held', 'refused', 'refused'] last_good: None
+## not armed
+nasbackup rows in launchctl list: 0 (control, naspush rows: 1)
+nasbackup plists in ~/Library/LaunchAgents: 0 (control, naspush: 1)
+nasbackup templates in scheduler/jobs: 0 (control, naspush: 1)
+## DEV-Working: nothing of this tool on the share (read-only listing)
+/Volumes/DEV-Working/General/Wednesday ['2026-11-11_workflow-selftest'] nightly-backup present: False | is a symlink: False
+/Volumes/DEV-Working/Secuura ['Blockchain'] nightly-backup present: False | is a symlink: False
+ls -ld first letter of /Volumes/DEV-Working/General : d
+ls -ld first letter of /Volumes/DEV-Working/General/Wednesday : d
+ls -ld first letter of /Volumes/DEV-Working/Secuura : d
+Secuura/Wednesday exists: False
+## the real conf: nested or repeated destination names (the third checker's Z2 question, asked of the conf by the tool's own rule)
+sets: 15 ; nested pairs within one client: 0 ; one name under two clients: 0 ; nested pairs ACROSS two clients (accepted): 1 [('CODING/Testing Agent MAIN', 'CODING/Testing Agent MAIN/projects/secuura')]
+## git: this seat staged or committed nothing (read-only status of the lane)
+ M 2_Project_Files/nas-backup/README.md
+ M 2_Project_Files/nas-backup/STATUS.md
+ M 2_Project_Files/nas-backup/nb_core.py
+ M 2_Project_Files/nas-backup/tests/mutants.sh
+ M 2_Project_Files/nas-backup/tests/run.sh
+?? 2_Project_Files/nas-backup/RESULT-quarantine-erase.md
+?? 2_Project_Files/nas-backup/evidence/quarantine-erase/
+?? 2_Project_Files/nas-backup/evidence/round4/
+?? 2_Project_Files/nas-backup/round3/

@@ -1,0 +1,45 @@
+Fri 27 Nov 2026 22:03:33 AEDT
+22:03  up 12:11, 2 users, load averages: 17.18 15.74 10.36
+== a. a signal AFTER the accounting (fault injection, scripts/A5_inject.py)
+  SIGTERM at 'manifest': rc=130 traceback lines=1 GOOD line=0 lock=released state.last_attempt=running last_good=None COMPLETE on NAS=0
+     watch then says: nas-backup watch[wednesday]: ok; 1.0 h since the first attempt on record (no good backup yet) (2026-12-01 01:00:00 AEDT); last attempt 2026-12-01 01:00 running
+     next run: rc=0 GOOD=1
+  SIGHUP at 'manifest': rc=130 traceback lines=1 GOOD line=0 lock=released state.last_attempt=running last_good=None COMPLETE on NAS=0
+     watch then says: nas-backup watch[wednesday]: ok; 1.0 h since the first attempt on record (no good backup yet) (2026-12-01 01:00:00 AEDT); last attempt 2026-12-01 01:00 running
+     next run: rc=0 GOOD=1
+  SIGTERM at 'after_complete': rc=130 traceback lines=1 GOOD line=1 lock=released state.last_attempt=running last_good=None COMPLETE on NAS=1
+     watch then says: nas-backup watch[wednesday]: ok; 1.0 h since the first attempt on record (no good backup yet) (2026-12-01 01:00:00 AEDT); last attempt 2026-12-01 01:00 running
+     next run: rc=0 GOOD=1
+  SIGHUP at 'after_complete': rc=130 traceback lines=1 GOOD line=1 lock=released state.last_attempt=running last_good=None COMPLETE on NAS=1
+     watch then says: nas-backup watch[wednesday]: ok; 1.0 h since the first attempt on record (no good backup yet) (2026-12-01 01:00:00 AEDT); last attempt 2026-12-01 01:00 running
+     next run: rc=0 GOOD=1
+== b. things that are not Refused: unwritable state folder, state file that is a folder, lock folder cannot be made
+  state file is a FOLDER: run rc=0 traceback=0 lock=released; first line: STATE FILE DAMAGED: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/15609ed4-7998-4256-a61d-5f55d5689085/scratchpad/qa3fx_r3/220333_58160/st_dir/
+    watch rc=5 traceback=0
+  damaged state in a READ-ONLY state folder: run rc=1 traceback=2 last line: PermissionError: [Errno 13] Permission denied: '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/15609ed4-7998-4256-a61d-5f55d
+    watch rc=1 traceback=2 last line: PermissionError: [Errno 13] Permission denied: '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/15609ed4-7998-4256-a61d-5f55d
+    nightly rc=1 traceback=2
+  the lock path is a FILE: run rc=6 traceback=0; line: REFUSED — STALE lock at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/15609ed4-7998-4256-a61d-5f55d5689085/scratchpad/qa3fx_r3/220333_58160/loc
+  the index path is a FOLDER: run rc=0 traceback=0 GOOD=1 lock=released notice=yes
+  night0 rc=0
+  a healthy index LOCKED by another reader for 14 s: run rc=0 GOOD=1 traceback=0; INDEX DAMAGED: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/15609ed4-7998-4256-a61d-5f55d5689085/scratchpad/qa3fx_r3/220333_58160/idx_locked/l
+     healthy index quarantined as damaged: 1 ; damage notice written: yes
+== c. every caller finding a damaged state; the notice until --ack-damage; a dry run moves nothing
+  found by nightly: rc=0 traceback=0 notice lines=1 moved aside=1 ; the watch afterwards rc=5
+  found by watch: rc=5 traceback=0 notice lines=1 moved aside=1 ; the watch afterwards rc=5
+  found by run: rc=0 traceback=0 notice lines=1 moved aside=1 ; the watch afterwards rc=5
+  found by dry: rc=0 traceback=0 notice lines=0 moved aside=1 ; the watch afterwards rc=5
+== d. the HOLD: does anything run or reach the NAS under it; what is recorded when the conf is ALSO refused under the hold
+  --run -> rc=3;   --run --out-of-sequence card-abcdef -> rc=3;   --run --accept-shrink card-abcdef -> rc=3;   --run --max-seconds 9 -> rc=3; 
+  nightly -> rc=3 ; fake NAS unchanged: yes ; engine processes started: 0
+  state after held runs: last_attempt=held first_attempt_at=None held_seen=True
+  a --run under the hold with an UNCONFIRMED conf: rc=2 recorded as refused; first_attempt_at=1796050800.0 (None = clock not started)
+  hold lifted four days later, first check: rc=3 nas-backup watch[wednesday]: OVERDUE; 103.0 h since the hold was lifted (the clock does not run while real runs are held) (2026-12-01 02:00:00 AEDT); 
+  a HOLD file spelled in another case (hold_wednesday) on this case-folding scratch volume:
+    rc=3 (3 = held)
+== e. mount: another share mounted at the NAS path; the share leaves mid-chunk
+  another share's name on the mount line: rc=0 GOOD=1
+  share leaves the table during chunk 2 of 4: rc=2 GOOD=0 engine calls=2 index rows=8;   - REFUSED — /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/15609ed4-7998-4256-a61d-5f55d5689085/scratchpad/qa3fx
+Fri 27 Nov 2026 22:04:00 AEDT
+22:04  up 12:11, 2 users, load averages: 18.92 16.36 10.74
+script exit 0

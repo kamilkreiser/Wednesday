@@ -79,14 +79,16 @@ mkdir -p "<your session scratchpad>"
 /bin/bash "<tree>/2_Project_Files/brain-db/tests/run.sh" "<your session scratchpad>"
 ```
 
-Expected last line: `RESULT: 483 passed, 0 failed`. The result no longer depends on which scope files your tree has adopted. Any failure: stop and report it with the run directory the last line names. It takes under a minute.
+Expected last line: `RESULT: 869 passed, 0 failed` (round 5b; the figure 483 that stood here was round 3's). The result no longer depends on which scope files your tree has adopted. Any failure: stop and report it with the run directory the last line names. It takes about two minutes (100 to 130 s measured).
 
 **3. Build:**
 
 ```
 B up          # creates pgdata-<seat>/ on the drive if missing, starts the server, rebuilds if check is red
 B rebuild     # run it once by hand as well, to read its report
-B check       # must print GREEN, and names the data directory it is reporting on
+B check       # must print GREEN, and names the data directory it is reporting on. AMBER (exit code 6, round 5) means the
+              # index is current but files that matched your allow-list are unreadable, not plain files, or were cut:
+              # its first line counts them and the next lines name them. Put them right, then rebuild.
 ```
 
 **4. Read the `rebuild` report before trusting the index.** It lists every lesson that was LEFT OUT, by name, under the clause it failed; every other file that matched an allow line and was not indexed, with the reason; every rules-index line that could not be read; and anything unreadable or cut. Its LAST line gives the count left out by each clause, and `check` and `doctor` print the same count afterwards, so a lesson that drops out later is visible without re-reading this report. If a lesson you expected is in the left-out list, the list tells you which clause to look at in the lesson file or the rules index.
@@ -133,6 +135,8 @@ B stop                              # at the end of the session, and before ejec
 | `REFUSED: the server answering on socket directory ... serves data directory 'A', but this command is addressed to 'B'` (exit code 4) | another cluster is running on your seat's socket directory, for example a second copy of your tree on another drive | stop that one with ITS OWN `braindb.sh stop`, or run this one with `BRAINDB_SOCKDIR=<another short private directory>` on every call |
 | `REFUSED: lessons are on the allow-list but the rules index ... cannot be used` | `_rules_index.tsv` is missing, is not a plain regular file, is not UTF-8, or has no row that could be read | restore the rules index; without it no lesson qualifies |
 | `REFUSED, for seat '<seat>' kind '<kind>' is indexed only from ...` (exit code 2) | a line in your scope file asks for something outside the code's table for your seat | remove the line; nothing was created or started |
+| `REFUSED: the tree changed while it was read; nothing was changed in the index` (exit code 5, round 5) | a lesson or the rules index was replaced or rewritten while `rebuild` or `check` was reading the tree, three times running (a sync, a checkout or an editor saving) | run the command again when the files are still; the index is exactly as it was |
+| `check: AMBER, ... BUT N other file(s) matched the allow-list and are NOT indexed (unreadable U, not a plain file L, cut C)` (exit code 6, round 5); `doctor` says `WARN ... it has GAPS` | a file or folder on your allow-list (a lesson included: the line's second number, `and K lesson file(s) unreadable or not a plain file`) cannot be read, is a symlink or has a second hard link, or holds a row over the size limit. A lesson left out by the qualify rule is NOT this: check stays GREEN over those | `check` names each; fix the file (permissions, replace the link by the file), then `rebuild` |
 | `another braindb command has held ... for more than 150 s; nothing was done` (exit code 75) | another rebuild, start or stop of the same cluster is still running, or is stuck | wait, or find the stuck command; the lock frees itself when that process ends |
 | `REFUSED — WED_AGENT='x' but this tree ('Y') is seat 'y'` | your shell's `WED_AGENT` names another seat | unset it, or run from the matching tree |
 | `REFUSED: cannot tell which seat this tree is` | the tree's folder is not named WEDNESDAY, TUESDAY or FRIDAY | run from the real tree; a copy must sit in a folder with the seat's name |
@@ -147,7 +151,7 @@ B stop                              # at the end of the session, and before ejec
 1. **It is word search, not meaning search.** It finds a lesson when your question shares words with the lesson, its file name or its rules-index line. "cleaning up" put the lesson named "cleanup means quarantine" third, behind two neighbours.
 2. **A first result can be confidently wrong.** See "How to read a result".
 3. **A stale index answers without saying so.** `search` and `at` build a missing index but do not rebuild one that is merely behind the files; `check` tells you, and the launcher's `up` rebuilds at boot.
-4. **`at` weights count only your own indexed ledgers.** `rules_card.py` counts every seat's ledger, so the order differs between the two. On the Wednesday seat the two list exactly the same 802 rule lines.
+4. **`at` weights count only your own indexed ledgers.** `rules_card.py` counts every seat's ledger, so the order differs between the two. On the Wednesday seat, at round 4b and over 22 triggers, the index listed 740 of the 805 rule lines `rules_card.py --at` lists and none that it does not; the 65 it lacks are rule lines of lessons the qualify rule leaves out or scopes to another seat. (The figure that stood here, "exactly the same 802", was round 3's, before the qualify rule.)
 5. **Only your own tree's rules files are indexed.** A rule that lives in the workspace file one level above your tree is not in the index (ruled out by Wednesday: that file carries another client's environment detail, and the harness loads it into every session anyway).
 6. **The qualify rule costs you lessons, on purpose.** A lesson with no tier line, a `MIXED` tier, an HTML comment or a body line that starts with the word tier is not in the index, however useful it is. `rebuild`, `check` and `doctor` all print how many are left out, and `rebuild` names every one. `search` does not look inside left-out files; when it finds nothing it says how many lessons are left out.
 7. **Nothing writes to the brain.** The tool only reads your files. Corrections go in the files; the index follows at the next rebuild.

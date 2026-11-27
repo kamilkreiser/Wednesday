@@ -1525,6 +1525,269 @@ printf 'ok/readme.md\0ok/my-environment.ts\0ok/keyboard.js\0api/local.settings.j
 "$PY" "$LANE/tests/scan_dry_lists.py" "$T/scan" s2 > "$T/out/scan_bad.txt" 2>&1; RC=$?
 is    "T28 CAN-FAIL: the same scan on a list holding the two real files' names: exit 1" 1 "$RC"
 
+# ═════════════════════ ROUND 4: the six fixes after the third check (ANSWER-6; the third checker's reproductions, lifted) ═════════════════════
+# Each family is a reproduction script of 2_Project_Files/qa-checks/nasbackup-r3/scripts/ turned into cells. Every writer
+# here is bounded: the largest fixture of this section holds 12 small files.
+mk_stub_n() { # name body : like mk_stub, with a call counter N, V = the seat tree, and a taken/ folder to move things into
+  local f="$T/stub/$1"
+  { echo '#!/bin/bash'
+    echo "REAL=$REAL_RSYNC"
+    echo 'STUBDIR="$(dirname "$0")"'
+    echo 'for a in "$@"; do if [ "$a" = "--version" ]; then exec "$REAL" --version; fi; done'
+    echo '[ -f "$STUBDIR/calls" ] && N=$(cat "$STUBDIR/calls") || N=0; N=$((N+1)); echo $N > "$STUBDIR/calls"; V="$STUBDIR/../vol/WEDNESDAY"; mkdir -p "$STUBDIR/taken"'
+    echo 'LIST=""; for a in "$@"; do case "$a" in --files-from=*) LIST="${a#--files-from=}";; esac; done'
+    echo "$2"
+  } > "$f"; chmod +x "$f"; echo "$f"
+}
+snapdir() { { find "$1" -exec stat -f '%N %z %m %i %HT' {} + 2>&1 | sort; find "$1" -type f -exec shasum -a 256 {} + 2>&1 | sort; } | shasum -a 256 | cut -c1-64; }
+nasfiles() { find "$T/nas" -type f 2>&1 | wc -l | tr -d ' '; }
+NB4() { echo "$T/nas/General/Wednesday/nightly-backup"; }
+
+echo; echo "T29 NESTED DESTINATIONS (third check, finding 1; its A1_dest_overlap.sh): two sets of one client whose destination names nest are refused at load"
+nest_fx() { fixture "$1"; mkdir -p "$T/vol/WEDNESDAY/docs" "$T/vol/Other"
+  echo "OUTER-SET-CONTENT of docs/readme (from the seat tree)" > "$T/vol/WEDNESDAY/docs/readme.txt"
+  echo "INNER-SET-CONTENT (another folder, same file name)!!" > "$T/vol/Other/readme.txt"; }
+nest_fx nest1; write_conf "" "" "set=General|WEDNESDAY/docs|$T/vol/Other"
+B4="$(snapnas)"; to n1.txt nb --run --now "$(at 0 1 0)"
+is    "T29 A1: set=General|WEDNESDAY and set=General|WEDNESDAY/docs: exit 2" 2 "$RC"
+has   "T29 ... refused as NESTING, naming both" "$(OUTF n1.txt)" "NEST: 'WEDNESDAY' and 'WEDNESDAY/docs'"
+is    "T29 ... the fake NAS is unchanged (nothing written)" "$B4" "$(snapnas)"
+hasnt "T29 ... and the run does not say GOOD" "$(OUTF n1.txt)" "GOOD: every in-scope"
+nest_fx nest2; write_conf "" "" "set=General|wednesday/Docs|$T/vol/Other"
+to n2.txt nb --run --now "$(at 0 1 0)"
+is    "T29 the same pair spelled in another case (wednesday/Docs): exit 2" 2 "$RC"
+nest_fx nest3; write_conf "" "" "set=General|Deep/A/B|$T/vol/Other" "set=General|Deep/A|$T/vol/WEDNESDAY/docs" "exclude_path=WEDNESDAY|docs"
+to n3.txt nb --run --now "$(at 0 1 0)"
+is    "T29 the inner name given FIRST (Deep/A/B before Deep/A): exit 2" 2 "$RC"
+has   "T29 ... refused as nesting" "$(OUTF n3.txt)" "NEST: 'Deep/A/B' and 'Deep/A'"
+nest_fx nest4; write_conf "" "" "set=General|Docs2|$T/vol/Other"
+to n4.txt nb --run --now "$(at 0 1 0)"
+is    "T29 NEIGHBOUR (the checker's control): the inner set named apart, General|Docs2: exit 0" 0 "$RC"
+yes   "T29 ... and the outer set's file is at the destination with ITS content" cmp -s "$T/vol/WEDNESDAY/docs/readme.txt" "$(CUR)/docs/readme.txt"
+yes   "T29 ... and the inner set's file with its own" cmp -s "$T/vol/Other/readme.txt" "$(NB4)/current/Docs2/readme.txt"
+nest_fx nest5; write_conf "" "" "set=General|WEDNESDAY-docs|$T/vol/Other"
+to n5.txt nb --run --now "$(at 0 1 0)"
+is    "T29 NEIGHBOUR: a name that only STARTS with the other's letters (WEDNESDAY-docs) is not nested: exit 0" 0 "$RC"
+nest_fx nest6; write_conf "" "" "set=Secuura|WEDNESDAY/docs|$T/vol/Other"
+to n6.txt nb --run --now "$(at 0 1 0)"
+is    "T29 NEIGHBOUR: the nested name under ANOTHER client (the real conf has one such pair) is accepted: exit 0" 0 "$RC"
+yes   "T29 ... the outer set's file keeps its content" cmp -s "$T/vol/WEDNESDAY/docs/readme.txt" "$(CUR)/docs/readme.txt"
+nest_fx nest7; write_conf "" "" "set=Secuura|WEDNESDAY|$T/vol/Other"
+B4="$(snapnas)"; to n7.txt nb --run --now "$(at 0 1 0)"
+is    "T29 finding 5: ONE destination name under TWO clients (General|WEDNESDAY, Secuura|WEDNESDAY): exit 2" 2 "$RC"
+has   "T29 ... refused, saying why" "$(OUTF n7.txt)" "is used under two clients"
+is    "T29 ... the fake NAS is unchanged" "$B4" "$(snapnas)"
+nest_fx nest8; write_conf "" "" "set=General|WEDNESDAY|$T/vol/Other"
+to n8.txt nb --run --now "$(at 0 1 0)"
+is    "T29 two sets of one client with the SAME destination name (the checker's surviving mutant X28): exit 2" 2 "$RC"
+
+echo; echo "T30 A SYMLINK IN THE DESTINATION CHAIN (third check, finding 2; its A4_dest_escape_and_chunks.sh a, b, c, d): refused, the outside folder unchanged"
+fixture esc_a; mkdir -p "$(NB4)/current" "$T/nas/General/SomeoneElse"; echo "theirs" > "$T/nas/General/SomeoneElse/keep.txt"
+ln -s "$T/nas/General/SomeoneElse" "$(NB4)/current/WEDNESDAY"
+O4="$(snapdir "$T/nas/General/SomeoneElse")"; B4="$(snapnas)"; to ea.txt nb --run --now "$(at 0 1 0)"
+is    "T30 A4a current/<set> is a symlink to a folder outside the seat's destination: exit 2" 2 "$RC"
+has   "T30 A4a ... refused, naming where it leads" "$(OUTF ea.txt)" "OUTSIDE this seat's own destination folder"
+is    "T30 A4a ... the outside folder is unchanged by hash" "$O4" "$(snapdir "$T/nas/General/SomeoneElse")"
+is    "T30 A4a ... the whole fake NAS is unchanged" "$B4" "$(snapnas)"
+hasnt "T30 A4a ... no GOOD line" "$(OUTF ea.txt)" "GOOD: every in-scope"
+fixture esc_b; mkdir -p "$T/nas/Datasec/x"; ln -s "$T/nas/Datasec/x" "$T/nas/General/Wednesday"
+O4="$(snapdir "$T/nas/Datasec/x")"; B4="$(snapnas)"; to eb.txt nb --run --now "$(at 0 1 0)"
+is    "T30 A4b the seat folder itself (<NAS>/General/Wednesday) is a symlink to another client's folder: exit 2" 2 "$RC"
+has   "T30 A4b ... refused as a SYMLINK" "$(OUTF eb.txt)" "General/Wednesday on the NAS is a SYMLINK"
+is    "T30 A4b ... entries under the other client's folder: only itself" 1 "$(find "$T/nas/Datasec/x" | wc -l | tr -d ' ')"
+is    "T30 A4b ... the outside folder is unchanged by hash" "$O4" "$(snapdir "$T/nas/Datasec/x")"
+is    "T30 A4b ... the whole fake NAS is unchanged" "$B4" "$(snapnas)"
+fixture esc_d; to ed0.txt nb --run --now "$(at 0 1 0)"
+is    "T30 A4d control: night 1 on plain folders is GOOD" 0 "$RC"
+mkdir -p "$T/nas/outside2" "$T/held"; echo "theirs" > "$T/nas/outside2/keep.txt"; mv "$(VER)" "$T/held/versions"; ln -s "$T/nas/outside2" "$(VER)"; echo "a changed, longer" > "$T/vol/WEDNESDAY/a.txt"
+O4="$(snapdir "$T/nas/outside2")"; B4="$(snapnas)"; to ed1.txt nb --run --now "$(at 1 1 0)"
+is    "T30 A4d versions/ is a symlink to outside and a file changed: exit 2" 2 "$RC"
+is    "T30 A4d ... files under the outside folder: the one that was there" 1 "$(find "$T/nas/outside2" -type f | wc -l | tr -d ' ')"
+is    "T30 A4d ... the outside folder is unchanged by hash" "$O4" "$(snapdir "$T/nas/outside2")"
+is    "T30 A4d ... the whole fake NAS is unchanged" "$B4" "$(snapnas)"
+is    "T30 A4d ... the destination copy of a.txt is still last night's" "old content of a" "$(cat "$(CUR)/a.txt")"
+to ed2.txt nb --dry
+is    "T30 a DRY run with versions/ leading outside is refused too (it must not say a real run would copy): exit 2" 2 "$RC"
+has   "T30 ... and names the folder that leads out" "$(OUTF ed2.txt)" "versions resolves to"
+fixture esc_e; mkdir -p "$T/held" "$T/nas/Datasec/y"; mv "$T/nas/General" "$T/held/General"; ln -s "$T/nas/Datasec/y" "$T/nas/General"
+B4="$(snapnas)"; to ee.txt nb --run --now "$(at 0 1 0)"
+is    "T30 the CLIENT folder itself (<NAS>/General) is a symlink to another client's folder: exit 2" 2 "$RC"
+is    "T30 ... entries under the other client's folder: only itself" 1 "$(find "$T/nas/Datasec/y" | wc -l | tr -d ' ')"
+is    "T30 ... the whole fake NAS is unchanged" "$B4" "$(snapnas)"
+fixture esc_f; mkdir -p "$T/nas/outside3"
+S="$(mk_stub_n swapmanifests 'B="$STUBDIR/../nas/General/Wednesday/nightly-backup"; if [ "$N" = 1 ]; then mv "$B/manifests" "$STUBDIR/taken/manifests"; ln -s "$STUBDIR/../nas/outside3" "$B/manifests"; fi; exec "$REAL" "$@"')"; write_conf "$S"
+to ef.txt nb --run --now "$(at 0 1 0)"
+no    "T30 manifests/ swapped for a symlink to outside DURING the run: NOT exit 0" test "$RC" -eq 0
+is    "T30 ... nothing was written through it" 0 "$(find "$T/nas/outside3" -type f | wc -l | tr -d ' ')"
+has   "T30 ... and the run says the manifest was not written" "$(OUTF ef.txt)" "were NOT written on the NAS"
+is    "T30 ... no COMPLETE marker anywhere" 0 "$(completed)"
+fixture esc_g; for i in 1 2 3 4 5 6; do echo "v0 file $i" > "$T/vol/WEDNESDAY/sub/g$i.txt"; done; CONF_CHUNK=2; write_conf
+to eg0.txt nb --run --now "$(at 0 1 0)"
+is    "T30 control: night 1 in chunks of 2 on plain folders is GOOD" 0 "$RC"
+for i in 1 2 3 4 5 6; do echo "v1 file $i, longer" > "$T/vol/WEDNESDAY/sub/g$i.txt"; done; mkdir -p "$T/nas/outside4"
+S="$(mk_stub_n swapversions 'B="$STUBDIR/../nas/General/Wednesday/nightly-backup"; if [ "$N" = 1 ]; then mv "$B/versions" "$STUBDIR/taken/versions"; ln -s "$STUBDIR/../nas/outside4" "$B/versions"; fi; exec "$REAL" "$@"')"; write_conf "$S"
+to eg1.txt nb --run --now "$(at 1 1 0)"
+no    "T30 versions/ swapped for a symlink to outside DURING chunk 1 of 3: NOT exit 0" test "$RC" -eq 0
+has   "T30 ... the run stops before the next chunk, saying why" "$(OUTF eg1.txt)" "stopped in set WEDNESDAY before chunk 2 of 3"
+is    "T30 ... only the chunk in flight wrote through the link (2 of the 6 replaced files), not the whole set" 2 "$(find "$T/nas/outside4" -type f | wc -l | tr -d ' ')"
+is    "T30 ... no COMPLETE marker for that night (control: its STARTED marker is there)" "0/1" "$(find "$T/nas" -name 'RUN_2026-12-02_*_COMPLETE.txt' | wc -l | tr -d ' ')/$(find "$T/nas" -name 'RUN_2026-12-02_*_STARTED.txt' | wc -l | tr -d ' ')"
+fixture esc_c; to ec0.txt nb --run --now "$(at 0 1 0)"
+mkdir -p "$T/nas/outside" "$T/held"; echo "theirs" > "$T/nas/outside/b.txt"
+mv "$(CUR)/sub" "$T/held/sub"; ln -s "$T/nas/outside" "$(CUR)/sub"; echo "b changed, longer" > "$T/vol/WEDNESDAY/sub/b.txt"
+to ec1.txt nb --run --now "$(at 1 1 0)"
+is    "T30 A4c (held in round 3, must still hold): a symlinked SUBFOLDER inside a set: the night is GOOD" 0 "$RC"
+is    "T30 A4c ... the outside file is untouched" "theirs" "$(cat "$T/nas/outside/b.txt")"
+is    "T30 A4c ... the subfolder at the destination is a real folder now" "Directory" "$(stat -f '%HT' "$(CUR)/sub")"
+yes   "T30 A4c ... holding the source's content" cmp -s "$T/vol/WEDNESDAY/sub/b.txt" "$(CUR)/sub/b.txt"
+fixture esc_u; mkdir -p "$(NB4)/current/WEDNESDAY" "$(NB4)/versions" "$T/nas/away"
+"$PY" - "$LANE" "$T" > "$T/out/unit.txt" 2>&1 <<'PYEOF'
+import os, sys
+os.environ["NB_TEST_ROOT"] = sys.argv[2]
+sys.path.insert(0, sys.argv[1]); import nb_core
+T = sys.argv[2]
+ctx = nb_core.Ctx("wednesday", T + "/vol/WEDNESDAY"); ctx.load_conf()
+print("plain folders: %s" % nb_core.dest_escape(ctx, "General", "WEDNESDAY"))
+b = T + "/nas/General/Wednesday/nightly-backup"
+os.symlink(T + "/nas/away", b + "/runs")
+print("runs is a link out: %s" % ("NAMED" if "runs resolves to" in str(nb_core.dest_escape(ctx, "General", "WEDNESDAY")) else "missed"))
+os.rename(b + "/runs", T + "/runs.link.moved"); os.symlink(b, b + "/_tmp_incoming")
+print("_tmp_incoming is a link to the base itself: %s" % ("NAMED" if "_tmp_incoming resolves to" in str(nb_core.dest_escape(ctx, "General", "WEDNESDAY")) else "missed"))
+PYEOF
+has   "T30 the containment test as a function: plain folders pass" "$(OUTF unit.txt)" "plain folders: None"
+has   "T30 ... a runs/ that leads out is named" "$(OUTF unit.txt)" "runs is a link out: NAMED"
+has   "T30 ... a _tmp_incoming that is a link back to the base is named" "$(OUTF unit.txt)" "_tmp_incoming is a link to the base itself: NAMED"
+
+echo; echo "T31 A HARD LINK SWAPPED IN AFTER THE PLAN (third check, finding 3; its A7_secrets.sh section b), both ways"
+M4="R4SECRETMARK"
+hl_fx() { fixture "$1"; W="$T/vol/WEDNESDAY"; mkdir -p "$W/4_Credentials" "$W/files"; echo "$M4 token" > "$W/4_Credentials/token.txt"
+  ln "$W/4_Credentials/token.txt" "$W/files/innocent.txt"; ln -s ../4_Credentials/token.txt "$W/files/sym.txt"; echo "plain v1" > "$W/files/later.txt"; CONF_CHUNK=2; }
+SWAP='mv "$V/files/later.txt" "$STUBDIR/taken/"; ln "$V/4_Credentials/token.txt" "$V/files/later.txt"'
+hl_fx hl_ctl; write_conf
+to c.txt nb --run --now "$(at 0 1 0)"
+is    "T31 control: no swap: GOOD" 0 "$RC"
+is    "T31 control: the planned file is at the destination with its content" "plain v1" "$(cat "$(CUR)/files/later.txt")"
+is    "T31 control: the hard link that existed at plan time and the symlink into the folder stayed out (0 marked copies)" 0 "$(on_nas "$M4")"
+hl_fx hl_after; S="$(mk_stub_n swap_in_its_own_chunk 'if [ ! -e "$STUBDIR/done" ] && tr "\0" "\n" < "$LIST" | /usr/bin/grep -q -x "files/later.txt"; then : > "$STUBDIR/done"; '"$SWAP"'; fi; exec "$REAL" "$@"')"; write_conf "$S"
+to a.txt nb --run --now "$(at 0 1 0)"
+yes   "T31 control: the swap happened, in the engine call that carried the file" test -e "$T/stub/done"
+no    "T31 swap between the hand-over of its chunk and the proof: NOT exit 0" test "$RC" -eq 0
+is    "T31 ... exit 8 (not every planned file proven)" 8 "$RC"
+hasnt "T31 ... no GOOD line" "$(OUTF a.txt)" "GOOD: every in-scope"
+is    "T31 ... no COMPLETE marker" 0 "$(completed)"
+has   "T31 ... the file is NOT DELIVERED, by name" "$(OUTF a.txt)" "NOT DELIVERED: WEDNESDAY/files/later.txt"
+has   "T31 ... a line says the content ALREADY REACHED THE DESTINATION" "$(OUTF a.txt)" "THE CONTENT ALREADY REACHED THE DESTINATION"
+has   "T31 ... and names the path there" "$(OUTF a.txt)" "HARD LINK AFTER THE PLAN, SENT: WEDNESDAY/files/later.txt -> $(CUR)/files/later.txt (its content is there now: YES)"
+is    "T31 ... and that is the truth: the marked content IS at that path" 1 "$(/usr/bin/grep -c -F "$M4" "$(CUR)/files/later.txt")"
+is    "T31 ... the state is not good" "failed" "$(state last_attempt.status)"
+hl_fx hl_before; S="$(mk_stub_n swap_one_chunk_early 'if [ "$N" = 1 ]; then if tr "\0" "\n" < "$LIST" | /usr/bin/grep -q -x "files/later.txt"; then : > "$STUBDIR/first_list_had_it"; fi; '"$SWAP"'; fi; exec "$REAL" "$@"')"; write_conf "$S"
+to b.txt nb --run --now "$(at 0 1 0)"
+no    "T31 control: the swap happened during chunk 1, and the file was NOT in chunk 1's list" test -e "$T/stub/first_list_had_it"
+yes   "T31 control: ... and the file has more than one hard link now" test "$(stat -f '%l' "$T/vol/WEDNESDAY/files/later.txt")" -gt 1
+is    "T31 swap BEFORE its chunk: the secret's content is NOT on the fake NAS (0 marked copies)" 0 "$(on_nas "$M4")"
+no    "T31 ... and no file of that name is at the destination" test -e "$(CUR)/files/later.txt"
+is    "T31 ... the night fails: exit 8" 8 "$RC"
+has   "T31 ... naming it as NOT SENT" "$(OUTF b.txt)" "HARD LINK AFTER THE PLAN, NOT SENT: WEDNESDAY/files/later.txt"
+has   "T31 ... and as NOT DELIVERED" "$(OUTF b.txt)" "NOT DELIVERED: WEDNESDAY/files/later.txt (NOT SENT: it has more than one hard link now"
+is    "T31 ... no COMPLETE marker" 0 "$(completed)"
+yes   "T31 ... the other planned files of the set did arrive" cmp -s "$T/vol/WEDNESDAY/sub/b.txt" "$(CUR)/sub/b.txt"
+
+echo; echo "T32 THE NAMES OF WHAT THE SECRET-SHAPE RULE LEAVES OUT (third check, finding 4; its A7_secrets.sh section d): on the drive, never on the share"
+names_fx() { fixture "$1"; W="$T/vol/WEDNESDAY"; mkdir -p "$W/src" "$W/certs" "$W/ev"; echo "export const x=1" > "$W/src/secrets.ts"; echo "PUBLIC CERT" > "$W/certs/root-ca.crt"
+  echo "{}" > "$W/ev/post_api_credentials_ok.json"; echo "A=1" > "$W/.env.example"; echo ok > "$W/src/main.ts"
+  "$PY" -c 'import sys; open(sys.argv[1] + "/certs/odd\nname.pem", "w").write("x")' "$W"
+  printf 'LEFTOUTMARK src/secrets.ts\tcredential-file\n' > "$W/2_Project_Files/2026-01-01_000000_1_run_WEDNESDAY_left_out_by_secret_shape.tsv"; echo "NEIGHBOURMARK" > "$W/2_Project_Files/left_out_notes.tsv"; }
+names_fx names_run; to r.txt nb --run --now "$(at 0 1 0)"
+is    "T32 the run is GOOD" 0 "$RC"
+LF="$(ls "$T"/lane/manifests/wednesday/*_run_WEDNESDAY_left_out_by_secret_shape.tsv 2>&1 | head -1)"
+yes   "T32 the list for the set exists in the lane's manifests folder ON THE DRIVE" test -f "$LF"
+TAB4="$(printf '\t')"
+for n4 in "src/secrets.ts|credential-file" "certs/root-ca.crt|key-or-certificate" "ev/post_api_credentials_ok.json|credential-file" ".env.example|env-file"; do
+  is  "T32 the drive list names '${n4%%|*}' with its shape" 1 "$(/usr/bin/grep -c -x -F -- "${n4%%|*}$TAB4${n4##*|}" "$LF")"
+done
+is    "T32 its line count equals the number the run printed for the set (5: the four and a name holding a newline)" "5/5" "$(wc -l < "$LF" | tr -d ' ')/$(/usr/bin/grep -F 'left out by secret shape:' "$(OUTF r.txt)" | head -1 | sed -e 's/.*shape: //' -e 's/ entries.*//')"
+has   "T32 a name holding a newline is still ONE line (written as \\n)" "$LF" 'certs/odd\nname.pem'
+yes   "T32 the other set has its own list, empty" test -f "$(ls "$T"/lane/manifests/wednesday/*_run_Secuura_left_out_by_secret_shape.tsv | head -1)"
+is    "T32 ... with 0 lines" 0 "$(cat "$T"/lane/manifests/wednesday/*_run_Secuura_left_out_by_secret_shape.tsv | wc -l | tr -d ' ')"
+for n4 in secrets.ts root-ca.crt post_api_credentials_ok.json .env.example; do
+  is  "T32 '$n4' is absent from every file on the fake NAS (by content and by name)" "0/0" "$(on_nas "$n4")/$(find "$T/nas" -name "$n4" | wc -l | tr -d ' ')"
+done
+is    "T32 control: the same two searches DO find things on the fake NAS (main.ts by name; the manifest by content)" "1/yes" "$(find "$T/nas" -name main.ts | wc -l | tr -d ' ')/$([ "$(on_nas left_out_by_secret_shape_entries)" -ge 1 ] && echo yes || echo no)"
+is    "T32 no list of left-out names is on the fake NAS, while the symlink list is (control)" "0/1" "$(find "$T/nas" -name '*left_out_by_secret_shape*' | wc -l | tr -d ' ')/$(find "$(NB4)/manifests" -name '*_symlinks.tsv' | wc -l | tr -d ' ')"
+is    "T32 a left-out list lying inside the source tree does NOT travel (0 copies of its marker on the NAS)" 0 "$(on_nas LEFTOUTMARK)"
+is    "T32 NEIGHBOUR: an ordinary file beside it (left_out_notes.tsv) arrives" 1 "$(on_nas NEIGHBOURMARK)"
+names_fx names_dry; to d.txt nb --dry
+is    "T32 a DRY run: exit 0" 0 "$RC"
+LD="$(ls "$T"/lane/manifests/wednesday/*_dry_WEDNESDAY_left_out_by_secret_shape.tsv 2>&1 | head -1)"
+is    "T32 a DRY run writes the list too: 5 lines, the same names" "5/1" "$([ -f "$LD" ] && wc -l < "$LD" | tr -d ' ')/$([ -f "$LD" ] && /usr/bin/grep -c -F 'src/secrets.ts' "$LD")"
+is    "T32 ... and wrote nothing at all on the fake NAS" 0 "$(nasfiles)"
+
+echo; echo "T33 THE DELETION PROOF (third check, finding 6; its A3_deleted_proof.sh a, b, c): a file that still exists is never counted deleted"
+fixture del_a; S="$(mk_stub_n parent_swapped 'if [ "$N" = 1 ]; then mv "$V/sub" "$V/sub.old"; mkdir "$V/sub"; fi; "$REAL" "$@"; exit $?')"; write_conf "$S"
+to r.txt nb --run --now "$(at 0 1 0)"
+yes   "T33 control: the file lives on in the folder that was moved away" test -f "$T/vol/WEDNESDAY/sub.old/b.txt"
+no    "T33 A3a the parent folder REPLACED by a new one of the same name: NOT exit 0" test "$RC" -eq 0
+has   "T33 A3a ... the file is NOT DELIVERED, by name" "$(OUTF r.txt)" "NOT DELIVERED: WEDNESDAY/sub/b.txt"
+hasnt "T33 A3a ... and is not counted as deleted" "$(OUTF r.txt)" "DELETED at the source during the run"
+fixture del_b; mkdir -p "$T/vol/elsewhere"; S="$(mk_stub_n parent_symlink 'if [ "$N" = 1 ]; then mv "$V/sub" "$STUBDIR/taken/sub"; ln -s "$STUBDIR/../vol/elsewhere" "$V/sub"; fi; "$REAL" "$@"; exit $?')"; write_conf "$S"
+to r.txt nb --run --now "$(at 0 1 0)"
+no    "T33 A3b the parent folder replaced by a SYMLINK to a listable folder: NOT exit 0" test "$RC" -eq 0
+hasnt "T33 A3b ... and the file is not counted as deleted" "$(OUTF r.txt)" "DELETED at the source during the run"
+fixture del_c; S="$(mk_stub_n case_rename_000 'if [ "$N" = 1 ]; then mv "$V/sub/b.txt" "$V/sub/tmpname"; mv "$V/sub/tmpname" "$V/sub/B.TXT"; chmod 000 "$V/sub/B.TXT"; fi; "$REAL" "$@"; exit $?')"; write_conf "$S"
+to r.txt nb --run --now "$(at 0 1 0)"
+is    "T33 control: this scratch volume folds case (the listing says B.TXT, the planned path sub/b.txt still resolves)" "B.TXT/yes" "$(ls "$T/vol/WEDNESDAY/sub" | tr '\n' ' ' | tr -d ' ')/$([ -e "$T/vol/WEDNESDAY/sub/b.txt" ] && echo yes || echo no)"
+no    "T33 A3c a file renamed to another case and made unreadable: NOT exit 0" test "$RC" -eq 0
+has   "T33 A3c ... the file is NOT DELIVERED, by name" "$(OUTF r.txt)" "NOT DELIVERED: WEDNESDAY/sub/b.txt"
+hasnt "T33 A3c ... and is not counted as deleted" "$(OUTF r.txt)" "DELETED at the source during the run"
+chmod 644 "$T/vol/WEDNESDAY/sub/B.TXT"
+fixture del_c2; S="$(mk_stub_n case_rename 'if [ "$N" = 1 ]; then mv "$V/sub/b.txt" "$V/sub/tmpname"; mv "$V/sub/tmpname" "$V/sub/B.TXT"; fi; "$REAL" "$@"; exit $?')"; write_conf "$S"
+to r.txt nb --run --now "$(at 0 1 0)"
+is    "T33 NEIGHBOUR: the same rename with the file left readable is PROVEN through the folded name: GOOD" 0 "$RC"
+fixture del_real; S="$(mk_stub_n really_deleted 'if [ "$N" = 1 ]; then mv "$V/sub/b.txt" "$STUBDIR/taken/"; fi; "$REAL" "$@"; exit $?')"; write_conf "$S"
+to r.txt nb --run --now "$(at 0 1 0)"
+is    "T33 NEIGHBOUR: a file really deleted (its folder still the same folder, the path gone) is still let go: GOOD" 0 "$RC"
+has   "T33 ... counted and named as deleted" "$(OUTF r.txt)" "DELETED AT SOURCE: WEDNESDAY/sub/b.txt"
+fixture del_u; U="$T/u"; mkdir -p "$U/root/dir" "$U/root/dir2"; echo x > "$U/root/dir/Here.txt"; echo y > "$U/root/dir2/gone.txt"
+"$PY" - "$LANE" "$U" > "$T/out/unit.txt" 2>&1 <<'PYEOF'
+import os, sys
+sys.path.insert(0, sys.argv[1]); import nb_core
+U = sys.argv[2]; r = os.stat(U + "/root"); rid = (r.st_dev, r.st_ino)
+d2 = os.stat(U + "/root/dir2"); pid = (d2.st_dev, d2.st_ino)
+print("present file: deleted=%s" % nb_core.source_deleted(U + "/root", rid, "dir2/gone.txt", pid))
+os.rename(U + "/root/dir2/gone.txt", U + "/gone.moved")
+print("really deleted, same parent: deleted=%s" % nb_core.source_deleted(U + "/root", rid, "dir2/gone.txt", pid))
+os.rename(U + "/root/dir2", U + "/root/dir2.old"); os.mkdir(U + "/root/dir2")
+print("parent replaced, its listed id given: deleted=%s" % nb_core.source_deleted(U + "/root", rid, "dir2/gone.txt", pid))
+print("parent replaced, no id given (what round 3 asked): deleted=%s" % nb_core.source_deleted(U + "/root", rid, "dir2/gone.txt"))
+print("a name on disk in another case (Here.txt there, here.txt asked; resolves=%s): deleted=%s" % (os.path.exists(U + "/root/dir/here.txt"), nb_core.source_deleted(U + "/root", rid, "dir/here.txt")))
+PYEOF
+has   "T33 the proof as a function: a present file is not deleted" "$(OUTF unit.txt)" "present file: deleted=False"
+has   "T33 ... really deleted, parent unchanged: deleted" "$(OUTF unit.txt)" "really deleted, same parent: deleted=True"
+has   "T33 ... parent replaced, judged by the id it had when listed: NOT deleted" "$(OUTF unit.txt)" "parent replaced, its listed id given: deleted=False"
+has   "T33 CAN-FAIL: the same question without the id says deleted (what round 3 answered)" "$(OUTF unit.txt)" "no id given (what round 3 asked): deleted=True"
+has   "T33 ... a name present in another case on a case-folding volume: NOT deleted" "$(OUTF unit.txt)" "resolves=True): deleted=False"
+
+echo; echo "T34 THE HOLD IS TESTED BEFORE THE CONF IS READ (third check, finding 10; its A5_damage_lock_signals.sh section d)"
+fixture holdfirst; echo "held" > "$T/lane/HOLD_wednesday"; CONF_STATUS=unconfirmed; write_conf
+to h1.txt nb --run --now "$(at 0 2 0)"
+is    "T34 a --run under the hold with an UNCONFIRMED conf: exit 3 (held), not 2" 3 "$RC"
+is    "T34 ... recorded as held" held "$(state last_attempt.status)"
+is    "T34 ... and the three-day clock is NOT started" None "$(state first_attempt_at)"
+printf 'status=confirmed\nthis line is not a conf line\n' > "$T/lane/seats/wednesday.conf"
+to h2.txt nb --run --now "$(at 0 2 5)"
+is    "T34 a --run under the hold with a conf that cannot even be read (no END marker): exit 3" 3 "$RC"
+is    "T34 ... still no clock" None "$(state first_attempt_at)"
+CONF_STATUS=confirmed; write_conf; mv -n "$T/lane/HOLD_wednesday" "$T/lane/HOLD_wednesday.lifted"
+to h3.txt watch --check --now "$(at 4 9 0)"
+is    "T34 the hold lifted four days later, first check: exit 0, not OVERDUE" 0 "$RC"
+hasnt "T34 ... no OVERDUE line" "$(OUTF h3.txt)" "OVERDUE"
+has   "T34 ... the clock starts at that check" "$(OUTF h3.txt)" "the three-day clock starts now"
+fixture holdnone; CONF_STATUS=unconfirmed; write_conf
+to n1.txt nb --run --now "$(at 0 2 0)"
+is    "T34 NEIGHBOUR: the same unconfirmed conf with NO hold: exit 2 (refused)" 2 "$RC"
+is    "T34 ... recorded as refused" refused "$(state last_attempt.status)"
+no    "T34 ... and that DOES start the clock" test "$(state first_attempt_at)" = None
+CONF_STATUS=confirmed
+
 echo
 echo "=== $PASS passed, $FAIL failed — fixtures kept at $RUN ==="
 if [ "$FAIL" -ne 0 ]; then printf 'FAILED:%s\n' "$FAILED"; exit 1; fi

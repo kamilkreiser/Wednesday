@@ -1,6 +1,6 @@
 # brain-db: proposed changes to shared files
 
-Written 2026-11-27 by the WED build seat "brain-db"; revised for round 2 (`ANSWER-1.md`) and round 3 (`ANSWER-3.md`, the checker's notes N2 and N3). **None of these is applied.** Each has a rollback line. The coordinator applies or drops them.
+Written 2026-11-27 by the WED build seat "brain-db"; revised for round 2 (`ANSWER-1.md`), round 3 (`ANSWER-3.md`, the checker's notes N2 and N3) and round 5 (`ANSWER-8.md`: the sentence of item 2 the third checker found false, its stale figures, the `doctor` table of item 3, and the launcher block of item 4, which now carries the count of files not indexed). **None of these is applied.** Each has a rollback line. The coordinator applies or drops them.
 
 | Shared file | Change proposed | Needed for the tool to work? |
 |---|---|---|
@@ -33,10 +33,10 @@ Rollback: restore the two bullets to their 2026-11-04 wording (the file's git hi
 
 ```
 ## NN. brain-db: the seat's local search index (Postgres 15, data ON THE DRIVE) (2026-11-27)
-A full-text index over the files this seat is already allowed to read at boot (its two rules files, lessons, the rules index, the seat's ledger and archive, the seat's daily notes, skills, identity, people, architecture). No file that belongs to another seat or another client's project enters it. Kam, live board 2026-11-27 11:43: "Each external drive will now also hold the dB"; decision wed-fleet-structure-v2-where-postgres-runs-1127 = c (local index only). Code and design: `2_Project_Files/brain-db/` (`DESIGN.md`).
+A full-text index over the files this seat is already allowed to read at boot (its two rules files, lessons, the rules index, the seat's ledger and archive, the seat's daily notes, skills, identity, people, architecture). No lesson that is declared another seat's or another client's (by its row, its tier or a marker) enters it; nothing reads meaning, so a lesson about another client's work that is tagged `W` or `M`, scoped to this seat and carries no marker IS indexed (the remedy is to tag or mark the lesson). Kam, live board 2026-11-27 11:43: "Each external drive will now also hold the dB"; decision wed-fleet-structure-v2-where-postgres-runs-1127 = c (local index only). Code and design: `2_Project_Files/brain-db/` (`DESIGN.md`).
 - **Machine-local:** the Postgres 15 binaries (item 25: `brew install postgresql@15`) and `python3`. A socket directory `/tmp/wed-braindb-<uid>-<seat>` (mode 700, created by the tool, holds no state).
-- **On-drive:** the cluster, `2_Project_Files/brain-db/pgdata-<seat>/` (about 160 MB for the Wednesday seat) and its lock file `pgdata-<seat>.lock`; both gitignored by the lane's own `.gitignore`.
-- **Rebuildable: yes.** The files are the master. `braindb.sh rebuild` reloads everything in about 5 to 7 seconds; losing or quarantining `pgdata-<seat>/` loses nothing.
+- **On-drive:** the cluster, `2_Project_Files/brain-db/pgdata-<seat>/` (174 MB for the Wednesday seat, measured in rounds 3 to 4b) and its lock file `pgdata-<seat>.lock`; both gitignored by the lane's own `.gitignore`.
+- **Rebuildable: yes.** The files are the master. `braindb.sh rebuild` reloads everything in 9 to 19 seconds as measured on this Mac under load averages of 11 to 24 (4.7 s was measured once at a lower load; there is no figure from a quiet machine); losing or quarantining `pgdata-<seat>/` loses nothing.
 - **On demand, no service, no port:** `search`, `at`, `check` and `rebuild` start the server themselves when it is down; the launcher runs `braindb.sh up` at boot; the wrap runs `braindb.sh stop`. Unix socket only. No password or key exists; access is the logged-in user through the socket.
 - **Stop the index before ejecting or syncing the drive; the data directory is excluded from every copy because it is rebuildable.** (`braindb.sh stop`.) After a power cut or a pulled drive the next start may print `STALE PID FILE` with one `mv -n` line to run by hand; then it costs a rebuild.
 - **New Mac / another drive:** `brew install postgresql@15`, then `braindb.sh up`. A cluster made by a different Postgres major version is refused at `start` with the word "rebuild": move `pgdata-<seat>/` into a `_quarantine_<date>/` folder and run `braindb.sh up`.
@@ -71,33 +71,39 @@ What `doctor` prints, each case exercised in `tests/run.sh` or in the simulation
 | seat has no scope file | `OK brain-db: not adopted on this seat (no scope/<seat>.scope)` | 0 |
 | no cluster yet | `WARN brain-db: no cluster yet \| run .../braindb.sh up` | 1 |
 | cluster version differs | `WARN brain-db: cluster is Postgres X, binaries are Postgres Y \| quarantine ... and run braindb.sh up` | 1 |
-| server stopped (the normal resting state) | `OK brain-db: server stopped (on demand; the next search starts it), <data directory>` | 0 |
-| index current | `OK brain-db: index current, <data directory> (GREEN, N files ...)` | 0 |
+| server stopped (the normal resting state) | `OK brain-db: server stopped (on demand; the next search starts it), <data directory>; 0 other file(s) matched the allow-list and are NOT indexed (...)` | 0 |
+| index current, nothing missing | `OK brain-db: index current, <data directory> (GREEN, N files ...; 0 other file(s) matched the allow-list and are NOT indexed (...))` | 0 |
+| index current, but files that matched the allow-list are not in it (round 5) | `WARN brain-db: index current but it has GAPS, <data directory> \| put right the files braindb.sh check names, then braindb.sh rebuild (AMBER, ...; N other file(s) matched the allow-list and are NOT indexed (unreadable U, not a plain file L, cut C), and K lesson file(s) unreadable or not a plain file ...)` (N or K above 0; round 5b added K) | 1 |
+| server stopped, and such files exist (round 5) | `WARN brain-db: server stopped, and N other file(s) matched the allow-list and are NOT indexed (unreadable U, not a plain file L, cut not known without the index), <data directory> \| ...` | 1 |
 | index stale | `WARN brain-db: index stale, <data directory> \| braindb.sh rebuild (...)` | 1 |
 | another cluster answers on this seat's socket directory | `WARN brain-db: ANOTHER cluster is answering on this seat's socket directory ...` | 1 |
-| anything else (a scope error, `WED_AGENT` disagreeing with the tree) | `WARN brain-db: check could not run (rc N) \| <first line>`, or the tool's own REFUSED line | 1 or 2 |
+| anything else (a scope error, `WED_AGENT` disagreeing with the tree, the tree changing while it was read: rc 5) | `WARN brain-db: check could not run (rc N) \| <first line>`, or the tool's own REFUSED line | 1 or 2 |
 
 Rollback: remove the block.
 
 ## 4. `Launch_Wednesday.command`: `up` at boot (start, check, rebuild when red)
 
-Placed after the rules-card block (line 272 onward today), before the prompt is built. `up` = create the cluster if missing, start it if stopped, run `check`, and `rebuild` only when `check` is red. A failure prints one warning and never blocks the boot. A seat that has not adopted a scope file is passed over silently. Nothing depends on this block having run: every command brings the server up itself.
+Placed after the rules-card block (line 272 onward today), before the prompt is built. `up` = create the cluster if missing, start it if stopped, run `check`, and `rebuild` only when `check` is red. A failure prints one warning and never blocks the boot. **Round 5 (the third checker's F2): the block carries the count of files that matched the allow-list and are not indexed.** It prints `check`'s first line, which now always holds that count; and when `up` exits 6 (`check` is AMBER: the index is current but has gaps) it prints that line under a warning instead of as success. Round 4b's block printed `check: GREEN ...` over an unreadable daily folder and a skipped ledger. A seat that has not adopted a scope file is passed over silently. Nothing depends on this block having run: every command brings the server up itself.
 
 ```bash
 # brain-db (WED-170 step 4, PORTABILITY): the seat's local search index. On demand, Unix socket only,
-# no service; stopped at wrap. `up` starts it and rebuilds only when the files have moved on (5 to 7 s).
-# The tool takes the seat from this tree's folder name; WED_AGENT, when set, must agree with it.
+# no service; stopped at wrap. `up` starts it and rebuilds only when the files have moved on (9 to 19 s
+# measured under load). The tool takes the seat from this tree's folder name; WED_AGENT, when set, must agree.
+# The check line it prints always carries the count of files that matched the allow-list and are NOT indexed.
 BRAINDB="$PROJECT_DIR/2_Project_Files/brain-db/braindb.sh"
 if [ -x "$BRAINDB" ]; then
-  if BRAINDB_OUT="$("$BRAINDB" up 2>&1)"; then
-    printf '%s\n' "$BRAINDB_OUT" | sed -n '/^check: /p' | tail -1
-  else
-    case "$BRAINDB_OUT" in
-      *"no scope file for seat"*) : ;;   # this seat has not adopted brain-db: say nothing
-      *) echo "⚠ brain-db up FAILED (the brain files are unaffected; search is unavailable this boot):"
-         printf '%s\n' "$BRAINDB_OUT" | tail -5 ;;
-    esac
-  fi
+  BRAINDB_OUT="$("$BRAINDB" up 2>&1)"; BRAINDB_RC=$?
+  BRAINDB_LINE="$(printf '%s\n' "$BRAINDB_OUT" | sed -n '/^check: /p' | tail -1)"
+  case "$BRAINDB_RC" in
+    0) printf '%s\n' "$BRAINDB_LINE" ;;
+    6) echo "⚠ brain-db: the index is current but has GAPS (search will not find what is in these files):"
+       printf '%s\n' "$BRAINDB_LINE" ;;
+    *) case "$BRAINDB_OUT" in
+         *"no scope file for seat"*) : ;;   # this seat has not adopted brain-db: say nothing
+         *) echo "⚠ brain-db up FAILED (the brain files are unaffected; search is unavailable this boot):"
+            printf '%s\n' "$BRAINDB_OUT" | tail -5 ;;
+       esac ;;
+  esac
 fi
 ```
 
@@ -157,4 +163,4 @@ No line. The server is started with `listen_addresses = ''` (written into the cl
 
 ## How the two blocks were exercised
 
-The checker ran round 2's blocks in a stub harness under bash 3.2.57 (its file `17_proposals_simulated.txt`). Round 3 changed both blocks, so I re-ran them the same way, with stub `ok` and `warn` functions, against the real cluster and against a tree with no scope file; the output is `evidence/proposals_simulated_round3.txt`. They have still not been run inside the real `doctor.sh` or launcher: this seat edits no shared file.
+The checker ran round 2's blocks in a stub harness under bash 3.2.57 (its file `17_proposals_simulated.txt`). Round 3 changed both blocks, so I re-ran them the same way, with stub `ok` and `warn` functions, against the real cluster and against a tree with no scope file; the output is `evidence/proposals_simulated_round3.txt`. Round 5 changed the launcher block; it and the unchanged `doctor.sh` block were run the same way, the text taken from this file by the stub itself, on scratch trees: nothing missing, the third checker's tree of gaps, a seat with no scope file, and a failing `up`; the output is `evidence/proposals_simulated_round5.txt`, and again after round 5b, with one more case (one unreadable lesson and nothing else wrong), `evidence/proposals_simulated_round5b.txt`. They have still not been run inside the real `doctor.sh` or launcher: this seat edits no shared file.

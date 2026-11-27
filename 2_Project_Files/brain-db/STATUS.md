@@ -1,5 +1,191 @@
 READY FOR QA
 
+# ROUND 5b (answer to `ANSWER-9.md`: sibling 1, a lesson that cannot be read as a plain file is a gap)
+
+Same seat, 2026-11-27 23:33 to 2026-11-28 00:01 AEDT (from `date`). All HOLDS kept; the drive cluster ran for one `check` and one `doctor` and is STOPPED. Round 5's report is kept whole below; where the two differ, this section stands. Round 5's "Siblings" item 1 and its "could not make sound" item 4 are now closed by this section; its siblings 2, 3 and 4 stay listed and are NOT edited.
+
+**In one paragraph.** A lesson that is unreadable or not a plain file (symlink, hard link, directory, FIFO) now turns `check` AMBER with exit code 6, `doctor` WARN, `up` exit 6 and the rebuild's last line `DONE WITH FAULTS`, exactly as any other gap does; it is still named under clause (f). A lesson left out by clauses (a) to (d) or (t) is not a gap and `check` stays GREEN over it, with its own cell and mutant. Suite **869 passed, 0 failed** on Python 3.14.10 and 3.9.6. The same tests on round 5's code: **27 FAIL lines**. 17 of 17 mutants in the subset caught, control 869 and 0. `green_faults.py` again: 0 lines say GREEN, 0 say OK. **One thing is not as ANSWER-9 expected: the real tree's `check` reads RED, not GREEN** (next paragraph).
+
+**The real tree: RED, and why; I did not rebuild.** ANSWER-9 asks for one `check` and one `doctor` and expects GREEN and OK. `check` printed `RED, 1 path(s) differ; braindb_index.py has changed since the last rebuild`, and `doctor` `WARN … index stale` (`evidence/real_check_round5b.txt`, 23:47). Both reasons are true and neither is a gap: the index on the drive was built at 23:29 by round 5's `braindb_index.py`, which this round changed, and today's daily note (`0_Brain/daily/2026-11-27.md`) has grown since. What ANSWER-9 wanted to see is on that same first line: `0 other file(s) … (unreadable 0, not a plain file 0, cut 0), and 0 lesson file(s) unreadable or not a plain file`, and `38 lesson file(s) LEFT OUT … b=28, c=8, d=2`, the same count by clause as round 5 (the names shown are a subset of round 5's 38; `check` prints five per clause). A GREEN needs one more rebuild of the real tree, which ANSWER-9 does not list and ANSWER-8 limited to one, so I took the stricter reading. **One command closes it: `braindb.sh rebuild` (about 12 s), then `check`.** GREEN over rule-left-out lessons is shown meanwhile on fixtures (the MUST STAY GREEN cell, 113 left out).
+
+## What changed (and nothing else in the tool)
+
+| Where | Change |
+|---|---|
+| The count line (`gap_line`, `braindb_index.py` line 776) | **My choice, said plainly: a second number on the same line**, `N other file(s) matched the allow-list and are NOT indexed (unreadable U, not a plain file L, cut C), and K lesson file(s) unreadable or not a plain file`. Zeros are printed. Two numbers because the first says "other file(s)"; one line so nothing can read the first and miss the second. |
+| `check`, the rebuild's last line, `doctor`, `up` | K above 0 does what N above 0 does. `check` also prints `NOT indexed: <lesson>  [why]  (a lesson; clause f)`. `doctor` with the server stopped says OK only when both numbers are 0. |
+| Not a gap | Lessons left out under (a), (b), (c), (d), (t). K counts clause (f) only. |
+
+## Tests
+
+- **"F2 9b" is changed, as told:** it asserted that the unreadable lesson was NOT in the count; it now asserts `…cut 1), and 1 lesson file(s) unreadable or not a plain file`.
+- **The resting fixture tree had four clause-(f) lessons, so it is now AMBER at its first `check`.** Section 4 asserts that (cells "F2 5b"); new section 6d moves the four away and asserts GREEN: the **MUST STAY GREEN** cells (rebuild says `done`, `check` rc 0 and GREEN, `doctor` OK, with 113 lessons left out by a, b, c, d and t). Everything after 6d runs on the tree without those four; the absence and clause tests for them (sections 6 and 6b, and the `Qf_` mutants) run before, unchanged.
+- New cells in R5-F2: `l1` one unreadable lesson and nothing else wrong (rebuild, check, doctor, up; named in `check`; still under clause f); `l1s` the same with the server stopped; `l2` one lesson that is a symlink; `l3` GREEN again (can fail).
+
+**Red cells, on round 5's code as it stood at READY FOR QA** (`evidence/red_first_round5b_tests_on_round5_code.log`: 842 passed, 27 failed), for example `F2 5b: check after the first rebuild is AMBER … (rc 0, wanted 6)`, `F2 l1: check (ONE LESSON is unreadable …): rc 0 (wanted 6), first line: check: GREEN`, `F2 l1: doctor … OK brain-db: index current`, `F2 l1s: … OK brain-db: server stopped`, `F2 l2: rebuild … last line: rebuild: done`. Said plainly: 2 of the 27 are MUST STAY GREEN lines that are red there only because round 5 does not print the second number; round 5 was GREEN on that tree. Green: `evidence/test_run_round5b.log` and `…_python39.log`, 869 and 0 each, 23:39 to 23:43, load average 14.
+
+| Mutant (one per new branch) | Caught on |
+|---|---|
+| `F2b_lesson_faults_uncounted` (K is always 0, as round 5) | `F2 5b: check after the first rebuild is AMBER` and the `l1` lines |
+| `F2b_check_green_over_lesson_fault` (counted, but still GREEN) | `F2 l1: check` |
+| `F2b_rebuild_done_over_lesson_fault` | `F2 l2: rebuild` |
+| `F2b_doctor_stopped_ok_over_lesson_fault` | `F2 l1s:` |
+| `F2b_rule_leftouts_are_gaps` (every left-out lesson counted) | `F2 5b MUST STAY GREEN` |
+
+**Mutants run: a subset, as ANSWER-9 says, not the whole set.** Control, the 10 F2 mutants of round 5, the 5 above, and the 2 file-level mutants whose fixtures I moved (`Qf_hard_link_through`, `Qf_symlink_followed`): 17 of 17 caught on the expected assertion, control 869 and 0, 0 servers left (`evidence/mutants_round5b_subset.log`, 23:46 to 00:00). The other 65 were last run whole on round 5's code and NOT on this code; the checker runs the whole set.
+
+## The checker's `green_faults.py`, from my copy, on this code
+
+`evidence/checker_reruns_round5b.txt`: lines saying GREEN 0, lines saying `OK brain-db` 0 (control from the same file: AMBER 5, WARN 5). Its block G2 (daily note and a LESSON unreadable) now reads `2 other file(s) … (unreadable 1, not a plain file 0, cut 1), and 1 lesson file(s) unreadable or not a plain file` and names the lesson. The proposed launcher and `doctor.sh` blocks, from the proposal's own text, with one unreadable lesson and nothing else wrong: `⚠ … GAPS` over the AMBER line, and a warn (`evidence/proposals_simulated_round5b.txt`, case C2).
+
+## Stop proof
+
+`evidence/real_check_round5b.txt`: `stop` rc 0, second `stop` rc 0, `server: STOPPED`, no `postmaster.pid`, socket directory empty, 0 postgres processes whose `-D` is in this lane (1 while it ran; control 47 bash). Checked again at 00:00 after the mutant run: 0 with a `-D` in this lane or under my scratchpad. Disk: 139 GiB free at the start of this round, 124 GiB at the end.
+
+## Documents
+
+`DESIGN.md` point 20a (its last sentences now say this), the instructions' expected suite line (869) and its AMBER row, one row of the `doctor` table in PROPOSALS item 3. Nothing else.
+
+## Slips of mine in round 5b
+
+1. A new test line expected `cut 0` where, with the server stopped, the tool prints `cut not known without the index`; one FAIL in my first run, the test string corrected, the tool untouched.
+2. My stub's new case was first inserted after the line that breaks the scope file, so it printed the scope refusal; moved and re-run. The evidence file is the corrected run.
+3. STATUS read WORKING for about 25 minutes while the mutant subset ran.
+
+## Not tested in round 5b
+
+The 65 mutants outside the subset, on this code. A GREEN `check` on the real tree with this code (above). Everything in round 5's list, unchanged.
+
+---
+
+# (round 5's report, as it stood; its first line was `READY FOR QA`)
+
+# ROUND 5 (answer to `ANSWER-8.md`: one short fix round on a closed list of four)
+
+Fresh build seat, 2026-11-27, 21:27 to 23:31 AEDT (both from `date`). All HOLDS kept. The drive cluster ran once, for one rebuild, one `check` and two `doctor` lines, and is STOPPED. Round 4b's report is kept whole below; where the two differ, this section stands. Every number is from a command I ran this session; the file is named beside it (all under `evidence/`).
+
+**In one paragraph.** The four items are fixed and nothing else in the tool was changed, with one disclosed exception (a one-line guard on `stop`, item 3). Suite: **837 passed, 0 failed** on Python 3.14.10 and 3.9.6 (round 4b: 692). The same tests on round 4b's code: **117 FAIL lines**, all in the new cells. Mutants: **82 of 82 caught on the expected assertion** (round 4b's 59 plus 23 new), control 837 and 0. The checker's attacks, from copies: SP4 **0 of 40** with the OTHER text (round 4b: 8 of 40); `green_faults.py` no GREEN and no OK anywhere; DB12 and M2 leave no directory, no lock file, no process. Real tree: 294 lessons, 256 indexed, **38 left out, the same 38 names and clauses as round 4b**; `check` GREEN with the new count at 0.
+
+**Three places where I went past the letter of the brief; each is cheap to reverse and each is said again under its item.** (1) The third word is `AMBER`, not `GREEN WITH GAPS`: the acceptance is "no GREEN over the gap" and a word that contains GREEN fails that by eye and by search. (2) A lesson's version is device, inode, size, modification time AND change time; the brief and the verdict say inode, size and modification time. Those three alone are defeated by a writer that rewrites in place and puts the time back (test F1.5; mutant `F1_stamp_no_ctime` lets the OTHER text in). (3) `stop` where no cluster exists no longer takes the lock. The brief named `init` and `start` only; **the verdict's own DB12 and M2 sequences end in `stop`, and once `init` is refused `stop` is the command that creates the lock file, so by the brief's rule the verdict's measurement wins.**
+
+**One acceptance line I cannot meet as worded, said plainly.** "0 of 40 … with its control": SP4's own control is "own > 0 and left out > 0". Against the fixed tool it reads own 0, left out 1, because its writer moves the pair about every 10 ms and one read of its 300-lesson tree takes longer: 39 of 40 rebuilds are refused, which the brief allows and I count. So the zero is real but SP4 alone no longer shows a finished rebuild of each state. I added `tests/f1_paced_attack.py`, SP4's writer with its pause as a parameter: there the control IS met and the answer is still 0 (table under item 1).
+
+## Item 1. F1, the torn read
+
+**What changed** (`braindb_index.py` lines 214 to 288 and 750 to 763; `DESIGN.md` point 16a). After every file is read: (1) the rules index is read again through the same guard and must hash the same; then (2) every lesson is `stat`-ed again by name inside the folder descriptor it was read through and must equal the `fstat` taken at its read. Anything moved: read the whole tree again, at most three tries, then `REFUSED: the tree changed while it was read; nothing was changed in the index`, exit code 5, before any database write. `check` goes through the same read. **The order of the two steps is part of the proof** (all reads, then the index, then the lessons: at the instant the index was re-read every lesson was still its read version), and it has its own test and mutant.
+
+| Case (section R5-F1 of `tests/run.sh`; pause points let the test change the tree at an exact moment) | On round 4b's code | Now |
+|---|---|---|
+| F1.1 the checker's SP4 made exact: lesson read in B, tree moves to A, index read | **RED cell:** `F1.1 the OTHER text (scoped to tuesday at every instant it existed) is NOT in the index ('qzflipOTHER' found 2 time(s))` | not indexed; one "read it again" naming the lesson |
+| **F1.2 the A, B, A case:** index read first in A, lesson read in B, back to A before the index is hashed again | RED: OTHER indexed | not indexed; what moved is the lesson ALONE (the index hash saw nothing) |
+| F1.3 index first, A then B and it stays | RED: OTHER indexed | not indexed; what moved is the index ALONE |
+| F1.4 the tree goes back to A between the two checks | RED | not indexed |
+| F1.5 lesson rewritten in place, same inode and size, modification time put back | RED | not indexed (the change time gave it away) |
+| F1.6 the lesson replaced under each of three reads | RED: `rebuild: done` | rc 5, the sentence above, exactly 3 tries, index byte-identical; `check` refused the same way |
+| F1.7 a lesson moved away before the check | RED: its text indexed | not indexed |
+
+Red run: 26 of the 117 FAIL lines (`red_first_round5_new_tests_on_round4b_code.log`; round 4b's `braindb_index.py` plus 13 lines that only pause, diff printed at its head). **On round 4b's code untouched**, the checker's instruments: SP4 8 of 40, SP4b torn at rebuild 2 (`checker_reruns_round5.txt`).
+
+| Attack, 40 rebuilds each (final code; SP4b up to 80) | OWN | left out | refused | **OTHER** | control |
+|---|---|---|---|---|---|
+| SP4, the checker's writer (3 ms pause) | 0 | 1 | 39 | **0** | NOT met (see above) |
+| paced, 0.05 s | 19 | 21 | 0 | **0** | met |
+| paced, 0.15 s | 22 | 18 | 0 | **0** | met |
+| paced, 0.4 s | 13 | 27 | 0 | **0** | met |
+| SP4b | no torn rebuild in 80 tries | | | **0** | |
+| round 4b, SP4 / paced 0.15 / paced 0.4 | | | | **8 / 1 / 1** | met |
+
+Mutants (9): `F1_no_validation` (F1.1), `F1_lessons_not_restatted` (F1.2: the verdict's "hash alone"), `F1_index_not_rehashed` (F1.3), `F1_validate_order_swapped` (F1.4), `F1_stamp_inode_only` and `F1_stamp_no_ctime` (F1.5), `F1_torn_read_accepted_at_the_end`, `F1_fourth_try` (F1.6), `F1_single_try` (F1.1).
+
+## Item 2. F2, GREEN and OK over gaps
+
+**What changed** (`braindb_index.py` `fault_class`, `gap_line`, `cmd_check`; `braindb.sh` `cmd_doctor`, `cmd_up`; `DESIGN.md` point 20a). One count, `N other file(s) matched the allow-list and are NOT indexed (unreadable U, not a plain file L, cut C)`, on `check`'s first line always (zeros included, and on its RED and "server is not answering" lines), in `doctor`'s one line, in the rebuild's last line. While it is not 0: `check` says `AMBER`, exit code 6, and names each file; `doctor` WARNs, exit code 1; the rebuild's last line says `DONE WITH FAULTS`; `up` exits 6. `check` reads the files before it asks the server, so **`doctor` warns with the server stopped too** (measured on the real tree: 0.92 s).
+
+- Red cells on round 4b's code: 57 FAIL lines, for example `F2 g1: check (a skill that is a SYMLINK into 3_Access_Keys): rc 0 (wanted 6), first line: check: GREEN, 84 files …` and `F2 9b: check is NOT green over the cut row`.
+- Green: section R5-F2, cases g0 to g8, each gap added in turn up to `5 other file(s) … (unreadable 1, not a plain file 3, cut 1)`, then closed again and GREEN (can-fail control).
+- **The checker's `green_faults.py` from a copy:** no line says GREEN or OK. Daily note 000: unreadable 1. Daily FOLDER 000: unreadable 1. Ledger symlink: not a plain file 1. The cut row: cut 1 in every block, **its "clean" control included (its tree holds the over-long skill from the start), so G0 is AMBER too; that is correct.** Round 4b from the same copy: GREEN and OK in all five blocks.
+- **The launcher block (PROPOSALS item 4) carries it: how.** It prints `check`'s first line, which now always holds the count; and when `up` exits 6 it prints that line under `⚠ brain-db: the index is current but has GAPS` instead of as success. Run from the proposal's own text in a stub on the checker's launcher case (ledger symlink, daily folder 000): `check: AMBER … 2 other file(s) … (unreadable 1, not a plain file 1, cut 0)`, and the `doctor.sh` block warns (`proposals_simulated_round5.txt`).
+- Mutants (10): `F2_check_green_over_gaps`, `F2_amber_exits_0`, `F2_not_plain_uncounted`, `F2_unreadable_uncounted`, `F2_cut_uncounted`, `F2_rebuild_done_over_gaps`, `F2_doctor_ok_over_gaps`, `F2_doctor_rc0_over_gaps`, `F2_doctor_stopped_ok`, `F2_up_rc0_over_gaps`.
+
+## Item 3. F4, `init` and `start` validate the scope
+
+`need_scope` before `locked __init` and `locked __start` (`braindb.sh` lines 313, 314). And line 316: `stop` where no cluster directory exists says `not running (no cluster at …)` without taking the lock. `stop` gets no scope test: a running server must always be stoppable, and that is tested under a refused scope.
+
+- Red cells on round 4b's code: 34 FAIL lines, for example `F4 'init' with no scope file: rc 0, cluster dir created, lock file created` and `F4 'stop' under a refused scope: rc 0, lock file CREATED`.
+- Green: section 12 (no scope file: `init start rebuild search at up`, then `stop`) and 12e (four refused scopes times six commands, then `stop`, then `start` on a cluster that EXISTS: rc 2, no server).
+- The checker's DB12 and M2 from a copy, final code: every line reads cluster directory False, lock file False; 0 postmasters; with a positive control (the same sequence under the good scope: True, True, 1 postmaster). Round 4b: created at `init`.
+- Mutants (3): `F4_init_unscoped`, `F4_start_unscoped`, `F4_stop_makes_a_lock_file`.
+
+## Item 4. K18, the failed-session branch
+
+No tool change: the code was right and no test reached it, so there is **no red cell on round 4b's code** (its 13 K18 lines pass there). Section R5-K18 enters the branch by the checker's F3 (a second lesson file whose name equals the first once a zero-width space is removed): exit code 1, `REBUILD FAILED` as the last line, psql's `duplicate key` error shown, no `rebuild: done`, the index byte-identical to the one before, `check` RED afterwards; and with the twin moved away the same rebuild succeeds. Mutant `K18_nonzero_psql_is_done` (the checker's own text): caught on 4 lines. **F3 itself is not fixed and stays a Minor:** two such files still make every rebuild fail until one is moved.
+
+## The text corrections
+
+| Where | Was | Now |
+|---|---|---|
+| PROPOSALS item 2, the `PORTABILITY.md` sentence | "No file that belongs to another seat or another client's project enters it." | "No lesson that is declared another seat's or another client's (by its row, its tier or a marker) enters it", with the consequence beside it |
+| PROPOSALS item 2 | "about 5 to 7 seconds", "about 160 MB" | 9 to 19 s under load (no quiet-machine figure exists), 174 MB |
+| INSTRUCTIONS step 2 | `483 passed`, "under a minute" | `837 passed`, about two minutes |
+| INSTRUCTIONS limit 4 | "exactly the same 802 rule lines" | round 4b's 740 of 805, none only in the index |
+| Both proposed scope files, closing comment | round 3's seat-word rule | says the closed table decides. **My reading:** Note 7 lists it among the stale texts though it is not a figure |
+
+Also written, because they describe this round's changes: `DESIGN.md` (points 5, 13, 15, 16a, 20a, 7d), the `doctor` table of PROPOSALS item 3, the launcher block of item 4, two rows of the instructions' message table and its `check` line.
+
+## Suite, mutants, real rebuild
+
+- Suite, final code: 837 passed, 0 failed, 22:16 to 22:18 (`test_run_round5.log`) and under 3.9.6, 22:18 to 22:21 (`test_run_round5_python39.log`); load average 13.
+- Mutants, whole (`mutants_round5.log`, 22:10 to 23:23): control 837 and 0; 81 of 82 caught on the expected assertion in the run; the 82nd, round 4b's `Qf_symlink_followed`, was red on 337 lines but not on its named one, re-run with the control and caught (see slip 2). 0 server processes left.
+- **The one real rebuild** (`real_rebuild_round5.txt`, 23:29, load average 11 to 13): 294 lesson files, 256 indexed, 38 left out, b=28, c=8, d=2; **the same 38 names and clauses as `left_out_lessons_round4b.txt`** (compared by script; list in `left_out_lessons_round5.txt`). One lesson more than round 4b's 293 and 255; the checker counted the same 294 and 256 at 20:31. 411 files, 22,296 search rows, 12.3 s. Last line `rebuild: done; … 0 other file(s) matched the allow-list and are NOT indexed (unreadable 0, not a plain file 0, cut 0); 38 lesson file(s) LEFT OUT …`. `check` GREEN, `doctor` OK, both with the count at 0. No retry was needed.
+- **Stop proof** (same file, 23:29:34): `stop` rc 0, second `stop` rc 0, `server: STOPPED`, no `postmaster.pid`, socket directory empty, 0 postgres processes whose `-D` is in this lane (1 while it ran; 1 other postmaster on this Mac, another project's, not touched; control 33 bash).
+- Disk, `df` before and after every attack family: 152 GiB free at the start, lowest 91 GiB at the end of the mutant run, 140 GiB now. No writer of mine grows a file: the checker's SP6 was cut out of my copy and never run.
+
+## What I could not make sound
+
+1. **F1 rests on five numbers standing for a version.** A writer that can step the machine's clock back, or a file system that reuses inode numbers AND keeps coarse times, could bring them all back. This drive is APFS: 2,000 replaces gave 2,000 distinct inodes and change times. Of the five, inode and modification time are covered by the change time, so a mutant that drops only one of those two would survive; I ship no such mutant and claim no test for them singly.
+2. **A tree that never holds still is never indexed.** That is the fix working, and it is the cost: under SP4's writer 39 of 40 rebuilds are refused.
+3. **F1 validates lessons and the rules index only**, as the brief says. A ledger or daily note that changes during the read is indexed as read. The folders above a file are still as `DESIGN.md` point 16 says.
+4. **F2's count is of files other than lessons, as the brief words it.** See the first sibling below.
+
+## Siblings found and NOT edited (the brief's STOP-and-list)
+
+1. **A LESSON that is unreadable or not a plain file does not turn `check` AMBER.** It is left out under clause (f), counted and named in the left-out line of `check` and `doctor`, and an unreadable one still makes the rebuild say `DONE WITH FAULTS`; but `check` alone says GREEN over it. Test "F2 9b" asserts exactly this. If "no GREEN over an unreadable input" is meant to cover lessons, this is the line to change.
+2. `search` still answers `NO MATCH` with no note when the word is in a file that is a gap.
+3. `status` prints the stored fault counts only.
+4. PROPOSALS item 7 still says "about 157 MB"; `scope/wednesday.scope`'s comment is untouched (the verdict's point ii suggestion); `DESIGN.md` point 21 still says one bad file does not lose the rebuild (false for F3).
+
+## Left, as the brief lists them (one line each)
+
+- F3: twin file names fail every rebuild; now proven loud by K18's test, not fixed.
+- F5: `search` and `at` answer from another seat's or tree's index when addressed to its cluster.
+- F6: `status` says STOPPED over a hand-started server under another spelling.
+- F7: the lock-wait limit exits 1, not 75, inside the self-start.
+- F8: nothing bounds the size or time of a read.
+- Notes 1 to 6, 8, 9: not touched (pickup table confirmed by the checker; `allow lesson` patterns accepted; Python-version difference for new characters; ß ø æ and `-->` costs; a non-UTF-8 scope file's traceback; other kinds taken whole; `devnas.prf` line 147; the second checker's lost controls). Note 7: done above.
+- The checker's other eight surviving mutants, K02, K06, K07, K11, K12, K13, K16, K17: still without a test. I did not run them, and I did not check that their anchors still apply to the changed file (K18's does: it is the one I shipped).
+- `own_projects`: not added. The two free-text tests of clause (d): not relabelled or removed.
+
+## Slips of mine
+
+1. **I launched the whole mutant run before I had run the checker's DB12, which showed the `stop` lock file.** I stopped my own harness (22 shells by pid, selected by executable and my scratch path; 2 scratch servers by `pg_ctl` on their own data directories), added the guard, and ran everything again on the final code. About 10 minutes lost; the first run's partial results are discarded.
+2. **My fix broke one of round 4b's mutants' expectations and I only saw it in the run.** With symlinks followed, the new snapshot check refuses every rebuild (a file read through a link is not the file its name stats as), so nothing is indexed and the old token assertions cannot fire. The mutant is still caught, by `rebuild (rc 5, wanted 0)`; I widened its EXPECT line in `tests/mutants.sh` and re-ran it with the control. No tool or test code changed after the suite logs.
+3. The SP4, paced and SP4b runs were first made before the `stop` guard; I re-ran all three on the final code and the evidence file says which is which.
+4. The red-first log's header first said "14 lines" for the pause points; it is 13, corrected.
+5. `py_compile` left a `.pyc` in the lane's `__pycache__` and made `tests/__pycache__`; both are gitignored.
+6. One hook refusal (an unquoted list variable under zsh); re-run inside `bash`.
+
+## Not tested
+
+F1 with `git` or a sync as the writer, on the real tree, or on another file system. Exit code 5 through `up`, the launcher block, and the self-build inside `search` and `at`. The 60 s limit of the test pause points. The two proposed blocks inside the real `doctor.sh` and launcher. Everything in round 4b's list, unchanged: another machine, drive or seat's real tree; an eject or sync with the server up; unison; a Postgres major-version difference; a quiet-machine timing.
+
+## Files (this round)
+
+Changed: `braindb_index.py` (1,635 lines), `braindb.sh` (330), `tests/run.sh` (1,010), `tests/mutants.sh`, `tests/make_fixtures.py` (the symlinked skill is no longer in the resting tree; R5-F2 plants it), `DESIGN.md`, `proposed/PROPOSALS.md`, `proposed/INSTRUCTIONS-for-other-seats.md`, both `proposed/scope/*.scope` (comment only). New: `tests/f1_paced_attack.py`, and in `evidence/`: `test_run_round5.log`, `test_run_round5_python39.log`, `red_first_round5_new_tests_on_round4b_code.log`, `mutants_round5.log`, `checker_reruns_round5.txt`, `proposals_simulated_round5.txt`, `real_rebuild_round5.txt`, `left_out_lessons_round5.txt`. The tool has one test-only switch more, `BRAINDB_TEST_READ_HOLD`, inert unless set to a directory that holds request files. The checker's folder was read only; my adapted copies of its scripts are in my scratchpad, not in the lane. No git write, no mail, no post, no network, nothing installed.
+
+---
+
+# (round 4b's report, as it stood; its first line was `READY FOR QA`)
+
 # ROUND 4b (answer to `ANSWER-7.md`: the client-name test is removed from clause (d))
 
 Same seat, 2026-11-27, 18:58 to 19:46 AEDT (from `date`). All HOLDS kept. The drive cluster ran once more, for one rebuild and the ten questions, and is STOPPED. Round 4's report is kept whole below; where the two differ, this section stands.

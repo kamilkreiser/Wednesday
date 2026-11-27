@@ -7,7 +7,9 @@
 #   braindb.sh start | stop | status
 #   braindb.sh up                   init if missing, start if stopped, rebuild if check is red
 #   braindb.sh rebuild              drop and reload everything from the files
-#   braindb.sh check                rc 0 when (path, sha256) on disk equals the index, else rc 1 + up to 20 paths
+#   braindb.sh check                rc 0 GREEN: (path, sha256) on disk equals the index and nothing that matched the
+#                                   allow-list is missing from it; rc 1 RED + up to 20 paths; rc 6 AMBER: equal, but
+#                                   files that matched the allow-list are unreadable, not plain files, or were cut
 #   braindb.sh search "<words>" [--kind K | --all] [--limit N]   rules and lessons first by default
 #   braindb.sh at <trigger> [--top N]
 #   braindb.sh doctor               one line for doctor.sh; starts nothing; rc 0 ok, rc 1 warn
@@ -16,6 +18,7 @@
 # that off. Every psql session the tool opens first asserts, inside that same session (and for a rebuild or
 # a read, inside the same transaction as the work), that the server's data directory is the one the command
 # is addressed to; otherwise rc 4 and nothing is read or changed. rc 3 = no server answers.
+# rc 5 = the tree changed while it was read, three times running: nothing was changed in the index.
 # The scope file is read and validated BEFORE any cluster is created or started (rc 2 on any refusal).
 #
 # Seat: the tree's folder name (WEDNESDAY, TUESDAY, FRIDAY). WED_AGENT, when set, must agree with it.
@@ -271,24 +274,35 @@ cmd_up() {
   need_scope
   find_pgbin
   running || locked __ensure || return 1
-  if indexer check; then return 0; fi
-  indexer rebuild && indexer check
+  local rc
+  indexer check; rc=$?
+  case "$rc" in 0|6) return "$rc" ;; esac     # 6 = AMBER: the index matches every file that could be read; a rebuild closes no gap
+  indexer rebuild || return $?
+  indexer check
 }
 
 cmd_doctor() { # ONE line for doctor.sh. Starts nothing, stops nothing. rc 0 = ok or not adopted, rc 1 = warn.
   if ! find_pgbin_soft; then echo "WARN brain-db: Postgres 15 binaries missing | brew install postgresql@15 (PORTABILITY 25 and the brain-db item)"; return 1; fi
   if [ ! -f "$SCOPE" ]; then echo "OK brain-db: not adopted on this seat (no scope/$SEAT.scope)"; return 0; fi
   if [ ! -f "$PGDATA/PG_VERSION" ]; then echo "WARN brain-db: no cluster yet | run 2_Project_Files/brain-db/braindb.sh up"; return 1; fi
-  local have want out rc first lo
+  local have want out rc first lo gap
   if ! out="$(indexer validate 2>&1)"; then echo "WARN brain-db: the scope file is refused | $(printf '%s\n' "$out" | sed -n 1p)"; return 1; fi
   have="$(tr -d ' \n' < "$PGDATA/PG_VERSION")"; want="$(bin_major)"
   if [ "$have" != "$want" ]; then echo "WARN brain-db: cluster is Postgres $have, binaries are Postgres $want | quarantine pgdata-$SEAT (mv -n) and run braindb.sh up"; return 1; fi
   out="$(BRAINDB_NO_AUTOSTART=1 indexer check 2>&1)"; rc=$?
-  first="$(printf '%s\n' "$out" | sed -n 1p)"
+  # the first line that is the answer (a "read it again" notice, when the tree moved under the read, is not it)
+  first="$(printf '%s\n' "$out" | /usr/bin/grep -v -F 'braindb: the tree changed while it was read (try' | sed -n 1p)"
   lo="$(printf '%s\n' "$out" | sed -n 's/^  left out: //p' | sed -n 1p)"
+  # the ONE count of files that matched the allow-list and are not indexed; check prints it on its first line
+  gap="$(printf '%s\n' "$first" | sed -n 's/^.*[;,] \(BUT \)\{0,1\}\([0-9][0-9]* other file(s) matched the allow-list and are NOT indexed ([^)]*), and [0-9][0-9]* lesson file(s) unreadable or not a plain file\).*$/\2/p')"
   case "$rc" in
     0) echo "OK brain-db: index current, $PGDATA (${first#check: }); $lo"; return 0 ;;
-    3) echo "OK brain-db: server stopped (on demand; the next search starts it), $PGDATA"; return 0 ;;
+    6) echo "WARN brain-db: index current but it has GAPS, $PGDATA | put right the files braindb.sh check names, then braindb.sh rebuild (${first#check: }); $lo"; return 1 ;;
+    3) case "$gap" in
+         "0 other file(s)"*", and 0 lesson file(s)"*) echo "OK brain-db: server stopped (on demand; the next search starts it), $PGDATA; $gap"; return 0 ;;
+         "") echo "WARN brain-db: server stopped, and the files could not be counted, $PGDATA | $first"; return 1 ;;
+         *) echo "WARN brain-db: server stopped, and $gap, $PGDATA | put right the files braindb.sh check names, then braindb.sh rebuild"; return 1 ;;
+       esac ;;
     1) echo "WARN brain-db: index stale, $PGDATA | braindb.sh rebuild (${first#check: }); $lo"; return 1 ;;
     4) echo "WARN brain-db: ANOTHER cluster is answering on this seat's socket directory $SOCKDIR | $first"; return 1 ;;
     *) echo "WARN brain-db: check could not run (rc $rc) | $first"; return 1 ;;
@@ -296,9 +310,11 @@ cmd_doctor() { # ONE line for doctor.sh. Starts nothing, stops nothing. rc 0 = o
 }
 
 case "${1:-}" in
-  init)    locked __init ;;
-  start)   locked __start ;;
-  stop)    locked __stop ;;
+  init)    need_scope; locked __init ;;      # ROUND 5 (F4): a refused or missing scope file leaves no directory,
+  start)   need_scope; locked __start ;;     # no lock file and no process, for these two as for every other command
+  stop)    # F4: nothing to stop where no cluster exists; say so WITHOUT creating its lock file (stop never needs a scope)
+           if [ ! -e "$PGDATA" ] && [ ! -L "$PGDATA" ]; then echo "stop: not running (no cluster at $PGDATA)"; exit 0; fi
+           locked __stop ;;
   __init)  cmd_init ;;
   __start) cmd_start ;;
   __stop)  cmd_stop ;;

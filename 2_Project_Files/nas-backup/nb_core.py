@@ -13,6 +13,21 @@
 #   - proof is saved as it goes (the engine works in chunks; each chunk is proven and indexed before the next).
 # Round 2's file is kept at round2/nb_core.py.round2, round 1's at round1/nb_core.py.round1.
 #
+# ROUND 4 (2026-11-27, ANSWER-6: six fixes after the third check, and nothing else). Round 3's file is kept at
+# round3/nb_core.py.round3. Each fix is marked "ROUND 4" where it sits:
+#   1. two sets of one client whose destination names NEST, and one destination name under two clients: refused
+#      at load (load_conf);
+#   2. a SYMLINK anywhere in the destination chain is refused (ensure_dest_chain), and before each set the real
+#      paths of its destination, versions, manifests, runs and _tmp_incoming must lie inside the seat's own
+#      nightly-backup folder (dest_escape);
+#   3. a planned file that has gained a second HARD LINK is kept out of the chunk it would travel in, and at
+#      proof time it is a verdict of its own that is never proven (hard_linked_now, prove_arrival);
+#   4. what the secret-shape rule leaves out is written BY NAME, per set, to a file on the DRIVE only
+#      (write_left_out_list); that file is never copied to the share and never part of a backup;
+#   5. the deletion proof also needs the planned path not to resolve, and the parent folder to be the very
+#      folder that was listed (source_deleted);
+#   6. the HOLD is tested before the conf is read (cmd_backup).
+#
 # WED-170, Kam 2026-11-27 12:03: a NIGHTLY, STAGGERED, COPY-ONLY backup of one coordinator seat's folder and its
 # working projects to the DEV-Working NAS, with next-night catch-up and a three-day flag.
 # Round 2 answers the independent check of 2026-11-27 (0_Brain/reference/2026-11-27_qa-nasbackup/verdict.md, NO GO)
@@ -152,7 +167,11 @@ EXCLUDES = [
     ("system", "any", [".ds_store", ".spotlight-v100", ".fseventsd", ".trashes", ".temporaryitems",
                        ".smbdelete*", ".unison*", "#recycle"]),
     ("system", "files", ["._*"]),
+    # ROUND 4 (finding 4): this tool's own lists of what the secret-shape rule left out hold the NAMES of real
+    # secret files. They live on the drive, inside the seat's tree; they must never travel to the share.
+    ("own-left-out-list", "files", ["*_left_out_by_secret_shape.tsv"]),
 ]
+LEFT_OUT_SUFFIX = "_left_out_by_secret_shape.tsv"          # must match the pattern in the line above
 FORBIDDEN_RSYNC = ("--del", "--delete", "--remove-source-files", "--force", "--inplace", "--prune-empty-dirs",
                    "--existing", "--ignore-existing")
 
@@ -385,6 +404,29 @@ class Ctx(object):
                             raise Refused("REFUSED — source %s (real path %s) has the component '%s', which contains '%s': "
                                           "that is another seat's or another client's material, never backed up by seat %s"
                                           % (s["src"], s["real"], comp, f, self.seat))
+        # ROUND 4 (third check, finding 1): NESTED DESTINATIONS. Two sets of ONE client whose destination names
+        # nest (`X` and `X/sub`) write into each other's folder: each night the inner set overwrote the outer
+        # set's file of the same path, both proofs passed in turn, and every night said GOOD. Refused at load,
+        # like a nested source. Compared part by part (split at `/`), each part NFC-normalised and case-folded.
+        # (Finding 5, its smallest form:) the SAME destination name under TWO clients is refused too: the
+        # baseline of the fall rule, allow_empty and the index are kept by the destination name alone, so two
+        # sets of one name would share one row in each of the three.
+        def dparts(s):
+            return tuple(unicodedata.normalize("NFC", p).casefold() for p in s["dest"].split("/"))
+        for i, a in enumerate(c["sets"]):
+            for b in c["sets"][i + 1:]:
+                pa, pb = dparts(a), dparts(b)
+                n = min(len(pa), len(pb))
+                if a["client"] == b["client"] and pa[:n] == pb[:n]:
+                    raise Refused("REFUSED — the destinations of two sets of client %s NEST: '%s' and '%s' (one name is a "
+                                  "path prefix of the other). The inner set would write inside the outer set's folder and "
+                                  "the two would overwrite each other's files every night; give them names that do not "
+                                  "nest; nothing run" % (a["client"], a["dest"], b["dest"]))
+                if a["client"] != b["client"] and pa == pb:
+                    raise Refused("REFUSED — the destination name '%s' is used under two clients (%s and %s): the baseline "
+                                  "of the fall rule, allow_empty and the index are kept by that name alone, so the two sets "
+                                  "would share them; give one of them another name; nothing run"
+                                  % (a["dest"], a["client"], b["client"]))
         # FORBIDDEN ROOTS, BOTH DIRECTIONS (second check, finding 3: a set= naming the PARENT of the seat trees
         # carried TUESDAY and FRIDAY to the NAS). A source is refused when it IS a forbidden root, lies INSIDE one,
         # or is an ANCESTOR of one, by real path.
@@ -724,10 +766,19 @@ def ensure_dest_chain(root_existing, rel_parts, create):
     cur = root_existing
     existed = True
     deepest = root_existing
+    # ROUND 4 (third check, finding 2): A SYMLINK IS NEVER A LEVEL OF THE DESTINATION. os.path.isdir follows a
+    # link, so `<NAS>/General/Wednesday -> <NAS>/Datasec/x` was accepted and the whole backup was written into
+    # another client's folder. The level the walk starts from (the client folder) is held to the same rule.
+    if os.path.islink(root_existing):
+        raise Refused("REFUSED — %s on the NAS is a SYMLINK (to %s): this tool writes only into real folders, never "
+                      "through a link; nothing written" % (root_existing, os.readlink(root_existing)))
     for part in rel_parts:
         chk = real_name_check(cur, part) if os.path.isdir(cur) else "absent"
         nxt = os.path.join(cur, part)
         if chk == "exact":
+            if os.path.islink(nxt):
+                raise Refused("REFUSED — %s on the NAS is a SYMLINK (to %s): this tool writes only into real folders of "
+                              "its own destination, never through a link; nothing written" % (nxt, os.readlink(nxt)))
             if not os.path.isdir(nxt):
                 raise Refused("REFUSED — %s exists on the NAS but is not a folder" % nxt)
             if existed:
@@ -742,6 +793,27 @@ def ensure_dest_chain(root_existing, rel_parts, create):
                           % (chk, part, cur))
         cur = nxt
     return cur, existed, deepest
+
+
+DEST_SUBFOLDERS = ("versions", "manifests", "runs", "_tmp_incoming")
+
+
+def dest_escape(ctx, client, dest=None):
+    """ROUND 4 (third check, finding 2). Returns None when every folder this tool writes for `client` resolves
+    INSIDE the seat's own folder, realpath(<NAS>/<Client>/<Seat>/nightly-backup); else one sentence naming the
+    first that does not. Looked at: the set's destination (current/<dest>, when `dest` is given), versions,
+    manifests, runs and _tmp_incoming. A path that does not exist yet resolves to itself, which is inside."""
+    croot = ctx.client_root(client)
+    base = os.path.realpath(croot)
+    paths = [os.path.join(croot, sub) for sub in DEST_SUBFOLDERS]
+    if dest is not None:
+        paths.insert(0, os.path.join(croot, "current", *dest.split("/")))
+    for p in paths:
+        rp = os.path.realpath(p)
+        if rp == base or not contains(base, rp):
+            return ("%s resolves to %s, which is OUTSIDE this seat's own destination folder %s (a symlink on the "
+                    "share leads out of it)" % (p, rp, base))
+    return None
 
 
 def ckey(rel):
@@ -795,7 +867,8 @@ class Rules(object):
 def walk(top, rules=None):
     """dict(files={rel:(size,mtime_ns,ctime_ns)}, dirs=set, links={rel:target}, specials=[rel],
     excluded={(cat,pattern):entries}, hardlinks=[rel], errors=[str]). Never follows a symlink."""
-    res = {"files": {}, "dirs": set(), "links": {}, "specials": [], "excluded": {}, "hardlinks": [], "errors": []}
+    res = {"files": {}, "dirs": set(), "links": {}, "specials": [], "excluded": {}, "hardlinks": [], "errors": [],
+           "secret_names": [], "dir_ids": {}}
     stack = [("", top)]
     while stack:
         rel, path = stack.pop()
@@ -813,6 +886,8 @@ def walk(top, rules=None):
                     m = rules.match(e.name, r, is_dir) if rules else None
                     if m:
                         res["excluded"][m] = res["excluded"].get(m, 0) + 1
+                        if m[0] == "secret":
+                            res["secret_names"].append((r, m[1]))          # ROUND 4: named on the drive, never on the share
                         continue
                     if is_link:
                         try:
@@ -821,6 +896,10 @@ def walk(top, rules=None):
                             res["links"][r] = "?unreadable: %s" % ex
                     elif is_dir:
                         res["dirs"].add(r)
+                        if rules is not None:
+                            # ROUND 4 (finding 6): which folder this IS, for the deletion proof (source walks only)
+                            ds = e.stat(follow_symlinks=False)
+                            res["dir_ids"][r] = (ds.st_dev, ds.st_ino)
                         stack.append((r, e.path))
                     elif e.is_file(follow_symlinks=False):
                         s = e.stat(follow_symlinks=False)
@@ -1296,7 +1375,8 @@ def plan_set(ctx, s, index_rows, last_count, accept_shrink, do_hash=True, on_pro
         dst = walk(dest_dir)
         plan["nas_listed"].append("%s: %d files, %d folders (walked whole)" % (dest_dir, len(dst["files"]), len(dst["dirs"])))
     else:
-        dst = {"files": {}, "dirs": set(), "links": {}, "specials": [], "errors": [], "excluded": {}, "hardlinks": []}
+        dst = {"files": {}, "dirs": set(), "links": {}, "specials": [], "errors": [], "excluded": {}, "hardlinks": [],
+               "secret_names": [], "dir_ids": {}}
         try:
             plan["nas_listed"].append("%s: %d entries at its top level; the destination below it does not exist yet"
                                       % (deepest, len(os.listdir(deepest))))
@@ -1420,11 +1500,18 @@ def prove_arrival(src_path, dst_path):
        unreadable  the source could not be read, for ANY reason (permission, I/O error, a privacy refusal, no such
                    file, no longer a regular file). This is NOT 'gone': the caller treats it as NOT DELIVERED
                    unless source_deleted() then proves the file was deleted.
+       hardlinked  ROUND 4 (third check, finding 3): the source now has more than one hard link. It had one when
+                   it was planned (the walk leaves out every file with more), so another name was given to it
+                   since, and that other name may sit inside a secrets folder. NEVER proven, whatever the
+                   destination holds.
        differs     the destination is absent, unreadable, or holds other content."""
     try:
         s1 = stat3(src_path)
-        if not stat.S_ISREG(os.lstat(src_path).st_mode):
+        ls = os.lstat(src_path)
+        if not stat.S_ISREG(ls.st_mode):
             return ("unreadable", None, "the source is no longer a regular file")
+        if ls.st_nlink > 1:
+            return ("hardlinked", None, "the source has %d hard links now and had one when it was planned" % ls.st_nlink)
         if _TEST["hash_delay"]:
             time.sleep(_TEST["hash_delay"])
         hs = sha256_of(src_path)
@@ -1442,26 +1529,76 @@ def prove_arrival(src_path, dst_path):
     return ("proven", s1, "") if hs == hd else ("differs", s1, "the destination copy holds other content")
 
 
-def source_deleted(root, root_id, rel):
+def hard_linked_now(path):
+    """ROUND 4 (third check, finding 3): True when `path` is a regular file with more than one hard link NOW.
+    Asked immediately before a chunk is handed to the engine. A path that cannot be looked at is not judged here:
+    the arrival proof judges it."""
+    try:
+        st = os.lstat(path)
+    except OSError:
+        return False
+    return stat.S_ISREG(st.st_mode) and st.st_nlink > 1
+
+
+def source_deleted(root, root_id, rel, parent_id=None):
     """True ONLY when the planned file is provably DELETED from the source: the set's root is still the very folder
     that was listed, the file's PARENT folder can be listed, and the name is absent from that listing; checked
     twice. A folder that cannot be listed, a parent that is itself gone, a root that was moved or unmounted: False
-    (the file is then NOT DELIVERED). 'Could not read it' is never taken to mean 'it was deleted'."""
-    parent = os.path.dirname(os.path.join(root, rel))
+    (the file is then NOT DELIVERED). 'Could not read it' is never taken to mean 'it was deleted'.
+    ROUND 4 (third check, finding 6), two more conditions, each of which a file that STILL EXISTS failed to meet:
+      - the planned path must not resolve (os.path.lexists): on a volume that folds case, a file renamed to another
+        case is absent from the listing BY NAME while its planned path still opens it;
+      - when the caller knows which folder the parent WAS when it was listed (parent_id: device and inode), the
+        parent must still be that folder: a folder REPLACED by a new one of the same name lists without the file,
+        and the file lives on wherever the old folder went."""
+    path = os.path.join(root, rel)
+    parent = os.path.dirname(path)
     name = os.path.basename(rel)
     for attempt in (1, 2):
         try:
             rs = os.stat(root)
             if (rs.st_dev, rs.st_ino) != tuple(root_id) or not stat.S_ISDIR(rs.st_mode):
                 return False
+            if parent_id is not None:
+                ps = os.stat(parent)
+                if (ps.st_dev, ps.st_ino) != tuple(parent_id):
+                    return False
             names = os.listdir(parent)
         except OSError:
             return False
         if name in names:
             return False
+        if os.path.lexists(path):
+            return False
         if attempt == 1:
             time.sleep(DELETE_RECHECK_SECONDS)
     return True
+
+
+def parent_id_of(plan, rel):
+    """The (device, inode) of the folder that held `rel` when the set was listed. A parent the walk has no record
+    of gets an id nothing can equal, so the deletion proof fails closed."""
+    prel = os.path.dirname(rel)
+    return plan["root_id"] if prel == "" else plan["src"]["dir_ids"].get(prel, (-1, -1))
+
+
+def left_out_line(rel, shape):
+    """One line of the left-out list: <relative path> TAB <shape>. A backslash, tab, newline or carriage return
+    inside a name is written as \\\\, \\t, \\n, \\r, so one entry is always exactly one line."""
+    return "%s\t%s\n" % (rel.replace("\\", "\\\\").replace("\t", "\\t").replace("\n", "\\n").replace("\r", "\\r"), shape)
+
+
+def write_left_out_list(ctx, stamp, mode, safe, secret_names):
+    """ROUND 4 (third check, finding 4; ANSWER-5's condition for keeping the wide name rule). What the secret-shape
+    rule left out of this set, BY NAME: one line per excluded entry (a folder is one entry; nothing under it was
+    looked at), relative path TAB shape, sorted. Written in the lane's manifests/ ON THE DRIVE, beside the symlink
+    list, by a dry run as well. NEVER written to the share: these are the names of real secret files, and whoever
+    can read the share could read them. The file's own name is excluded from every backup (EXCLUDES)."""
+    lp = os.path.join(ctx.manifest_dir, "%s_%s_%s%s" % (stamp, mode, safe, LEFT_OUT_SUFFIX))
+    with open(lp, "w", encoding="utf-8", errors="surrogateescape") as fh:
+        for rel, shape in sorted(secret_names):
+            fh.write(left_out_line(rel, shape))
+    return lp
 
 
 def deleted_allowed(conf, planned):
@@ -1564,13 +1701,17 @@ def cmd_backup(ctx, mode, scheduled=False, out_of_sequence=None, max_seconds=Non
         say("DRY RUN: reads only. Nothing is written to the NAS, the state file or the index. The engine is never "
             "handed a NAS path in a dry run: the destination is LISTED by this tool.")
     try:
+        # ROUND 4 (third check, finding 10): THE HOLD IS TESTED FIRST, before the conf is read. A held --run that
+        # would also be refused for another reason (an unconfirmed conf) was recorded as `refused` and started the
+        # three-day clock; lifting the hold days later then raised OVERDUE at the first check. Under the hold
+        # every --run is `held`, whatever else is wrong, and never starts the clock.
+        if mode == "run" and os.path.exists(ctx.hold_file):
+            raise Refused("REFUSED — %s exists: real runs are HELD (arming is the coordinator's word on Kam's "
+                          "instruction); --dry is still allowed; nothing run" % ctx.hold_file, RC_HELD)
         ctx.load_conf()
         st0 = ctx.read_state()
         if ctx.state_note:
             say(ctx.state_note)
-        if mode == "run" and os.path.exists(ctx.hold_file):
-            raise Refused("REFUSED — %s exists: real runs are HELD (arming is the coordinator's word on Kam's "
-                          "instruction); --dry is still allowed; nothing run" % ctx.hold_file, RC_HELD)
         for label, val in (("--out-of-sequence", out_of_sequence), ("--accept-shrink", accept_shrink)):
             if val is not None and len(val.strip()) < 6:
                 raise Refused("REFUSED — %s needs the id of the card Kam ruled (it is recorded in the manifest)" % label)
@@ -1587,6 +1728,8 @@ def cmd_backup(ctx, mode, scheduled=False, out_of_sequence=None, max_seconds=Non
             try:
                 # A refusal under the HOLD is recorded as `held`: it is not an attempt and never starts the clock.
                 ctx.note_attempt("held" if e.rc == RC_HELD else "refused", str(e))
+                if ctx.state_note and ctx.state_note not in lines:
+                    say(ctx.state_note)          # a damaged state file met while recording a held run is still said
             except Exception as ex:
                 err("nas-backup: could not record the refusal in the state file: %s" % ex)
         with open(run_log, "w", encoding="utf-8") as fh:
@@ -1657,7 +1800,9 @@ def backup_body(ctx, mode, stamp, lines, say, st0, run_log, scheduled, out_of_se
     totals = {"src_files": 0, "src_bytes": 0, "copy_files": 0, "copy_bytes": 0, "new": 0, "changed": 0,
               "dst_files": 0, "dst_bytes": 0, "dst_only_files": 0, "versioned": 0, "deleted": 0, "resent": 0,
               "symlinks": 0, "excluded_entries": 0, "case_collision_files": 0, "hard_link_files": 0,
-              "type_changes": 0, "undelivered": 0, "proven_by_sha256": 0, "repaired": 0, "sampled": 0}
+              "type_changes": 0, "undelivered": 0, "proven_by_sha256": 0, "repaired": 0, "sampled": 0,
+              "hard_linked_after_plan": 0}
+    hardlink_all = []          # ROUND 4: (set/path, SENT or NOT SENT, where) for every file that gained a hard link after the plan
     secret_counts, token_counts, set_counts = {}, dict((t[0], 0) for t in tokens), {}
     client_roots = {}
     index = None
@@ -1678,6 +1823,12 @@ def backup_body(ctx, mode, stamp, lines, say, st0, run_log, scheduled, out_of_se
             croot = ctx.client_root(s["client"])
             if mode == "run":
                 ensure_dest_chain(os.path.join(c["nas_root"], s["client"]), [ctx.info["cap"], BACKUP_FOLDER], create=True)
+            # ROUND 4 (third check, finding 2): BEFORE ANYTHING IS WRITTEN FOR THIS SET, every folder it would write
+            # into must resolve inside this seat's own nightly-backup folder. A dry run is held to it as well.
+            esc = dest_escape(ctx, s["client"], s["dest"])
+            if esc:
+                raise Refused("REFUSED — %s; nothing written for set %s" % (esc, s["dest"]))
+            if mode == "run":
                 for sub in ("current", "versions", "manifests", "runs", "_tmp_incoming"):
                     ensure_dest_chain(croot, [sub], create=True)
                 ensure_dest_chain(croot, ["current"] + s["dest"].split("/"), create=True)
@@ -1707,6 +1858,9 @@ def backup_body(ctx, mode, stamp, lines, say, st0, run_log, scheduled, out_of_se
                 saver.flush()          # whatever was found identical so far is kept, also when the plan is interrupted
             src = plan["src"]
             dest_dir = plan["dest_dir"]
+            # ROUND 4 (finding 4): what the secret-shape rule left out of this set, BY NAME, on the drive only.
+            # Written as soon as the set is listed, so an interrupted run has it too.
+            left_out_file = write_left_out_list(ctx, stamp, mode, s["dest"].replace("/", "__"), src["secret_names"])
             n_src = len(src["files"])
             src_bytes = sum(v[0] for v in src["files"].values())
             set_counts[s["dest"]] = n_src
@@ -1723,6 +1877,8 @@ def backup_body(ctx, mode, stamp, lines, say, st0, run_log, scheduled, out_of_se
                 % (n_src, fmt_bytes(src_bytes), len(src["dirs"]), len(src["links"]), len(src["specials"])))
             say("    excluded at the source: %d entries (%s)" % (exc_entries, ", ".join(
                 "%s=%d" % (cat, n) for cat, n in sorted(sum_by_cat(src["excluded"]).items())) or "none"))
+            say("    left out by secret shape: %d entries, listed BY NAME on this drive only, never on the share: %s"
+                % (len(src["secret_names"]), left_out_file))
             for ln in plan["nas_listed"]:
                 say("    listed on the NAS (read-only): %s" % ln)
             say("    to copy: %d files, %s (%d new, %d changed -> previous copy kept in versions/%s/); %d new folders"
@@ -1755,6 +1911,8 @@ def backup_body(ctx, mode, stamp, lines, say, st0, run_log, scheduled, out_of_se
                     "symlinks": len(src["links"]), "specials": len(src["specials"]),
                     "excluded": [{"category": k[0], "pattern": k[1], "entries": v} for k, v in sorted(src["excluded"].items())],
                     "hard_link_files_skipped": src["hardlinks"][:500],
+                    "left_out_by_secret_shape_entries": len(src["secret_names"]),
+                    "left_out_by_secret_shape_list_on_the_drive": left_out_file,
                     "to_copy_files": len(plan["copy"]), "to_copy_bytes": copy_bytes, "new": n_new, "changed": n_chg,
                     "case_collision_names": plan["collisions"][:200],
                     "case_collision_files_not_backed_up": len(plan["collision_skipped"]),
@@ -1805,6 +1963,8 @@ def backup_body(ctx, mode, stamp, lines, say, st0, run_log, scheduled, out_of_se
                 # accounting: nothing below can take a file out of it.
                 planned = set(src["files"])
                 why = {}                    # rel -> why it is not proven (printed with its name)
+                held_back = []              # ROUND 4: gained a second hard link after the plan; kept out of its chunk
+                sent_linked = []            # ROUND 4: (rel, destination path, content there now) seen only at proof time
                 missing_dirs = []
                 stop = None                 # set when the engine was stopped (cap, stall) or the cap passed mid-proof
                 try:
@@ -1892,9 +2052,28 @@ def backup_body(ctx, mode, stamp, lines, say, st0, run_log, scheduled, out_of_se
                         if not nas_is_smb_mounted(ctx):
                             raise Refused("REFUSED — %s is no longer mounted as a network share; stopped in set %s before "
                                           "chunk %d of %d" % (c["nas_root"], s["dest"], ci, len(chunks)))
+                        # ROUND 4 (finding 2): ... and so is the destination, before every chunk: a symlink put into
+                        # the chain while the set is being copied gets at most the one chunk that was in flight.
+                        esc = dest_escape(ctx, s["client"], s["dest"])
+                        if esc:
+                            raise Refused("REFUSED — %s; stopped in set %s before chunk %d of %d"
+                                          % (esc, s["dest"], ci, len(chunks)))
                         todo = list(chunk)
                         todo_dirs = list(plan["copy_dirs"]) if ci == 1 else []
                         for npass in range(1, MAX_PASSES + 1):
+                            # ROUND 4 (third check, finding 3): IMMEDIATELY BEFORE THE CHUNK IS HANDED TO THE ENGINE,
+                            # every file of it is looked at again. One that has more than one hard link now (it had
+                            # one when planned) is taken out of the chunk: it is not sent, it is never proven, and
+                            # the night fails naming it. This narrows the window to the one chunk in flight.
+                            linked = set(rel for rel in todo if hard_linked_now(os.path.join(s["src"], rel)))
+                            if linked:
+                                for rel in sorted(linked):
+                                    why[rel] = ("%s: it has more than one hard link now and had one when it was planned; "
+                                                "another name for the same file may sit in a secrets folder"
+                                                % ("NOT SENT" if npass == 1 else "NOT SENT AGAIN (pass %d of this run sent it while "
+                                                   "it was changing, before the second link was seen)" % (npass - 1)))
+                                    held_back.append(rel)
+                                todo = [rel for rel in todo if rel not in linked]
                             if not todo and not todo_dirs:
                                 break
                             tag = "" if npass == 1 else "_pass%d" % npass
@@ -1968,8 +2147,20 @@ def backup_body(ctx, mode, stamp, lines, say, st0, run_log, scheduled, out_of_se
                                     totals["proven_by_sha256"] += 1
                                     if plan["reason"].get(rel) == "repair":
                                         totals["repaired"] += 1
+                                elif verdict == "hardlinked":
+                                    # ROUND 4 (finding 3): the second link appeared after the chunk was handed over.
+                                    # NEVER proven. The file was sent; say plainly whether its content is there.
+                                    dpath = os.path.join(dest_dir, drel)
+                                    try:
+                                        there = os.path.isfile(dpath) and sha256_of(dpath) == sha256_of(os.path.join(s["src"], rel))
+                                    except OSError:
+                                        there = False
+                                    why[rel] = ("%s; it was SENT before that was seen, and its content %s %s, where this tool "
+                                                "never deletes" % (note, "ALREADY REACHED THE DESTINATION at" if there
+                                                                   else "may have reached the destination (the copy there does not match it now) at", dpath))
+                                    sent_linked.append((rel, dpath, there))
                                 elif verdict == "unreadable":
-                                    if source_deleted(s["src"], plan["root_id"], rel):
+                                    if source_deleted(s["src"], plan["root_id"], rel, parent_id_of(plan, rel)):
                                         deleted.append(rel)
                                         why.pop(rel, None)
                                     else:
@@ -2020,6 +2211,23 @@ def backup_body(ctx, mode, stamp, lines, say, st0, run_log, scheduled, out_of_se
                                     "(max_deleted_files=%d, max_deleted_fraction=%g of %d planned): that many is not a few "
                                     "temporary files" % (s["dest"], len(deleted), allowed, c["max_deleted_files"],
                                                          c["max_deleted_fraction"], len(planned)))
+                # ROUND 4 (finding 3): a second hard link that appeared after the plan fails the night, by name.
+                held_only = sorted(r for r in set(held_back) if r not in proven and r not in set(x[0] for x in sent_linked))
+                if held_only:
+                    problems.append("%s: %d planned file(s) gained a second HARD LINK after the plan and were NOT SENT (first: %s). "
+                                    "Another name for the same file may sit in a secrets folder; the walk leaves such files out, "
+                                    "and so does the copy" % (s["dest"], len(held_only), held_only[0]))
+                    hardlink_all += [("%s/%s" % (s["dest"], r), "NOT SENT", "") for r in held_only]
+                if sent_linked:
+                    problems.append("%s: %d planned file(s) gained a second HARD LINK after the plan and were SENT before that was "
+                                    "seen. THE CONTENT ALREADY REACHED THE DESTINATION and this tool never deletes there: look at "
+                                    "each path named below and remove it by hand if the other name is a secret (first: %s at %s)"
+                                    % (s["dest"], len(sent_linked), sent_linked[0][0], sent_linked[0][1]))
+                    hardlink_all += [("%s/%s" % (s["dest"], r), "SENT", "%s (its content is there now: %s)" % (dp, "YES" if th else "no"))
+                                     for r, dp, th in sent_linked]
+                totals["hard_linked_after_plan"] += len(held_only) + len(sent_linked)
+                mset.update({"hard_linked_after_plan_not_sent": held_only[:500],
+                             "hard_linked_after_plan_sent": [[r, dp, th] for r, dp, th in sent_linked[:500]]})
                 if undelivered:
                     first = undelivered[0]
                     problems.append("%s: %d file(s) NOT PROVEN at the destination with the source's content (first: %s: %s)"
@@ -2124,6 +2332,13 @@ def backup_body(ctx, mode, stamp, lines, say, st0, run_log, scheduled, out_of_se
             say("  DELETED AT SOURCE: %s" % d)
         if len(deleted_all) > 600:
             say("  ... and %d more, all in the manifest" % (len(deleted_all) - 600))
+    if hardlink_all:
+        say("HARD LINK AFTER THE PLAN (%d file(s)): each had one name when its set was listed and has more than one now. None "
+            "is proven; the night fails. This tool deletes nothing at the destination:" % len(hardlink_all))
+        for name, what, where in hardlink_all[:600]:
+            say("  HARD LINK AFTER THE PLAN, %s: %s%s" % (what, name, (" -> " + where) if where else ""))
+        if len(hardlink_all) > 600:
+            say("  ... and %d more, in the manifest" % (len(hardlink_all) - 600))
     if mode == "dry":
         est_copy_h = totals["copy_files"] / c["est_files_per_s"] / 3600.0
         est_list_min = (totals["src_files"] / c["est_list_per_s"]) / 60.0
@@ -2140,8 +2355,14 @@ def backup_body(ctx, mode, stamp, lines, say, st0, run_log, scheduled, out_of_se
             say("DRY RUN finished: a real run would copy the files above. Nothing was written to the NAS.")
             rcode = RC_OK
     else:
+        # ROUND 4 (finding 2): the manifest and the completion marker are written on the share too, so the same
+        # question is asked once more, for every client folder, before either is written.
+        escapes = [e for e in (dest_escape(ctx, client) for client in sorted(client_roots)) if e]
+        for e in escapes:
+            problems.append("the manifest and the completion marker were NOT written on the NAS: %s" % e)
+            good = False
         try:
-            for client, croot in client_roots.items():
+            for client, croot in ([] if escapes else list(client_roots.items())):
                 cm = dict(manifest)
                 cm["sets"] = [m for m in manifest["sets"] if m["client"] == client]
                 with open(os.path.join(croot, "manifests", "%s_manifest.json" % stamp), "w", encoding="utf-8", errors="surrogateescape") as fh:

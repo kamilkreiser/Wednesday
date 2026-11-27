@@ -1,5 +1,213 @@
 READY FOR QA
 
+**Both tasks of ANSWER-6 are done. `RESULT-quarantine-erase.md` was written first (first line DONE).** TASK 1 in two lines: the quarantine folder is erased from the Backup share, and so is the copy of it the NAS had put in its recycle bin (16,807 files, 1,010,204,025 bytes, each of the 39 folders counted equal to its record first); nothing else at the share's top level changed. One of the seven originals on the drive changed while I worked, because a live Secuura session is writing to it; my program has no write path on the drive.
+
+**One thing for the coordinator before a checker is commissioned:** I found a sibling of finding 2 that is NOT on the closed list, measured it, and did not edit it, as the brief orders: a link planted at the fixed file name `README.txt` in the destination folder makes the tool create a file outside the seat's folder and say GOOD. One word fixes it. It is the first entry under "Siblings" below.
+
+# ROUND 4 (2026-11-27 evening): six fixes after the third check (ANSWER-6.md)
+
+Fresh build seat "nas-backup" (WED-170), Fable 5.2, 2026-11-27 21:27 to 00:01 AEDT. The earlier seats' files were my handover; round 3's code is kept in `round3/`. ROUND 3's status follows this section as that seat wrote it.
+
+**Read whole before I changed anything:** ANSWER-6, BRIEF, ANSWER-4, ANSWER-5, RESULT-secrets-move-2, RESULT-secrets-move, STATUS lines 1 to 206, the third verdict (204 lines), and of its `scripts/`: `lib3.sh`, `A1`, `A3`, `A4`, `A5`, `A7`. **Not read whole:** the evidence folders of the two moves (I read both programs, the plan and the count files, the two process checks); of the verdict's `scripts/` the files `A8`, `A9`, `A10`, `A5_inject.py`, `S3`, `X_my_mutants.sh`, `Z9`; of its `raw/` only the outputs of A1, A3, A4, A5 and A7. The brief asked for scripts and raw as my acceptance attacks; I read the ones that belong to the six items.
+
+**Holds, kept:** nothing written to any NAS mount except TASK 1's two licensed removals; nothing armed; no `launchctl` verb but `list`; the three HOLD files stay; no shared file edited; no commit, push, stash or checkout (read-only `git log`, `status`, `show` only); no mail, board or chat post. Evidence that nothing is armed: `evidence/round4/real_lane_checks.txt` (0 `nasbackup` rows in `launchctl list`, 0 plists, 0 templates, each beside a control of 1 for `naspush`; `--run` on the real lane exits 3).
+
+## The numbers
+
+| | Round 3 | Round 4 |
+|---|---|---|
+| Suite (`tests/run.sh`, fake NAS only) | 568 passed, 0 failed | **694 passed, 0 failed** (126 new cells, T29 to T34) |
+| The same suite file on ROUND 3's engine (red first) | | **607 passed, 87 failed**: all 87 in T29 to T34, 0 anywhere else |
+| Mutants (`tests/mutants.sh`) | 126 of 126 | **143 of 143 caught, 0 survived or broken** (round 3's 126 and 17 new, one or more per new guard, each caught by the cell NAMED for it) |
+| The third checker's scripts for findings 1, 2, 3, 4, 6, 10, re-run from copies | reproduce on round 3's engine | **refused or failing as required** on round 4's (table below) |
+| Real dry run | 1,012,110 files, 68.27 GiB | **1,026,146 files, 69.22 GiB**, exit 0, no PROBLEM line |
+| Secret-shaped names in the real dry list, lane's scan | 0 | **0** (controls 52,987, 5,559, 7,188) |
+| The same list, the second checker's own scan, tiers A and B | 0 and 0 | **0 and 0** (8 and 14 patterns; tier D 0) |
+| Names of what the secret-shape rule leaves out | counts only | **15 lists on the drive, 2,767 lines, each list's line count equal to the dry run's count for its set; 0 such files on the share** |
+| Coverage claims in this section checked by a program | 140 | **223 claims, 0 not supported** |
+
+## Where the brief and what I measured differ, and which I took
+
+ANSWER-6 says the verdict's measurement wins where they differ, and to say so.
+
+1. **Item 5, "one line".** The brief (and the verdict's "smallest fix") says the deletion proof also requires `not os.path.lexists(path)`, and that the checker's A3 a then reads NOT DELIVERED. It does not: in A3 a the parent folder is replaced by a new empty one, so the planned path does not resolve and `lexists` is false. I ran it; the one line fixes A3 c only. To make A3 a hold I added what the function already does for the set's root: the parent folder must still be the very folder that was listed (device and inode, recorded when the set is listed). The `lexists` line is there too. So item 5 is two conditions and about fifteen lines, not one.
+2. **Item 3, "A7 section b, both ways".** His stub swaps the file in during the engine call that already carries it. That is the case "after the hand-over": sent, never proven, the night fails, named. For "before the chunk" I wrote a second stub that swaps one chunk earlier. His own script, re-run, now ends rc 8 with the marked copy on the fake NAS: that is the first case, and the run says so by name.
+3. **Item 2, how far "the destination chain" reaches.** The brief names `ensure_dest_chain` levels and a realpath check "before each set". I did both, and three things more that I read as the same item: the folder the walk starts from (the client folder, `<NAS>/General`) is refused when it is a link; the realpath check is made again before every chunk; and again before the manifest and the COMPLETE marker are written. Each has a cell and a mutant. If that is wider than meant, each is one call site to take out.
+4. **Item 4, one line beyond the brief.** The lane lies inside the seat's tree, and `manifests/` is backed up as a record. A names list written there would have travelled to the share with the next night's copy of the tree. So the list's own file name is excluded from every set (one line in the fixed exclusions, its own cell and mutant).
+5. **Item 1.** Parts are compared case-folded as asked, and NFC-normalised as well. Two sets of one client with the SAME name were already refused by round 3; they are now refused by this rule too, and the checker's surviving mutant X28 has a cell.
+
+## Per item: what changed, the red cell on round 3's engine, the green cell, the mutant
+
+Every cell and mutant named here is a line of `tests/claims.tsv` (ids starting `r4-`), checked by `tests/claims_check.py` against the final suite output and the final mutant output. Red means: the final `tests/run.sh` run against `round3/nb_core.py.round3` (`evidence/round4/red_first_the_final_suite_on_round3_code_607_passed_87_failed.txt`).
+
+### 1. Nested destinations (finding 1), and one name under two clients (finding 5's smallest form). Fixed.
+- `load_conf`: within one client, a set whose destination name is a path prefix of another's is refused, naming both; the same name under two clients is refused. The real conf loads: 0 nested pairs in one client, 0 names used twice, 1 nested pair across two clients, which is accepted (`evidence/round4/real_lane_checks.txt`, and the dry run).
+- Red on round 3 (9 cells), for example: `T29 A1: set=General|WEDNESDAY and set=General|WEDNESDAY/docs: exit 2 (expected '2', got '0')`; `T29 finding 5: ONE destination name under TWO clients ...: exit 2 (expected '2', got '0')`.
+- Green now: those, plus the fake NAS unchanged by hash after the refusal (checked for the A1 pair and for the two-clients pair); the inner name given first; the checker's `Docs2` control GOOD with both files holding their own content; a name that only starts with the other's letters (`WEDNESDAY-docs`) accepted; the nested name under another client accepted.
+- Two cells of T29 are green on round 3 as well, and I say so: the pair spelled in another case (round 3 refused it later, for the case clash on the share), and two sets with the same name.
+- Mutants: F01 (nesting allowed), F02 (one name under two clients allowed), F03 (names compared as strings, not part by part).
+
+### 2. A symlink in the destination chain (finding 2). Fixed for folders; one file-level sibling is listed below, not fixed.
+- `ensure_dest_chain` refuses a level that is a link, and the folder it starts from. `dest_escape` requires the real paths of the set's destination, `versions`, `manifests`, `runs` and `_tmp_incoming` to lie inside the real path of `<NAS>/<Client>/<Seat>/nightly-backup`: before each set (a dry run too), before each chunk, and before the manifest is written.
+- Red on round 3 (31 cells), for example: `T30 A4a ...: exit 2 (expected '2', got '0')`; `T30 A4b ... entries under the other client's folder: only itself (expected '1', got '24')`; `T30 A4d ... files under the outside folder: the one that was there (expected '1', got '2')`.
+- Green now: A4a, A4b, A4d each refused (exit 2) with the outside folder unchanged by hash (a listing with sizes, times and inodes, plus sha256 of every file) and the whole fake NAS unchanged; a dry run with `versions/` leading out refused; the client folder as a link refused; `manifests/` swapped for a link during the run: nothing written through it, no COMPLETE marker; `versions/` swapped during chunk 1 of 3: the run stops before chunk 2, and 2 of the 6 replaced files went through the link, not 6. **A4c stays as it held:** GOOD, the outside file untouched, the subfolder a real folder with the source's content.
+- Mutants: F04 (a linked level accepted), F05 (a linked client folder accepted), F06 (no check per set), F07 (no check before the manifest), F17 (no check before a chunk).
+
+### 3. A hard link swapped in after the plan (finding 3). Fixed as far as a check can; the race is narrowed, not ended.
+- Immediately before each chunk is handed to the engine (every pass), a file that now has more than one hard link is taken out of the chunk: not sent, never proven, the night fails, named `HARD LINK AFTER THE PLAN, NOT SENT`. In `prove_arrival`, more than one link is a verdict of its own, never proven; the run then compares the destination copy with the source and prints `HARD LINK AFTER THE PLAN, SENT: <set>/<path> -> <destination path> (its content is there now: YES|no)`, and the failure line says "THE CONTENT ALREADY REACHED THE DESTINATION and this tool never deletes there".
+- Red on round 3 (14 cells), for example: `T31 swap between the hand-over of its chunk and the proof: NOT exit 0`; `T31 swap BEFORE its chunk: the secret's content is NOT on the fake NAS (0 marked copies) (expected '0', got '1')`.
+- Green now, both ways. Swap before its chunk: 0 marked copies on the fake NAS, no file of that name at the destination, exit 8, named NOT SENT and NOT DELIVERED, the set's other files arrive. Swap after the hand-over: exit 8, no GOOD line, no COMPLETE marker, named, and the line's statement is checked against the fake NAS (the marked content IS at the path it names). Control without a swap: GOOD.
+- Mutants: F08 (no check before the chunk), F09 (a linked file proven).
+
+### 4. The names of what the secret-shape rule leaves out (finding 4; ANSWER-5's condition). Fixed.
+- Per set, every run and every dry run writes `manifests/<seat>/<stamp>_<run|dry>_<set>_left_out_by_secret_shape.tsv` on the drive, beside the symlink list: one line per excluded entry, path TAB shape, sorted. It is written as soon as the set is listed. It is never copied to the share (the symlink list still is); the manifest that goes to the share carries the count and the list's path on the drive. README says where the list is and why it is not on the share.
+- Red on round 3 (13 cells), for example: `T32 the drive list names 'src/secrets.ts' with its shape (expected '1', got '')`; `T32 a DRY run writes the list too: 5 lines, the same names (expected '5/1', got '/')`.
+- Green now: the checker's four names each present in the drive list with its shape; line count 5 equal to the number the run printed (a name holding a newline is one line); each of the four names absent from every file on the fake NAS by content and by name, beside a control that both searches do find things there; no list on the fake NAS while the symlink list is; a list lying inside the source tree does not travel and an ordinary neighbour does; the dry run writes 5 lines and nothing on the fake NAS.
+- Three of the four "absent" cells are green on round 3 too (round 3 wrote the names nowhere); they exist for mutant F11.
+- Mutants: F10 (names not recorded), F11 (names put into the manifest that goes to the share), F12 (the list's own name not excluded).
+
+### 5. The deletion proof (finding 6). Fixed, by two conditions (see "differ" 1).
+- Red on round 3 (12 cells), for example: `T33 A3a the parent folder REPLACED by a new one of the same name: NOT exit 0`; `T33 A3c a file renamed to another case and made unreadable: NOT exit 0`.
+- Green now: A3 a and A3 c each NOT DELIVERED by name, not counted deleted; A3 b (parent replaced by a link) not counted deleted; the readable rename still GOOD; a real deletion still let go and named; the function with and without the parent's id (without it, it answers as round 3 did: that cell is the can-fail).
+- Mutants: F13 (deleted although the path resolves), F14 (a replaced parent accepted), F15 (the parent's id not passed).
+
+### 6. The hold is tested before the conf is read (finding 10). Fixed.
+- Red on round 3 (8 cells), for example: `T34 a --run under the hold with an UNCONFIRMED conf: exit 3 (held), not 2 (expected '3', got '2')`; `T34 the hold lifted four days later, first check: exit 0, not OVERDUE (expected '0', got '3')`.
+- Green now: exit 3, recorded as held, no clock; the same with a conf that cannot be read at all; lifted four days later: exit 0, the clock starts at that check; without the hold the same conf is refused (exit 2) and does start the clock.
+- Mutant: F16 (the conf read first).
+- The nightly script already tested the hold first; nothing changed there.
+
+## Suite and mutants
+
+- **The final pass ran from a snapshot outside the repo** (`evidence/round4/snap.sh`; reason under "My slips" 1): the suite once (694 passed, 0 failed, `evidence/round4/tests_run_round4_final_694.txt`), then every mutant.
+- **Mutants: 143 of 143 caught, 0 survived or broken (`evidence/round4/mutants_round4_final_143_of_143.txt`). The pass: suite from 22:53:01, mutants from 22:55:03 to 23:53:45, eight at a time. The ten files it ran are listed with their sha256 in `evidence/round4/final_pass_snapshot_sha256_before.txt`; hashed again after the pass: identical; and the lane's own files against that list afterwards: all ten the same (`final_pass_lane_against_the_snapshot_after.txt`).**
+- A mutant counts as caught only when the cell NAMED for it fails. 17 are new (F01 to F17). 126 are round 3's; **four of those had to be re-pointed, because round 4 changed the line or the behaviour they aim at** (slip 2): R01 and R06 aim at two lines I rewrote (same intent, the new text); N07 (hard links travel) is now named for the cell `T13 the hard-linked file is skipped and counted`, because with the walk's rule broken the new check before the chunk still keeps the file off the NAS, so its old cell `T13 NOT ONE of the 35` stays green; R02 (deleted although still listed) now breaks both the old `name in names` line and the new `lexists` line, because for a name that is present either one alone answers. That last one is worth knowing: **the old `name in names` test is now redundant for a present name**; I left it in, as the brief words the proof.
+- Before the pass I checked without running any suite that every one of the 143 mutations still applies to the engine (`evidence/round4/mutants_all_143_mutations_apply_no_suite_run.txt`: 0 BROKEN), and ran the six nearest the changed guards on their own (6 of 6 caught by name, `mutants_the_six_nearest_the_changed_guards_rerun.txt`).
+- `tests/claims_check.py` on the final outputs: 223 claims checked, 0 NOT SUPPORTED, exit 0 (`evidence/round4/claims_check.out`). 83 of them are round 4's (ids `r4-`); the other 140 are round 3's, re-checked against tonight's outputs, with the two totals updated to 694 and 143.
+
+## The third checker's scripts, re-run from copies
+
+The 14 files of his `scripts/` were copied byte for byte (compared) and run with two environment variables his `lib3.sh` reads: where the lane copy is, and where fixtures go. Nothing in them was edited. Outputs: `evidence/round4/checker_rerun/round4_code/` and `.../round3_code/`.
+
+| Script, section | On round 3's engine | On round 4's |
+|---|---|---|
+| A1 nested names | GOOD on 3 of 3 nights, the inner set's content at the outer set's path | rc 2 on 3 of 3 nights, 0 GOOD; `Docs2` control GOOD |
+| A1, A2 one name, two clients | GOOD on 3 nights; the baseline holds `'Proj': 1` for a set of 12 files | rc 2, refused by name |
+| A4a `current/<set>` a link | GOOD; `a.txt`, `sub` beside the outsider's file | rc 2; the outside folder holds `keep.txt` only |
+| A4b the seat folder a link | GOOD; 15 entries under the other client's folder | rc 2; 1 entry (itself) |
+| A4c a linked subfolder | GOOD, outside untouched | the same |
+| A4d `versions` a link | GOOD; 1 file written outside | rc 2; 0 files outside |
+| A6a, A6b, A6c (chunks; not in this round) | as the verdict reports | the same: 21 of 21 odd names identical, 4 distinct contents kept, the resume GOOD |
+| A7 b hard link swapped in | rc 0, GOOD, the marked copy on the fake NAS | rc 8, 0 GOOD; the marked copy is on the fake NAS and the run names it (his stub swaps after the hand-over) |
+| A7 c a folder swapped (a note, not in this round) | GOOD, marked copy under `conf/` | the same |
+| A7 d names of the left-out | each of 4 names: lane manifests 0 | each of 4 names: lane manifests 1; run output 0, lane logs 0, NAS manifests 0 |
+| A3 a parent replaced | GOOD, 1 counted deleted | rc 8, NOT DELIVERED, none counted deleted |
+| A3 b parent a link | rc 8, 1 counted deleted | rc 8, none counted deleted |
+| A3 c case rename, unreadable | GOOD, 1 counted deleted | rc 8, NOT DELIVERED |
+| A3 f his unit calls | a name on disk in another case: deleted True; NFD on disk, NFC asked: True | False and False. His third call ("parent is a symlink") still answers True: it calls the function without the parent's id, which only the run supplies (section b shows the run's answer) |
+| A5 d held with an unconfirmed conf | rc 2, recorded refused, clock started; four days later OVERDUE, "103.0 h" | rc 3, recorded held, no clock; four days later rc 0, the clock starts then |
+| A5 a, b, c, e (findings 8, 9, 11, 12; not in this round) | as the verdict reports | unchanged |
+
+## The real dry run, both scans, the names lists
+
+One dry run, 22:11:34 to 22:21:09 (575 s under load averages 14 to 16; not a speed figure), reads only, exit 0, stderr empty.
+
+| | Files | Bytes |
+|---|---|---|
+| WEDNESDAY tree, to `General/Wednesday` | 279,072 | 28.05 GiB |
+| Testing Agent MAIN without Secuura's material, to General | 6,322 | 247 MiB |
+| Eleven smaller general projects, to General (one empty and allowed to be) | 8,099 | 0.82 GiB |
+| Secuura client folder, to `Secuura/Wednesday` | 587,374 | 30.97 GiB |
+| Secuura's test material from Testing Agent MAIN, to Secuura | 145,279 | 9.14 GiB |
+| **Would copy** | **1,026,146** | **69.22 GiB** |
+
+- 14,036 files more than round 3's dry run five hours earlier: the tree is live.
+- 0 PROBLEM lines; 15 engine list checks, each with 0 deleting lines; 15 "listed on the NAS (read-only)" lines. Excluded entries 7,814; by secret shape 2,767 (env-file 2,184; credential-file 412; key-or-certificate 126; private-key-or-wallet-name 28; credentials-folder-name 14; terraform-variables 2; credential-store 1); 9 files with more than one hard link; 16 left out for case-only name clashes; 982 symlinks recorded.
+- The real share, read-only: `/Volumes/DEV-Working/General`, `General/Wednesday` and `Secuura` are plain folders, not links; `General/Wednesday` holds 1 entry; `Secuura/Wednesday` does not exist; no `nightly-backup` folder exists. Listings, folder times and `df` identical before and after (`evidence/round4/nas_diff.txt` is empty, rc 0).
+- **Both scans on its stamp `2026-11-27_221134_46090`** (1,124,752 paths): the lane's `tests/scan_dry_lists.py`: 0, controls 52,987, 5,559, 7,188, rc 0. The second checker's `S_scan_real_lists.py` from where it lies: tier A 0 in 8 of 8 patterns, tier B 0 in 14 of 14, tier D 0, unit controls 22 of 22, 1,026,145 files asked and 0 not readable by this user (1 gone since the listing), rc 0.
+- **The names lists** (`evidence/round4/left_out_lists_against_the_dry_run.txt`, by a program): 15 files on the drive, one per set; each file's line count equals that set's count in the dry run's output and in its manifest (WEDNESDAY 1,182; Secuura 786; Secuura's test material 727; Agentic Coding 40; Paperclip 17; Testing Agent MAIN 9; three sets with 2; six sets with 0); 2,767 lines in all, and by shape the same seven numbers the run printed. Files named `*left_out_by_secret_shape*` under the two destination parents on the real share: 0. I did not copy any of these lists into `evidence/`, and no name from them is in this file.
+- **This dry run ran on the engine as it was at 22:11** (sha256 `3ed3e1df...`). One edit came after it: the containment check before each chunk, which a dry run never reaches. The suite and the mutants ran on the final engine (`beb8ffdb...`).
+
+## Siblings: found, listed, NOT edited (the brief's closed list)
+
+1. **A file-level link at `README.txt` in the destination folder. Measured, a real hole of finding 2's kind.** The tool writes one file with a fixed name, `<NAS>/<Client>/<Seat>/nightly-backup/README.txt`, when `os.path.exists` says it is not there. A link planted at that name, pointing at a file that does not exist yet, is "not there": the tool then writes the README text through the link. On a fake NAS: rc 0, GOOD, `planted.txt` created in an outside folder (`evidence/round4/probe_sibling_readme_file_symlink_NOT_FIXED.txt`; with the link pointing at an existing file nothing is written). What lands outside is the fixed README text, not backup content. The fix is one word, `os.path.lexists`, and one cell. It is not one of the six items, so I did not make it. The real share has no `nightly-backup` folder yet, so nothing can be planted there before a first run creates it. **This needs a word before the re-check: a checker who tries file-level links will find it.**
+2. **The comparison during planning does not look at the link count.** A planned file of the same size as its destination copy and not yet in the index is compared by sha256 while the set is planned; if it gained a second hard link since the listing and its content equals the destination's, it is recorded proven. Nothing is sent in that case (the content is already there). Read in the code, not run.
+3. **Deeper levels are not looked at for links:** `versions/<stamp>/...` (the stamp is not predictable), and the manifest and marker file names (they carry the stamp). Read in the code, not run.
+4. **`source_deleted` called without the parent's id** answers as round 3 did. The run always passes the id; a future caller that forgets would lose the check. I left the parameter optional so the checker's own unit calls still run.
+5. Not siblings, but the checker's 11 surviving mutants: X28 now has a cell (T29). The other ten are untouched, as the brief says.
+
+## What I could not make sound
+
+1. **The hard-link check narrows a window, it does not close it.** A second link that appears while a chunk is in flight (at most 200 files or 2 GiB) is sent. The proof then refuses it, the night fails and the path is named, but the content is at the destination and stays: this tool never deletes there. A link that appears and is gone again before the proof is not seen. And from the next night on, that file has two links when the plan is made, so it is left out by the ordinary rule and the night can be GOOD while the copy from the failed night is still on the share. The failed night's line is the only notice.
+2. **The same for a link planted in the destination while a chunk is in flight:** that one chunk's writes go through it (cell: 2 of 6 files).
+3. **A planned folder swapped for a secrets folder** (the verdict's note under finding 3) still delivers same-named files. A rule that reads names cannot see it.
+4. **The names lists are as private as the drive.** They are kept out of the share and out of every set by their file name. A copy of those names in a file with another name (a report, a note, a checker's raw output inside this tree) travels like any other file.
+5. **How the share presents a link made by another client is not known to me.** Every link in my tests is a local one on a fake NAS. If the share shows a server-side link as a plain folder, `islink` and `realpath` cannot see it. The real share's three folders read as plain folders today.
+6. Findings 7, 8, 9, 11, 12 and notes 13 to 21 of the verdict are not touched, as ruled. README lists them under "Round 4: what the fixes do not close".
+
+## My slips, this round
+
+1. **A suite run I started from the lane itself was hit by another session's commit, and for a few minutes I took its result for a fault in my code.** At 22:15:19 the coordinator's session committed in this repo. For a moment the lane's uncommitted files were the committed ones, and one fixture of my suite (started 22:15:22) ran round 3's engine: it said GOOD where round 4 refuses. I found it from that run's own output (no "left out by secret shape" line) and from the three files' modification time of 22:15, a minute I had not written them in. That the commit set local changes aside and put them back is my reading of those two facts; I did not watch it happen. The same fixture, run nine more times in isolation, was refused every time. From 22:19 every suite and mutant run was made from a snapshot outside the repo. Evidence: `evidence/round4/note_the_22-15_commit_window.txt`. **What it means for a first real run is under "For the coordinator".**
+2. **I started the whole mutant pass before checking round 3's mutants against my own changes, and had to stop it at 48 of 143.** 47 were caught; N07 was caught by two other cells of its family but not by the one named for it (above). Looking at why, I found two more that would have ended BROKEN later in the pass (R01, R06: I had rewritten the lines they aim at) and one that would have survived (R02). All four were faults in the mutant list, not in the tool; I corrected the list, proved all 143 apply, re-ran the six nearest, and started the pass again on a fresh snapshot with the same engine and suite files (compared). The stopped pass is kept: `mutants_first_final_pass_stopped_*`. Cost: about 25 minutes.
+3. **I ran the second checker's scan with a missing argument** (`--access` wants a control file after it). Its last line raised an error and it exited 1 after printing every count. I ran it again properly (rc 0); the first output is kept as `scan_checker_first_try_my_wrong_argument.*`.
+4. **One new cell had a wrong expectation** (it counted COMPLETE markers of both nights where it meant the second night); its first run showed it. Another assumed a link count of 2 where the fixture gives 3; found before any run.
+5. **The dry run ran before my last engine edit** (above). I did not spend the one licensed dry run twice.
+6. **In TASK 1's first precheck one exit code is the filter's**, not the command's (a hook said so). It is the one meant there; the result file says so.
+7. **A `du` over `/private/tmp` that I started to see who was filling the disk ran past two minutes; I stopped it.** It read only.
+8. **I typed `git stash list` to look for the cause of slip 1; a hook refused it** (the verb is on its write list, though `list` only reads). It did not run. Everything I ran in git was `log`, `status` and `show`.
+
+## What is NOT tested in round 4
+
+- **Any write to the real NAS by this tool**, as before. The new guards have only ever seen local links on a fake NAS (point 5 above).
+- **The real code path of a real run** with the new checks: the per-chunk link check and the per-chunk containment check add an `lstat` per file and five `realpath` calls per chunk; at about 5,100 chunks that cost is not measured.
+- **A case-sensitive source for A3 c.** The scratch volume folds case, which is what that test needs; the real drive is case-sensitive, where a case rename really removes the name.
+- **Python 3.9** on the new paths beyond what T10 covers (one real run under `/usr/bin/python3`, green).
+- **The names list at restore time:** nobody has tried to restore from it.
+- **Whether tonight's 03:30 `naspush` run re-creates a secrets folder on the Backup share** (TASK 1's result says the same).
+- **The proposals** (`proposed/`) were not re-read against round 4; none of the six items changes what they say, and I did not edit them.
+- `tests/claims_check.py` matches text, as the verdict's note 17 says. It checks that a named cell passed and a named mutant was caught; it does not judge the cell.
+
+## For the coordinator
+
+1. **Commit this lane before any real run.** Until then the committed engine is round 3's, and a run that STARTS in the moment another session commits can execute it (slip 1). A run already going is not affected: it loaded its code at the start.
+2. **The `README.txt` sibling** (above): one word, your call, before the checker.
+3. **Disk:** free space on `/` went from 152 GiB (21:27) to 124 GiB while I worked. My scratchpad holds about 7.4 GB; the rest is not mine. The lowest I read was 91 GiB (23:23), above the 50 GiB floor; a watchdog would have stopped my mutant pass at 52.
+4. TASK 1's open ends are in its result: whether the NAS keeps snapshots or versions elsewhere is invisible from here; `#recycle/DevMASTER-mirror` was there before and I did not walk it.
+
+## For the checker: where to look first
+
+- `nb_core.py`, every change is marked `ROUND 4`: `load_conf` (the block after the forbidden-roots loop), `ensure_dest_chain`, `dest_escape` and its three call sites, `hard_linked_now`, `prove_arrival`, the pass loop in `backup_body` (search `linked = set(`), `source_deleted`, `parent_id_of`, `write_left_out_list`, the `own-left-out-list` line of `EXCLUDES`, the top of `cmd_backup`.
+- **Run from a copy outside the repo**, as you did (`evidence/round4/snap.sh` makes one and checks it): a commit by another session can swap the lane's files under a running suite.
+- Re-run: `bash tests/run.sh /private/tmp/<dir>` (about three minutes); `bash tests/mutants.sh /private/tmp/<dir> 8` (143 suite runs: 59 minutes tonight, eight at a time, under load averages of 8 to 22; a third argument such as `'F'` runs only round 4's 17, about nine minutes); `python3 tests/claims_check.py <suite output> <mutants output>`.
+- Red first: put `round3/nb_core.py.round3` in a copy as `nb_core.py` and run the same `tests/run.sh`.
+- Your `lib3.sh` reads `LANE_OVERRIDE` and `FXBASE`; that is all I set to re-run your scripts.
+
+## What I built or changed (sizes in bytes)
+
+`nb_core.py` 162,476 (was 145,042) · `tests/run.sh` 139,316 (was 114,480) · `tests/mutants.sh` 33,823 (was 29,499) · `tests/claims.tsv` 21,000 (was 12,552) · `README.md` 30,721 (was 22,736) · `RESULT-quarantine-erase.md` 15,788 (new) · `evidence/quarantine-erase/` (new: 42 files, 70,106 bytes) · `evidence/round4/` (new: 51 files, 409,680 bytes) · `round3/` (new: round 3's engine, suite, mutants, claims, README and four more, as they were).
+
+Unchanged, compared byte for byte with the copies in `round3/`: `nas_backup_watch.sh`, `seats/wednesday.conf`, `tests/claims_check.py`, `tests/scan_dry_lists.py`, `proposed/doctor_nasbackup_block.sh`. Unchanged by `git status` (not listed as modified): `nas_backup.sh`, `nas_backup_nightly.sh`, `nb_common.sh`, `jobs/nasbackup.plist.template`, everything in `proposed/`, `seats/wednesday.tokens`, the HOLD files, `CENSUS.md`, `BRIEF.md`, the ANSWER files, the two earlier RESULT files. `git status` of the lane at the end:
+
+```
+ M 2_Project_Files/nas-backup/README.md
+ M 2_Project_Files/nas-backup/STATUS.md
+ M 2_Project_Files/nas-backup/nb_core.py
+ M 2_Project_Files/nas-backup/tests/claims.tsv
+ M 2_Project_Files/nas-backup/tests/mutants.sh
+ M 2_Project_Files/nas-backup/tests/run.sh
+?? 2_Project_Files/nas-backup/evidence/quarantine-erase/
+?? 2_Project_Files/nas-backup/evidence/round4/
+?? 2_Project_Files/nas-backup/round3/
+```
+
+Run state on the drive, git-ignored, written by the one dry run and one held `--run`: `logs/wednesday/` (the dry run's lists), `manifests/wednesday/` (its manifest, its symlink lists and the 15 names lists), `state/wednesday.json` (one more `held` record).
+
+---
+
+(ROUND 3's status follows as that seat wrote it; its first line was `READY FOR QA`.)
+
+READY FOR QA
+
 **Both tasks of ANSWER-4 are done. `RESULT-secrets-move-2.md` was written first (first line DONE): all 37 folders moved, counts equal, 0 left under the mirror.** This section is TASK 2, round 3 of the backup job.
 
 # ROUND 3 (2026-11-27): one rule, "unproven means failed" (ANSWER-4.md)

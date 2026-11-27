@@ -1,0 +1,13 @@
+What happened at 22:15 (written 2026-11-27 22:38:15 AEDT)
+
+A suite run started from the lane itself at 22:12:54 showed 4 FAIL cells in the fixture esc_f (a run that said GOOD and wrote its manifest through a planted link) plus 1 cell of mine with a wrong expectation.
+The run in that fixture started at 22:15:22 (first line of its output, kept beside this file). Its output has NO 'left out by secret shape' line, which every round 4 run prints per set:
+  lines carrying 'left out by secret shape' in that output: 0 (control, the same fixture in the 21:51 suite run: 2)
+So that one run executed ROUND 3's engine. The repo's log shows why:
+  3372ee43e7 22:15:19 Wednesday: S 132nd wrapped, scored 0.96, pane closed; scoreboard; pickup; note
+  528ec4053b 22:11:51 Wednesday: Secuura In Progress sort received (14/0/23/165), seat told to wrap; pickup; note
+and the lane's three edited files all carried the modification time 22:15 afterwards, a minute I did not write them in:
+  (read at 22:17: nb_core.py 22:15, README.md 22:15, tests/run.sh 22:15; my last writes were at 22:12)
+My reading of those facts (I did not watch it happen): a commit made by another session in this repo, with a rebase that sets local changes aside and puts them back, swaps the lane's uncommitted files for the COMMITTED ones for a moment. The committed nb_core.py is round 3's (sha256 8d20bab6...).
+The same fixture run 9 more times in isolation: refused every time (rc 8, 0 files outside).
+From 22:19 on, every suite and mutant run was made from a snapshot outside the repo (snap.sh, kept beside this file).

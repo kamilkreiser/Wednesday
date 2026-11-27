@@ -139,9 +139,15 @@ section "4. check before any rebuild is RED, rebuild makes it GREEN"
 run check0 check; rc_is "check with no index is red" 1 check0
 run rebuild1 rebuild; rc_is "rebuild" 0 rebuild1
 sed 's/^/        /' "$RUN/rebuild1.out"
-run check1 check; rc_is "check after rebuild is green" 0 check1
+# ROUND 5b: the fixture tree holds four LESSON files that are not plain files (a symlink, a hard link, a directory, a
+# FIFO: clause f). They are a gap now, so with them present check is AMBER; section 6d moves them away and shows GREEN.
+run check1 check; rc_is "F2 5b: check after the first rebuild is AMBER, rc 6: four lesson files are not plain files (round 5 said GREEN, rc 0)" 6 check1
+F4L=", and 4 lesson file(s) unreadable or not a plain file"
+[ "$(sed -n 1p "$RUN/check1.out" | count_in "check: AMBER, " /dev/stdin)" = "1" ] && [ "$(sed -n 1p "$RUN/check1.out" | count_in "0 other file(s) matched the allow-list and are NOT indexed (unreadable 0, not a plain file 0, cut 0)$F4L" /dev/stdin)" = "1" ] && ok "F2 5b:   its FIRST line says AMBER and carries both numbers: 0 other files, 4 lesson files" || bad "F2 5b: check's first line: $(sed -n 1p "$RUN/check1.out")"
+t_hasnt "F2 5b:   nothing in check's output says GREEN" "GREEN" "$RUN/check1.out"
+t_has "F2 5b:   check names such a lesson as NOT indexed" "NOT indexed: $L/2026-09-04_f-a-fifo.md  [not a regular file]  (a lesson; clause f)" "$RUN/check1.out"
 t_has "check prints the data directory it reports on" "data directory: $PGD" "$RUN/check1.out"
-t_has "rebuild's last line says nothing was skipped for a fault" "rebuild: done; no file was unreadable and no row was truncated" "$RUN/rebuild1.out"
+[ "$(tail -1 "$RUN/rebuild1.out" | count_in "rebuild: DONE WITH FAULTS: 0 unreadable file(s) skipped, 0 row(s) truncated; they are listed above; 0 other file(s)" /dev/stdin)" = "1" ] && [ "$(tail -1 "$RUN/rebuild1.out" | count_in "$F4L" /dev/stdin)" = "1" ] && ok "F2 5b: the rebuild's last line says DONE WITH FAULTS over the four lesson files, not 'done'" || bad "F2 5b: rebuild's last line: $(tail -1 "$RUN/rebuild1.out")"
 
 section "5. the indexed path set is exactly the expected set"
 paths A
@@ -197,7 +203,7 @@ for c in a b c d t f; do
   t_has "the report counts clause ($c): $n" "clause ($c) " "$RUN/rebuild1.out"
   [ "$(/usr/bin/grep -i -E -c -- "clause \($c\) .*: $n\$" "$RUN/rebuild1.out")" = "1" ] && ok "  and the count printed for clause ($c) is $n" || bad "clause ($c) count is not $n: $(/usr/bin/grep -i -F -- "clause ($c) " "$RUN/rebuild1.out")"
 done
-t_has_re "the rebuild's LAST line gives the count left out by each clause" "^rebuild: done; .*; $N_CL lesson file\(s\) LEFT OUT by the qualify rule: a=[0-9]+, b=[0-9]+, c=[0-9]+, d=[0-9]+, t=[0-9]+, f=[0-9]+\$" "$RUN/rebuild1.out"
+t_has_re "the rebuild's LAST line gives the count left out by each clause" "^rebuild: DONE WITH FAULTS: .*; $N_CL lesson file\(s\) LEFT OUT by the qualify rule: a=[0-9]+, b=[0-9]+, c=[0-9]+, d=[0-9]+, t=[0-9]+, f=[0-9]+\$" "$RUN/rebuild1.out"
 [ "$(tail -1 "$RUN/rebuild1.out" | count_in 'LEFT OUT by the qualify rule' /dev/stdin)" = "1" ] && ok "  (it is the last line)" || bad "the left-out line is not last: $(tail -1 "$RUN/rebuild1.out")"
 t_has "check prints the same count" "left out: $N_CL lesson file(s) LEFT OUT by the qualify rule" "$RUN/check1.out"
 t_has "  and names lessons under each clause, up to its limit" "(+" "$RUN/check1.out"
@@ -209,6 +215,7 @@ t_hasnt "no Python traceback anywhere in the rebuild output" "Traceback" "$RUN/r
 run sLO search xcanary03; t_has "search for a left-out lesson's word says NO MATCH" "NO MATCH" "$RUN/sLO.out"
 t_has "  and says that $N_CL lesson files are left out and not searched" "NOTE: $N_CL lesson file(s) are LEFT OUT" "$RUN/sLO.out"
 run docLO doctor; t_has "doctor's one line carries the left-out count" "$N_CL lesson file(s) LEFT OUT" "$RUN/docLO.out"
+if [ "$RC" -eq 1 ] && has "WARN brain-db: index current but it has GAPS" "$RUN/docLO.out" && has "$F4L" "$RUN/docLO.out" && hasnt "OK brain-db" "$RUN/docLO.out"; then ok "F2 5b: and doctor WARNs (rc 1) over the four lesson files; it does not say OK"; else bad "F2 5b: doctor over four lesson files that are not plain files: rc $RC: $(cat "$RUN/docLO.out")"; fi
 
 section "6c. ROUND 4b: a lesson that merely NAMES another client is indexed (ANSWER-7, must succeed)"
 for tok in xneighbour741 xneighbour742 xneighbour743 xneighbour744 xneighbour745 xneighbour746 xneighbour747 xneighbour748 xneighbour749 xneighbour749rule xneighbour750 xneighbour751; do
@@ -218,6 +225,18 @@ run sNM search xneighbour741; t_has "  and search finds one by its word" "d-ok-n
 t_hasnt_re "  while every marker and tier-like case stays out (red-capable: the six marker forms, two comments, six tier-like lines, the numeric reference)" "xcanary7[0-9][0-9]" "$RUN/dump-A.sql"
 { cat "$LANE/scope/wednesday.scope"; echo "deny_clients datasec"; } > "$RUN/denyline.scope"
 T_SCOPE="$RUN/denyline.scope" run denyline check; rc_is "a scope file that still carries a deny_clients line is refused (rc 2): the line would promise a protection that no longer exists" 2 denyline
+
+section "6d. ROUND 5b: lessons left out by the RULE are not a gap (must stay GREEN); lessons that cannot be read as plain files are"
+for n in 2026-09-01_f-symlink.md 2026-09-02_f-hardlink.md 2026-09-03_f-a-directory.md 2026-09-04_f-a-fifo.md; do mv -n "$TREE/$L/$n" "$GONE/fixture-$n"; done
+N_RULE=$((N_CL - 4))
+run rebuild1g rebuild; rc_is "with the four non-plain lesson files moved away: rebuild" 0 rebuild1g
+t_has "F2 5b MUST STAY GREEN: the rebuild's last line says 'done' although $N_RULE lessons are left out by clauses a, b, c, d and t" "rebuild: done; no file was unreadable and no row was truncated; 0 other file(s) matched the allow-list and are NOT indexed (unreadable 0, not a plain file 0, cut 0), and 0 lesson file(s) unreadable or not a plain file; $N_RULE lesson file(s) LEFT OUT by the qualify rule: a=" "$RUN/rebuild1g.out"
+run check1g check; rc_is "F2 5b MUST STAY GREEN: check is rc 0 with those $N_RULE lessons left out by the rule" 0 check1g
+[ "$(sed -n 1p "$RUN/check1g.out" | count_in "check: GREEN, " /dev/stdin)" = "1" ] && [ "$(sed -n 1p "$RUN/check1g.out" | count_in ", and 0 lesson file(s) unreadable or not a plain file" /dev/stdin)" = "1" ] && ok "F2 5b MUST STAY GREEN:   its first line says GREEN, 0 other files, 0 lesson files" || bad "F2 5b MUST STAY GREEN: check's first line: $(sed -n 1p "$RUN/check1g.out")"
+t_has "F2 5b MUST STAY GREEN:   and still prints the $N_RULE left out" "left out: $N_RULE lesson file(s) LEFT OUT by the qualify rule" "$RUN/check1g.out"
+[ "$N_RULE" -gt 100 ] && ok "  (control) $N_RULE is not a small number: a b c d t are all in it" || bad "N_RULE is $N_RULE"
+run doc1g doctor; rc_is "F2 5b MUST STAY GREEN: doctor is rc 0" 0 doc1g
+t_has "F2 5b MUST STAY GREEN:   and says OK, index current" "OK brain-db: index current" "$RUN/doc1g.out"
 
 section "7. what a scope file may ask for is a closed table in the code (N5): anything else is REFUSED at load"
 NF7="$(sql "select count(*) from brain.files")"
@@ -377,7 +396,11 @@ t_has "  the truncated row is listed" "0_Brain/skills/big-row.md" "$RUN/rebuildF
 t_has "  and the LAST line says so" "DONE WITH FAULTS: 1 unreadable file(s) skipped, 1 row(s) truncated; they are listed above; " "$RUN/rebuildF.out"
 [ "$(tail -1 "$RUN/rebuildF.out" | count_in 'DONE WITH FAULTS' /dev/stdin)" = "1" ] && ok "  (it is the last line)" || bad "the fault line is not last: $(tail -1 "$RUN/rebuildF.out")"
 can_fail "fault line: the clean rebuild before it did not print it" has "DONE WITH FAULTS" "$RUN/rebuild5.out"
-run checkF check; rc_is "check is green on what could be read" 0 checkF
+run checkF check; rc_is "F2 9b: check is NOT green over the cut row: AMBER, rc 6 (round 4b said GREEN, rc 0)" 6 checkF
+[ "$(sed -n 1p "$RUN/checkF.out" | count_in "check: AMBER, " /dev/stdin)" = "1" ] && ok "F2 9b:   its FIRST line says AMBER" || bad "F2 9b: check's first line is not AMBER: $(sed -n 1p "$RUN/checkF.out")"
+[ "$(sed -n 1p "$RUN/checkF.out" | count_in "1 other file(s) matched the allow-list and are NOT indexed (unreadable 0, not a plain file 0, cut 1), and 1 lesson file(s) unreadable or not a plain file" /dev/stdin)" = "1" ] && ok "F2 9b:   and carries both numbers: cut 1, and 1 lesson file (ROUND 5b: round 5 asserted here that the unreadable LESSON was NOT counted; it is now)" || bad "F2 9b: the counts are not on check's first line: $(sed -n 1p "$RUN/checkF.out")"
+t_hasnt "F2 9b:   nothing in check's output says GREEN" "GREEN" "$RUN/checkF.out"
+t_has "  the unreadable lesson is in the left-out line, clause (f)" "left out: " "$RUN/checkF.out"
 t_has "  and reports the skipped counts" "skipped for a fault: 1 file(s) unreadable on disk now; at the last rebuild 1 unreadable, 1 row(s) truncated" "$RUN/checkF.out"
 t_hasnt "  with no Python traceback" "Traceback" "$RUN/checkF.out"
 run sF search xbigrow301; t_has "the truncated row is still found by a word before the cut" "0_Brain/skills/big-row.md" "$RUN/sF.out"
@@ -463,10 +486,12 @@ runs t0 TUESDAY check; rc_not0 "a seat with no scope file is refused"
 t_has "  and says why" "no scope file for seat 'tuesday'" "$RUN/t0.out"
 [ ! -e "$RUN/pgdata-TUESDAY" ] && ok "  and NOTHING was created: no cluster directory (ANSWER-3 F4)" || bad "the refused command created a cluster directory"
 [ "$(server_procs "$RUN/pgdata-TUESDAY")" = "0" ] && ok "  and no server was started" || bad "the refused command left a server running"
-for c in rebuild search at up; do
+for c in init start rebuild search at up; do
   runs t0$c TUESDAY $c pane
-  if [ "$RC" -ne 0 ] && [ ! -e "$RUN/pgdata-TUESDAY" ]; then ok "  the same for '$c': refused, nothing created"; else bad "'$c' with no scope file: rc $RC, cluster dir $([ -e "$RUN/pgdata-TUESDAY" ] && echo created || echo absent)"; fi
+  if [ "$RC" -ne 0 ] && [ ! -e "$RUN/pgdata-TUESDAY" ] && [ ! -e "$RUN/pgdata-TUESDAY.lock" ] && [ "$(server_procs "$RUN/pgdata-TUESDAY")" = "0" ]; then ok "  the same for '$c': refused, no cluster directory, no lock file, no server (F4 for init and start: the checker's M2)"; else bad "F4 '$c' with no scope file: rc $RC, cluster dir $([ -e "$RUN/pgdata-TUESDAY" ] && echo created || echo absent), lock file $([ -e "$RUN/pgdata-TUESDAY.lock" ] && echo created || echo absent), servers $(server_procs "$RUN/pgdata-TUESDAY")"; fi
 done
+runs t0stop TUESDAY stop
+if [ "$RC" -eq 0 ] && [ ! -e "$RUN/pgdata-TUESDAY" ] && [ ! -e "$RUN/pgdata-TUESDAY.lock" ] && has "no cluster at" "$RUN/t0stop.out"; then ok "  and 'stop', which ends the checker's M2 sequence, is a no-op that leaves no lock file either (F4)"; else bad "F4 'stop' with no scope file and no cluster: rc $RC, lock file $([ -e "$RUN/pgdata-TUESDAY.lock" ] && echo created || echo absent): $(tail -1 "$RUN/t0stop.out")"; fi
 runs t0d TUESDAY doctor; rc_is "  doctor on a seat with no scope file says 'not adopted' and is rc 0" 0 t0d
 T_SCOPE="$LANE/proposed/scope/tuesday.scope" run t1 rebuild; rc_not0 "the wednesday seat cannot use the tuesday scope file"
 cp -n "$LANE/proposed/scope/tuesday.scope" "$RUN/sim/TUESDAY/2_Project_Files/brain-db/scope/tuesday.scope"
@@ -589,11 +614,22 @@ i=0
 for badline in "seat tuesday" "allow skill 4_Credentials/*.md" "alow skill 0_Brain/skills/*.md" "allow ledger 0_Brain/learnings/_ledger_friday.md"; do
   i=$((i+1))
   { if [ "$i" = 1 ]; then /usr/bin/grep -v -i -E '^seat ' "$LANE/scope/wednesday.scope"; else cat "$LANE/scope/wednesday.scope"; fi; echo "$badline"; } > "$RUN/n7-$i.scope"
-  for c in check rebuild "search x" up; do
+  for c in init start check rebuild "search x" up; do
     T_SCOPE="$RUN/n7-$i.scope" T_PGD="$RUN/pgdata-n7" T_SOCK="$SOCK2" run n7 $c
-    if [ "$RC" -eq 2 ] && [ ! -e "$RUN/pgdata-n7" ] && [ ! -e "$RUN/pgdata-n7.lock" ] && [ "$(server_procs "$RUN/pgdata-n7")" = "0" ]; then ok "scope with '$badline': '$c' is rc 2 and created no cluster, no lock file and no server"; else bad "scope with '$badline': '$c' rc $RC, cluster dir $([ -e "$RUN/pgdata-n7" ] && echo CREATED || echo absent), servers $(server_procs "$RUN/pgdata-n7")"; fi
+    if [ "$RC" -eq 2 ] && [ ! -e "$RUN/pgdata-n7" ] && [ ! -e "$RUN/pgdata-n7.lock" ] && [ "$(server_procs "$RUN/pgdata-n7")" = "0" ]; then ok "scope with '$badline': '$c' is rc 2 and created no cluster, no lock file and no server"; else bad "scope with '$badline': '$c' rc $RC, cluster dir $([ -e "$RUN/pgdata-n7" ] && echo CREATED || echo absent), lock file $([ -e "$RUN/pgdata-n7.lock" ] && echo CREATED || echo absent), servers $(server_procs "$RUN/pgdata-n7")"; fi
   done
 done
+T_SCOPE="$RUN/n7-1.scope" T_PGD="$RUN/pgdata-n7" T_SOCK="$SOCK2" run n7s stop
+if [ "$RC" -eq 0 ] && [ ! -e "$RUN/pgdata-n7" ] && [ ! -e "$RUN/pgdata-n7.lock" ] && has "no cluster at" "$RUN/n7s.out"; then ok "F4 'stop' under a refused scope, which ends the checker's DB12 sequence: a no-op, and still no cluster directory and no lock file"; else bad "F4 'stop' under a refused scope: rc $RC, lock file $([ -e "$RUN/pgdata-n7.lock" ] && echo CREATED || echo absent): $(tail -1 "$RUN/n7s.out")"; fi
+# F4, start on its own: a cluster that EXISTS (made under the good scope) must not be started under a refused one
+T_PGD="$RUN/pgdata-f4" T_SOCK="$SOCK2" run f4init init; rc_is "(control) under the good scope the same init is accepted and creates the cluster" 0 f4init
+T_SCOPE="$RUN/n7-1.scope" T_PGD="$RUN/pgdata-f4" T_SOCK="$SOCK2" run f4start start
+if [ "$RC" -eq 2 ] && [ "$(server_procs "$RUN/pgdata-f4")" = "0" ] && [ ! -f "$RUN/pgdata-f4/postmaster.pid" ]; then ok "F4 'start' with a refused scope on an EXISTING cluster: rc 2 and no server (the checker's DB12)"; else bad "F4 'start' with a refused scope on an existing cluster: rc $RC, servers $(server_procs "$RUN/pgdata-f4"): $(tail -1 "$RUN/f4start.out")"; fi
+t_has "  it says why" "REFUSED: scope file" "$RUN/f4start.out"
+T_PGD="$RUN/pgdata-f4" T_SOCK="$SOCK2" run f4start2 start; rc_is "(can fail) under the good scope the same start succeeds" 0 f4start2
+[ "$(server_procs "$RUN/pgdata-f4")" = "1" ] && ok "  (control) and the instrument sees that server" || bad "the server count for pgdata-f4 is $(server_procs "$RUN/pgdata-f4")"
+T_SCOPE="$RUN/n7-1.scope" T_PGD="$RUN/pgdata-f4" T_SOCK="$SOCK2" run f4stop stop; rc_is "  and 'stop' still works under the REFUSED scope: a running server can always be stopped" 0 f4stop
+[ "$(server_procs "$RUN/pgdata-f4")" = "0" ] && ok "  (it is gone)" || bad "stop under a refused scope left the server running"
 T_PGD="$RUN/pgdata-n7" T_SOCK="$SOCK2" run n7stop stop     # a no-op, unless a broken guard let a server start
 T_PGD="$RUN/pgdata-n7" T_SOCK="$SOCK2" T_SCOPE="$RUN/n7-2.scope" run n7doc doctor; t_hasnt "doctor on a seat with a refused scope does not print OK" "OK brain-db" "$RUN/n7doc.out"
 
@@ -624,6 +660,258 @@ touch "$RUN/swap.stop"; wait "$FLIP"
 [ "$reg" -gt 0 ] && [ "$sym" -gt 0 ] && ok "(control) the instrument saw both states: indexed as a regular file $reg time(s), skipped as a symlink $sym time(s)" || bad "the flip was not seen in both states (regular $reg, symlink $sym): the test proved nothing"
 mv -n "$TREE/0_Brain/skills/swap.md" "$GONE/swap-final-state"; mv -n "$TREE/4_Credentials/swap-secret.md" "$GONE/"
 run rebuildX rebuild; run checkX check; rc_is "green again with the swapped file moved away" 0 checkX
+
+section "R5-F2. ONE count of files that matched the allow-list and are NOT indexed; no GREEN and no OK over a gap (the third checker's F2)"
+GAP0="0 other file(s) matched the allow-list and are NOT indexed (unreadable 0, not a plain file 0, cut 0)"
+first_has() { [ "$(sed -n 1p "$2" | count_in "$1" /dev/stdin)" = "1" ]; }
+last_has()  { [ "$(tail -1 "$2" | count_in "$1" /dev/stdin)" = "1" ]; }
+run g0r rebuild; run g0c check; rc_is "F2 g0 (control): with nothing missing check is rc 0" 0 g0c
+first_has "check: GREEN, " "$RUN/g0c.out" && first_has "$GAP0" "$RUN/g0c.out" && ok "F2 g0:   its first line says GREEN and carries the count, all zeros" || bad "F2 g0: check's first line: $(sed -n 1p "$RUN/g0c.out")"
+last_has "rebuild: done; " "$RUN/g0r.out" && last_has "$GAP0" "$RUN/g0r.out" && ok "F2 g0:   the rebuild's last line says done and carries the same count" || bad "F2 g0: rebuild's last line: $(tail -1 "$RUN/g0r.out")"
+run g0d doctor; rc_is "F2 g0:   doctor is rc 0" 0 g0d
+first_has "OK brain-db: index current" "$RUN/g0d.out" && first_has "$GAP0" "$RUN/g0d.out" && ok "F2 g0:   doctor's one line says OK and carries the same count" || bad "F2 g0: doctor: $(cat "$RUN/g0d.out")"
+# gap_case <name> <the count string> <what was just broken>: rebuild, check, doctor, up; none may say GREEN, done or OK
+gap_case() {
+  local n="$1" want="$2" what="$3"
+  run $n-r rebuild
+  if [ "$RC" -eq 0 ] && last_has "rebuild: DONE WITH FAULTS: " "$RUN/$n-r.out" && last_has "$want" "$RUN/$n-r.out"; then ok "F2 $n: rebuild ($what): its LAST line says DONE WITH FAULTS and carries the count [$want]"; else bad "F2 $n: rebuild ($what): rc $RC, last line: $(tail -1 "$RUN/$n-r.out")"; fi
+  t_hasnt "F2 $n: rebuild:   and nowhere says 'rebuild: done;'" "rebuild: done;" "$RUN/$n-r.out"
+  run $n-c check
+  if [ "$RC" -eq 6 ] && first_has "check: AMBER, " "$RUN/$n-c.out" && first_has "$want" "$RUN/$n-c.out"; then ok "F2 $n: check is rc 6 and its FIRST line says AMBER and carries the count"; else bad "F2 $n: check ($what): rc $RC (wanted 6), first line: $(sed -n 1p "$RUN/$n-c.out")"; fi
+  t_hasnt "F2 $n: check:   nothing in its output says GREEN" "GREEN" "$RUN/$n-c.out"
+  run $n-d doctor
+  if [ "$RC" -eq 1 ] && first_has "WARN brain-db: index current but it has GAPS" "$RUN/$n-d.out" && first_has "$want" "$RUN/$n-d.out" && [ "$(wc -l < "$RUN/$n-d.out" | tr -d ' ')" = "1" ]; then ok "F2 $n: doctor WARNs (rc 1) in its one line and carries the count"; else bad "F2 $n: doctor ($what): rc $RC (wanted 1): $(cat "$RUN/$n-d.out")"; fi
+  t_hasnt_re "F2 $n: doctor:   it says neither OK nor GREEN" "OK brain-db|GREEN" "$RUN/$n-d.out"
+  run $n-u up
+  if [ "$RC" -eq 6 ] && [ "$(/usr/bin/grep -i -E -- '^check: ' "$RUN/$n-u.out" | tail -1 | count_in "check: AMBER, " /dev/stdin)" = "1" ] && has "$want" "$RUN/$n-u.out"; then ok "F2 $n: up is rc 6 and the check line a launcher prints from it says AMBER with the count"; else bad "F2 $n: up ($what): rc $RC (wanted 6): $(/usr/bin/grep -i -E -- '^check: ' "$RUN/$n-u.out" | tail -1)"; fi
+  t_hasnt "F2 $n: up:   nothing in its output says GREEN" "GREEN" "$RUN/$n-u.out"
+}
+# ROUND 5b: a LESSON that cannot be read as a plain file is a gap too, with no other gap present
+L0="0 other file(s) matched the allow-list and are NOT indexed (unreadable 0, not a plain file 0, cut 0), and"
+printf -- '---\ntier: W\n---\n\n# locked\n\nxgaplesson\n' > "$TREE/$L/2026-09-20_gap-locked.md"; chmod 000 "$TREE/$L/2026-09-20_gap-locked.md"
+gap_case l1 "$L0 1 lesson file(s) unreadable or not a plain file" "ONE LESSON is unreadable (mode 000) and nothing else is wrong"
+t_has "F2 l1: check names the lesson" "NOT indexed: $L/2026-09-20_gap-locked.md  [unreadable: PermissionError]  (a lesson; clause f)" "$RUN/l1-c.out"
+t_has "F2 l1: and it is still named under clause (f) of the left-out list" "2026-09-20_gap-locked.md  [unreadable: PermissionError]" "$RUN/l1-r.out"
+run l1stop stop
+run l1d doctor
+if [ "$RC" -eq 1 ] && first_has "WARN brain-db: server stopped, and 0 other file(s) matched the allow-list and are NOT indexed (unreadable 0, not a plain file 0, cut not known without the index), and 1 lesson file(s) unreadable or not a plain file" "$RUN/l1d.out" && hasnt "OK brain-db" "$RUN/l1d.out"; then ok "F2 l1s: with the server STOPPED doctor still WARNs over the one unreadable lesson (rc 1), and does not say OK"; else bad "F2 l1s: doctor, server stopped, one unreadable lesson: rc $RC: $(cat "$RUN/l1d.out")"; fi
+run l1start start
+chmod 644 "$TREE/$L/2026-09-20_gap-locked.md"; mv -n "$TREE/$L/2026-09-20_gap-locked.md" "$GONE/"
+ln -s "$TREE/4_Credentials/secret.md" "$TREE/$L/2026-09-21_gap-link.md"
+gap_case l2 "$L0 1 lesson file(s) unreadable or not a plain file" "ONE LESSON is a symlink and nothing else is wrong"
+mv -n "$TREE/$L/2026-09-21_gap-link.md" "$GONE/gap-link.symlink"
+run l3r rebuild; run l3c check; rc_is "F2 l3 (can fail): with that lesson moved away check is GREEN again, rc 0" 0 l3c
+ln -s "$TREE/3_Access_Keys/key2.md" "$TREE/0_Brain/skills/abs-link.md"
+gap_case g1 "1 other file(s) matched the allow-list and are NOT indexed (unreadable 0, not a plain file 1, cut 0)" "a skill that is a SYMLINK into 3_Access_Keys"
+t_has "F2 g1: check names the file" "NOT indexed: 0_Brain/skills/abs-link.md  [symlink]" "$RUN/g1-c.out"
+dump G1; t_hasnt "F2 g1: and nothing behind the symlink is indexed (token xcanary681)" "xcanary681" "$RUN/dump-G1.sql"
+t_has "F2 g1: (control) the seat's own ledger IS indexed at this point (token xneighbour40 lives in it)" "$L/_ledger.md" "$RUN/dump-G1.sql"
+mv -n "$TREE/$L/_ledger.md" "$GONE/_ledger.real"; ln -s "$GONE/_ledger.real" "$TREE/$L/_ledger.md"
+gap_case g2 "2 other file(s) matched the allow-list and are NOT indexed (unreadable 0, not a plain file 2, cut 0)" "also the seat's OWN LEDGER is a symlink"
+t_has "F2 g2: check names the ledger" "NOT indexed: $L/_ledger.md  [symlink]" "$RUN/g2-c.out"
+dump G2; t_hasnt "F2 g2: and the ledger is not in the index" "$L/_ledger.md" "$RUN/dump-G2.sql"
+printf '# a hard-linked skill\n\nxgaphard\n' > "$TREE/0_Brain/skills/hl-skill.md"; ln "$TREE/0_Brain/skills/hl-skill.md" "$GONE/hl-skill.second-name"
+gap_case g3 "3 other file(s) matched the allow-list and are NOT indexed (unreadable 0, not a plain file 3, cut 0)" "also a skill with a second hard link"
+t_has "F2 g3: check names it" "NOT indexed: 0_Brain/skills/hl-skill.md  [hard link (link count 2)" "$RUN/g3-c.out"
+chmod 000 "$TREE/0_Brain/daily"
+gap_case g4 "4 other file(s) matched the allow-list and are NOT indexed (unreadable 1, not a plain file 3, cut 0)" "also the seat's own DAILY FOLDER is mode 000"
+t_has "F2 g4: check names the folder" "NOT indexed: 0_Brain/daily/  [unreadable: PermissionError]" "$RUN/g4-c.out"
+"$PY" -c "
+import sys
+open(sys.argv[1], 'w').write('# big\n\nxgapbigstart ' + 'word ' * 40000 + ' xgapbigend\n')" "$TREE/0_Brain/skills/gap-big.md"
+gap_case g5 "5 other file(s) matched the allow-list and are NOT indexed (unreadable 1, not a plain file 3, cut 1)" "also one skill row over the 80,000-character limit"
+run g5s search xgapbigend; t_has "F2 g5: (control) the word after the cut really is missing from the index" "NO MATCH" "$RUN/g5s.out"
+echo "a line" >> "$TREE/0_Brain/skills/ritual.md"
+run g6c check; rc_is "F2 g6: with a changed file as well, check is RED (rc 1)" 1 g6c
+first_has "check: RED, 1 path(s) differ" "$RUN/g6c.out" && first_has "5 other file(s) matched the allow-list and are NOT indexed (unreadable 1, not a plain file 3, cut 1)" "$RUN/g6c.out" && ok "F2 g6:   and the RED first line carries the count too" || bad "F2 g6: RED first line: $(sed -n 1p "$RUN/g6c.out")"
+run g6d doctor; first_has "WARN brain-db: index stale" "$RUN/g6d.out" && first_has "5 other file(s) matched" "$RUN/g6d.out" && ok "F2 g6:   doctor's stale line carries it" || bad "F2 g6: doctor: $(cat "$RUN/g6d.out")"
+run g7stop stop; rc_is "F2 g7: the server is stopped" 0 g7stop
+run g7d doctor; rc_is "F2 g7: doctor with the server STOPPED still WARNs over the gaps it can count from the files (rc 1)" 1 g7d
+first_has "WARN brain-db: server stopped, and 4 other file(s) matched the allow-list and are NOT indexed (unreadable 1, not a plain file 3, cut not known without the index)" "$RUN/g7d.out" && ok "F2 g7:   in its one line, with the count" || bad "F2 g7: doctor: $(cat "$RUN/g7d.out")"
+t_hasnt "F2 g7:   it does not say OK" "OK brain-db" "$RUN/g7d.out"
+[ "$(server_procs)" = "0" ] && ok "F2 g7:   and doctor started nothing" || bad "doctor started a server"
+BRAINDB_NO_AUTOSTART=1 run g7c check; rc_is "F2 g7: check with the server stopped is rc 3" 3 g7c
+t_has "F2 g7:   and its line carries the count" "is not answering" "$RUN/g7c.out"; t_has "F2 g7:   (the count)" "4 other file(s) matched the allow-list and are NOT indexed" "$RUN/g7c.out"
+chmod 755 "$TREE/0_Brain/daily"
+mv -n "$TREE/0_Brain/skills/abs-link.md" "$GONE/abs-link.symlink"; mv -n "$TREE/$L/_ledger.md" "$GONE/_ledger.symlink"; mv -n "$GONE/_ledger.real" "$TREE/$L/_ledger.md"
+mv -n "$TREE/0_Brain/skills/hl-skill.md" "$GONE/hl-skill.md"; mv -n "$TREE/0_Brain/skills/gap-big.md" "$GONE/gap-big.md"
+run g8d doctor; rc_is "F2 g8 (can fail): with every gap closed, doctor on the stopped server is rc 0" 0 g8d
+first_has "OK brain-db: server stopped" "$RUN/g8d.out" && first_has "0 other file(s) matched the allow-list and are NOT indexed (unreadable 0, not a plain file 0, cut not known without the index)" "$RUN/g8d.out" && ok "F2 g8:   and says OK, server stopped, count 0" || bad "F2 g8: doctor: $(cat "$RUN/g8d.out")"
+run g8start start; run g8r rebuild; run g8c check; rc_is "F2 g8 (can fail): after a rebuild check is GREEN again, rc 0" 0 g8c
+first_has "check: GREEN, " "$RUN/g8c.out" && first_has "$GAP0" "$RUN/g8c.out" && ok "F2 g8:   first line GREEN, count all zeros" || bad "F2 g8: check's first line: $(sed -n 1p "$RUN/g8c.out")"
+run g8u up; rc_is "F2 g8:   and up is rc 0" 0 g8u
+
+section "R5-F1. ONE SNAPSHOT: a lesson's text is never paired with a rules-index row of another moment (the third checker's F1)"
+F1T="$RUN/f1"; FLIP="2027-01-02_q-flip.md"
+cat > "$RUN/f1put.py" <<'PYEOF'
+import os, sys
+# f1put.py <tree> <action>: the WRITER of the F1 tests. Every write is a whole-file atomic replace unless it says in place.
+tree, act = sys.argv[1], sys.argv[2]
+Ldir = os.path.join(tree, "0_Brain/learnings"); Z = "2027-01-02_q-flip.md"
+FM = "---\ndate: 2027-01-01\ntype: correction\nstatus: live\ntier: W\n---\n"
+def put(path, text):
+    tmp = os.path.join(tree, ".f1put.tmp")
+    with open(tmp, "w", encoding="utf-8", newline="") as f:
+        f.write(text)
+    os.replace(tmp, path)
+def text(tok):
+    return FM + "\n# Flip\n\nThe word is %s here.\n" % tok
+def idx(seats):
+    rows = ["2027-01-01_q-control.md\tlive\tall\tlearning-loop\tdrive\t-\tWhen testing: qzcontrolrule do it.",
+            "%s\tlive\t%s\tlearning-loop\tdrive\t-\tWhen testing: qzfliprule%s do it." % (Z, seats, seats)]
+    return "# header\n" + "\n".join(rows) + "\n"
+zp, ip = os.path.join(Ldir, Z), os.path.join(Ldir, "_rules_index.tsv")
+if act == "init":
+    os.makedirs(Ldir, exist_ok=True)
+    put(os.path.join(Ldir, "2027-01-01_q-control.md"), FM + "\n# Control\n\nThe word is qzcontrol here.\n")
+    put(zp, text("qzflipOWN")); put(ip, idx("all"))
+elif act == "A":            # B -> A as a careful writer does it: the text first, then the row
+    put(zp, text("qzflipOWN")); put(ip, idx("all"))
+elif act == "B":            # A -> B: the row first, then the text. At EVERY instant on disk, text OTHER implies row tuesday.
+    put(ip, idx("tuesday")); put(zp, text("qzflipOTHER"))
+elif act == "same":         # the lesson replaced by an identical copy: a new file holding the same bytes
+    put(zp, open(zp, encoding="utf-8").read())
+elif act == "A-inplace":    # B -> A with the lesson rewritten IN PLACE: same inode, same size, its modification time put back
+    st = os.stat(zp); new = text("qzflipOWNED").encode()
+    assert len(new) == st.st_size, (len(new), st.st_size)
+    fd = os.open(zp, os.O_WRONLY); os.write(fd, new); os.close(fd)
+    os.utime(zp, ns=(st.st_atime_ns, st.st_mtime_ns))
+    st2 = os.stat(zp)
+    assert (st2.st_ino, st2.st_size, st2.st_mtime_ns) == (st.st_ino, st.st_size, st.st_mtime_ns), "the in-place writer did not keep inode, size and mtime"
+    put(ip, idx("all"))
+else:
+    sys.exit("unknown action " + act)
+PYEOF
+"$PY" -c "
+import sys
+ls = open(sys.argv[1]).read().split('\n')
+i = next(k for k, l in enumerate(ls) if l.startswith('allow rules_index')); j = next(k for k, l in enumerate(ls) if l.startswith('allow lesson'))
+assert i > j
+ls.insert(j, ls.pop(i)); open(sys.argv[2], 'w').write('\n'.join(ls))" "$LANE/scope/wednesday.scope" "$RUN/index-first.scope" || bad "could not write the index-first scope"
+F1() { env -u WED_AGENT BRAINDB_ROOT="$F1T" BRAINDB_PGDATA="$RUN/pgdata-f1" BRAINDB_SOCKDIR="$SOCK2" BRAINDB_SCOPE="${F1_SCOPE:-}" BRAINDB_TEST_READ_HOLD="${HD:-}" /bin/bash "$TOOL" "$@"; }
+f1put() { "$PY" "$RUN/f1put.py" "$F1T" "$@" || bad "the F1 writer failed: $*"; }
+f1dump() { "$PGBIN/pg_dump" --data-only --schema=brain -h "$SOCK2" -d braindb > "$RUN/dump-$1.sql" || bad "pg_dump $1"; /usr/bin/grep -v -i -E 'built_at|^.(un)?restrict ' "$RUN/dump-$1.sql" > "$RUN/dump-$1.cmp"; }
+newhold() { HD="$RUN/hold-$1"; mkdir -p "$HD"; shift; local t; for t in "$@"; do : > "$HD/at-$t"; done; }      # ask the tool to pause at these points
+held() { waitfor "$HD/waiting-$1" || bad "the tool never reached the pause '$1' (so the case below proves nothing)"; }
+go() { : > "$HD/go-$1"; }
+retry_line() { /usr/bin/grep -i -F -- "the tree changed while it was read (try $1 of 3" "$2" | head -1; }
+f1put init
+HD="" F1 rebuild > "$RUN/f1-0.out" 2>&1; RC=$?; rc_is "(control) the F1 tree builds at rest in state A (own text, row scoped all)" 0 f1-0
+f1dump f1-0; t_has "  and the lesson is indexed with its own text" "qzflipOWN" "$RUN/dump-f1-0.sql"
+newhold c "1-$FLIP" "1-VALIDATE" "1-MIDVALIDATE"
+F1 rebuild > "$RUN/f1-c.out" 2>&1 & RB=$!
+held "1-$FLIP"; go "1-$FLIP"; held 1-VALIDATE; go 1-VALIDATE; held 1-MIDVALIDATE; go 1-MIDVALIDATE; wait "$RB"; RC=$?
+rc_is "(control) a rebuild paused at all three points with NOTHING changed ends rc 0" 0 f1-c
+t_hasnt "  and read the tree once: every 'read it again' below is caused by the change made in that case" "changed while it was read" "$RUN/f1-c.out"
+f1put B
+HD="" F1 rebuild > "$RUN/f1-b.out" 2>&1; f1dump f1-b
+t_hasnt "(control) at rest in state B (other text, row scoped tuesday) the lesson is left out" "qzflip" "$RUN/dump-f1-b.sql"
+t_has "  under clause (b)" "$FLIP  [its rules-index row is scoped to tuesday]" "$RUN/f1-b.out"
+# F1.1 the checker's SP4 made exact: the lesson is read in state B, then the tree moves to A before the index is read
+newhold t1 "1-$FLIP"
+F1 rebuild > "$RUN/f1-1.out" 2>&1 & RB=$!
+held "1-$FLIP"; f1put A; go "1-$FLIP"; wait "$RB"; RC=$?
+rc_is "F1.1 the lesson read in state B, the rules index read after the tree moved to state A: the rebuild ends rc 0" 0 f1-1
+f1dump f1-1
+t_hasnt "F1.1 the OTHER text (scoped to tuesday at every instant it existed) is NOT in the index" "qzflipOTHER" "$RUN/dump-f1-1.sql"
+t_has "F1.1   the lesson is indexed with the text that goes with the row" "qzflipOWN" "$RUN/dump-f1-1.sql"
+[ "$(retry_line 1 "$RUN/f1-1.out" | count_in "moved: $L/$FLIP)" /dev/stdin)" = "1" ] && ok "F1.1   because the tool saw the lesson move and read the tree again (try 1 of 3; moved: the lesson)" || bad "F1.1 no 'read it again' line naming the lesson: $(retry_line 1 "$RUN/f1-1.out")"
+# F1.2 the A, B, A case: the index is read FIRST (state A), the lesson is read in state B, the tree is back in A
+# when the index is hashed again. The index hashes the same at both ends; only the lesson's stat can tell.
+newhold t2 "1-_rules_index.tsv" "1-$FLIP"
+F1_SCOPE="$RUN/index-first.scope" F1 rebuild > "$RUN/f1-2.out" 2>&1 & RB=$!
+held "1-_rules_index.tsv"; f1put B; go "1-_rules_index.tsv"; held "1-$FLIP"; f1put A; go "1-$FLIP"; wait "$RB"; RC=$?
+rc_is "F1.2 A, B, A (index read first in A, lesson read in B, back to A before the index is hashed again): rc 0" 0 f1-2
+f1dump f1-2
+t_hasnt "F1.2 the OTHER text is NOT in the index although the rules index hashed the same at both ends" "qzflipOTHER" "$RUN/dump-f1-2.sql"
+t_has "F1.2   the lesson is indexed with its own text" "qzflipOWN" "$RUN/dump-f1-2.sql"
+[ "$(retry_line 1 "$RUN/f1-2.out" | count_in "moved: $L/$FLIP)" /dev/stdin)" = "1" ] && ok "F1.2   what moved is the lesson ALONE: the index hash did not see it, the lesson's stat did" || bad "F1.2 the 'read it again' line is not 'moved: the lesson' alone: $(retry_line 1 "$RUN/f1-2.out")"
+# F1.3 index first, A then B and it stays B: the lesson is one stable file, only the index hash can tell
+newhold t3 "1-_rules_index.tsv"
+F1_SCOPE="$RUN/index-first.scope" F1 rebuild > "$RUN/f1-3.out" 2>&1 & RB=$!
+held "1-_rules_index.tsv"; f1put B; go "1-_rules_index.tsv"; wait "$RB"; RC=$?
+rc_is "F1.3 index read in A, then the tree moves to B and stays: rc 0" 0 f1-3
+f1dump f1-3
+t_hasnt "F1.3 the OTHER text is NOT in the index (the row read first said all; the lesson never moved after its read)" "qzflipOTHER" "$RUN/dump-f1-3.sql"
+[ "$(retry_line 1 "$RUN/f1-3.out" | count_in "moved: $L/_rules_index.tsv)" /dev/stdin)" = "1" ] && ok "F1.3   what moved is the rules index ALONE: its second hash is what saw it" || bad "F1.3 the 'read it again' line is not 'moved: the rules index' alone: $(retry_line 1 "$RUN/f1-3.out")"
+t_has "F1.3   and on the second read the lesson is left out under (b), named" "$FLIP  [its rules-index row is scoped to tuesday]" "$RUN/f1-3.out"
+# F1.4 the ORDER of the two checks: the tree goes back to A between the index's second hash and the lessons' stats
+f1put A
+newhold t4 "1-_rules_index.tsv" "1-MIDVALIDATE"
+F1_SCOPE="$RUN/index-first.scope" F1 rebuild > "$RUN/f1-4.out" 2>&1 & RB=$!
+held "1-_rules_index.tsv"; f1put B; go "1-_rules_index.tsv"; held 1-MIDVALIDATE; f1put A; go 1-MIDVALIDATE; wait "$RB"; RC=$?
+rc_is "F1.4 index read in A, lesson read in B, back to A BETWEEN the two checks: rc 0" 0 f1-4
+f1dump f1-4
+t_hasnt "F1.4 the OTHER text is NOT in the index (the index is hashed again BEFORE the lessons are stat-ed; the other order lets it in)" "qzflipOTHER" "$RUN/dump-f1-4.sql"
+t_has "F1.4   the lesson is indexed with its own text" "qzflipOWN" "$RUN/dump-f1-4.sql"
+# F1.5 a writer that rewrites the lesson IN PLACE and puts its modification time back: same inode, size and mtime
+f1put B
+newhold t5 "1-$FLIP"
+F1 rebuild > "$RUN/f1-5.out" 2>&1 & RB=$!
+held "1-$FLIP"; f1put A-inplace; go "1-$FLIP"; wait "$RB"; RC=$?
+rc_is "F1.5 the lesson rewritten in place (same inode, same size, modification time put back) after its read: rc 0" 0 f1-5
+f1dump f1-5
+t_hasnt "F1.5 the OTHER text is NOT in the index (the change time gave the rewrite away)" "qzflipOTHER" "$RUN/dump-f1-5.sql"
+t_has "F1.5   the lesson is indexed with the text now on disk" "qzflipOWNED" "$RUN/dump-f1-5.sql"
+# F1.6 a tree that moves under every read: three tries, then REFUSED, the index untouched
+f1put A
+newhold t6 1-VALIDATE 2-VALIDATE 3-VALIDATE
+F1 rebuild > "$RUN/f1-6.out" 2>&1 & RB=$!
+for n in 1 2 3; do held $n-VALIDATE; f1put same; go $n-VALIDATE; done; wait "$RB"; RC=$?
+rc_is "F1.6 the lesson replaced under each of three reads: the rebuild is REFUSED with rc 5" 5 f1-6
+t_has "F1.6   it says so in the words asked for" "REFUSED: the tree changed while it was read; nothing was changed in the index" "$RUN/f1-6.out"
+[ "$(count_in "the tree changed while it was read (try" "$RUN/f1-6.out")" = "3" ] && ok "F1.6   after exactly three tries" || bad "F1.6 tries counted: $(count_in "the tree changed while it was read (try" "$RUN/f1-6.out"), wanted 3"
+t_hasnt_re "F1.6   it prints no 'rebuild: done' and no report" "rebuild: (done|DONE)|LESSONS:" "$RUN/f1-6.out"
+f1dump f1-6
+cmp -s "$RUN/dump-f1-5.cmp" "$RUN/dump-f1-6.cmp" && ok "F1.6   and the index is byte-identical to the one before it (it still holds the previous text)" || bad "F1.6 the refused rebuild changed the index"
+newhold t6c 1-VALIDATE 2-VALIDATE 3-VALIDATE
+F1 check > "$RUN/f1-6c.out" 2>&1 & RB=$!
+for n in 1 2 3; do held $n-VALIDATE; f1put same; go $n-VALIDATE; done; wait "$RB"; RC=$?
+rc_is "F1.6 check under the same churn is refused the same way (rc 5)" 5 f1-6c
+t_hasnt_re "F1.6   and prints no GREEN, AMBER or RED verdict off a torn read" "check: (GREEN|AMBER|RED)" "$RUN/f1-6c.out"
+HD="" F1 rebuild > "$RUN/f1-6ok.out" 2>&1; RC=$?; rc_is "F1.6 (can fail) with the tree still, the same rebuild succeeds" 0 f1-6ok
+f1dump f1-6ok
+can_fail "F1.6 the 'index is byte-identical' comparison: after that rebuild the index does differ" cmp -s "$RUN/dump-f1-5.cmp" "$RUN/dump-f1-6ok.cmp"
+# F1.7 a lesson that is gone when the read is checked
+newhold t7 1-VALIDATE
+F1 rebuild > "$RUN/f1-7.out" 2>&1 & RB=$!
+held 1-VALIDATE; mv -n "$F1T/$L/$FLIP" "$GONE/f1-flip-moved-away.md"; go 1-VALIDATE; wait "$RB"; RC=$?
+rc_is "F1.7 a lesson moved away between its read and the check: rc 0" 0 f1-7
+f1dump f1-7
+t_hasnt "F1.7   its text is not indexed from the read that came before it left" "qzflipOWN" "$RUN/dump-f1-7.sql"
+t_has "F1.7   (control) the other lesson is indexed" "qzcontrol" "$RUN/dump-f1-7.sql"
+[ "$(retry_line 1 "$RUN/f1-7.out" | count_in "moved: $L/$FLIP)" /dev/stdin)" = "1" ] && ok "F1.7   and the tool said it read the tree again" || bad "F1.7 no 'read it again' line: $(retry_line 1 "$RUN/f1-7.out")"
+HD="" F1 stop > "$RUN/f1-stop.out" 2>&1; RC=$?; rc_is "the F1 cluster is stopped" 0 f1-stop
+[ "$(server_procs "$RUN/pgdata-f1")" = "0" ] && ok "  no F1 server is left" || bad "an F1 server is still running"
+
+section "R5-K18. a rebuild whose psql session FAILS says REBUILD FAILED, exits non-zero and keeps the previous index"
+K18T="$RUN/k18"; mkdir -p "$K18T/$L"
+K() { env -u WED_AGENT BRAINDB_ROOT="$K18T" BRAINDB_PGDATA="$RUN/pgdata-k18" BRAINDB_SOCKDIR="$SOCK2" /bin/bash "$TOOL" "$@"; }
+printf -- '---\ntier: W\n---\n\n# dup\n\nThe word is qzk18own here.\n' > "$K18T/$L/2027-05-01_q-dup.md"
+printf '# idx\n2027-05-01_q-dup.md\tlive\tall\tlearning-loop\tdrive\t-\tWhen testing: qzk18rule do it.\n' > "$K18T/$L/_rules_index.tsv"
+K rebuild > "$RUN/k18-0.out" 2>&1; RC=$?; rc_is "(control) the K18 tree builds: one lesson, one row" 0 k18-0
+f1dump k18-0; t_has "  and its text is indexed" "qzk18own" "$RUN/dump-k18-0.sql"
+# the live way into the failed-session branch (the checker's F3, NOT fixed in this round): a second lesson file whose
+# NAME equals the first once format characters are removed. Both qualify on the one row; the second rule row has the same key.
+"$PY" -c "
+import sys, os
+open(os.path.join(sys.argv[1], '2027-05-01_q-dup​.md'), 'w', encoding='utf-8').write('---\ntier: W\n---\n\n# twin\n\nThe word is qzk18twin here.\n')" "$K18T/$L" || bad "could not plant the twin file"
+[ "$(ls "$K18T/$L" | /usr/bin/grep -i -c 'q-dup')" = "2" ] && ok "(control) two files are on disk whose names read the same" || bad "the twin file is not there"
+K rebuild > "$RUN/k18-1.out" 2>&1; RC=$?
+rc_is "K18 a rebuild whose psql session fails exits 1, not 0" 1 k18-1
+t_has "K18   it prints REBUILD FAILED" "REBUILD FAILED (psql rc " "$RUN/k18-1.out"
+[ "$(tail -1 "$RUN/k18-1.out" | count_in "REBUILD FAILED" /dev/stdin)" = "1" ] && ok "K18   as its LAST line" || bad "K18 the last line is not REBUILD FAILED: $(tail -1 "$RUN/k18-1.out")"
+t_has "K18   psql's own error is shown, not discarded (so this IS the failed-session branch)" "duplicate key value violates unique constraint" "$RUN/k18-1.out"
+t_hasnt_re "K18   it prints no 'rebuild: done' and no report" "rebuild: (done|DONE)|LESSONS:" "$RUN/k18-1.out"
+f1dump k18-1
+cmp -s "$RUN/dump-k18-0.cmp" "$RUN/dump-k18-1.cmp" && ok "K18   and the previous index is kept, byte for byte" || bad "K18 the failed rebuild changed the index"
+t_hasnt "K18   (the twin's text is not in it)" "qzk18twin" "$RUN/dump-k18-1.sql"
+K check > "$RUN/k18-c.out" 2>&1; RC=$?; rc_is "K18   check afterwards is RED: it does not call the failed rebuild current" 1 k18-c
+mv -n "$K18T/$L/$(ls "$K18T/$L" | /usr/bin/grep -i 'q-dup' | /usr/bin/grep -v -i -x '2027-05-01_q-dup.md')" "$GONE/k18-twin.md"
+K rebuild > "$RUN/k18-2.out" 2>&1; RC=$?; rc_is "K18 (can fail) with the twin moved away the same rebuild succeeds" 0 k18-2
+t_has "K18   (can fail) and that one does print 'rebuild: done'" "rebuild: done" "$RUN/k18-2.out"
+K stop > "$RUN/k18-stop.out" 2>&1; RC=$?; rc_is "the K18 cluster is stopped" 0 k18-stop
+[ "$(server_procs "$RUN/pgdata-k18")" = "0" ] && ok "  no K18 server is left" || bad "a K18 server is still running"
 
 section "13. stop, and on-demand start"
 [ "$(server_procs)" = "1" ] && ok "(control) one server process before stop" || bad "server process count before stop is $(server_procs)"

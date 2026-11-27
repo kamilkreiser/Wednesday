@@ -9,6 +9,7 @@
 # 2's own; K = the SECOND checker's 25 (K_my_mutants.sh; 15 of which survived round 2), each re-pointed at the
 # round 3 code with the same intent and named for the test that must catch it; R = new mutants on round 3's code.
 # Where round 3 rewrote the line a mutant aimed at, the mutant here breaks the line that now does that job.
+# ROUND 4 (ANSWER-6) adds group F: one mutant per new guard of the six fixes, each named for its T29..T34 cell.
 #   tests/mutants.sh [base dir under /private/tmp] [how many at once, default 5] [only mutants whose name starts with this, an extended regex such as 'M20|Q16']
 set -u
 HERE="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -58,7 +59,7 @@ N=0
 mutant() { if [ -n "$ONLY" ] && ! printf '%s' "$1" | /usr/bin/grep -q -E "^($ONLY)"; then return 0; fi
   ORDER="$ORDER $1"; one "$@" & N=$((N+1)); if [ $((N % PAR)) -eq 0 ]; then wait; fi; }
 
-echo "=== mutants (round 3) — scratch copies under $RUN, $PAR at a time ==="
+echo "=== mutants (rounds 1 to 4) — scratch copies under $RUN, $PAR at a time ==="
 copy_lane control
 bash "$RUN/control/WEDNESDAY/2_Project_Files/nas-backup/tests/run.sh" "$RUN/control/base" > "$RUN/control/out.txt" 2>&1; CRC=$?
 echo "  CONTROL   the unmutated copy: exit $CRC — $(tail -1 "$RUN/control/out.txt" | cut -c1-28)"
@@ -127,7 +128,7 @@ mutant N03-missing-exclude_path-accepted "T15 an exclude_path that names nothing
 mutant N04-exclude-everything-accepted "T15 exclude_name=*" '            if match_everything(p):' '            if False:'
 mutant N05-empty-scope-is-good "T15 a set that became EMPTY" '    if n_src == 0 and s["dest"] not in c["allow_empty"]:' '    if False:' '    elif last_count and n_src < last_count * (1.0 - c["max_drop_fraction"]) and not accept_shrink:' '    elif last_count and n_src and n_src < last_count * (1.0 - c["max_drop_fraction"]) and not accept_shrink:'
 mutant N06-sharp-fall-is-good "T15 a set that lost more than half" '    elif last_count and n_src < last_count * (1.0 - c["max_drop_fraction"]) and not accept_shrink:' '    elif False:'
-mutant N07-hard-links-travel "T13 NOT ONE of the 35" '                        if rules is not None and s.st_nlink > 1:' '                        if False:'
+mutant N07-hard-links-travel "T13 the hard-linked file is skipped and counted" '                        if rules is not None and s.st_nlink > 1:' '                        if False:'
 mutant N08-key-extensions-travel "T13 NOT ONE of the 35" '        if n.endswith(e) or (e + ".") in n or (e + " ") in n:' '        if False:'
 mutant N09-deploy-keys-travel "T13 NOT ONE of the 35" '            or n.startswith("github_deploy") or "deploy_key" in n or "deploy-key" in n
             or n.endswith("_deploy_rw") or n.endswith("_deploy_ro")):' '            ):'
@@ -211,8 +212,10 @@ mutant K23-source-not-required-to-be-a-folder "T22 ... refused as not a folder" 
 mutant K24-held-watch-raises-nothing-removed "T9 HELD: exit 0" '    if os.path.exists(ctx.hold_file) and action in ("check", "card"):' '    if False:'
 mutant K25-nightly-records-no-fire "T7 ... the fire and its decision are RECORDED" '    st["last_fire"] = {"time": ctx.now, "time_local": now_local_str(ctx.now), "decision": action, "reason": reason}' '    pass'
 # ── R: new mutants on round 3's code ──
-mutant R01-unreadable-counts-as-deleted "T21a a source file with mode 000" '                                    if source_deleted(s["src"], plan["root_id"], rel):' '                                    if True:'
+mutant R01-unreadable-counts-as-deleted "T21a a source file with mode 000" '                                    if source_deleted(s["src"], plan["root_id"], rel, parent_id_of(plan, rel)):' '                                    if True:'
 mutant R02-deleted-although-still-listed "T21l a name that is still there" '        if name in names:
+            return False' '        if False:
+            return False' '        if os.path.lexists(path):
             return False' '        if False:
             return False'
 mutant R03-unlistable-parent-means-deleted "T21h a planned file whose parent folder went away" '            names = os.listdir(parent)
@@ -224,7 +227,7 @@ mutant R04-root-identity-not-checked "T21l a root that is no longer" '          
                 return False' '            if False:
                 return False'
 mutant R05-deleted-limit-off "T21g six planned files" '                if len(deleted) > allowed:' '                if False:'
-mutant R06-non-regular-source-hashed "T21i ... named, with the reason" '        if not stat.S_ISREG(os.lstat(src_path).st_mode):' '        if False:'
+mutant R06-non-regular-source-hashed "T21i ... named, with the reason" '        if not stat.S_ISREG(ls.st_mode):' '        if False:'
 mutant R07-sample-finding-keeps-its-index-row "T23 the NEXT night" '                        index.drop(s["dest"], repair)' '                        pass'
 mutant R36-no-read-back-after-a-sample-finding "T23 ... not one destination copy differs" '                    if wrong_at_dest:' '                    if False:'
 mutant R37-own-run-state-in-the-plan "T27 the lane's own state folder" '        if self.own_state is not None and rel == self.own_state:' '        if False:'
@@ -285,6 +288,42 @@ mutant R34-cap-ignored-while-proving "T26 a copy stopped by the cap: exit 4" '  
                 kill_child()
                 return ("killed-cap", None)'
 mutant R35-unreached-sets-not-named "T26 ... a set the run never reached" '            if s["dest"] not in done_sets:' '            if False:'
+# ── F: ROUND 4, one per new guard of the six fixes (ANSWER-6). Each is named for the T29..T34 cell that owns it. ──
+mutant F01-nested-destinations-allowed "T29 A1: set=General|WEDNESDAY and set=General|WEDNESDAY/docs: exit 2" 'if a["client"] == b["client"] and pa[:n] == pb[:n]:' 'if False:'
+mutant F02-one-name-under-two-clients-allowed "T29 finding 5: ONE destination name under TWO clients" 'if a["client"] != b["client"] and pa == pb:' 'if False:'
+mutant F03-destinations-compared-as-strings "T29 NEIGHBOUR: a name that only STARTS" 'return tuple(unicodedata.normalize("NFC", p).casefold() for p in s["dest"].split("/"))' 'return tuple(unicodedata.normalize("NFC", s["dest"]).casefold())'
+mutant F04-symlinked-level-accepted "T30 A4b the seat folder itself" '            if os.path.islink(nxt):' '            if False:'
+mutant F05-symlinked-client-folder-accepted "T30 the CLIENT folder itself" '    if os.path.islink(root_existing):' '    if False:'
+mutant F06-no-containment-check-per-set "T30 a DRY run with versions/ leading outside" '            if esc:
+                raise Refused("REFUSED — %s; nothing written for set %s"' '            if False:
+                raise Refused("REFUSED — %s; nothing written for set %s"'
+mutant F07-no-containment-check-before-the-manifest "T30 ... nothing was written through it" 'escapes = [e for e in (dest_escape(ctx, client) for client in sorted(client_roots)) if e]' 'escapes = []'
+mutant F17-no-containment-check-before-a-chunk "T30 ... only the chunk in flight wrote through the link" '                        if esc:
+                            raise Refused("REFUSED — %s; stopped in set %s before chunk %d of %d"' '                        if False:
+                            raise Refused("REFUSED — %s; stopped in set %s before chunk %d of %d"'
+mutant F08-no-hard-link-check-before-the-chunk "T31 swap BEFORE its chunk: the secret" 'linked = set(rel for rel in todo if hard_linked_now(os.path.join(s["src"], rel)))' 'linked = set()'
+mutant F09-hard-link-proven-at-proof-time "T31 swap between the hand-over of its chunk and the proof: NOT exit 0" '        if ls.st_nlink > 1:' '        if False:'
+mutant F10-left-out-names-not-recorded "T32 the drive list names 'src/secrets.ts'" 'res["secret_names"].append((r, m[1]))' 'pass'
+mutant F11-left-out-names-in-the-share-manifest "T32 'secrets.ts' is absent from every file on the fake NAS" '"left_out_by_secret_shape_entries": len(src["secret_names"]),' '"left_out_by_secret_shape_entries": src["secret_names"],'
+mutant F12-own-left-out-list-travels "T32 a left-out list lying inside the source tree" '    ("own-left-out-list", "files", ["*_left_out_by_secret_shape.tsv"]),' '    ("own-left-out-list", "files", []),'
+mutant F13-deleted-although-the-path-resolves "T33 A3c a file renamed to another case and made unreadable: NOT exit 0" '        if os.path.lexists(path):
+            return False' '        if False:
+            return False'
+mutant F14-replaced-parent-accepted "T33 A3a the parent folder REPLACED" '                if (ps.st_dev, ps.st_ino) != tuple(parent_id):' '                if False:'
+mutant F15-parent-id-not-passed "T33 A3a the parent folder REPLACED" 'if source_deleted(s["src"], plan["root_id"], rel, parent_id_of(plan, rel)):' 'if source_deleted(s["src"], plan["root_id"], rel):'
+mutant F16-conf-read-before-the-hold "T34 a --run under the hold with an UNCONFIRMED conf: exit 3" '        if mode == "run" and os.path.exists(ctx.hold_file):
+            raise Refused("REFUSED — %s exists: real runs are HELD' '        if False:
+            raise Refused("REFUSED — %s exists: real runs are HELD' '        ctx.load_conf()
+        st0 = ctx.read_state()
+        if ctx.state_note:
+            say(ctx.state_note)
+        for label, val' '        ctx.load_conf()
+        st0 = ctx.read_state()
+        if ctx.state_note:
+            say(ctx.state_note)
+        if mode == "run" and os.path.exists(ctx.hold_file):
+            raise Refused("HELD (mutant: the conf was read first)", RC_HELD)
+        for label, val'
 wait
 
 echo

@@ -1,0 +1,23 @@
+Fri 27 Nov 2026 22:03:11 AEDT
+22:03  up 12:10, 2 users, load averages: 17.26 15.65 10.17
+== A1 nested destination names, same client
+night1 rc=2 GOOD lines=0 COMPLETE markers=0
+  refused? REFUSED — the destinations of two sets of client General NEST: 'WEDNESDAY' and 'WEDNESDAY/docs' (one name is a path prefix of the other). The inner set would write inside the outer set's folder and the two would overwrite each other's files every night; give them names that do not nest; nothing run
+  destination current/WEDNESDAY/docs/readme.txt holds: cat: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/15609ed4-7998-4256-a61d-5f55d5689085/scratchpad/qa3fx_r4/220311_48648/a1/nas/General/Wednesday/nightly-backup/current/WEDNESDAY/docs/readme.txt: No such file or directory
+  source of set WEDNESDAY for that path holds:       OUTER-SET-CONTENT of docs/readme (from the seat tree)
+  cmp outer source vs destination: DIFFERENT
+  state last_attempt.status=refused  undelivered=None
+  copies of the outer content anywhere on the fake NAS: 
+night2 rc=2 GOOD lines=0; to-copy lines: 
+  after night 2 destination holds: cat: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/15609ed4-7998-4256-a61d-5f55d5689085/scratchpad/qa3fx_r4/220311_48648/a1/nas/General/Wednesday/nightly-backup/current/WEDNESDAY/docs/readme.txt: No such file or directory; sample line: 
+night3 rc=2 GOOD lines=0; destination holds: cat: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/15609ed4-7998-4256-a61d-5f55d5689085/scratchpad/qa3fx_r4/220311_48648/a1/nas/General/Wednesday/nightly-backup/current/WEDNESDAY/docs/readme.txt: No such file or directory
+CONTROL (same two sets, the inner one named apart: General|Docs2): 
+  rc=0 GOOD=1 outer cmp: SAME
+== A2 same destination name under two clients: allow_empty and the fall baseline are keyed by the name alone
+night1 rc=2 GOOD=0  refused: REFUSED — the destination name 'Proj' is used under two clients (General and Secuura): the baseline of the fall rule, allow_empty and the index are kept by that name alone, so the two sets would share
+  baseline recorded: None
+night2 (General/Proj fell 12 -> 2) rc=2 GOOD=0  fell-line: 
+night3 (allow_empty=Proj meant for one; General/Proj now EMPTY) rc=2 GOOD=0 empty-lines: 0
+Fri 27 Nov 2026 22:03:12 AEDT
+22:03  up 12:10, 2 users, load averages: 17.26 15.65 10.17
+script exit 0

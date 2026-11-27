@@ -1,0 +1,40 @@
+Fri 27 Nov 2026 22:03:15 AEDT
+22:03  up 12:10, 2 users, load averages: 17.08 15.64 10.19
+== A4a current/<set> is a SYMLINK to a folder outside the seat's destination
+  rc=2 GOOD=0 refused:   - REFUSED — /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/15609ed4-7998-4256-a61d-5f55d5689085/scratchpad/qa3fx_r4/220315_51006/e1/nas/General/Wednesda
+  files now in the OUTSIDE folder: keep.txt 
+== A4b the seat folder itself (<NAS>/General/Wednesday) is a symlink to another client's folder
+  rc=2 GOOD=0 refused: REFUSED — /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/15609ed4-7998-4256-a61d-5f55d5689085/scratchpad/qa3fx_r4/220315_51006/e2/nas/General/Wednesday on
+  entries now under nas/Datasec/x: 1 (1 = only itself)
+== A4c a symlinked SUBFOLDER inside current/<set> (sub -> outside), source has sub/b.txt changed
+  night1 rc=0
+  night2 rc=0 GOOD=1; outside/b.txt now: theirs; sub is: Directory
+    problems: 
+== A4d versions/ is a symlink to outside; a changed file's old copy would be written through it
+  night1 rc=0
+  night2 rc=2 GOOD=0; files now under outside2: 0
+== A6a odd names in one chunk list: newline, leading dash, glob characters, trailing space, backslash, leading #, ;
+  planted 18 odd names; rc=0 GOOD=1; chunks: 5; deleting lines>0: 0
+  source files 21 ; destination files 21 ; content diff: 0 lines
+  first problem (if any): 
+  engine argument lists the tool built (distinct option words over all calls): --backup --backup-dir --files-from --from0 --no-h --stats --temp-dir --timeout -I -O -t 
+== A6b versions/: the same file replaced by chunk passes and by TWO runs in one night: is any earlier copy overwritten?
+  run0 rc=0
+  run1 (f1 changes after each of the first engine calls) rc=8 GOOD=0 resent: 2 re-sent
+  run2 the same night rc=0 GOOD=1
+  version folders: 2026-12-01_011000_52844 2026-12-01_011000_52844_pass2 2026-12-01_011000_52844_pass3 2026-12-01_012000_53359 
+    copies whose first line is exactly 'v0 file 1' kept under versions/: 1
+    copies whose first line is exactly 'v1 file 1 longer' kept under versions/: 3
+    copies whose first line is exactly 'v0 file 7' kept under versions/: 1
+    copies whose first line is exactly 'v1 file 7 longer' kept under versions/: 1
+    distinct contents of sub/f1.txt kept under versions/: 4 in 4 files
+== A6c SIGKILL of the tool in chunk 3 of 5 (the engine hangs); then what the next run trusts
+  after SIGKILL: index rows=10 state.last_attempt=running last_good=None COMPLETE=0 lock left=yes files at destination=10
+  a new run while the orphan engine lives: rc=6 REFUSED — the run that held the lock /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/15609ed4-7998-4256-a
+  orphan ended; files at destination now=15 index rows=10; clear-stale-lock rc=0
+  altered behind the tool (delivered by the orphan, no index row): f18.txt
+  resume rc=0 GOOD=1;     to copy: 11 files, 114 B (10 new, 1 changed -> previous copy kept in version;     compared by sha256 (same size, source changed or not yet proven): 5 files, 4 identical
+  after the resume: source and destination differ in 0 lines; the altered content is kept in versions/: 1 file
+Fri 27 Nov 2026 22:03:33 AEDT
+22:03  up 12:11, 2 users, load averages: 17.18 15.74 10.36
+script exit 0

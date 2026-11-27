@@ -1,0 +1,40 @@
+Fri 27 Nov 2026 22:04:00 AEDT
+22:04  up 12:11, 2 users, load averages: 18.92 16.36 10.74
+== a. parent folder REPLACED by another folder of the same name (files live on in sub.old)
+  parent_swapped: rc=0 GOOD=1 deleted-line:     DELETED at the source during the run: 1 planned file(s). Each one's folder was listed  | first NOT DELIVERED: 
+     the file still exists at: vol/WEDNESDAY/sub.old/b.txt
+== b. parent folder replaced by a SYMLINK to a listable folder outside the set
+  parent_symlink: rc=8 GOOD=0 deleted-line:     DELETED at the source during the run: 1 planned file(s). Each one's folder was listed  | first NOT DELIVERED:   NOT DELIVERED: WEDNESDAY/sub/ (the folder is missing at the destination)
+== c. file renamed to a name differing only in CASE and made unreadable (this scratch volume folds case)
+  case_rename_000: rc=0 GOOD=1 deleted-line:     DELETED at the source during the run: 1 planned file(s). Each one's folder was listed  | first NOT DELIVERED: 
+     listing of sub: B.TXT  ; path sub/b.txt still resolves: YES
+== c2. the same rename, file left readable (control: must be PROVEN through the folded name)
+  case_rename: rc=0 GOOD=1 deleted-line:  | first NOT DELIVERED: 
+== d. file replaced by a FIFO, by a socket-like special, by a symlink (same name stays in the listing)
+  to_fifo: rc=8 GOOD=0 deleted-line:  | first NOT DELIVERED:   NOT DELIVERED: WEDNESDAY/sub/b.txt (the source is no longer a regular file)
+  to_symlink: rc=8 GOOD=0 deleted-line:  | first NOT DELIVERED:   NOT DELIVERED: WEDNESDAY/sub/b.txt (the source is no longer a regular file)
+== e. name absent at the first listing, back before the second (re-created 0.1 s later by a background writer)
+  reappears: rc=8 GOOD=0 deleted-line:  | first NOT DELIVERED:   NOT DELIVERED: WEDNESDAY/sub/b.txt (the source could not be read (No such file or directory))
+== f. the unit function on more shapes
+  case-differing name present (dir/here.txt asked, Here.txt on disk; path resolves=True): deleted=True
+  NFD on disk, NFC asked (path resolves=True): deleted=True
+  parent is a symlink to a listable folder without the name: deleted=True
+  name present as a FIFO: deleted=False
+  emptied folder: deleted=True
+  deleted_allowed(planned=587130, max_files=5, fraction=0.001) = 587
+  deleted_allowed(planned=587130, max_files=100, fraction=0.01) = 5871
+  deleted_allowed(planned=265280, max_files=100, fraction=0.01) = 2652
+  deleted_allowed(planned=10, max_files=100, fraction=0.01) = 100
+  real 15 sets, defaults: total allowed deleted on a GOOD night = 1058 ; at the conf ceiling (100 files, 1%) = 11175
+== g. conf ceiling: max_deleted_files=101 and max_deleted_fraction=0.02 (must be refused), 100 and 0.01 (accepted)
+  101: rc=2 /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/15609ed4-7998-4256-a61d-5f5
+  0.02: rc=2 /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/15609ed4-7998-4256-a61d-5f5
+  100 and 0.01: rc=0
+  -1: rc=2
+== h. many deletions: 700 of 1000 files deleted mid-run at the ceiling conf; are ALL named in the last lines / manifest / state?
+  70,002 planned, 650 deleted (allowed 1% = 700): rc=0 GOOD=1
+  DELETED AT SOURCE lines in the run's last lines: 600 ; 'and N more' line:   ... and 50 more, all in the manifest
+  manifest deleted_during_run names: 650 ; per-set deleted_count=650 names=650 ; state last_good.deleted_during_run names: 20
+Fri 27 Nov 2026 22:10:51 AEDT
+22:10  up 12:18, 2 users, load averages: 9.25 11.02 10.34
+script exit 0

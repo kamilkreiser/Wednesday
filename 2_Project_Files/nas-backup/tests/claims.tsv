@@ -1,4 +1,4 @@
-# tests/claims.tsv — every coverage claim STATUS.md (ROUND 3) makes, in a form tests/claims_check.py can check against
+# tests/claims.tsv — every coverage claim STATUS.md (ROUND 3, and ROUND 4: the ids starting r4-) makes, in a form tests/claims_check.py can check against
 # a suite run and a mutant run. Columns, TAB-separated: id, kind, argument, what STATUS says. Kinds: see claims_check.py.
 # A claim that is not in this file is not made in STATUS. Edit both together.
 1a	pass	T21a a source file with mode 000 from the first night: night 1 is NOT exit 0	a source file that cannot be read fails the night from the first night
@@ -139,5 +139,89 @@
 3m-M20	mutant	M20	mutant caught: index trusted blindly
 4i	pass	T14 a source inside a datasec-named folder four levels down, where no forbidden root is searched for: exit 2	deeper than the root search, the component rule still refuses
 4j	pass	T14 ... refused by its REAL path's name	the real path's components are checked too
-9t	total	568	the suite: all passed, 0 failed
-9m	mutants	126	the mutant run: all caught
+9t	total	694	the suite: all passed, 0 failed
+9m	mutants	143	the mutant run: all caught
+# ── ROUND 4 (ANSWER-6): the six fixes. Every cell and mutant the ROUND 4 section of STATUS names. ──
+r4-1a	pass	T29 A1: set=General|WEDNESDAY and set=General|WEDNESDAY/docs: exit 2	item 1: the checker's A1 pair is refused at load
+r4-1b	pass	T29 ... refused as NESTING, naming both	item 1: the refusal names both destinations
+r4-1c	pass	T29 ... the fake NAS is unchanged (nothing written)	item 1: nothing is written
+r4-1d	pass	T29 the same pair spelled in another case (wednesday/Docs): exit 2	item 1: the comparison ignores case (this cell is green on round 3 too, for another reason)
+r4-1e	pass	T29 the inner name given FIRST (Deep/A/B before Deep/A): exit 2	item 1: order of the two lines does not matter
+r4-1f	pass	T29 NEIGHBOUR (the checker's control): the inner set named apart, General|Docs2: exit 0	item 1: the Docs2 control stays GOOD
+r4-1g	pass	T29 NEIGHBOUR: a name that only STARTS with the other's letters	item 1: a shared string prefix is not nesting
+r4-1h	pass	T29 NEIGHBOUR: the nested name under ANOTHER client	item 1: nesting across two clients is accepted
+r4-1i	pass	T29 finding 5: ONE destination name under TWO clients	item 1: one name under two clients is refused
+r4-1j	pass	T29 two sets of one client with the SAME destination name	item 1: the checker's surviving mutant X28 now has a test
+r4-1m1	mutant	F01	mutant caught: nested destinations allowed
+r4-1m2	mutant	F02	mutant caught: one name under two clients allowed
+r4-1m3	mutant	F03	mutant caught: destinations compared as strings, not parts
+r4-2a	pass	T30 A4a current/<set> is a symlink to a folder outside the seat's destination: exit 2	item 2: A4a refused
+r4-2a2	pass	T30 A4a ... the outside folder is unchanged by hash	item 2: A4a outside folder unchanged by hash
+r4-2b	pass	T30 A4b the seat folder itself (<NAS>/General/Wednesday) is a symlink to another client's folder: exit 2	item 2: A4b refused
+r4-2b2	pass	T30 A4b ... the outside folder is unchanged by hash	item 2: A4b outside folder unchanged by hash
+r4-2d	pass	T30 A4d versions/ is a symlink to outside and a file changed: exit 2	item 2: A4d refused
+r4-2d2	pass	T30 A4d ... the outside folder is unchanged by hash	item 2: A4d outside folder unchanged by hash
+r4-2e	pass	T30 a DRY run with versions/ leading outside is refused too	item 2: a dry run is held to the containment check
+r4-2f	pass	T30 the CLIENT folder itself (<NAS>/General) is a symlink	item 2: the client folder as a symlink is refused
+r4-2g	pass	T30 manifests/ swapped for a symlink to outside DURING the run: NOT exit 0	item 2: a swap during the run fails the night
+r4-2g2	pass	T30 ... nothing was written through it	item 2: the manifest is not written through the link
+r4-2h	pass	T30 versions/ swapped for a symlink to outside DURING chunk 1 of 3: NOT exit 0	item 2: a swap during a chunk stops the run before the next chunk
+r4-2h2	pass	T30 ... only the chunk in flight wrote through the link	item 2: only the chunk in flight is exposed
+r4-2c	pass	T30 A4c (held in round 3, must still hold)	item 2: A4c still holds
+r4-2c2	pass	T30 A4c ... the outside file is untouched	item 2: A4c outside file untouched
+r4-2u	pass	T30 the containment test as a function: plain folders pass	item 2: the containment function passes plain folders
+r4-2m1	mutant	F04	mutant caught: a symlinked level accepted
+r4-2m2	mutant	F05	mutant caught: a symlinked client folder accepted
+r4-2m3	mutant	F06	mutant caught: no containment check per set
+r4-2m4	mutant	F07	mutant caught: no containment check before the manifest
+r4-2m5	mutant	F17	mutant caught: no containment check before a chunk
+r4-3a	pass	T31 control: no swap: GOOD	item 3: the control without a swap is GOOD
+r4-3b	pass	T31 swap between the hand-over of its chunk and the proof: NOT exit 0	item 3: swap after hand-over fails the night
+r4-3b2	pass	T31 ... the file is NOT DELIVERED, by name	item 3: and the file is named
+r4-3b3	pass	T31 ... a line says the content ALREADY REACHED THE DESTINATION	item 3: the line says the content reached the destination
+r4-3b4	pass	T31 ... and names the path there	item 3: and names the path
+r4-3b5	pass	T31 ... and that is the truth: the marked content IS at that path	item 3: the statement is checked against the fake NAS
+r4-3c	pass	T31 swap BEFORE its chunk: the secret's content is NOT on the fake NAS	item 3: swap before the chunk: not sent
+r4-3c2	pass	T31 ... the night fails: exit 8	item 3: and the night fails
+r4-3c3	pass	T31 ... naming it as NOT SENT	item 3: and it is named
+r4-3m1	mutant	F08	mutant caught: no hard-link check before the chunk
+r4-3m2	mutant	F09	mutant caught: a hard-linked file proven at proof time
+r4-4a	pass	T32 the list for the set exists in the lane's manifests folder ON THE DRIVE	item 4: the list is written on the drive
+r4-4b1	pass	T32 the drive list names 'src/secrets.ts' with its shape	item 4: name 1 of 4 is in the drive list
+r4-4b2	pass	T32 the drive list names 'certs/root-ca.crt' with its shape	item 4: name 2 of 4
+r4-4b3	pass	T32 the drive list names 'ev/post_api_credentials_ok.json' with its shape	item 4: name 3 of 4
+r4-4b4	pass	T32 the drive list names '.env.example' with its shape	item 4: name 4 of 4
+r4-4c	pass	T32 its line count equals the number the run printed for the set	item 4: line count equals the printed count
+r4-4d1	pass	T32 'secrets.ts' is absent from every file on the fake NAS	item 4: name 1 absent from the fake NAS
+r4-4d2	pass	T32 'root-ca.crt' is absent from every file on the fake NAS	item 4: name 2 absent
+r4-4d3	pass	T32 'post_api_credentials_ok.json' is absent from every file on the fake NAS	item 4: name 3 absent
+r4-4d4	pass	T32 '.env.example' is absent from every file on the fake NAS	item 4: name 4 absent
+r4-4e	pass	T32 control: the same two searches DO find things on the fake NAS	item 4: the absence searches have a positive control
+r4-4f	pass	T32 no list of left-out names is on the fake NAS, while the symlink list is (control)	item 4: no left-out list on the fake NAS
+r4-4g	pass	T32 a left-out list lying inside the source tree does NOT travel	item 4: the list never travels as part of the tree
+r4-4h	pass	T32 NEIGHBOUR: an ordinary file beside it (left_out_notes.tsv) arrives	item 4: an ordinary neighbour arrives
+r4-4i	pass	T32 a DRY run writes the list too	item 4: a dry run writes the list
+r4-4j	pass	T32 ... and wrote nothing at all on the fake NAS	item 4: the dry run wrote nothing on the fake NAS
+r4-4m1	mutant	F10	mutant caught: left-out names not recorded
+r4-4m2	mutant	F11	mutant caught: left-out names in the share's manifest
+r4-4m3	mutant	F12	mutant caught: the tool's own left-out list travels
+r4-5a	pass	T33 A3a the parent folder REPLACED by a new one of the same name: NOT exit 0	item 5: A3a fails the night
+r4-5a2	pass	T33 A3a ... the file is NOT DELIVERED, by name	item 5: A3a: NOT DELIVERED
+r4-5a3	pass	T33 A3a ... and is not counted as deleted	item 5: A3a: not counted deleted
+r4-5b	pass	T33 A3b ... and the file is not counted as deleted	item 5: A3b: not counted deleted
+r4-5c	pass	T33 A3c a file renamed to another case and made unreadable: NOT exit 0	item 5: A3c fails the night
+r4-5c2	pass	T33 A3c ... the file is NOT DELIVERED, by name	item 5: A3c: NOT DELIVERED
+r4-5c3	pass	T33 control: this scratch volume folds case	item 5: the A3c fixture really folds case
+r4-5d	pass	T33 NEIGHBOUR: the same rename with the file left readable	item 5: the readable rename is still GOOD
+r4-5e	pass	T33 NEIGHBOUR: a file really deleted	item 5: a real deletion is still let go
+r4-5m1	mutant	F13	mutant caught: deleted although the path resolves
+r4-5m2	mutant	F14	mutant caught: a replaced parent accepted
+r4-5m3	mutant	F15	mutant caught: the parent id not passed
+r4-6a	pass	T34 a --run under the hold with an UNCONFIRMED conf: exit 3 (held), not 2	item 6: held, not refused
+r4-6b	pass	T34 ... recorded as held	item 6: recorded as held
+r4-6c	pass	T34 ... and the three-day clock is NOT started	item 6: the clock is not started
+r4-6d	pass	T34 a --run under the hold with a conf that cannot even be read	item 6: also with an unreadable conf
+r4-6e	pass	T34 the hold lifted four days later, first check: exit 0, not OVERDUE	item 6: lifting the hold four days later is not overdue
+r4-6f	pass	T34 NEIGHBOUR: the same unconfirmed conf with NO hold: exit 2 (refused)	item 6: without the hold it is refused
+r4-6g	pass	T34 ... and that DOES start the clock	item 6: and that starts the clock
+r4-6m1	mutant	F16	mutant caught: the conf read before the hold

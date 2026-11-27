@@ -310,8 +310,9 @@ ABSENT += [("xcanary15", "clause (f): a 4_Credentials file reached through a SYM
 os.symlink("../4_Credentials", os.path.join(root, "0_Brain/skills_link"))
 raw("3_Access_Keys/key2.md", "xcanary681\n")
 os.makedirs(os.path.join(root, "0_Brain/skills"), exist_ok=True)
-os.symlink(os.path.join(root, "3_Access_Keys/key2.md"), os.path.join(root, "0_Brain/skills/abs-link.md"))
-ABSENT.append(("xcanary681", "an absolute symlinked FILE in skills/ pointing into 3_Access_Keys"))
+# ROUND 5: the symlinked skill (0_Brain/skills/abs-link.md -> 3_Access_Keys/key2.md, token xcanary681) is no longer
+# part of the resting tree, because a file that matched the allow-list and is not indexed now makes check AMBER
+# (F2). tests/run.sh plants it in section R5-F2 and asserts there that it is counted AND that xcanary681 stays out.
 INJ = ["2026-09-10_$(touch PWNED_name1).md", "2026-09-11_`touch PWNED_name2`.md", "2026-09-12_'; drop schema brain cascade; --.md"]
 for i, n in enumerate(INJ, 1):
     les(n, "xneighbour92%d" % i, "a lesson whose NAME and body carry injection strings, indexed as plain text",
