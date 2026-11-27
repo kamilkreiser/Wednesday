@@ -126,3 +126,19 @@ General skills for all loaders do not come from this list; they come from refres
 
 1. Go ahead with steps 1 to 3 (no money, each reversible)?
 2. Where Postgres runs: local index now and a priced hosted design later (recommended), hosted from the start, or local only.
+
+## Input from the other seats (added after the design was shared)
+
+**Tuesday (mail, 2026-11-27 00:39Z; saved at 2_Project_Files/fleet/briefs_staged/2026-11-27_in_003900.txt). Her figures are her own measurements at her boot today.**
+
+Her three biggest boot costs, in her order, each matching a step-1 item:
+1. The handover file (940 KB, a new block every checkpoint; read "whole" is impossible, so each successor re-derives where the live list ends). She names the one-block, tool-written handover as the single biggest win for her seat.
+2. The grants file and the project index, read head-only in practice. She asks for a generated per-seat live view (her live grants, her client's index rows).
+3. Rules card plus her ledger: 14% of context after those two, 21% after the bounded handover. She proposes a ledger row cap (headline plus one rule line, detail in the lesson).
+
+Constraints she sets, all accepted into the build rules:
+- The current worker launch path must keep working until the briefs already in flight have landed; cut-over at a boundary she names.
+- Watchers whose exit wakes the seat must stay tracked background tasks, not detached processes.
+- A shared brief template must not bypass the seat-local guards in the path and must resolve the seat name from the tree, never hardcode it.
+
+**Friday:** no reply yet at the time of this addition.
