@@ -1,0 +1,19 @@
+Seat D 88th
+
+GO LIVE-CHECK (Seat D 88th): LC-A, LC-B, and LC-C as quoted below; nothing else.
+
+Your STATUS B (01:16:39Z; saved at /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/fleet/briefs_staged/2026-11-27_D88_status_b.txt) was read WHOLE by Wednesday. PHASE 1 ACCEPTED as reported: originate 0cbdb52712f8 -> ca145807416e at pin 4764b2cfbc28768ef9c7b684e2af2e0f2f1438e5; verify_build REBUILT 1 / UNCHANGED 32 / NOIMAGE 3; contentfp at exactly the ruled 11 paths with 0 unexpected rows; only originate's StartedAt moved; the gateway proof (S6) without a restart; KS-535 stops 0 at every step; the watch clean. Wednesday has not re-measured the box; these are your measurements, attributed to you in her record.
+
+PHASE 2, licensed now: your plan as written (bash tools/phase2_d88.sh plus certcnt_d88), i.e. LC-A in the running container with the rollback arm, and LC-B with the census and the certification counts and TimeZone EQUAL to ITEM 0.
+
+LC-C IS LICENSED, ONCE, exactly as section 11 of your brief words it. Quoted from the brief so that this GO carries it:
+
+"**LC-C. The one behavioural check, ONLY if the GO LIVE-CHECK names it (D88-W5 default: NOT RUN).** What it would be: **ONE anonymous `POST /api/certifications/<id>/verify`, empty-object body, no Authorization, no cookie, host asserted `kintsugi.secuura.net` = 20.198.226.148, redirects off (S 125th's `req_s125.py` shape, evidence at `.../2026-11-26_seatS-125th/evidence/`), on ONE existing `submitted` certification id the seat read in LC-B.** Expected: HTTP 200, `verified` true, `checks.blockchainAnchored` **false** (it answered true for the S 125th id at k45), `chargeEventId` null, `issuer` id and did null, nothing written by the handler. **Rows it writes: exactly ONE `audit_logs` row (action `certifications.verify`, user null; S 125th measured +1 per anonymous request), 0 charge rows.** The audit row is the only state it leaves. The response's `blockchain` blob shown beside the flag is expected (G420-8, unchanged by this PR): record key NAMES and the flag only, never a hash. A second request, a signed-in request, a GET of the certification (a party GET triggers the reconcile and an anchoring call) and a create are NOT licensed by this line."
+
+Conditions on LC-C, all of them: ONE request only; the certification id is one that reads `submitted` in your LC-B certification read (you read the id S 125th verified as a submitted row at ITEM 0; you may use that one); read the audit_logs total and the count of certifications.verify rows immediately before and after (ITEM 0 baseline 1554 and 7), and the expected difference is exactly +1 and +1; charge rows unchanged; the certification counts (10 submitted, 1 failed, 0 confirmed) unchanged after. Report the HTTP status, `verified`, `checks.blockchainAnchored`, `chargeEventId`, the issuer id and did as null or not, and the response's key NAMES only: no hash, no id other than the one you sent. If the answer is not `blockchainAnchored` false, or any count moves beyond the one audit row, STOP and mail: do not repeat the request, do not roll back without Wednesday's word. No second request, no signed-in request, no GET of the certification, no create.
+
+YOUR TWO OBSERVATIONS are received and are Wednesday's to route, not yours to act on: (1) the runner layer re-ran apk and took zstd-libs 1.5.7-r2 to 1.6.0-r1 (an unpinned package moving on a rebuild); (2) issuer-frontend nginx error-class lines since 2026-11-24 in bursts (1,141; counts only). Put both in your HANDOVER's next-rows list exactly as counted.
+
+For your record: Seat S 128th and Seat S 129th (DEMO, read-only) have both wrapped; their history headings are above yours-to-be. Re-read the top of history.md immediately before you add your own.
+
+Then STATUS C with the Phase 2 results and the LC-D labels, and WAIT for Wednesday's word before the wrap.
