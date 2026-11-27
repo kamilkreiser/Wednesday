@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-27 11:49 from 292 lesson files (1,230,698 B). M 43 · MIXED 5 · P (Datasec/OXPd) 1 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 6 · W 235. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-27 12:05 from 292 lesson files (1,231,869 B). M 43 · MIXED 5 · P (Datasec/OXPd) 1 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 6 · W 235. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (6) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md · 2026-11-21_a-holding-helper-gets-the-next-useful-job.md · 2026-11-21_friday-runs-on-opus-fable-only-when-flagged.md · 2026-11-21_windows-helper-launches-without-permission-prompts.md
 
@@ -8226,4 +8226,10 @@ sections (open the file for these): The rule · Why · The failure behind it (le
 - Postgres is LOCAL. Its data directory lives ON each seat's external drive (DevMASTER for this seat), so the drive still holds everything. It is a REBUILDABLE INDEX only (tap c): no hosted database, no spend; row records stay in files and the union tools.
 - This lifts PORTABILITY.md item 25's "never start a service on it" for this ONE use. The rule "never store project state off-drive" stands, and is why the data directory is on the drive.
 - Still Kam's: any hosted database, any spend, any change to another seat's boot before the instructions step.
+
+## ADDED BY KAM 2026-11-27 12:03:29 (live board): a nightly staggered backup to the NAS
+
+Verbatim: "also, create a workflow where in the middle of the night (you decide timing but about 2 hours apart) so agents don't all do it at once, each agent backs up / syncs their folder and the working projects to the NAS.  If it does not happen one night, it should happen the next.  Flag it with me if backup not done for 3 days so I can approve an out of sequence backup.  this should be added to the structure change"
+
+**Wednesday's reading (told to him on the panel, bf-baff0dbe9c792a92):** each coordinator seat backs up its own folder and the projects it coordinates to the NAS at night, about two hours apart (proposed Wednesday 00:30, Tuesday 02:30, Friday 04:30); a missed night runs the next; after three days without a good backup the seat raises ONE card asking him to approve an out-of-sequence backup and runs none outside the window until he answers. Copy only, never a delete; each run proven by counts on both sides. Built on this seat first; the other seats get it by written instructions. An existing NAS job held on his earlier word is not re-armed by this.
 

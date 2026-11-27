@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-27 11:49 from 292 lesson files (1,230,488 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 22 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-27 12:05 from 292 lesson files (1,231,659 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 22 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -8314,4 +8314,10 @@ sections (open the file for these): The rule · Why · The failure behind it (le
 - Postgres is LOCAL. Its data directory lives ON each seat's external drive (DevMASTER for this seat), so the drive still holds everything. It is a REBUILDABLE INDEX only (tap c): no hosted database, no spend; row records stay in files and the union tools.
 - This lifts PORTABILITY.md item 25's "never start a service on it" for this ONE use. The rule "never store project state off-drive" stands, and is why the data directory is on the drive.
 - Still Kam's: any hosted database, any spend, any change to another seat's boot before the instructions step.
+
+## ADDED BY KAM 2026-11-27 12:03:29 (live board): a nightly staggered backup to the NAS
+
+Verbatim: "also, create a workflow where in the middle of the night (you decide timing but about 2 hours apart) so agents don't all do it at once, each agent backs up / syncs their folder and the working projects to the NAS.  If it does not happen one night, it should happen the next.  Flag it with me if backup not done for 3 days so I can approve an out of sequence backup.  this should be added to the structure change"
+
+**Wednesday's reading (told to him on the panel, bf-baff0dbe9c792a92):** each coordinator seat backs up its own folder and the projects it coordinates to the NAS at night, about two hours apart (proposed Wednesday 00:30, Tuesday 02:30, Friday 04:30); a missed night runs the next; after three days without a good backup the seat raises ONE card asking him to approve an out-of-sequence backup and runs none outside the window until he answers. Copy only, never a delete; each run proven by counts on both sides. Built on this seat first; the other seats get it by written instructions. An existing NAS job held on his earlier word is not re-armed by this.
 
