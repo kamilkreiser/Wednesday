@@ -98,7 +98,7 @@ def load_scope(path, seat, daily_rel=None):
     if not os.path.isfile(path):
         die("no scope file for seat '%s' at %s. A seat is indexed only through its own reviewed "
             "allow-list; see proposed/INSTRUCTIONS-for-other-seats.md" % (seat, path))
-    sc = dict(seat=None, own=[], deny_clients=[], allow=[], deny_path=[], deny_seat_word=[], path=path, daily_rel=daily_rel)
+    sc = dict(seat=None, own=[], allow=[], deny_path=[], deny_seat_word=[], path=path, daily_rel=daily_rel)
     pending = []
     with open(path, encoding="utf-8") as f:
         for n, line in enumerate(f, 1):
@@ -113,7 +113,8 @@ def load_scope(path, seat, daily_rel=None):
             elif key == "own_clients":
                 sc["own"] = rest.lower().split()
             elif key == "deny_clients":
-                sc["deny_clients"] = rest.lower().split()
+                die("%s: REFUSED, 'deny_clients' is no longer a directive (round 4b): no lesson is left out for naming "
+                    "a client, so the line would promise a protection that does not exist. Remove the line." % where)
             elif key == "deny_path":
                 if not rest:
                     die("%s: deny_path needs a value" % where)
@@ -135,11 +136,9 @@ def load_scope(path, seat, daily_rel=None):
     for kind, glob_, where in pending:              # judged only once the seat line is known to be this seat's
         check_allow(glob_, kind, where, seat, daily_rel)
         sc["allow"].append((kind, glob_))
-    for w_ in sc["own"] + sc["deny_clients"]:
+    for w_ in sc["own"]:
         if not re.fullmatch(r"[a-z][a-z0-9]{2,}", w_):
             die("%s: a client name is one plain lower-case word of 3 or more letters and digits: %r" % (path, w_))
-    if set(sc["own"]) & set(sc["deny_clients"]):
-        die("%s: a client cannot be both own and denied: %s" % (path, " ".join(sorted(set(sc["own"]) & set(sc["deny_clients"])))))
     if not sc["allow"]:
         die("scope file %s has no allow lines" % path)
     return sc
@@ -335,7 +334,7 @@ def plain_text(raw):
 
 def qualify_lesson(name, raw, idx, sc):
     """-> (None, None) when the lesson qualifies, else (clause, why). Clauses: 'a' its rules-index row,
-    'b' that row's seat, 'c' its frontmatter and tier, 'd' no other-client marker or name, 't' plain text.
+    'b' that row's seat, 'c' its frontmatter and tier, 'd' no tier marker or tier-like line, 't' plain text.
     `idx` is the parsed rules index (parse_rules_index)."""
     # ---- (t) plain text
     text, why = plain_text(raw)
@@ -389,7 +388,7 @@ def qualify_lesson(name, raw, idx, sc):
         return "c", "a second frontmatter block follows the first (exactly one is allowed)"
     if not allowed_tier(tier, sc):
         return "c", "tier '%s' is not one of this seat's tiers (W, M, P-<own client>/<project>)" % tier[:60]
-    # ---- (d) no other-client marker or name ANYWHERE in the text, and nothing tier-like outside that one line
+    # ---- (d) no tier marker in any spelling ANYWHERE in the text, and nothing tier-like outside that one line
     if "<!--" in text or "-->" in text:
         return "d", "it holds an HTML comment (a section marker in any spelling is one)"
     for i, line in enumerate(lines):
@@ -398,20 +397,19 @@ def qualify_lesson(name, raw, idx, sc):
         f = fold(line)
         if TIER_LINE_START.search(f) or TIER_ASSIGN.search(f):
             return "d", "line %d is tier-like outside the frontmatter's one tier line" % (i + 1)
-    whole = fold(text) + "\n" + fold(" ".join(r["raw"] for r in mine)) + "\n" + fold(name)
-    squeezed = re.sub(r"[*_`~\\]", "", whole)
-    for c in sc["deny_clients"]:
-        if c in squeezed:
-            return "d", "it names another client ('%s') in its text, its name or its rules-index row" % c
+    # ROUND 4b (ANSWER-7, ruled): there is NO client-name test. A lesson is not left out for naming another
+    # client; a word list is a recogniser, it took 55 of this seat's own lessons and still missed a project
+    # named without its client. What keeps another client's material out is declared by a person: the row (b),
+    # the tier (c) and the marker (d). Do not put a name test back.
     if "&#" in text:
-        return "d", "it holds a numeric character reference (&#...;), which can spell a name the word test cannot see"
+        return "d", "it holds a numeric character reference (&#...;), which can spell the word tier where the line test cannot see it"
     return None, None
 
 
 CLAUSES = (("a", "no single well-read rules-index row for it"),
            ("b", "its rules-index row is scoped to other seats"),
            ("c", "frontmatter or tier does not qualify"),
-           ("d", "other-client marker, name or tier-like line in its text"),
+           ("d", "tier marker or tier-like line in its text"),
            ("t", "not plain text"),
            ("f", "not a plain regular file (link, hard link, unreadable)"))
 

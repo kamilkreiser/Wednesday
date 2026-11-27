@@ -245,6 +245,13 @@ D = [  # (slug, what, body)
     ("body-tier-quote", "a body line '> tier = P-Other/X'", mixed % "> tier = P-Other/X\n\nTOKEN\n"),
     ("body-tier-inline", "the words 'tier: P-Other/X' in the middle of a line", "\nThis part is tier: P-Other/X and TOKEN.\n"),
     ("body-tier-linkref", "a link-reference comment '[//]: # (tier: P-Other/X)'", "\n[//]: # (tier: P-Other/X)\n\nTOKEN\n"),
+    ("entity", "a numeric character reference spelling the first letter of the word tier", "\n&#116;ier: P-Other/X TOKEN\n"),
+]
+for i, (slug, what, body) in enumerate(D, 1):
+    tok = "xcanary7%02d" % i
+    les("2026-07-%02d_d-%s.md" % (i, slug), tok, what, "d", body=body.replace("TOKEN", tok))
+# ROUND 4b (ANSWER-7): a lesson that merely NAMES another client is this seat's lesson and MUST be indexed.
+OKNAMES = [
     ("name-plain", "the other client's name in the body", "\nThe Datasec seat does it differently. TOKEN\n"),
     ("name-upper", "the name in capitals", "\nDATASEC. TOKEN\n"),
     ("name-domain", "the name inside a domain", "\nmail from someone at datasec.com.au TOKEN\n"),
@@ -252,17 +259,16 @@ D = [  # (slug, what, body)
     ("name-accent", "the name with an accented letter", "\nDàtasec TOKEN\n"),
     ("name-fullwidth", "the name in full-width letters", "\nＤａｔａｓｅｃ TOKEN\n"),
     ("name-heading", "the name in a section heading", "\n## A Datasec-only case\n\nTOKEN\n"),
-    ("entity", "a numeric character reference spelling the first letter", "\n&#68;atasec TOKEN\n"),
 ]
-for i, (slug, what, body) in enumerate(D, 1):
-    tok = "xcanary7%02d" % i
-    les("2026-07-%02d_d-%s.md" % (i, slug), tok, what, "d", body=body.replace("TOKEN", tok))
-les("2026-07-25_laptop_datasec-habit.md", "xcanary725", "the other client's name in the lesson's FILE NAME", "d")
-les("2026-07-26_d-name-in-rule.md", "xcanary726", "the other client's name in its rules-index rule line", "d",
-    rows=[row("2026-07-26_d-name-in-rule.md", rule="When working for Datasec: xcanary726rule do it their way.")])
-ABSENT.append(("xcanary726rule", "that rule line"))
-les("2026-07-27_d-name-in-frontmatter.md", "xcanary727", "the other client's name in a frontmatter value", "d", front=fm("tier: W\n", "source: the Datasec seat\n"))
-les("2026-07-28_d-own-project-names-other.md", "xcanary728", "own client's project tier whose project name carries the other client's name", "d", front=fm("tier: P-Secuura/shared-with-Datasec\n"))
+for i, (slug, what, body) in enumerate(OKNAMES, 1):
+    tok = "xneighbour74%d" % i
+    les("2026-07-4%d_d-ok-%s.md" % (i, slug), tok, "(d) must succeed: " + what, body=body.replace("TOKEN", tok))
+les("2026-07-48_laptop_datasec-habit.md", "xneighbour748", "(d) must succeed: the other client's name in the lesson's FILE NAME")
+les("2026-07-49_d-ok-name-in-rule.md", "xneighbour749", "(d) must succeed: the other client's name in its rules-index rule line",
+    rows=[row("2026-07-49_d-ok-name-in-rule.md", rule="When working for Datasec: xneighbour749rule do it their way.")])
+PRESENT.append(("xneighbour749rule", "that rule line"))
+les("2026-07-50_d-ok-name-in-frontmatter.md", "xneighbour750", "(d) must succeed: the other client's name in a frontmatter value", front=fm("tier: W\n", "source: the Datasec seat\n"))
+les("2026-07-51_d-ok-own-project-names-other.md", "xneighbour751", "(d) must succeed: own client's project tier whose project name carries the other client's name", front=fm("tier: P-Secuura/shared-with-Datasec\n"))
 les("2026-07-30_d-ok-own-client.md", "xneighbour730", "(d) neighbour: the seat's OWN client named in the body, and 'data security'", body="\nSecuura keeps its data secure: data security matters.\n")
 
 # ====================================================================== clause (t): plain text

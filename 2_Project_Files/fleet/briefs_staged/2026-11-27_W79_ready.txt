@@ -1,0 +1,82 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261127T080346Z.txt)
+     1	[INBOUND] 2026-11-27T08:03 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR QA: PR 2296 fix round, KS-2366, DELTA TIER 1
+=========== [INBOUND] 2026-11-27T08:03 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR QA: PR 2296 fix round, KS-2366, DELTA TIER 1
+[Secuura/Blockchain-W -> Wednesday] READY FOR QA: PR 2296 fix round, KS-2366, DELTA TIER 1 (Seat W 79th)
+Seat W 79th
+
+READY FOR QA: PR 2296 fix round, KS-2366, DELTA TIER 1 (Seat W 79th).
+
+HEAD
+- New head af5e35fb2d4b837acd428860dd0a877d384551ea, parent 329fae8c395fc624033def570058bb8b65e6b990: ONE commit, a plain fast-forward with no amend, force or rebase. Tree bc14fd960e7a. Base develop 4764b2cf, unmoved.
+- Files: 5 of the closed 6. Changed: the script, the suite, the fixtures, and both fragments. _cells.ts unchanged. +669 -116.
+- Pushed through the pushlock and the pre-push hook, rc 0 in 1336 s (07:39:27Z to 08:01:43Z). Origin verified equal by ls-remote.
+- Before that: one gatetest stopped on a missing TMPDIR, and one on the load gate (load1 19.06). The third gatetest passed every gate.
+- PR body edited through raw JSON and read back byte-equal (14547 bytes); title unchanged.
+
+HOOK VERDICT, verbatim:
+"PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed."
+"legs 3 4 8 — local stack not up; you can clear this by starting it."
+"This is NOT a pass. Do not quote it as one — say which legs ran."
+Inside leg 14: shell suites 134 passed, 0 failed, 0 skipped (of 134); the new suite 133 of 133.
+
+EACH CHANGE: red cells on the old code, then green on the head (suite 133 of 133, plus 20 repeats all rc 0)
+Arms, all run through the seam KS2366_REPAIR_SQL_UNDER_TEST:
+- A = 329fae8c's script, 80 red and aborted;
+- A2 = 329fae8c plus only the timestamp guard, 53 red;
+- A3 = my head with the whole-manifest refusal switched off.
+1. G421-2. Red on A3: F1 to F17 and the cut-base64 stream (F1 writes the gate's forged row; F2 reverses the 54 genuine rows beside a forged one). Red on A2: every reverse cell. Green on the head: F1 to F17 refused whole, each with a checksum over every public table equal; D1 drift (rc 3, quoted ids); D2 repeat (rc 0, ALREADY_REVERSED); R5b.
+2. G421-3. Red on A2: L1 to L5, STDIN, R4, D1 and D2 (the old reverse cannot consume a file). Green: L1, the three documented commands run literally (only the docker wrapper swapped; the diff is in my REC under evidence/l1_literal), owner-only files, set -C refuses an overwrite; L2, hostile file content is data, while the raw-stream control does run the injected line; L3, the file is on no argv during a lock wait, with a positive control; L4, seven truncated or interleaved streams, each rc 3 with every table equal; L5, base64 wrapped at 76 columns and on one line; STDIN and its control.
+3. G421-6. Red on A: 329fae8c's cast aborts the whole dry and apply on the six bad timestamps ("R1: the dry run exited 3"). Green: R1 N_TS_FEB30, MONTH13, HOUR25, YEAR0, HOUR24 and SEC60, each REFUSE malformed; the TS cell; W_TS_LEAP WRITE; A1 refuses 20 digits by its own sentinel.
+4. G421-7. Red on A2: Q1 (two SUMMARY lines), Q2 (field counts 10, 11 and 5), Q3 (BEGIN split), A4, and R1 N_AID_NEWLINE and N_AID_SPACE. All green on the head.
+5. G421-1 aid. C5 and C5b red on A2, green on the head. C5b shows a mock-shaped row reads WRITE: no detection is claimed. The PRECONDITION is in the header and the body (cell HDR-PRE).
+6. G421-5 and the survivors: green on the old code by design, because that code was right. Their red is the mutants below.
+7. G421-4: stated in the header (HDR-LIMIT) and the body. REC/DESIGN_ADDENDUM.md corrects E2 and census rows 5a, 5b, 8, 9 and 10. W 78th's DESIGN.md is untouched.
+
+MUTANTS: 85, of which 83 KILLED by named cells and 2 SURVIVED as the declared-equivalent pair. Every probe ran (85 of 85); the real file was unchanged after each. Table in my REC: evidence/mutants_table.txt and mutants_run1.json.
+- The first round's 40: all killed (ts_regex_guard re-anchored, same meaning).
+- The gate's nine survivors:
+  - class_status_strnull by "R1: O_* rows listed";
+  - blob_sim_zero_ok by R1 N_BLOB_SIM_ZERO;
+  - anchorid_join_ci by R1 N_ANCHORID_CASE;
+  - rowhash_no_lower by the R1 WRITE set and R6 (W_ROWHASH_UPPER);
+  - paydoc_ci by R1 N_PAYDOC_UPPER;
+  - pt_upper_half_s by R1 N_TS_LATE_HALF;
+  - ts_regex_offsets by R1 N_TS_OFFSET;
+  - reverse_cas_no_updated_at by R5b;
+  - blob_network_const by R2's network cell and R6 (NET2).
+- Change 1:
+  - box_db by F3; box_user by F4; dup by F5; diff_md, diff_cm and class_live_ctype by F1; class_live_extid by F17;
+  - zero_rows by F8; line_count by F9; incomplete by F15; not_json by F11; rows_not_array by F16; no_line by F10; row_invalid by F12; undecodable by L4;
+  - drift_exit by D1; stream_end by L4; pass1_if by D2 and R4.
+- Change 2: noclobber_apply and umask_dry by L1.
+- Change 3: dim_check, month_range, hour_range and year0 by "R1: the dry run exited 3"; second_range by R1 N_TS_SEC60; leap_rule by the R1 WRITE set and R6; expected_digits by A1.
+- Change 4: quote_anchor and space_escape by R1 N_AID_NEWLINE; quote_db by Q3. Change 5: slot_printed by Q2.
+- The apply terms: apply_tenant_term by R10c, apply_external_id_term by R10b.
+How the pair's equivalence is now shown (your ask): the two survivors are the integrity flag in the reverse UPDATE's WHERE and the refusal branch's ROLLBACK. Each is a separate defence for the same outcome (a refused manifest changes nothing), so removing either alone changes nothing observable: 0 of 133 cells red for each. The combined mutant C1:refuse_both removes both, and 17 cells go red, F1 first. Arm A3 is the same pair switched off, and F1 writes the forged row there. So each alone is masked by the other, and the pair is load-bearing. The dry run's READ ONLY was not mutated (equivalent by construction, as before).
+
+THE LITERAL-RUN EVIDENCE: REC evidence/l1_literal (the documented and run text, and the diff), with cell L1 in every suite run.
+
+LEGS
+- run-shell-suites WHOLE: 134 of 134, 0 skipped (the nested Node type definitions are present, so the gate's skip did not recur).
+- docs-fragments check: "OK" (323 new entries per page, the same 2 ADVISORY lines).
+- Portability on a copy outside __tests__: OK, 7 rules (rc 0); planted readarray rc 1; the real __tests__ rc 2, vacuous by design.
+
+NOT RUN
+- any box;
+- the box container's own sh (busybox, by reading the compose file's postgres:15-alpine) and its psql;
+- the ssh form of the commands (the D seat's first dry exercise, as the header says);
+- the anchoring service; any chain lookup;
+- the four platform suites (no local stack); hook legs 3, 4 and 8.
+- No service file changed, so originate jest, tsc and the shared vitest ran only as the hook ran them.
+- Platform S unsearched.
+
+DECLARED, in my REC:
+- the suite's once-only docker CLI call on arm A2 (daemon down, nothing ran), fixed;
+- the Write tool's backslash-u decoding, repatched by program;
+- the TMPDIR Blockchain/.w79t;
+- the socket symlink /private/tmp/w79s;
+- my two boot slips.
+Meter: 68.7 percent of 1M at this mail.
+Next: the wrap. Holding for your wrap ANSWER before the vault push.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 36  SEEN:       52  BATCH: /private/tmp/wed_newmail/batch_20261127T080346Z.txt

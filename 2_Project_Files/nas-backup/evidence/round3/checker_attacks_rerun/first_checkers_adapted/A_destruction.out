@@ -1,0 +1,91 @@
+### A0 POSITIVE CONTROL of the oracle: a destination file taken away by hand must be reported LOST
+snap: 3 distinct contents, 3 files
+LOST content b8c1882aecfe formerly at ['General/Wednesday/nightly-backup/current/WEDNESDAY/a.txt']
+oracle: 1 of 3 contents lost
+HELD   A0 oracle fires on a removed file (rc of oracle) (expected 1, got 1)
+
+### A1-A4 changed / shrunk to zero / same-size change / removed at source
+HELD   A1 first run rc (expected 0, got 0)
+snap: 5 distinct contents, 5 files
+HELD   A1-4 second run rc (expected 0, got 0)
+oracle: 0 of 5 contents lost
+HELD   A1-4 nothing lost (expected 0, got 0)
+HELD   A2 zero-byte now current (expected 0, got 0)
+HELD   A4 removed-at-source still at dest (expected yes, got yes)
+nas/General/Wednesday/nightly-backup/versions/2026-12-02_010000_88033/WEDNESDAY/a.txt
+nas/General/Wednesday/nightly-backup/versions/2026-12-02_010000_88033/WEDNESDAY/same.txt
+nas/General/Wednesday/nightly-backup/versions/2026-12-02_010000_88033/WEDNESDAY/z.txt
+
+### A5 a source FILE replaced by a DIRECTORY of the same name (with a child)
+snap: 4 distinct contents, 4 files
+A5 run rc=0
+GOOD: every in-scope source file is PROVEN at the destination with the source's content (every file of the plan made when its set started). Nothing was deleted on either side by this tool.
+oracle: 0 of 4 contents lost
+HELD   A5 nothing lost (expected 0, got 0)
+A5 dest 'thing' is now: Directory
+nas/General/Wednesday/nightly-backup/versions/2026-12-02_010000_88345/WEDNESDAY/thing
+nas/General/Wednesday/nightly-backup/current/WEDNESDAY/thing
+nas/General/Wednesday/nightly-backup/current/WEDNESDAY/thing/child.txt
+A5 NEXT night rc=0 (state last_attempt=good, last_good=2026-12-03 01:00:00 AEDT)
+GOOD: every in-scope source file is PROVEN at the destination with the source's content (every file of the plan made when its set started). Nothing was deleted on either side by this tool.
+A5 night after rc=0 (state last_attempt=good, last_good=2026-12-04 01:00:00 AEDT)
+
+### A6 a source DIRECTORY replaced by a FILE of the same name
+snap: 4 distinct contents, 4 files
+A6 run rc=0
+GOOD: every in-scope source file is PROVEN at the destination with the source's content (every file of the plan made when its set started). Nothing was deleted on either side by this tool.
+oracle: 0 of 4 contents lost
+HELD   A6 nothing lost (expected 0, got 0)
+A6 NEXT night rc=0 last_attempt=good last_good=2026-12-03 01:00:00 AEDT
+A6 is the new file content anywhere on the NAS? 1 file(s)
+
+### A7 a source file replaced by a SYMLINK (to an in-scope file, and to a secret)
+snap: 4 distinct contents, 4 files
+HELD   A7 rc (expected 0, got 0)
+oracle: 0 of 4 contents lost
+HELD   A7 nothing lost (expected 0, got 0)
+HELD   A7 secret content on NAS (grep -r count) (expected 0, got 0)
+HELD   A7 control: the secret IS findable at the source by the same grep (expected 1, got 1)
+
+### A8 a rename that differs ONLY BY CASE (scratch volume is case-insensitive, like the share), content changed
+snap: 6 distinct contents, 6 files
+HELD   A8 rc (expected 0, got 0)
+GOOD: every in-scope source file is PROVEN at the destination with the source's content (every file of the plan made when its set started). Nothing was deleted on either side by this tool.
+oracle: 0 of 6 contents lost
+HELD   A8 nothing lost (expected 0, got 0)
+A8 names at dest now: ['a.txt', 'keep.txt', 'logs', 'report.txt', 'sub']
+HELD   A8 current content of the renamed file (expected report v2 longer, got report v2 longer)
+HELD   A8 same-size renamed file current content (expected SAME2, got SAME2)
+
+### A9 Unicode: the same name in NFC then NFD at the source, content changed
+snap: 4 distinct contents, 4 files
+source names now: ["'cafe\\u0301.txt'"]
+HELD   A9 rc (expected 0, got 0)
+GOOD: every in-scope source file is PROVEN at the destination with the source's content (every file of the plan made when its set started). Nothing was deleted on either side by this tool.
+oracle: 0 of 4 contents lost
+HELD   A9 nothing lost (expected 0, got 0)
+dest names: ["'caf\\xe9.txt'"]
+
+### A12 source folders named like the tool's own (versions, current, _tmp_incoming, manifests, runs) and a second-night change
+HELD   A12 rc (expected 0, got 0)
+snap: 7 distinct contents, 7 files
+HELD   A12 rc2 (expected 0, got 0)
+oracle: 0 of 7 contents lost
+HELD   A12 nothing lost (expected 0, got 0)
+HELD   A12 six previous copies kept (expected 6, got 6)
+
+### A13 the versions/ folder is not writable when a changed file must be versioned
+snap: 3 distinct contents, 3 files
+A13 rc=5
+FAILED (the exit code of the engine is never success; the proof is):
+  - WEDNESDAY: engine exit code 11 (rsync error: error in file IO (code 11) at rsync.c(900) [receiver=3.5.2])
+  - WEDNESDAY: 1 file(s) NOT PROVEN at the destination with the source's content (first: a.txt: the destination copy has another size)
+oracle: 0 of 3 contents lost
+HELD   A13 nothing lost (expected 0, got 0)
+HELD   A13 the run is NOT recorded good (expected failed, got failed)
+
+### A14 DRY run against an existing destination with pending changes writes nothing to the NAS
+HELD   A14 dry rc (expected 0, got 0)
+HELD   A14 NAS tree stat-listing unchanged by two dry runs (expected 273242cd4d4231f1422561d084361550458723654f790d7876049bb40c1192df  -, got 273242cd4d4231f1422561d084361550458723654f790d7876049bb40c1192df  -)
+HELD   A14 CONTROL: the listing hash changes when a file is added (differs=yes) (expected yes, got yes)
+1

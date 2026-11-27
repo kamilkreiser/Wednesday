@@ -210,6 +210,15 @@ run sLO search xcanary03; t_has "search for a left-out lesson's word says NO MAT
 t_has "  and says that $N_CL lesson files are left out and not searched" "NOTE: $N_CL lesson file(s) are LEFT OUT" "$RUN/sLO.out"
 run docLO doctor; t_has "doctor's one line carries the left-out count" "$N_CL lesson file(s) LEFT OUT" "$RUN/docLO.out"
 
+section "6c. ROUND 4b: a lesson that merely NAMES another client is indexed (ANSWER-7, must succeed)"
+for tok in xneighbour741 xneighbour742 xneighbour743 xneighbour744 xneighbour745 xneighbour746 xneighbour747 xneighbour748 xneighbour749 xneighbour749rule xneighbour750 xneighbour751; do
+  t_has "present $tok  a tier W or own-project lesson naming the other client in its text, name, rule line or frontmatter" "$tok" "$RUN/dump-A.sql"
+done
+run sNM search xneighbour741; t_has "  and search finds one by its word" "d-ok-name-plain.md" "$RUN/sNM.out"
+t_hasnt_re "  while every marker and tier-like case stays out (red-capable: the six marker forms, two comments, six tier-like lines, the numeric reference)" "xcanary7[0-9][0-9]" "$RUN/dump-A.sql"
+{ cat "$LANE/scope/wednesday.scope"; echo "deny_clients datasec"; } > "$RUN/denyline.scope"
+T_SCOPE="$RUN/denyline.scope" run denyline check; rc_is "a scope file that still carries a deny_clients line is refused (rc 2): the line would promise a protection that no longer exists" 2 denyline
+
 section "7. what a scope file may ask for is a closed table in the code (N5): anything else is REFUSED at load"
 NF7="$(sql "select count(*) from brain.files")"
 n=0
@@ -257,14 +266,14 @@ for seatname in TUESDAY FRIDAY; do
   mv -n "$RUN/sim/$seatname/2_Project_Files/brain-db/scope/$low.scope" "$GONE/$low.scope.n5"
 done
 # 7b. the clauses that read the scope file are load-bearing: name this seat for the other client and its lessons enter
-sed -e '/^deny_clients /d' -e '/^deny_path /d' -e 's/^own_clients .*/& datasec/' "$LANE/scope/wednesday.scope" > "$RUN/permissive.scope"
+sed -e '/^deny_path /d' -e 's/^own_clients .*/& datasec/' "$LANE/scope/wednesday.scope" > "$RUN/permissive.scope"
 T_SCOPE="$RUN/permissive.scope" run rebuildP rebuild; rc_is "rebuild under a scope that calls the other client its own" 0 rebuildP
 dump P
-for tok in xcanary08 xcanary715 xcanary716 xcanary725 xcanary726 xcanary727; do
-  t_has "(can fail) under that scope $tok DOES enter, so its absence above is clause (c) or (d) at work" "$tok" "$RUN/dump-P.sql"
+for tok in xcanary08; do
+  t_has "(can fail) under that scope $tok DOES enter, so its absence above is clause (c)'s client test at work" "$tok" "$RUN/dump-P.sql"
 done
 t_hasnt_re "even then: every lesson left out under (a), (b), (t) or (f), and every structural (c) and (d) case, stays out" \
-  "xcanary03|xcanary17|xcanary3[0-9][0-9]|xcanary40[12]|xcanary50[1-9]|xcanary5[1-4][0-9]|xcanary70[1-9]|xcanary71[0-4]|xcanary8[0-9][0-9]|xcanary15|xcanary680" "$RUN/dump-P.sql"
+  "xcanary03|xcanary17|xcanary3[0-9][0-9]|xcanary40[12]|xcanary50[1-79]|xcanary5[1-4][0-9]|xcanary7[0-9][0-9]|xcanary8[0-9][0-9]|xcanary15|xcanary680" "$RUN/dump-P.sql"
 t_hasnt_re "even then: sync copies and backups stay out although the scope's deny_path lines are not what holds them" "xcanary05|xcanary06|xcanary07|xcanary24|xcanary25" "$RUN/dump-P.sql"
 run checkP check; rc_is "check under the real scope is red after that rebuild" 1 checkP
 run rebuild2 rebuild; rc_is "rebuild under the real scope" 0 rebuild2
@@ -300,7 +309,7 @@ allow lesson CLAUDE.md
 allow skill 0_Brain/skills/4_Credentials/*.md
 allow skill 0_Brain/skills_link/*.md
 deny_seat_word two words
-own_clients secuura general Datasec
+own_clients secuura general d-s
 deny_clients ds
 seat tuesday
 alow skill 0_Brain/skills/*.md
@@ -463,13 +472,13 @@ T_SCOPE="$LANE/proposed/scope/tuesday.scope" run t1 rebuild; rc_not0 "the wednes
 cp -n "$LANE/proposed/scope/tuesday.scope" "$RUN/sim/TUESDAY/2_Project_Files/brain-db/scope/tuesday.scope"
 runs t2 TUESDAY rebuild; rc_is "(can fail) once its scope file is in place the tuesday tree builds on the fixtures" 0 t2
 dump2 T
-for tok in xcanary23 xcanary37 xcanary08 xcanary17 xcanary401 xcanary402 xcanary715 xcanary725 xneighbour02 xneighbour01 xneighbour46 xneighbour71; do t_has "tuesday scope: present $tok" "$tok" "$RUN/dump-T.sql"; done
-for tok in xneighbour20 xneighbour30 xneighbour10 xneighbour730 xneighbour403 xcanary38 xcanary22 xcanary03 xcanary15 xcanary47 xcanary77 xcanary680 xcanary301 xcanary501 xcanary701 xcanary801 xtasksown202; do t_hasnt "tuesday scope: absent  $tok" "$tok" "$RUN/dump-T.sql"; done
+for tok in xcanary23 xcanary37 xcanary08 xcanary17 xcanary401 xcanary402 xneighbour741 xneighbour748 xneighbour730 xneighbour02 xneighbour01 xneighbour46 xneighbour71; do t_has "tuesday scope: present $tok" "$tok" "$RUN/dump-T.sql"; done
+for tok in xneighbour20 xneighbour30 xneighbour10 xneighbour403 xcanary38 xcanary22 xcanary03 xcanary15 xcanary47 xcanary77 xcanary680 xcanary301 xcanary501 xcanary701 xcanary801 xtasksown202; do t_hasnt "tuesday scope: absent  $tok" "$tok" "$RUN/dump-T.sql"; done
 runs t3 TUESDAY stop; rc_is "tuesday's server stopped" 0 t3
 cp -n "$LANE/proposed/scope/friday.scope" "$RUN/sim/FRIDAY/2_Project_Files/brain-db/scope/friday.scope"
 runs f2 FRIDAY rebuild; rc_is "the friday tree builds on the fixtures with its proposed scope" 0 f2
 dump2 F
-for tok in xcanary22 xcanary38 xcanary03 xcanary08 xcanary401 xcanary715 xneighbour10 xneighbour01 xneighbour02 xneighbour404 xneighbour730; do t_has "friday scope: present $tok" "$tok" "$RUN/dump-F.sql"; done
+for tok in xcanary22 xcanary38 xcanary03 xcanary08 xcanary401 xneighbour741 xneighbour10 xneighbour01 xneighbour02 xneighbour404 xneighbour730; do t_has "friday scope: present $tok" "$tok" "$RUN/dump-F.sql"; done
 for tok in xneighbour20 xneighbour30 xneighbour403 xcanary37 xcanary23 xcanary17 xcanary15 xcanary47 xcanary77 xcanary680 xcanary301 xcanary501 xcanary701 xcanary801; do t_hasnt "friday scope: absent  $tok" "$tok" "$RUN/dump-F.sql"; done
 runs f3 FRIDAY stop; rc_is "friday's server stopped" 0 f3
 [ "$(server_procs "$RUN/pgdata-TUESDAY")$(server_procs "$RUN/pgdata-FRIDAY")" = "00" ] && ok "no other-seat test server is left" || bad "an other-seat test server is still running"
