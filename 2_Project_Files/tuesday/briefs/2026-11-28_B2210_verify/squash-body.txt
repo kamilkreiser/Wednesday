@@ -1,0 +1,36 @@
+Oxpd1ContextCaller makes one call of the closed list Oxpd1ContextKind
+over an Oxpd1Client it does not own: ReserveAuthenticationContext and
+ReleaseAuthenticationContext of the Authentication service, and HidOpen,
+HidStartReading, HidStopReading and HidClose of the Accessories service,
+each at the service path, action and body element of the committed
+bindings and schemas. It sends through the client's internal guest
+sender, so the pinned handler, the time-out, the answer bound, the mask
+and the record are the client's own; it makes no HttpClient and no
+handler and keeps no state across calls.
+
+Each call is a dry run unless its Execute is set: a dry run returns the
+envelope it would send, sends nothing and reads no setting. Every
+argument is checked when the call is made: a non-empty agent id; every
+context id 32 to 128 ASCII letters or digits (the schema's Nonce); a
+callback that is an absolute http or https address with no user
+information, no @ and at most 256 characters; a server context id of 1
+to 256 characters XML can carry; a callback time-out of 1 to 300 s.
+
+An executed call ends in one outcome: answered is applied, a missing
+setting, a refused pin, 401 and 403 are not applied, anything else is
+unknown. A reserve is answered only by one result element whose text is
+a Nonce; any other text is a malformed answer with no id. A result that
+may have taken effect carries its undo as a dry run: a reserve the
+release of the id it returned, an open its close, a start of reading its
+stop. A refused call and a reserve whose end is unknown carry none. No
+ToString carries an id, an address or a credential.
+
+Cells N01 to N10 (39 cases) run against the stub device on 127.0.0.1;
+every answer is the cell's assumption. Named limits: how a printer
+answers any of the six, and whether it accepts the guest user, is not
+measured; the client's record holds the context ids; a fault code is
+passed on as the client scrubs it; the guest request carries the
+client's setting value as its password. Nothing ran against a device or
+a tenant. Nothing is deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

@@ -1,0 +1,151 @@
+{
+ "suites": {
+  "oxpd1": {
+   "project": "tests/Datasec.Suite.Adapters.Oxpd1.Tests/Datasec.Suite.Adapters.Oxpd1.Tests.csproj",
+   "exe": "tests/Datasec.Suite.Adapters.Oxpd1.Tests/bin/Release/net10.0/Datasec.Suite.Adapters.Oxpd1.Tests",
+   "prefix": "src/Datasec.Suite.Adapters.Oxpd1/",
+   "cells": [
+    "ContextTests.N01",
+    "ContextTests.N02",
+    "ContextTests.N03",
+    "ContextTests.N04",
+    "ContextTests.N05",
+    "ContextTests.N06",
+    "ContextTests.N07",
+    "ContextTests.N08",
+    "ContextTests.N09",
+    "ContextTests.N10"
+   ]
+  }
+ },
+ "rows": [
+  [
+   "mDryRunSends",
+   "oxpd1",
+   "src/Datasec.Suite.Adapters.Oxpd1/Oxpd1Context.cs",
+   "if (!call.Execute)",
+   "if (call.Kind == Oxpd1ContextKind.HidClose && !call.Execute)",
+   "ContextTests.N02"
+  ],
+  [
+   "mAdminUser",
+   "oxpd1",
+   "src/Datasec.Suite.Adapters.Oxpd1/Oxpd1Context.cs",
+   "_client.SendGuestAsync(",
+   "_client.SendAdminReadAsync(",
+   "ContextTests.N03 ContextTests.N04"
+  ],
+  [
+   "mNonceLength",
+   "oxpd1",
+   "src/Datasec.Suite.Adapters.Oxpd1/Oxpd1Context.cs",
+   "s.Length is >= MinNonceLength and <= MaxNonceLength",
+   "s.Length >= 1",
+   "ContextTests.N05 ContextTests.N09"
+  ],
+  [
+   "mNonceChars",
+   "oxpd1",
+   "src/Datasec.Suite.Adapters.Oxpd1/Oxpd1Context.cs",
+   "s.All(char.IsAsciiLetterOrDigit)",
+   "s.All(char.IsAscii)",
+   "ContextTests.N05 ContextTests.N09"
+  ],
+  [
+   "mHidCloseUndoLost",
+   "oxpd1",
+   "src/Datasec.Suite.Adapters.Oxpd1/Oxpd1Context.cs",
+   "            Oxpd1ContextKind.HidOpen => Oxpd1ContextCall.HidClose(call.ContextId!),\n",
+   "",
+   "ContextTests.N04 ContextTests.N06 ContextTests.N08"
+  ],
+  [
+   "mStopReadingUndoLost",
+   "oxpd1",
+   "src/Datasec.Suite.Adapters.Oxpd1/Oxpd1Context.cs",
+   "            Oxpd1ContextKind.HidStartReading => Oxpd1ContextCall.HidStopReading(call.ContextId!),\n",
+   "",
+   "ContextTests.N04"
+  ],
+  [
+   "mForbiddenApplied",
+   "oxpd1",
+   "src/Datasec.Suite.Adapters.Oxpd1/Oxpd1Context.cs",
+   " or Oxpd1Outcome.Forbidden",
+   "",
+   "ContextTests.N07"
+  ],
+  [
+   "mIdInToString",
+   "oxpd1",
+   "src/Datasec.Suite.Adapters.Oxpd1/Oxpd1Context.cs",
+   "public override string ToString() => (Execute ? \"Execute \" : \"DryRun \") + Kind;",
+   "public override string ToString() => (Execute ? \"Execute \" : \"DryRun \") + Kind + \" \" + ContextId;",
+   "ContextTests.N10"
+  ],
+  [
+   "gUndoOnRefused",
+   "oxpd1",
+   "src/Datasec.Suite.Adapters.Oxpd1/Oxpd1Context.cs",
+   "applied == Oxpd1Applied.No ? null :",
+   "applied == (Oxpd1Applied)99 ? null :",
+   "ContextTests.N07"
+  ],
+  [
+   "gReadKeepsAnyText",
+   "oxpd1",
+   "src/Datasec.Suite.Adapters.Oxpd1/Oxpd1Context.cs",
+   "outcome == Oxpd1Outcome.Answered && !Oxpd1ContextCatalogue.IsNonce(result!.Value)",
+   "outcome == Oxpd1Outcome.Answered && result!.Value.Length == 0",
+   "ContextTests.N05"
+  ],
+  [
+   "gCallbackAtAllowed",
+   "oxpd1",
+   "src/Datasec.Suite.Adapters.Oxpd1/Oxpd1Context.cs",
+   "\n            || callback.AbsoluteUri.Contains('@', StringComparison.Ordinal) || callback.AbsoluteUri.Length > 256)",
+   "\n            || callback.AbsoluteUri.Length > 256)",
+   "ContextTests.N09"
+  ],
+  [
+   "gServerControlAllowed",
+   "oxpd1",
+   "src/Datasec.Suite.Adapters.Oxpd1/Oxpd1Context.cs",
+   " || !serverContextId.All(XmlConvert.IsXmlChar)",
+   "",
+   "ContextTests.N09"
+  ],
+  [
+   "gBodyElementName",
+   "oxpd1",
+   "src/Datasec.Suite.Adapters.Oxpd1/Oxpd1Context.cs",
+   "w.WriteElementString(\"serverContextId\", n, server);",
+   "w.WriteElementString(\"serverContextID\", n, server);",
+   "ContextTests.N01"
+  ],
+  [
+   "gUndoSentByDefault",
+   "oxpd1",
+   "src/Datasec.Suite.Adapters.Oxpd1/Oxpd1Context.cs",
+   "Oxpd1ContextKind.HidOpen => Oxpd1ContextCall.HidClose(call.ContextId!),",
+   "Oxpd1ContextKind.HidOpen => Oxpd1ContextCall.HidClose(call.ContextId!) with { Execute = true },",
+   "ContextTests.N04 ContextTests.N06"
+  ],
+  [
+   "gResultToStringId",
+   "oxpd1",
+   "src/Datasec.Suite.Adapters.Oxpd1/Oxpd1Context.cs",
+   "\" applied \" + Applied;",
+   "\" applied \" + Applied + \" \" + ContextId;",
+   "ContextTests.N10"
+  ],
+  [
+   "gTimeoutBounds",
+   "oxpd1",
+   "src/Datasec.Suite.Adapters.Oxpd1/Oxpd1Context.cs",
+   "value is >= 1 and <= 300 ? value :",
+   "value is >= 0 and <= 301 ? value :",
+   "ContextTests.N09"
+  ]
+ ]
+}

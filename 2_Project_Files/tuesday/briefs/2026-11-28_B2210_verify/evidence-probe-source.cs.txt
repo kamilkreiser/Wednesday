@@ -1,0 +1,417 @@
+using System.Reflection;
+using System.Text;
+using Xunit;
+
+namespace Datasec.Suite.Adapters.Oxpd1.Tests;
+
+// Gate B2210 probes: written only into the gate's own scratch clone, never committed or pushed. Every value SYNTHETIC.
+// Each probe writes one line per shape to OUT; no id or credential VALUE is written (booleans, lengths, kinds only).
+public class ZProbeB2210Tests
+{
+    private const string OUT = "/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s338/g2210/probe-out/probe.txt";
+    private const string Setting = "SYNTHETIC_OXPD1_SETTING";
+    private const string Password = "synthetic-admin-0001";
+    private const string S = "http://www.w3.org/2003/05/soap-envelope";
+    private const string AuthNs = "http://www.hp.com/schemas/imaging/OXPd/service/authentication/2013/03/01";
+    private const string AccNs = "http://www.hp.com/schemas/imaging/OXPd/service/accessories/2010/04/14";
+    private const string Id32 = "SYNTHETICcontext0000000000000001";
+    private const string AccessoryId = "SYNTHETICaccessory00000000000001";
+    private static readonly Guid AgentId = Guid.Parse("5a1e0000-0000-4000-8000-00000000c001");
+    private static readonly Uri Callback = new("https://lab-host.example:8443/hid");
+    private static readonly object Gate = new();
+
+    private static CancellationToken Guard => TestContext.Current.CancellationToken;
+
+    private static void W(string line)
+    {
+        lock (Gate)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(OUT)!);
+            File.AppendAllText(OUT, line + "\n");
+        }
+    }
+
+    private static (Oxpd1Client Client, Func<int> Reads) Client(StubDevice stub, string? settingValue = Password, TimeSpan? timeout = null, string? recordFile = null)
+    {
+        int reads = 0;
+        Oxpd1ClientOptions options = new("127.0.0.1", [TestCertificates.Sha256(stub.Certificate)], Setting)
+        {
+            SoapPort = stub.Port,
+            TreePort = stub.Port,
+            Timeout = timeout ?? TimeSpan.FromSeconds(10),
+        };
+        Oxpd1Client client = new(options, name =>
+        {
+            Interlocked.Increment(ref reads);
+            return name == Setting ? settingValue : null;
+        }, recordFile);
+        return (client, () => Volatile.Read(ref reads));
+    }
+
+    private static string Envelope(string inner) => "<s:Envelope xmlns:s=\"" + S + "\"><s:Body>" + inner + "</s:Body></s:Envelope>";
+
+    private static string EmptyAnswer(string ns, string operation) => Envelope("<" + operation + "Response xmlns=\"" + ns + "\"/>");
+
+    private static string ReserveAnswerRaw(string resultXml) =>
+        Envelope("<ReserveAuthenticationContextResponse xmlns=\"" + AuthNs + "\">" + resultXml + "</ReserveAuthenticationContextResponse>");
+
+    private static string ReserveAnswer(string inside) => ReserveAnswerRaw("<ReserveAuthenticationContextResult>" + inside + "</ReserveAuthenticationContextResult>");
+
+    private static string Kind(Oxpd1ContextKind k) => k.ToString();
+
+    private static Oxpd1ContextCall[] Six() =>
+    [
+        Oxpd1ContextCall.ReserveAuthenticationContext(AgentId),
+        Oxpd1ContextCall.ReleaseAuthenticationContext(Id32),
+        Oxpd1ContextCall.HidOpen(AccessoryId),
+        Oxpd1ContextCall.HidStartReading(AccessoryId, Callback, "synthetic-server-0001"),
+        Oxpd1ContextCall.HidStopReading(AccessoryId),
+        Oxpd1ContextCall.HidClose(AccessoryId),
+    ];
+
+    private static string AnswerFor(Oxpd1ContextKind k) => k == Oxpd1ContextKind.ReserveAuthenticationContext
+        ? ReserveAnswer(Id32)
+        : EmptyAnswer(k == Oxpd1ContextKind.ReleaseAuthenticationContext ? AuthNs : AccNs, k.ToString());
+
+    // (a) the credential each of the six carries, and the password half of the guest header.
+    [Fact]
+    public async Task PA1_credential_of_each_executed_call()
+    {
+        foreach (Oxpd1ContextCall call in Six())
+        {
+            await using StubDevice stub = await StubDevice.StartAsync(behaviour: new StubBehaviour { ForceBody = AnswerFor(call.Kind) });
+            (Oxpd1Client client, Func<int> reads) = Client(stub);
+            using (client)
+            {
+                Oxpd1ContextResult r = await new Oxpd1ContextCaller(client).CallAsync(call with { Execute = true }, Guard);
+                SeenRequest seen = Assert.Single(stub.Seen);
+                string auth = seen.Authorization ?? string.Empty;
+                string decoded = auth.StartsWith("Basic ", StringComparison.Ordinal) ? Encoding.UTF8.GetString(Convert.FromBase64String(auth[6..])) : "";
+                int colon = decoded.IndexOf(':');
+                string user = colon < 0 ? "(none)" : decoded[..colon];
+                bool pwIsAdminSetting = colon >= 0 && decoded[(colon + 1)..] == Password;
+                W($"PA1 {Kind(call.Kind)} | outcome {r.Outcome} applied {r.Applied} | requests 1 | scheme {(auth.StartsWith("Basic ", StringComparison.Ordinal) ? "Basic" : "other")} | user {user} | password half equals the client's AdminPasswordSetting value: {pwIsAdminSetting} | setting reads {reads()} | path {seen.Path}");
+            }
+        }
+    }
+
+    // (a) no request leaves without Execute: the six as made, each undo as returned, and an undo of an undo.
+    [Fact]
+    public async Task PA2_nothing_leaves_without_execute()
+    {
+        await using StubDevice stub = await StubDevice.StartAsync(behaviour: new StubBehaviour { ForceBody = ReserveAnswer(Id32) });
+        (Oxpd1Client client, Func<int> reads) = Client(stub);
+        using (client)
+        {
+            Oxpd1ContextCaller caller = new(client);
+            foreach (Oxpd1ContextCall call in Six())
+            {
+                Oxpd1ContextResult r = await caller.CallAsync(call, Guard);
+                W($"PA2 dry {Kind(call.Kind)} | DryRun {r.DryRun} | seen {stub.Seen.Count} | reads {reads()}");
+            }
+
+            Oxpd1ContextResult reserve = await caller.CallAsync(Six()[0] with { Execute = true }, Guard);
+            int seenAfter = stub.Seen.Count;
+            int readsAfter = reads();
+            Oxpd1ContextResult undoDry = await caller.CallAsync(reserve.Undo!, Guard);
+            W($"PA2 reserve executed then its undo called as returned | undo Execute {reserve.Undo!.Execute} | undo result DryRun {undoDry.DryRun} | seen before {seenAfter} after {stub.Seen.Count} | reads before {readsAfter} after {reads()}");
+
+            stub.Behaviour.ForceBody = EmptyAnswer(AccNs, "HidOpen");
+            Oxpd1ContextResult open = await caller.CallAsync(Six()[2] with { Execute = true }, Guard);
+            int s2 = stub.Seen.Count;
+            Oxpd1ContextResult closeDry = await caller.CallAsync(open.Undo!, Guard);
+            W($"PA2 open executed then its undo called as returned | undo Execute {open.Undo!.Execute} | DryRun {closeDry.DryRun} | seen before {s2} after {stub.Seen.Count}");
+        }
+    }
+
+    // (a) a redirect: the request goes once; the Location (a second stub) sees nothing, so no credential is forwarded.
+    [Fact]
+    public async Task PA3_redirect_is_not_followed()
+    {
+        await using StubDevice other = await StubDevice.StartAsync(behaviour: new StubBehaviour { ForceBody = EmptyAnswer(AccNs, "HidOpen") });
+        await using StubDevice stub = await StubDevice.StartAsync(behaviour: new StubBehaviour { RedirectTo = "https://127.0.0.1:" + other.Port + "/hp/device/webservices/OXPd/AccessoriesService" });
+        (Oxpd1Client client, _) = Client(stub);
+        using (client)
+        {
+            Oxpd1ContextResult r = await new Oxpd1ContextCaller(client).CallAsync(Oxpd1ContextCall.HidOpen(AccessoryId) with { Execute = true }, Guard);
+            W($"PA3 open answered 307 to a second stub | outcome {r.Outcome} status {r.Status} applied {r.Applied} undo {(r.Undo is null ? "none" : r.Undo.Kind.ToString())} | first stub seen {stub.Seen.Count} | second stub seen {other.Seen.Count}");
+        }
+    }
+
+    // (a) every public member of the lane's public types (anything else that could send).
+    [Fact]
+    public void PA4_public_surface()
+    {
+        foreach (Type t in typeof(Oxpd1ContextCaller).Assembly.GetExportedTypes().Where(t => t.Name.StartsWith("Oxpd1Context", StringComparison.Ordinal)).OrderBy(t => t.Name))
+        {
+            IEnumerable<string> members = t.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                .Select(m => m.MemberType + " " + m.Name).Distinct().OrderBy(x => x, StringComparer.Ordinal);
+            W($"PA4 {t.Name} ({(t.IsEnum ? "enum" : t.IsSealed ? "sealed" : "open")}) | " + string.Join(", ", members));
+            IEnumerable<string> ctors = t.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                .Select(c => (c.IsPublic ? "public" : c.IsAssembly ? "internal" : c.IsPrivate ? "private" : c.IsFamily ? "protected" : "other") + "(" + string.Join(",", c.GetParameters().Select(p => p.ParameterType.Name)) + ")");
+            W($"PA4 {t.Name} constructors | " + string.Join(", ", ctors));
+        }
+
+        FieldInfo[] fields = typeof(Oxpd1ContextCaller).GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+        W("PA4 Oxpd1ContextCaller fields | " + string.Join(", ", fields.Select(f => (f.IsStatic ? "static " : "") + (f.IsInitOnly ? "readonly " : "") + f.FieldType.Name + " " + f.Name)));
+    }
+
+    // (a) two concurrent executed reserves over one caller: each its own result.
+    [Fact]
+    public async Task PA5_two_concurrent_calls()
+    {
+        await using StubDevice stub = await StubDevice.StartAsync(behaviour: new StubBehaviour { ForceBody = ReserveAnswer(Id32), Delay = TimeSpan.FromMilliseconds(300) });
+        (Oxpd1Client client, _) = Client(stub);
+        using (client)
+        {
+            Oxpd1ContextCaller caller = new(client);
+            Task<Oxpd1ContextResult> a = caller.CallAsync(Six()[0] with { Execute = true }, Guard);
+            Task<Oxpd1ContextResult> b = caller.CallAsync(Six()[0] with { Execute = true }, Guard);
+            Oxpd1ContextResult[] both = await Task.WhenAll(a, b);
+            W($"PA5 two concurrent reserves | outcomes {both[0].Outcome},{both[1].Outcome} | ids equal the answer {both[0].ContextId == Id32},{both[1].ContextId == Id32} | distinct result objects {!ReferenceEquals(both[0], both[1])} | seen {stub.Seen.Count}");
+        }
+    }
+
+    // (a) a caller's cancellation while an executed open is in flight.
+    [Fact]
+    public async Task PA6_caller_cancellation_in_flight()
+    {
+        await using StubDevice stub = await StubDevice.StartAsync(behaviour: new StubBehaviour { ForceBody = EmptyAnswer(AccNs, "HidOpen"), Delay = TimeSpan.FromSeconds(2) });
+        (Oxpd1Client client, _) = Client(stub);
+        using (client)
+        {
+            using CancellationTokenSource cts = new(TimeSpan.FromMilliseconds(500));
+            string end;
+            try
+            {
+                Oxpd1ContextResult r = await new Oxpd1ContextCaller(client).CallAsync(Oxpd1ContextCall.HidOpen(AccessoryId) with { Execute = true }, cts.Token);
+                end = "result " + r.Outcome + " undo " + (r.Undo is null ? "none" : r.Undo.Kind.ToString());
+            }
+            catch (Exception e)
+            {
+                end = "exception " + e.GetType().Name;
+            }
+
+            W($"PA6 executed open, caller cancels at 0.5 s, stub answers at 2 s | {end} | stub seen {stub.Seen.Count}");
+        }
+    }
+
+    // (b) a reserve's answer in shapes outside the tested ones; (c) the mask on the id.
+    [Theory]
+    [InlineData("ctl-nonce32-mixed")]
+    [InlineData("lower32")]
+    [InlineData("upper32")]
+    [InlineData("digits32")]
+    [InlineData("len33")]
+    [InlineData("len127")]
+    [InlineData("len128")]
+    [InlineData("len129")]
+    [InlineData("len256")]
+    [InlineData("len4096")]
+    [InlineData("len200000")]
+    [InlineData("len2000000-over-answer-bound")]
+    [InlineData("prefix-then-dash-tail")]
+    [InlineData("prefix-then-space-word")]
+    [InlineData("nonce-then-128-more")]
+    [InlineData("trail-space")]
+    [InlineData("trail-tab")]
+    [InlineData("trail-lf")]
+    [InlineData("trail-crlf")]
+    [InlineData("lead-space")]
+    [InlineData("lead-lf-trail-lf")]
+    [InlineData("trail-nbsp")]
+    [InlineData("trail-zwsp")]
+    [InlineData("trail-nul-charref")]
+    [InlineData("fullwidth-letters32")]
+    [InlineData("e-acute32")]
+    [InlineData("arabic-indic-digits32")]
+    [InlineData("cyrillic-a-lookalike32")]
+    [InlineData("kelvin-sign32")]
+    [InlineData("comment-split")]
+    [InlineData("pi-split")]
+    [InlineData("cdata-whole")]
+    [InlineData("cdata-half")]
+    [InlineData("charref-letter")]
+    [InlineData("amp-entity")]
+    [InlineData("xsi-nil-attr")]
+    [InlineData("xml-space-attr")]
+    [InlineData("two-results")]
+    [InlineData("result-no-namespace")]
+    [InlineData("result-other-namespace-prefixed")]
+    [InlineData("response-other-namespace")]
+    [InlineData("response-prefixed-right-namespace")]
+    [InlineData("result-empty-self-closed")]
+    [InlineData("status500-good-answer")]
+    [InlineData("status200-fault")]
+    [InlineData("status202-good-answer")]
+    [InlineData("two-bodies")]
+    [InlineData("pw-ctl-no-overlap")]
+    [InlineData("pw-substring-of-nonce")]
+    [InlineData("pw-equals-nonce")]
+    [InlineData("pw-placeholder-word")]
+    public async Task PB_reserve_answer_shapes(string shape)
+    {
+        string a16 = "SYNTHETICabcd012";
+        string setting = Password;
+        string? body = null;
+        int? status = null;
+        string? inside = shape switch
+        {
+            "ctl-nonce32-mixed" => Id32,
+            "lower32" => new string('q', 32),
+            "upper32" => new string('Q', 32),
+            "digits32" => new string('7', 32),
+            "len33" => new string('a', 33),
+            "len127" => new string('a', 127),
+            "len128" => new string('a', 128),
+            "len129" => new string('a', 129),
+            "len256" => new string('a', 256),
+            "len4096" => new string('a', 4096),
+            "len200000" => new string('a', 200000),
+            "len2000000-over-answer-bound" => new string('a', 2000000),
+            "prefix-then-dash-tail" => Id32 + "-tail",
+            "prefix-then-space-word" => Id32 + " word",
+            "nonce-then-128-more" => Id32 + new string('b', 128),
+            "trail-space" => Id32 + " ",
+            "trail-tab" => Id32 + "\t",
+            "trail-lf" => Id32 + "\n",
+            "trail-crlf" => Id32 + "&#13;\n",
+            "lead-space" => " " + Id32,
+            "lead-lf-trail-lf" => "\n" + Id32 + "\n",
+            "trail-nbsp" => Id32 + " ",
+            "trail-zwsp" => Id32 + "​",
+            "trail-nul-charref" => Id32 + "&#0;",
+            "fullwidth-letters32" => new string('Ａ', 32),
+            "e-acute32" => new string('é', 32),
+            "arabic-indic-digits32" => new string('٣', 32),
+            "cyrillic-a-lookalike32" => new string('а', 32),
+            "kelvin-sign32" => new string('K', 32),
+            "comment-split" => a16 + "<!--c-->" + a16,
+            "pi-split" => a16 + "<?pi x?>" + a16,
+            "cdata-whole" => "<![CDATA[" + Id32 + "]]>",
+            "cdata-half" => a16 + "<![CDATA[" + a16 + "]]>",
+            "charref-letter" => "&#83;" + Id32[1..],
+            "amp-entity" => a16 + "&amp;" + a16,
+            "pw-ctl-no-overlap" => Id32,
+            "pw-substring-of-nonce" => "AAAAAAAAAAAAAAAAAAA" + "Synthetic0001",
+            "pw-equals-nonce" => Id32,
+            "pw-placeholder-word" => "removedPASSWORDremoved0000000000",
+            _ => null,
+        };
+        if (shape.StartsWith("pw-", StringComparison.Ordinal))
+        {
+            setting = shape switch
+            {
+                "pw-ctl-no-overlap" => "Synthetic0001",
+                "pw-substring-of-nonce" => "Synthetic0001",
+                "pw-equals-nonce" => Id32,
+                _ => "removed",
+            };
+        }
+
+        body = shape switch
+        {
+            "xsi-nil-attr" => ReserveAnswerRaw("<ReserveAuthenticationContextResult xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:nil=\"false\">" + Id32 + "</ReserveAuthenticationContextResult>"),
+            "xml-space-attr" => ReserveAnswerRaw("<ReserveAuthenticationContextResult xml:space=\"preserve\">" + Id32 + "</ReserveAuthenticationContextResult>"),
+            "two-results" => ReserveAnswerRaw("<ReserveAuthenticationContextResult>" + Id32 + "</ReserveAuthenticationContextResult><ReserveAuthenticationContextResult>" + Id32 + "</ReserveAuthenticationContextResult>"),
+            "result-no-namespace" => ReserveAnswerRaw("<ReserveAuthenticationContextResult xmlns=\"\">" + Id32 + "</ReserveAuthenticationContextResult>"),
+            "result-other-namespace-prefixed" => ReserveAnswerRaw("<x:ReserveAuthenticationContextResult xmlns:x=\"urn:lookalike\">" + Id32 + "</x:ReserveAuthenticationContextResult>"),
+            "response-other-namespace" => Envelope("<ReserveAuthenticationContextResponse xmlns=\"urn:lookalike\"><ReserveAuthenticationContextResult>" + Id32 + "</ReserveAuthenticationContextResult></ReserveAuthenticationContextResponse>"),
+            "response-prefixed-right-namespace" => Envelope("<au:ReserveAuthenticationContextResponse xmlns:au=\"" + AuthNs + "\"><au:ReserveAuthenticationContextResult>" + Id32 + "</au:ReserveAuthenticationContextResult></au:ReserveAuthenticationContextResponse>"),
+            "result-empty-self-closed" => ReserveAnswerRaw("<ReserveAuthenticationContextResult/>"),
+            "status500-good-answer" => ReserveAnswer(Id32),
+            "status202-good-answer" => ReserveAnswer(Id32),
+            "status200-fault" => Envelope("<s:Fault><s:Code><s:Value>s:Sender</s:Value></s:Code><s:Reason><s:Text xml:lang=\"en\">synthetic</s:Text></s:Reason></s:Fault>"),
+            "two-bodies" => "<s:Envelope xmlns:s=\"" + S + "\"><s:Body>" + "<ReserveAuthenticationContextResponse xmlns=\"" + AuthNs + "\"><ReserveAuthenticationContextResult>" + Id32 + "</ReserveAuthenticationContextResult></ReserveAuthenticationContextResponse></s:Body><s:Body/></s:Envelope>",
+            _ => ReserveAnswer(inside!),
+        };
+        status = shape switch
+        {
+            "status500-good-answer" => 500,
+            "status202-good-answer" => 202,
+            _ => null,
+        };
+
+        await using StubDevice stub = await StubDevice.StartAsync(behaviour: new StubBehaviour { ForceBody = body, ForceStatus = status });
+        (Oxpd1Client client, _) = Client(stub, settingValue: setting);
+        using (client)
+        {
+            string end;
+            try
+            {
+                Oxpd1ContextResult r = await new Oxpd1ContextCaller(client).CallAsync(Oxpd1ContextCall.ReserveAuthenticationContext(AgentId) with { Execute = true }, Guard);
+                string idShape = r.ContextId is null ? "null" : "len " + r.ContextId.Length + (Oxpd1ContextCatalogue.IsNonce(r.ContextId) ? " nonce" : " NOT-nonce");
+                end = $"outcome {r.Outcome} status {r.Status} applied {r.Applied} | ContextId {idShape} | Undo {(r.Undo is null ? "none" : r.Undo.Kind + (r.Undo.ContextId == r.ContextId ? " of that id" : " of ANOTHER id"))}";
+            }
+            catch (Exception e)
+            {
+                end = "EXCEPTION " + e.GetType().Name + " out of CallAsync (no result, no undo)";
+            }
+
+            W($"PB {shape} | {end} | stub seen {stub.Seen.Count}");
+        }
+    }
+
+    // R17e: a fault code holding an id-shaped text reaches FaultCode and ToString.
+    [Fact]
+    public async Task PC1_fault_code_with_id_shaped_text()
+    {
+        string fault = Envelope("<s:Fault><s:Code><s:Value>s:Sender</s:Value><s:Subcode><s:Value>x</s:Value></s:Subcode></s:Code><s:Reason><s:Text xml:lang=\"en\">r</s:Text></s:Reason></s:Fault>")
+            .Replace("<s:Value>s:Sender</s:Value>", "<s:Value>" + AccessoryId + "</s:Value>", StringComparison.Ordinal);
+        await using StubDevice stub = await StubDevice.StartAsync(behaviour: new StubBehaviour { ForceBody = fault, ForceStatus = 500 });
+        (Oxpd1Client client, _) = Client(stub);
+        using (client)
+        {
+            Oxpd1ContextResult r = await new Oxpd1ContextCaller(client).CallAsync(Oxpd1ContextCall.HidOpen(AccessoryId) with { Execute = true }, Guard);
+            W($"PC1 open faulted with the accessory id as the fault code | outcome {r.Outcome} | FaultCode holds the id {r.FaultCode?.Contains(AccessoryId, StringComparison.Ordinal)} | ToString holds the id {r.ToString().Contains(AccessoryId, StringComparison.Ordinal)}");
+        }
+    }
+
+    // R17b, R17f and a few argument shapes beyond N09.
+    [Theory]
+    [InlineData("cb-ipv6-literal")]
+    [InlineData("cb-port-0")]
+    [InlineData("cb-percent40")]
+    [InlineData("cb-fragment")]
+    [InlineData("cb-http-plain")]
+    [InlineData("cb-loopback")]
+    [InlineData("cb-backslash-at")]
+    [InlineData("cb-len256")]
+    [InlineData("srv-surrogate-pair")]
+    [InlineData("srv-len256")]
+    [InlineData("srv-lone-surrogate")]
+    [InlineData("id-fullwidth32")]
+    [InlineData("id-trailing-space")]
+    [InlineData("agent-max-guid")]
+    public void PD_argument_shapes(string shape)
+    {
+        string end;
+        try
+        {
+            Oxpd1ContextCall c = shape switch
+            {
+                "cb-ipv6-literal" => Oxpd1ContextCall.HidStartReading(AccessoryId, new Uri("https://[::1]:8443/hid")),
+                "cb-port-0" => Oxpd1ContextCall.HidStartReading(AccessoryId, new Uri("https://lab-host.example:0/hid")),
+                "cb-percent40" => Oxpd1ContextCall.HidStartReading(AccessoryId, new Uri("https://lab-host.example/a%40b")),
+                "cb-fragment" => Oxpd1ContextCall.HidStartReading(AccessoryId, new Uri("https://lab-host.example/hid#frag")),
+                "cb-http-plain" => Oxpd1ContextCall.HidStartReading(AccessoryId, new Uri("http://lab-host.example/hid")),
+                "cb-loopback" => Oxpd1ContextCall.HidStartReading(AccessoryId, new Uri("http://127.0.0.1:1/hid")),
+                "cb-backslash-at" => Oxpd1ContextCall.HidStartReading(AccessoryId, new Uri("https://lab-host.example\\@other.example/hid")),
+                "cb-len256" => Oxpd1ContextCall.HidStartReading(AccessoryId, new Uri("https://lab-host.example/" + new string('a', 256 - "https://lab-host.example/".Length))),
+                "srv-surrogate-pair" => Oxpd1ContextCall.HidStartReading(AccessoryId, Callback, "a\U0001F600b"),
+                "srv-len256" => Oxpd1ContextCall.HidStartReading(AccessoryId, Callback, new string('a', 256)),
+                "srv-lone-surrogate" => Oxpd1ContextCall.HidStartReading(AccessoryId, Callback, "a\uD800b"),
+                "id-fullwidth32" => Oxpd1ContextCall.HidOpen(new string('Ａ', 32)),
+                "id-trailing-space" => Oxpd1ContextCall.HidOpen(AccessoryId + " "),
+                _ => Oxpd1ContextCall.ReserveAuthenticationContext(Guid.Parse("ffffffff-ffff-ffff-ffff-ffffffffffff")),
+            };
+            end = "accepted" + (c.Callback is null ? "" : " callback host-kind " + c.Callback.HostNameType + " port " + c.Callback.Port + " length " + c.Callback.AbsoluteUri.Length);
+        }
+        catch (Exception e)
+        {
+            end = "refused " + e.GetType().Name;
+        }
+
+        W($"PD {shape} | {end}");
+    }
+}
