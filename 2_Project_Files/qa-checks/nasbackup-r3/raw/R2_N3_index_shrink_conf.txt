@@ -1,0 +1,83 @@
+Fri 27 Nov 2026 20:00:01 AEDT
+20:00  up 10:07, 2 users, load averages: 7.39 7.64 9.51
+### N3a a destination file DELETED behind the tool's back (index still says proven). Expected: noticed the next night, re-sent.
+night 1 rc=0 GOOD=1 | to copy: 1 files, 13 B (1 new, 0 changed -> previous cop | f7 back at destination: yes
+
+### N3b a destination file's CONTENT altered behind the tool's back, same size (bit rot, another writer). 400 unsent files, hash_sample=40 (the shipped default). How many nights until it is noticed?
+12 nights with nothing changed at the source: recorded GOOD on 12 nights while the destination copy differed; first night it was caught: never in 12 (expected chance per night 40/402 = 10%)
+   the catching night said: 
+
+### N3c the index file is damaged (garbage bytes). Expected: one plain line, not a traceback; the lock not left behind.
+night 1 rc=0 GOOD=1 | traceback lines: 0 | last line: log: /private/tmp/qa3nb/r2run/fx/N3c_54410/lane/logs/wednesday/2026-12-02_010000_55826_run.log
+   lock left behind: no | state last_attempt=good
+   the next attempt: rc=0 | 
+   watch: rc=5 nas-backup watch[wednesday]: DAMAGE NOTICE, not yet acknowledged by a seat: the index was found damaged at 2026-12-02 01:00:00 by a real run (nas_backup.sh --run) and moved to /private/tmp/qa3nb/r2run
+   a DRY run with the damaged index: rc=0 traceback lines: 0
+
+### N3d an index from ANOTHER destination: the whole destination is replaced by same-size different content; the index is kept.
+night 1 rc=0 GOOD=1 |  | NOT DELIVERED lines: 0 of 30 altered
+night 2 rc=0 GOOD=1 | still-altered destination files: 0
+night 6 rc=0 | still-altered destination files after 6 nights: 0
+
+### N4a the shrink guard and the nightly job: can the nightly job accept a shrink? can a shrink be accepted twice?
+night 0 (nightly) rc=0
+night 1 (nightly) after 42 -> 7 files: rc=8 | PROBLEM: SCOPE FELL SHARPLY: 7 files in scope now, 42 at the last good run (more than a 50% fall). If the source really shrank, run once with --accept-shrink "<card i
+night 2 (nightly) unchanged: rc=8 (still failing: the nightly job has no way to accept)
+   accept-shrink in the nightly script or the plist template: 0 / 0 (control: 'decide-only' in the nightly script: 2)
+by hand with --accept-shrink: rc=0 GOOD=1 ; new baseline: {'Secuura': 1, 'WEDNESDAY': 7}
+a FURTHER sharp fall the next night, no flag: rc=8 (2 SCOPE FELL line: the acceptance was not sticky)
+
+### N4b a SLOW shrink, 45% of what is left each night (below the 50% trigger).
+   night 1: 550 filler files left, rc=0 GOOD=1
+   night 2: 303 filler files left, rc=0 GOOD=1
+   night 3: 167 filler files left, rc=0 GOOD=1
+   night 4: 92 filler files left, rc=0 GOOD=1
+   night 5: 51 filler files left, rc=0 GOOD=1
+   night 6: 29 filler files left, rc=0 GOOD=1
+   night 7: 16 filler files left, rc=0 GOOD=1
+   night 8: 9 filler files left, rc=0 GOOD=1
+   night 9: 5 filler files left, rc=0 GOOD=1
+   night 10: 3 filler files left, rc=0 GOOD=1
+1000 -> 3 files in 10 nights, every night GOOD: YES
+
+### N4c FIRST run of a set that holds folders but ZERO files (ruling 4: 'a set whose in-scope count is zero FAILS').
+rc=8 GOOD=0 | source in scope: 0 files, 0 B, 2 folders, 0 symlinks (recorded, not copied), | EMPTY SCOPE lines: 2
+CONTROL the same with no folders either: rc=8 EMPTY SCOPE lines: 2
+
+### N4d exclusion patterns that are not literally '*' but match (nearly) every name, on a FIRST run and after a good run.
+   first run, exclude_name=*.*          rc=2 GOOD=0 | REFUSED — the exclusion pattern '*.*' in /private/tmp/qa3nb/r2run/fx/N4d_31089_54410/lane/
+   first run, exclude_name=[!~]*        rc=2 GOOD=0 | REFUSED — the exclusion pattern '[!~]*' in /private/tmp/qa3nb/r2run/fx/N4d_27749_54410/lan
+   first run, exclude_name=*[a-z0-9]*   rc=2 GOOD=0 | REFUSED — the exclusion pattern '*[a-z0-9]*' in /private/tmp/qa3nb/r2run/fx/N4d_32064_5441
+   first run, exclude_name=?*           rc=2 GOOD=0 | REFUSED — the exclusion pattern '?*' in /private/tmp/qa3nb/r2run/fx/N4d_12837_54410/lane/s
+   first run, exclude_name=**           rc=2 GOOD=0 | REFUSED — the exclusion pattern '**' in /private/tmp/qa3nb/r2run/fx/N4d_15277_54410/lane/s
+   after a good 22-file night, exclude_name=*.* : rc=2 GOOD=0 | 
+   the same with max_drop_fraction=1 in the conf: rc=2 GOOD=0 (the conf can switch the fall guard off; the zero rule remains)
+   state file damaged AND 20 of 22 files newly excluded the same night: rc=8 GOOD=0 (the baseline went with the damaged state) | STATE FILE DAMAGED: /private/tmp/qa3nb/r2run/fx/N4d4_54410/l
+
+### N4e a set that GROWS by pulling in an unintended tree (5,000 files appear under the seat tree overnight).
+rc=0 GOOD=1 | to copy: 5000 files, 23.33 KiB (5000 new, 0 changed -> p | lines warning about growth: 0
+
+### N5a the END marker counts lines, it does not seal them: one exclude line REPLACED by another valid line, count unchanged.
+intact: rc=0 bulk marker on NAS=0
+exclude line replaced by 'io_timeout=1800' (END count untouched): rc=0 GOOD=1 bulk marker on NAS=1
+
+### N5b duplicate keys: which wins, and is it said?
+status=confirmed then status=unconfirmed: rc=2 ()
+status=unconfirmed then status=confirmed: rc=2 GOOD=0 | duplicate-key warnings: 1
+
+### N5c an exclude_path that exists but is the WRONG folder (sub instead of cache/huge).
+rc=0 GOOD=1 bulk marker on NAS=1 ; sub/b.txt at destination: NO (accepted by nature: the tool cannot know intent)
+
+### N5d text after the END marker, and an END marker in the middle
+a line appended after END: rc=2 (REFUSED — /private/tmp/qa3nb/r2run/fx/N5d_54410/lane/seats/wednesday.conf does not end with its `END lines=<N>)
+
+### N5e the state file: valid JSON with a last_good in the FUTURE (a wrong clock during one good run)
+nightly 5 days later: nightly[wednesday]: STATE FILE DAMAGED: /private/tmp/qa3nb/r2run/fx/N5e_54410/lane/state/wednesday.json could not be used (last_good.time is in the FU
+watch 9 days later: rc=3 nas-backup watch[wednesday]: DAMAGE NOTICE, not yet acknowledged by a seat: the state file was found damaged at 2026-12-
+
+### N5f the state file: valid JSON, right seat, but last_good without its fields
+watch: rc=5 traceback lines=0 | nas-backup watch[wednesday]: ok; 0.0 h since the first attempt on record (no good backup yet) (2026-
+nightly with last_good lacking 'time': rc=0 traceback lines=0 | nas-backup watch[wednesday]: ok; 0.0 h since the last good backup (2026-12-02 00:31:00 AEDT); last a
+watch on it: rc=5 traceback lines=0 | nas-backup watch[wednesday]: ok; 8.5 h since the last good backup (2026-12-02 00:31:00 AEDT); last a
+script rc=0
+Fri 27 Nov 2026 20:00:36 AEDT

@@ -1,0 +1,41 @@
+Fri 27 Nov 2026 20:01:20 AEDT
+20:01  up 10:08, 2 users, load averages: 6.80 7.45 9.26
+== 2a. patterns that (nearly) empty a set without being a refused shape
+  exclude_name=*t first run: rc=8 GOOD=0 planned=0 files, 0 B, 1 fol     PROBLEM: EMPTY SCOPE: 0 fi
+  exclude_name=?*.* first run: rc=2 GOOD=0 planned= REFUSED — the exclusion patter
+  exclude_name=[a-z]* first run: rc=8 GOOD=0 planned=0 files, 0 B, 0 fol     PROBLEM: EMPTY SCOPE: 0 fi
+  exclude_name=*[!.] first run: rc=2 GOOD=0 planned= REFUSED — the exclusion patter
+  exclude_name=*.txt first run: rc=8 GOOD=0 planned=0 files, 0 B, 1 fol     PROBLEM: EMPTY SCOPE: 0 fi
+  exclude_name=a* first run: rc=0 GOOD=1 planned=9 files, 18 B, 1 fo 
+  exclude_name=[!x]* first run: rc=8 GOOD=0 planned=0 files, 0 B, 0 fol     PROBLEM: EMPTY SCOPE: 0 fi
+  exclude_name=*?? first run: rc=2 GOOD=0 planned= REFUSED — the exclusion patter
+  exclude_name=*.?* first run: rc=2 GOOD=0 planned= REFUSED — the exclusion patter
+== 2b. allow_empty on a set that FILLS and then EMPTIES again; and a set that goes 9 -> 0 files WITH allow_empty
+  empty, allowed: rc=0 GOOD=1
+  filled with 9: rc=0 GOOD=1 baseline=9
+  emptied again (9 -> 0) under allow_empty: rc=0 GOOD=1 ; fall or empty problem lines: 0
+== 2c. the plan is made per set: a file created in set 2 while set 1 copies; a file in set 2 deleted before set 2 is planned
+  rc=0 GOOD=1 ; new.txt at destination: yes ; gone.txt named anywhere in the output: 0 (0 = it left before its set's plan, uncounted by design)
+== 3a. the cap passes DURING the full read-back; then the next nights
+  night0 rc=0 rows=62
+  night1 (61 altered, read-back slowed to 0.25 s a file by the lane's own test hook, cap 6 s): rc=4 GOOD=0 rows left=1 still-wrong=60;   - WEDNESDAY: the run-time cap (6s) passed during the full read-back that follows a sample finding: 19 of 57 files read back; the next run goes on
+  night2 sample OFF, no cap problem: 
+    rc=0 GOOD=1 still-wrong=0;     to copy: 61 files, 793 B (0 new, 61 changed -> previous      compared by sha256 (same size, source changed or not yet proven): 61 files, 0 identica
+== 3b. kill -9 during the read-back (row removal already committed?)
+  rows before=62
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/qa-checks/nasbackup-r3/scripts/A8_items_2_3_4.sh: line 34:  2996 Killed: 9               env -u WED_AGENT NB_TEST_ROOT="$T" NB_TEST_TREE="$T/vol/WEDNESDAY" NB_TEST_HASH_DELAY=0.25 "$LANE/nas_backup.sh" --run --now "$(at 1 1 0)" > "$T/o/r1.txt" 2>&1
+  after kill -9 mid read-back: rows=1 (the rows of unsent files must be gone) state=running
+  next night, sample OFF: rc=0 GOOD=1 still-wrong=0 ;     compared by sha256 (same size, source changed or not yet proven): 61 files, 0 identical
+== 3c. a finding in ONE set: are the other set's proofs on the same NAS withdrawn?
+  rc=0 GOOD=1 ; set 1 all altered -> full read-back lines: 2 ; set P2 files still wrong after the run: 0 of 5 altered (P2's own sample of 1 decides)
+== 3d. a destination copy MISSING or of ANOTHER SIZE while the index holds its proof: is the set's trust withdrawn, is it said?
+  1 destination file removed, 1 truncated, 10 altered same-size, sample off: rc=0 GOOD=1 ;     to copy: 2 files, 26 B (1 new, 1 changed -> previous copy kept in  ; read-back lines: 0 ; still wrong: 10
+== 4. containment: a client folder THREE levels down; set= as ancestor of it; seat-named folders deeper
+  set= the ancestor A (roots sit 3 and 4 levels down): rc=0 GOOD=1 
+    on the NAS: Datasec mark 0, tuesday-seat mark 1, Friday mark 0, plain neighbour 1
+  set=A/B/C/Datasec: rc=2 ; Datasec mark on NAS: 0
+  set=A/B/C/Datasec/proj: rc=2 ; Datasec mark on NAS: 0
+  set=A/B/C/../C/Datasec/proj: rc=2 ; Datasec mark on NAS: 0
+  set=A/B/C/DATASEC/proj: rc=2 ; Datasec mark on NAS: 0
+Fri 27 Nov 2026 20:01:39 AEDT
+20:01  up 10:09, 2 users, load averages: 6.08 7.24 9.15
