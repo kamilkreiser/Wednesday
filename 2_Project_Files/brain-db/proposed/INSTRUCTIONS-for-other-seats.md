@@ -9,14 +9,13 @@ Round 4 changed what this step is. **You adopt by CONFIRMING your seat's scope f
 Your proposed file is `proposed/scope/<seat>.scope`. It is not live. Until a file sits at `<tree>/2_Project_Files/brain-db/scope/<seat>.scope`, every command refuses with "no scope file for seat" and creates nothing.
 
 1. Read the proposal whole.
-2. Confirm the three lines that are yours to confirm (table below). If one is wrong, do not edit it yourself: tell your coordinator, because the same fact is in the code's table.
+2. Confirm the two lines that are yours to confirm (table below). If one is wrong, do not edit it yourself: tell your coordinator, because the same fact is in the code's table.
 3. Copy it: `cp -n proposed/scope/<seat>.scope scope/<seat>.scope`.
 
 | Line | What it does | What you confirm |
 |---|---|---|
 | `seat <name>` | Ties the file to one seat. A file whose `seat` is not your tree's seat is refused. | It is your seat. |
-| `own_clients <words>` | The clients whose PROJECT lessons (`tier: P-<Client>/<Project>`) your seat may index. | Tuesday proposal: `datasec general`. Friday proposal: `secuura datasec general`. |
-| `deny_clients <words>` | A lesson that names one of these words ANYWHERE (its text, its file name, its rules-index line) is left out whole. | Tuesday proposal: `secuura`. **Friday proposal: no such line, because Friday works for both clients. That is the build seat's reading, not a ruling: Kam or your coordinator confirms it.** |
+| `own_clients <words>` | The clients whose PROJECT lessons (`tier: P-<Client>/<Project>`) your seat may index. | Tuesday proposal: `datasec general`. Friday proposal: `secuura datasec general`, because Friday works for both clients. **That is the build seat's reading, not a ruling: Kam or your coordinator confirms it.** |
 
 Every `allow` line in the proposal is already the only thing the table permits for your seat:
 
@@ -37,11 +36,15 @@ So a Tuesday or Friday tree cannot index the Wednesday seat's ledger, daily note
 - (a) it has exactly one row in the rules index whose key is exactly its file name, and no line of the rules index that could not be read so much as holds its name;
 - (b) that row's seats cell is `all` or names your seat;
 - (c) its frontmatter is one block opened on line 1 by `---` and closed by `---`, every line in it a plain `key: value`, with exactly one `tier:` line whose value is `W`, `M`, or `P-<one of your own clients>/<project>`. No tier, `MIXED`, or any other value stays out;
-- (d) nowhere in its text is there an HTML comment, a tier-like line, or the name of a client on your `deny_clients` line;
+- (d) nowhere in its text is there an HTML comment (a section marker in any spelling is one), a tier-like line, or a numeric character reference;
 - (t) it is plain UTF-8 text with Latin letters and no control or invisible characters;
 - (f) it is a plain regular file: not a symlink, not hard-linked, readable.
 
 This is deliberately strict. It leaves out real lessons you might want (on the Wednesday seat: see step 4), and the fix for a lesson that should be in is in the lesson file or the rules index, never in the tool.
+
+**What keeps another client's material out, said plainly (round 4b, `ANSWER-7.md`).** Three things, each DECLARED BY A PERSON: the lesson's row in the rules index (which seat it is for), its `tier:` line (whose it is), and a section marker (this part is another client's). The tool reads those three strictly and reads nothing else. Nothing reads meaning, and there is no list of client names: one was built in round 4, it left out 55 of the Wednesday seat's own lessons for mentioning the other client in passing, and it still could not see a project named without its client or an abbreviation. So a lesson about another client's work that is tagged `W` or `M`, scoped to this seat and carries no marker WILL be indexed. The remedy is to tag it with its project tier or mark the section, in the lesson file; it is not a word list, and one should not be put back.
+
+There is no `deny_clients` line any more. A scope file that carries one is refused, so that no file promises a protection the tool does not give.
 
 ## What you get
 
@@ -88,7 +91,7 @@ B check       # must print GREEN, and names the data directory it is reporting o
 
 **4. Read the `rebuild` report before trusting the index.** It lists every lesson that was LEFT OUT, by name, under the clause it failed; every other file that matched an allow line and was not indexed, with the reason; every rules-index line that could not be read; and anything unreadable or cut. Its LAST line gives the count left out by each clause, and `check` and `doctor` print the same count afterwards, so a lesson that drops out later is visible without re-reading this report. If a lesson you expected is in the left-out list, the list tells you which clause to look at in the lesson file or the rules index.
 
-On the Wednesday seat (2026-11-27, round 4) the report reads: 354 files, 22,096 search rows. Of 292 lesson files, 199 qualified and 93 were left out: 28 under (b) (their row is scoped to other seats), 8 under (c) (5 with tier `MIXED`, 3 with no tier line), 57 under (d) (55 of them because they name the other client somewhere in their text). Nothing unreadable, nothing cut. The cluster takes about 174 MB on the drive. That one rebuild took 19 s on a Mac that was busy with other seats' work (load average 24); round 3 measured about 5 s on the same tree.
+On the Wednesday seat (2026-11-27, round 4b) the report reads: 410 files, 22,255 search rows. Of 293 lesson files, 255 qualified and 38 were left out: 28 under (b) (their row is scoped to other seats), 8 under (c) (5 with tier `MIXED`, 3 with no tier line), 2 under (d) (a body line that starts with the word tier). Nothing unreadable, nothing cut. The cluster takes about 174 MB on the drive. The rebuild took 9.4 s with the Mac's load average at 11; round 3 measured about 5 s on a quieter machine.
 
 **5. Confirm the git ignore** (the cluster must never be committed):
 
@@ -146,9 +149,9 @@ B stop                              # at the end of the session, and before ejec
 3. **A stale index answers without saying so.** `search` and `at` build a missing index but do not rebuild one that is merely behind the files; `check` tells you, and the launcher's `up` rebuilds at boot.
 4. **`at` weights count only your own indexed ledgers.** `rules_card.py` counts every seat's ledger, so the order differs between the two. On the Wednesday seat the two list exactly the same 802 rule lines.
 5. **Only your own tree's rules files are indexed.** A rule that lives in the workspace file one level above your tree is not in the index (ruled out by Wednesday: that file carries another client's environment detail, and the harness loads it into every session anyway).
-6. **The qualify rule costs you lessons, on purpose.** A lesson with no tier line, a `MIXED` tier, an HTML comment, or any mention of a client on your `deny_clients` line is not in the index, however useful it is. `rebuild`, `check` and `doctor` all print how many are left out, and `rebuild` names every one. `search` does not look inside left-out files; when it finds nothing it says how many lessons are left out.
+6. **The qualify rule costs you lessons, on purpose.** A lesson with no tier line, a `MIXED` tier, an HTML comment or a body line that starts with the word tier is not in the index, however useful it is. `rebuild`, `check` and `doctor` all print how many are left out, and `rebuild` names every one. `search` does not look inside left-out files; when it finds nothing it says how many lessons are left out.
 7. **Nothing writes to the brain.** The tool only reads your files. Corrections go in the files; the index follows at the next rebuild.
-8. **What the rule cannot see.** It reads names and words, not meaning: a lesson about another client's work that never uses a name on your `deny_clients` line, or spells it as an abbreviation, with a digit for a letter or with a space inside it, qualifies. A secret pasted into a lesson is not a path problem and is not seen either.
+8. **What the rule cannot see.** Meaning. It reads the row, the tier and the marker that a person wrote. A lesson about another client's work that is tagged `W` with no marker is indexed; so is one whose own-client project tier hides another client's project. A secret pasted into a lesson is not a path problem and is not seen either. Tag or mark the lesson.
 
 ## The shared-file changes that go with it
 
