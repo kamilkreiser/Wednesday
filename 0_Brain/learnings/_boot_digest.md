@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-27 11:19 from 292 lesson files (1,229,231 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 22 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-27 11:49 from 292 lesson files (1,230,488 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 22 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -8302,4 +8302,16 @@ sections (open the file for these): The rule · Why · The failure behind it (le
 - Research and a design come to Kam before anything is rebuilt: the brain, launchers and boot path are shared by three seats (claim with the sister seats before touching shared tooling).
 - Datasec project briefs are Tuesday's to write; the STRUCTURE is shared and client-neutral.
 - Third-party skills and repos are read before adoption; nothing external is installed into a loader unread.
+
+## RULED 2026-11-27 (live board, after the design was shared)
+
+- 11:43:30, a note, verbatim: "thank you.  I like your recommendations.  Please put this into action for you.  Each external drive will now also hold the dB.  once you finish and test, prepare instructions and send to Tuesday and Friday"
+- 11:43:40 tap: card wed-fleet-structure-v2-where-postgres-runs-1127 = **c, Local index only**.
+- 11:43:52 tap: card wed-fleet-structure-v2-go-steps-1-3-1127 = **a, Go, steps 1 to 3 in that order**.
+
+**Wednesday's reading (told to him on the panel):**
+- Build and test on Wednesday's own seat FIRST. Tuesday's and Friday's seats change only after that, by written instructions Wednesday sends them.
+- Postgres is LOCAL. Its data directory lives ON each seat's external drive (DevMASTER for this seat), so the drive still holds everything. It is a REBUILDABLE INDEX only (tap c): no hosted database, no spend; row records stay in files and the union tools.
+- This lifts PORTABILITY.md item 25's "never start a service on it" for this ONE use. The rule "never store project state off-drive" stands, and is why the data directory is on the drive.
+- Still Kam's: any hosted database, any spend, any change to another seat's boot before the instructions step.
 
