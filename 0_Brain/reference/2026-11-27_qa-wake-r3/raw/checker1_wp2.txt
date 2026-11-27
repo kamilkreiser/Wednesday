@@ -1,0 +1,36 @@
+rebuild rc 0
+control, fresh: rc 0
+ATTACK 1: one hand-added line beginning 'generated: ' in the pack body (+119 bytes): --check rc 1 | FAULT: pack content differs from what would be built now (sha256 bb188a983b80 on disk, 7e716d29ce6e expected)
+wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+ATTACK 2: hand-added 'generated: ' line in the sidecar: --check rc 1 | FAULT: dropped-rows sidecar differs from what would be built now (sha256 68507ecd0976 on disk, 3fda0df76dfb expected): /
+control, restored: rc 0
+---- filter: hostile rows (classify_grant called directly on the copy of the tool; seat wednesday, today 2026-11-27)
+  ok               unclassified LIVE, binds all: other seat leads, 'all seats' in the cell  []
+  ok               unclassified LIVE: two seats named by short name  []
+  ok               unclassified LIVE: other seat leads, this seat bound in the scope cell  []
+  ok               mine         LIVE: two seats with a slash  []
+  ok               unclassified LIVE: fleet-wide lead  []
+  ok               unclassified LIVE: marker word is the subject, not a status  []
+  ok               unclassified LIVE: 'DEAD LETTER queue may be purged'  []
+  ok               unclassified LIVE: 'EXPIRED certificates may be renewed'  []
+  ok               unclassified LIVE: 'RETIRED' as subject  []
+  ok               unclassified LIVE: struck-through dead marker, then revived  []
+  ok               unclassified LIVE: 'CLOSED? No:' reopened  []
+  ok               unclassified LIVE: hyphenated word starting with a marker  []
+  ok               mine         LIVE: EXPIRES cell starts with the GIVEN date  []
+  ok               mine         LIVE: a START date leads the cell  []
+  ok               mine         LIVE: date, then 'until further notice'  []
+  ok               mine         LIVE: date or EVENT, whichever is later  []
+  ok               mine         LIVE: first of several dates in words  []
+  ok               mine         LIVE: continued, no hint word  []
+  ok               mine         LIVE: ends today  []
+  ok               past         DEAD: ended yesterday (control)  [EXPIRES cell starts with end date 2026-11-26]
+  ok               mine         LIVE: EVENT row (control)  []
+  ok               unclassified LIVE: EXTENDED in first cell (control)  []
+  ok               mine         LIVE: five cells because of a pipe in the text  []
+  ok               unclassified LIVE: lower-case seat lead  []
+  ok               other        OTHER: plain Tuesday row (control)  [first cell starts with TUESDAY]
+hostile live rows wrongly dropped: 0 of 23 live cases
+---- date boundary: the filter takes today from the machine's local clock
+  today=2026-11-27 -> ('mine', '')
+  today=2026-11-28 -> ('past', 'EXPIRES cell starts with end date 2026-11-27')

@@ -105,7 +105,8 @@ if [ -f "$PRF" ]; then
     esac
   done < "$PRF"
 fi
-for n in Datasec TUESDAY node_modules worktrees .venv __pycache__ .next .turbo .pytest_cache .git _nas_push_overwritten; do
+# 2026-11-27 (Kam, card wed-nas-backup-share-holds-secuura-credentials-1127 = a): secrets folders never go to the NAS (workspace hard rule 3).
+for n in Datasec TUESDAY node_modules worktrees .venv __pycache__ .next .turbo .pytest_cache .git _nas_push_overwritten '*4_[Cc][Rr][Ee][Dd][Ee][Nn][Tt][Ii][Aa][Ll][Ss]*' '*3_[Aa][Cc][Cc][Ee][Ss][Ss]_[Kk][Ee][Yy][Ss]*'; do
   EXCL+=( "--exclude=$n" )
 done
 

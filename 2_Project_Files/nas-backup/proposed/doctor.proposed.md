@@ -1,48 +1,36 @@
-# PROPOSED block for `2_Project_Files/doctor.sh` (nothing here is applied)
+# PROPOSED line for `2_Project_Files/doctor.sh` (round 2). Nothing here is applied.
 
-Where: after the "NAS replica staleness" block (ends near line 548), before the next section. It uses the helpers doctor already has (`ok`, `warn`, `_DOC_AGENT`, `PROJECT_DIR`).
-
-Why doctor: it is one of the three callers of the three-day check that run on their own clock (launcher boot, doctor, the nightly job). A backup job that never fires cannot report itself (2026-09-20 lesson).
-
+## The change: one sourced file
+After the "NAS replica staleness" block (ends near line 548):
 ```
-# --- Nightly copy-only NAS backup (WED-170, Kam 2026-11-27) ---
-# The three-day check reads only nas-backup/state/<seat>.json and the clock: it needs neither the NAS nor the job.
-NB_DIR="$PROJECT_DIR/2_Project_Files/nas-backup"
-if [ ! -x "$NB_DIR/nas_backup_watch.sh" ]; then
-  warn "nas-backup/nas_backup_watch.sh missing or not executable" "restore it from git (chmod +x): without it a backup that stopped is invisible"
-else
-  NB_OUT="$(bash "$NB_DIR/nas_backup_watch.sh" --check 2>&1)"; NB_RC=$?
-  NB_LINE="$(printf '%s\n' "$NB_OUT" | head -1)"
-  if [ -e "$NB_DIR/HOLD_${_DOC_AGENT}" ]; then
-    warn "nightly NAS backup HELD (by design: nas-backup/HOLD_${_DOC_AGENT})" "do NOT lift it yourself; lifting is the coordinator's word on Kam's instruction"
-  elif [ "$NB_RC" -eq 3 ]; then
-    warn "NO GOOD NAS BACKUP FOR 3 DAYS" "$NB_LINE — run: bash 2_Project_Files/nas-backup/nas_backup_watch.sh --flag  (it prints the ONE card for Kam; no backup runs outside the window without his word)"
-  elif [ "$NB_RC" -ne 0 ]; then
-    warn "nas_backup_watch.sh exited $NB_RC" "$NB_LINE"
-  else
-    ok "nightly NAS backup: $NB_LINE"
-  fi
-  # the job itself (machine-local): loaded, and its last exit
-  if [ ! -e "$NB_DIR/HOLD_${_DOC_AGENT}" ] && [ -f "$PROJECT_DIR/2_Project_Files/scheduler/jobs/nasbackup.plist.template" ]; then
-    if launchctl print "gui/$(id -u)/com.${_DOC_AGENT}.nasbackup" >/dev/null 2>&1; then
-      NB_LEC=$(launchctl print "gui/$(id -u)/com.${_DOC_AGENT}.nasbackup" 2>/dev/null | awk '/last exit code/{print $NF}')
-      case "$NB_LEC" in
-        126) warn "nasbackup job last exit 126" "TCC: /bin/bash lacks Full Disk Access on this machine (PORTABILITY 15)";;
-        78*) warn "nasbackup job last exit $NB_LEC" "EX_CONFIG: launchd refused the plist; out/err must live in ~/Library/Logs (PORTABILITY 22)";;
-        7)   warn "nasbackup job last exit 7 (STALLED)" "a macOS privacy prompt for rsync or python3 is probably waiting on this Mac's screen (PORTABILITY 15a)";;
-        *)   ok "nasbackup job loaded (last exit ${NB_LEC:-never})";;
-      esac
-    else
-      warn "nasbackup job not loaded" "bash 2_Project_Files/scheduler/install_all_jobs.sh (from this seat's own tree, WED_AGENT unset)"
-    fi
-  fi
-fi
-# the engine dependency (already listed for nas_push.sh): Homebrew rsync 3
-[ -x /opt/homebrew/bin/rsync ] || warn "Homebrew rsync missing" "brew install rsync — nas-backup refuses without rsync 3 (PORTABILITY)"
+# --- Nightly copy-only NAS backup (WED-170, Kam 2026-11-27): the three-day flag's channel to a seat ---
+[ -f "$PROJECT_DIR/2_Project_Files/nas-backup/proposed/doctor_nasbackup_block.sh" ] && . "$PROJECT_DIR/2_Project_Files/nas-backup/proposed/doctor_nasbackup_block.sh"
 ```
+The block is a FILE (`proposed/doctor_nasbackup_block.sh`), not pasted lines, so the suite runs exactly what doctor will run. When it is applied, Wednesday may move the file out of `proposed/`; the tests name its path in one place (`doctor_block()` in `tests/run.sh`).
 
-Note: the two `>/dev/null 2>&1` on `launchctl print` copy the form the existing per-job sweep uses (doctor.sh lines 503 to 505) to test presence only; every other call keeps its output.
+Rollback: remove the line.
 
-Rollback: remove the block (take `doctor.sh.pre-<date>-nasbackup` first, by this project's convention). Nothing else reads it.
+## What it prints
 
-Exercise both paths before trusting it (2026-08-06 lesson): with a state file whose `last_good.time` is 80 hours old the block must WARN; with a fresh one it must print ok. `tests/run.sh` T8 and T9 exercise the script underneath; the doctor block itself is NOT tested (it does not exist yet).
+| State | doctor prints | Why |
+|---|---|---|
+| Good backup inside 72 hours | `ok` (nothing under `--quiet`) | |
+| Held (`HOLD_<seat>` exists) | a warning, **once a day at most**; `ok` on later boots that day | QA minor: round 1 warned at every boot on every held seat |
+| 72 hours without a good backup, card **not** recorded as raised | **a hard failure (`fail`, the `✗` line)** whose text starts with the command to run: `bash 2_Project_Files/nas-backup/nas_backup_watch.sh --card` | This is the channel (QA finding 6) |
+| Same, card recorded as raised | a warning | Nothing more for a seat to do |
+| State file damaged | the same hard failure; the watch has already moved the file aside | QA finding 9: round 1 showed a Python traceback here |
+| Seat of the tree unknown | a warning; the check is not run | |
+
+## Why a hard failure, and why that is the channel
+QA finding 6: round 1's card command went to a launchd log, and its launcher proposal named a variable the launcher does not have. I read the real launcher (`Launch_Wednesday.command`, `set -u` at line 9). What it carries from boot into a seat's prompt is one thing only: doctor's `✗` lines (lines 400 to 417 and 904 to 914). On a rotation they are appended to the boot prompt under "FIX THEM FIRST"; on a human launch the boot stops and shows them to Kam. It cuts each line at 400 characters, so the block puts the command first and keeps the line short.
+
+So: the nightly job never prints the card (it calls the watch's read-only mode). Doctor's hard-failure line names the command. The seat runs it, gets the one `decision_queue.sh add` command, adds the card, and runs `--mark-raised <id>`. From then on doctor warns instead. Printing the command consumes nothing: it prints again at every call until `--mark-raised`. The card id is fixed per gap and `decision_queue.sh` refuses a duplicate id, so the card exists once per gap.
+
+**The cost, said plainly:** a hard failure stops a human launch at the "Preflight found HARD failures" prompt until someone answers it. That is deliberate (Kam asked to be flagged) and it ends as soon as the card is recorded as raised. If Wednesday would rather it never gate a launch, change `fail` to `warn` in the block's case `3)`; then nothing carries it into a seat's prompt and a seat must read doctor's output itself.
+
+## The seat comes from the tree
+The block calls `tools/seat_note.sh` (`seat_note_dir "$PROJECT_DIR"`), never doctor's own `_DOC_AGENT` default (QA minor: with `WED_AGENT` unset on a TUESDAY tree, round 1's block looked at `HOLD_wednesday`).
+
+## Tested, and not
+- Tested in `tests/run.sh` with doctor's own three helpers copied from doctor.sh lines 16 to 18: T8 (three failed nights end with the `✗` line; cut at 400 characters it still names the command; running the command prints the card; once raised, no `✗`), T9 (held: warned once, not twice the same day), T16 (an empty state file gives the `✗` line, not a traceback).
+- **NOT tested:** the block inside the real `doctor.sh` (doctor was not edited or run with it), and the launcher carrying the line into a real boot prompt. That path was read, not exercised.

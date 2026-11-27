@@ -1,0 +1,105 @@
+run dir /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/seat-135756 ; 2026-11-27 13:57:56 AEDT
+
+######## S1 tree names: which seat does each resolve to? (status line 1; rc 2 = refused)
+tree 'WEDNESDAY'        -> seat: wednesday   tree: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/seat-135756
+tree 'wednesday'        -> seat: wednesday   tree: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/seat-135756
+tree 'Wednesday'        -> seat: wednesday   tree: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/seat-135756
+tree 'WEDNESDAY '       -> braindb: REFUSED — cannot tell which seat this tree is — run from a WEDNESDAY, TUESDAY or FRIDAY tree (tree: /private/tmp/claude-501/-Volumes-DevM
+tree ' WEDNESDAY'       -> braindb: REFUSED — cannot tell which seat this tree is — run from a WEDNESDAY, TUESDAY or FRIDAY tree (tree: /private/tmp/claude-501/-Volumes-DevM
+tree 'WEDNESDAY.bak'    -> braindb: REFUSED — cannot tell which seat this tree is — run from a WEDNESDAY, TUESDAY or FRIDAY tree (tree: /private/tmp/claude-501/-Volumes-DevM
+tree 'wEDNESDAY'        -> seat: wednesday   tree: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/seat-135756
+tree 'TUESDAY'          -> seat: tuesday   tree: f
+tree 'tuesday'          -> seat: tuesday   tree: f
+tree 'TuEsday'          -> braindb: REFUSED — cannot tell which seat this tree is — run from a WEDNESDAY, TUESDAY or FRIDAY tree (tree: /private/tmp/claude-501/-Volumes-DevM
+tree 'FRIDAY'           -> seat: friday   tree: fi
+tree 'WEDNESDAY-copy'   -> braindb: REFUSED — cannot tell which seat this tree is — run from a WEDNESDAY, TUESDAY or FRIDAY tree (tree: /private/tmp/claude-501/-Volumes-DevM
+tree 'WEDNESDAY~x'      -> braindb: REFUSED — cannot tell which seat this tree is — run from a WEDNESDAY, TUESDAY or FRIDAY tree (tree: /private/tmp/claude-501/-Volumes-DevM
+
+######## S2 symlinked trees: the link's name versus the real folder's name
+run through link named TUESDAY -> real WEDNESDAY : seat: wednesday   tree: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratc
+run through link named WEDNESDAY -> real TUESDAY : seat: tuesday   tree: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchp
+run through a symlink to braindb.sh itself        : seat: wednesday   tree: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratc
+
+######## S3 nested trees
+TUESDAY/WEDNESDAY/2_Project_Files : seat: wednesday   tree: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratc
+WEDNESDAY/TUESDAY/2_Project_Files : seat: tuesday   tree: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchp
+
+######## S4 WED_AGENT forms on a tree named WEDNESDAY
+WED_AGENT='tuesday'    -> braindb: REFUSED — WED_AGENT='tuesday' but this tree ('WEDNESDAY') is seat 'wednesday' — unset WED_AGENT, or run from the matching tree
+WED_AGENT='friday'     -> braindb: REFUSED — WED_AGENT='friday' but this tree ('WEDNESDAY') is seat 'wednesday' — unset WED_AGENT, or run from the matching tree
+WED_AGENT='Wednesday'  -> braindb: REFUSED — WED_AGENT='Wednesday' but this tree ('WEDNESDAY') is seat 'wednesday' — unset WED_AGENT, or run from the matching tre
+WED_AGENT='wednesday ' -> braindb: REFUSED — WED_AGENT='wednesday ' but this tree ('WEDNESDAY') is seat 'wednesday' — unset WED_AGENT, or run from the matching tr
+WED_AGENT=''           -> seat: wednesday   tree: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/s
+WED_AGENT='all'        -> braindb: REFUSED — WED_AGENT='all' but this tree ('WEDNESDAY') is seat 'wednesday' — unset WED_AGENT, or run from the matching tree
+
+######## S5 BRAINDB_SEAT / BRAINDB_SCOPE given from outside on a WEDNESDAY tree (can an env var re-seat the indexer?)
+BRAINDB_SEAT=tuesday exported by the caller: seat: wednesday   tree: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratc
+braindb: scope file real/WEDNESDAY/2_Project_Files/brain-db/scope/tuesday
+cluster created by that refused call? YES ; processes: 1
+
+######## S6 a TUESDAY-named tree, its proposed scope, plus allow lines a careless seat might write for the WEDNESDAY seat's records
+T0 proposed tuesday.scope unchanged (control)                    rc=1 | wed ledger xneighbour20=0 wed archive xneighbour21=0 wed daily xneighbour30=0 wed pickup xtasksown202=0 friday ledger xcanary22=0 friday daily xcanary38=0 | control tuesday own ledger=0
+T1 + allow ledger 0_Brain/learnings/_ledger.md                   rc=1 | wed ledger xneighbour20=0 wed archive xneighbour21=0 wed daily xneighbour30=0 wed pickup xtasksown202=0 friday ledger xcanary22=0 friday daily xcanary38=0 | control tuesday own ledger=0
+T2 + allow ledger 0_Brain/learnings/_ledger*.md                  rc=1 | wed ledger xneighbour20=0 wed archive xneighbour21=0 wed daily xneighbour30=0 wed pickup xtasksown202=0 friday ledger xcanary22=0 friday daily xcanary38=0 | control tuesday own ledger=0
+T3 + allow daily 0_Brain/daily/20*.md                            rc=1 | wed ledger xneighbour20=0 wed archive xneighbour21=0 wed daily xneighbour30=0 wed pickup xtasksown202=0 friday ledger xcanary22=0 friday daily xcanary38=0 | control tuesday own ledger=0
+T4 + allow skill 0_Brain/tasks/*.md                              rc=1 | wed ledger xneighbour20=0 wed archive xneighbour21=0 wed daily xneighbour30=0 wed pickup xtasksown202=0 friday ledger xcanary22=0 friday daily xcanary38=0 | control tuesday own ledger=0
+T5 + allow daily 0_Brain/daily_friday/20*.md                     rc=1 | wed ledger xneighbour20=0 wed archive xneighbour21=0 wed daily xneighbour30=0 wed pickup xtasksown202=0 friday ledger xcanary22=0 friday daily xcanary38=0 | control tuesday own ledger=0
+T6 + allow ledger 0_Brain/learnings/_ledger_friday.md            rc=1 | wed ledger xneighbour20=0 wed archive xneighbour21=0 wed daily xneighbour30=0 wed pickup xtasksown202=0 friday ledger xcanary22=0 friday daily xcanary38=0 | control tuesday own ledger=0
+-- the reverse: a WEDNESDAY tree whose scope lost its deny_seat_word lines and gained Tuesday's records
+rc=0 ; tuesday ledger xcanary23=8 tuesday daily xcanary37=10 (control own ledger xneighbour20=10)
+stop: stopped pid 88379 (/private/tmp/claude-501/-Volumes-De
+
+######## F2a data directory given with a trailing slash, as a relative path, through a symlink (does the identity test fail SAFE, and is anything left running?)
+trailing slash: init rc=2
+trailing slash: start rc=2 : braindb: cannot open the lock file f2/slash/.lock: [Errno 2] No such file
+   server processes with -D .../f2/slash : 0
+server: STOPPED
+trailing slash: search rc=1 : braindb: cannot open the lock file f2/slash/.lock: [Errno 2] No such file
+trailing slash: stop rc=2 : braindb: cannot open the lock file f2/slash/.lock: [Errno 2] No such file
+   server processes STILL running after the tool's own stop: 0
+stop: not running (no pid file in /private/tmp/claude-501/-Volumes-DevMASTER-WED
+   after stop with the plain spelling: 0
+symlinked data dir: start rc=1 : braindb: no cluster at f2/link (r
+symlinked data dir: rebuild rc=1 : braindb: no cluster at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratch
+-- the SAME server addressed by its real path while it was started through the link (same cluster: accepted or refused?)
+seat: wednesday   tree: fix
+data directory: f2/slash  (not cr
+server: STOPPED
+psql: error: connection to server on socket "/tmp/qa3s/.s.PGSQL.5432" failed: No such file or directory
+stop: not running (no pid file in f2/slash)
+   processes after stop by real path: 0
+stop: not running (no pid file in /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d
+   processes after stop by link path: 0 / 0
+
+######## F2b two clusters in ONE socket directory on different BRAINDB_PORT values; a command addressed to c2 but carrying c1's port
+c1 (port 5501) rebuild rc=0
+start: running (pid 95899, socket /tmp/qa3s-b/.s.PGSQL.5502, no TCP listener)
+.s.PGSQL.5501 .s.PGSQL.5501.lock .s.PGSQL.5502 .s.PGSQL.5502.lock 
+addressed to c2, port of c1: rebuild rc=4 : braindb: REFUSED: the server answering on socket directory /tmp/qa3s-b serves data directory '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b
+addressed to c2, port of c1: check rc=4 : 0 GREEN/result lines
+addressed to c2, port of c1: search xneighbour01 rc=4 : 0 GREEN/result lines
+addressed to c2, port of c1: at pane rc=4 : 0 GREEN/result lines
+addressed to c2, port of c1: status rc=0 : 0 GREEN/result lines
+stop: stopped pid 95899 (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scrat
+   c1 processes: 1 c2 processes: 0  (stop addressed to c2 must stop c2, never c1)
+stop: stopped pid 95247 (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16
+stop: not running (no pid file in /private/tmp/claude-501/-Volumes-DevMASTER-WED
+
+######## F2c TIME-OF-CHECK: the server is swapped AFTER the identity check and BEFORE the write (rebuild waits for the cluster lock in between)
+c1 built from the fixture tree: rc=0 ; files in c1: 43
+c1's server stopped behind the tool's back: rc=0 ; c1 processes 0
+start: running (pid 1250, socket /tmp/qa3s-c/.s.PGSQL.5432, no TCP listener)
+the rebuild ADDRESSED TO c1 finished: rc=0
+rebuild: seat wednesday, tree tiny
+  data directory: f2/t1
+rebuild: done; no file was unreadable and no row was truncated
+c2 (never addressed) now holds: 1 braindb database(s); files: 3 file(s), root -135756/tiny
+which data directory does the answering server serve: f2/t2
+check: RED, 44 path(s) differ (run: braindb.sh rebuild)
+  on disk, not in the index: 0_Brain/CLAUDE.md
+stop: stopped pid 1250 (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b
+stop: not running (no pid file in /private/tmp/claude-501/-Volumes-DevMASTER-WED
+
+######## END
+processes with a data directory under /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/seat-135756: 0
+2026-11-27 13:58:28 AEDT

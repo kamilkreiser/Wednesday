@@ -1,56 +1,65 @@
-# PROPOSED lines for `scheduler/install_all_jobs.sh` (nothing here is applied)
+# PROPOSED change for arming the schedule (round 2). Nothing here is applied.
 
-Applying these IS the arming step. It is the coordinator's, on Kam's word, after QA. The build seat edited no existing file.
+Arming is Wednesday's, on Kam's word, after a GO from QA. It is **ONE change, applied once for all seats, by Wednesday**. No other seat edits the shared installer (QA minor: round 1 told Tuesday and Friday to apply the edits themselves).
 
-## What must be true first
-1. QA has passed this lane, and Kam has answered the scope questions in `STATUS.md`.
-2. One real run has been made by hand and reported GOOD (`nas_backup.sh --run --out-of-sequence <card id>`), so the first scheduled night is not also the first real copy.
-3. `HOLD_<seat>` in this lane has been moved aside (`mv -n HOLD_wednesday HOLD_wednesday.lifted-<date>`).
+## Why the order no longer matters (QA finding 11)
 
-## Step 1: put the template where the installer looks
+Round 1's template carried eight placeholders that only an edited installer rendered, and the hold lived only in the installer edit. Copy the template first and the unedited installer walked past the hold and loaded a broken plist.
+
+Round 2 removes both dependencies:
+
+1. **The template uses only the three placeholders the installer already renders** (`PROJECT_DIR`, `SEAT`, `HOME`). An unedited installer writes a valid plist from it. Tested: `tests/run.sh` T20 renders it with the installer's own five `sed` expressions, `plutil -lint` passes, no placeholder is left.
+2. **The schedule is not in the template.** It fires at minute 30 of every hour. `nas_backup_nightly.sh` reads the seat's window from `seats/<seat>.conf` and does nothing outside it but log one line.
+3. **The hold is enforced by the script launchd calls**, not by the installer. Under `HOLD_<seat>` the nightly script exits 3 and writes one line to `logs/<seat>/nightly.log` (T20). A seat with no confirmed scope (Tuesday, Friday today) is refused by the engine itself (T14).
+
+So whichever file lands first, a held or unconfirmed seat copies nothing.
+
+## The one change
+
+Apply together, in one commit, from the WEDNESDAY tree:
+
+**(a) the template**
 ```
 cp -n "2_Project_Files/nas-backup/jobs/nasbackup.plist.template" "2_Project_Files/scheduler/jobs/nasbackup.plist.template"
 ```
-Rollback: `mv -n 2_Project_Files/scheduler/jobs/nasbackup.plist.template 2_Project_Files/scheduler/jobs/_quarantine_<date>/` (the installer then no longer sees it), then `launchctl bootout gui/$(id -u)/com.<seat>.nasbackup` and move `~/Library/LaunchAgents/com.<seat>.nasbackup.plist` aside.
 
-## Step 2: three additions inside the `for t in "$JOBS"/*.plist.template` loop
-
-(a) Beside the existing `nassync` hold line (after line 94), so a held backup is never (re)installed by a well-meaning re-run. This is the second independent lock the 2026-10-04 recurrence asks for:
+**(b) two lines in `scheduler/install_all_jobs.sh`**, beside the existing `nassync` hold line (line 94). They are tidiness, not safety: without them a held or unconfirmed seat gets a loaded job that refuses every hour.
 ```
-  # nasbackup (WED-170, Kam 2026-11-27): the copy-only nightly backup. Held per seat by nas-backup/HOLD_<seat>; lifting it is the coordinator's word on Kam's instruction.
+  # nasbackup (WED-170, Kam 2026-11-27): the copy-only nightly backup. Held per seat by nas-backup/HOLD_<seat>; only seats with a confirmed scope file get the job.
   if [ "$job" = "nasbackup" ] && [ -e "$PROJECT_DIR/2_Project_Files/nas-backup/HOLD_$SEAT" ]; then echo "skip $job — HELD (2_Project_Files/nas-backup/HOLD_$SEAT)"; continue; fi
-  # ... and never for a seat whose configuration is not confirmed on its own machine.
-  if [ "$job" = "nasbackup" ] && ! /usr/bin/grep -q '^status=confirmed$' "$PROJECT_DIR/2_Project_Files/nas-backup/seats/$SEAT.conf"; then echo "skip $job — seats/$SEAT.conf is not confirmed"; continue; fi
+  if [ "$job" = "nasbackup" ] && ! /usr/bin/grep -q '^status=confirmed$' "$PROJECT_DIR/2_Project_Files/nas-backup/seats/$SEAT.conf" 2>/dev/null; then echo "skip $job — no confirmed nas-backup/seats/$SEAT.conf"; continue; fi
 ```
-Rollback: remove the two lines (the installer keeps `install_all_jobs.sh.pre-<date>-nasbackup` beside itself, by this project's convention; take that copy first).
+(The one `2>/dev/null` hides only grep's "no such file" for a seat that has no conf; the `echo` beside it says the same thing in words.)
 
-(b) Beside the `NASHOUR`/`NASMIN` case (after line 111), the per-seat fire times. A schedule is a per-seat fact (the 2026-09-21 lesson in that same block):
-```
-  case "$SEAT" in
-    wednesday) NBH0=0; NBM0=30; NBH1=1; NBM1=40; NBH2=2; NBM2=50; NBH3=4; NBM3=0  ;;
-    tuesday)   NBH0=2; NBM0=30; NBH1=3; NBM1=20; NBH2=4; NBM2=10; NBH3=5; NBM3=0  ;;
-    friday)    NBH0=4; NBM0=30; NBH1=5; NBM1=40; NBH2=6; NBM2=50; NBH3=8; NBM3=10 ;;
-  esac
-```
-and eight more `-e` expressions on the existing `sed` line 112:
-```
- -e "s|@NBH0@|$NBH0|g" -e "s|@NBM0@|$NBM0|g" -e "s|@NBH1@|$NBH1|g" -e "s|@NBM1@|$NBM1|g" -e "s|@NBH2@|$NBH2|g" -e "s|@NBM2@|$NBM2|g" -e "s|@NBH3@|$NBH3|g" -e "s|@NBM3@|$NBM3|g"
-```
-The first fire time of each seat must equal `fire=` in `nas-backup/seats/<seat>.conf` (the script's window is computed from the conf, not from the plist). Rollback: remove the case block and the eight expressions.
+**(c) the doctor block** (`proposed/doctor.proposed.md`): one sourced line.
 
-(c) After a successful `launchctl load` of `nasbackup` (inside the `if launchctl load` branch), start the three-day clock, so a job that is installed and then never fires is still flagged:
-```
-    [ "$job" = "nasbackup" ] && bash "$PROJECT_DIR/2_Project_Files/nas-backup/nas_backup_watch.sh" --mark-armed
-```
-Rollback: remove the line. (The mark itself is one field, `armed_at`, in `nas-backup/state/<seat>.json`.)
+Rollback of the whole change: `launchctl bootout gui/$(id -u)/com.<seat>.nasbackup`; move `~/Library/LaunchAgents/com.<seat>.nasbackup.plist` and `scheduler/jobs/nasbackup.plist.template` aside into a `_quarantine_<date>/` folder; remove the two installer lines and the doctor line (take the `.pre-<date>-nasbackup` copies first, by this project's convention).
 
-## Step 3: Friday
-`install_all_jobs.sh` exits at line 65 for the friday seat ("no scheduled jobs are installed on the laptop", Kam 2026-09-23). Kam's 2026-11-27 instruction says each agent backs up. Those two do not agree, and this proposal does NOT resolve it: Friday gets the job only if Kam says the laptop may carry this one scheduled job. If he does, the smallest change is to let the loop run for friday with every job except `nasbackup` skipped; that line is not written here on purpose.
+## What must be true before it is applied
+1. QA has returned GO on round 2.
+2. One real run has been made by hand and printed GOOD (`nas_backup.sh --run --out-of-sequence <card id> --max-seconds <n>`): Kam approved a first full copy "after it passes its check" (13:35:50), and it is Wednesday who runs it.
+3. `HOLD_wednesday` has been moved aside (`mv -n HOLD_wednesday HOLD_wednesday.lifted-<date>`), never deleted.
 
-## Step 4: verify the install (read-only)
+## Times, and what they sit beside
+The job fires at hh:30, every hour, on each seat's own machine. Inside its window a seat runs at most one backup; every other fire is one log line.
+
+| Seat | Window (from the seat's conf) | Fires that can start a backup |
+|---|---|---|
+| Wednesday | 00:30 to 05:30 | 00:30, 01:30, 02:30, 03:30, 04:30 |
+| Tuesday (not runnable yet) | 02:30 to 05:30 | 02:30, 03:30, 04:30 |
+| Friday (not runnable yet) | 04:30 to 09:30 | 04:30 to 08:30 |
+
+- First fires are two hours apart, as Kam asked.
+- On Wednesday's Mac the 03:30 fire shares its minute with `com.wednesday.naspush`. It only starts a backup if 00:30, 01:30 and 02:30 all could not (Mac asleep, NAS away). Tuesday's 05:30 fire falls on her shift change but is outside her window (it closes at 05:30), so it is a log line.
+- Limits, not fixed in code this round (Wednesday's ruling 9): the seats run on different machines and the lock is per seat, so two seats can copy to the NAS at the same hour when one is catching up or running long; and no wake is scheduled, so a Mac asleep through its whole window does not back up that night (launchd fires once on wake; outside the window that fire is a log line). A wake schedule is a machine setting and Kam's.
+
+## Verify after applying (read-only)
 ```
-launchctl print "gui/$(id -u)/com.<seat>.nasbackup" | /usr/bin/grep -i -E 'state|last exit|Hour|Minute'
+plutil -lint ~/Library/LaunchAgents/com.wednesday.nasbackup.plist
+launchctl print "gui/$(id -u)/com.wednesday.nasbackup" | /usr/bin/grep -i -E 'state|last exit'
 bash 2_Project_Files/scheduler/install_all_jobs.sh --check
 bash 2_Project_Files/nas-backup/nas_backup_nightly.sh --decide-only
 ```
-The first morning after: read `nas-backup/logs/<seat>/nightly.log` and run `nas_backup_watch.sh`.
+The morning after: `tail -30 2_Project_Files/nas-backup/logs/wednesday/nightly.log` (24 lines a day is the job's heartbeat), then `bash 2_Project_Files/nas-backup/nas_backup_watch.sh`.
+
+Not tested: the installer with these two lines in it, and any `launchctl` verb. Nothing was loaded.

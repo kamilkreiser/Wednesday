@@ -1,0 +1,31 @@
+baseline rebuild rc=0 ; check: GREEN, 43 files on disk match the index (built 2026-11-27T13:53:09+11:00)
+  data directory: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-
+  skipped for a fault: 0 file(s) unreadable on disk now; at the last rebuild 0 u
+---- K1 an indexed lesson made unreadable (mode 000)
+rebuild rc=0 ; traceback lines: 0 ; last: rebuild: DONE WITH FAULTS: 1 unreadable file(s) skipped, 0 row(s) truncated; they are listed above
+check rc=0 ; traceback lines: 0 ; last:     unreadable: 0_Brain/learnings/2026-06-01_locked.md
+search (old index) rc=0 ; (1 result, 29 ms; first result: score 0.0133; it holds all 1
+---- K2 one lesson section with 300,000 DIFFERENT words (a tsvector over 1 MB)
+awk: syntax error at source line 1
+ context is
+	{print >>>  \ <<< $5, "bytes"}
+awk: illegal statement at source line 1
+rebuild rc=0 ; 
+check: GREEN, 44 files on disk match the index (built 2026-11-27T13:53:10+11:00)
+  data directory: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/chk/crash-135307/
+(the whole rebuild is lost, not just the one file: every later rebuild fails the same way until the file changes)
+---- K3 a 30 MB daily note (one bullet)
+rebuild rc=0 ; rebuild: DONE WITH FAULTS: 0 unreadable file(s) skipped, 1 row(s) truncated; they are listed above ; 
+---- K4 rules index removed (missing), then a rules index that is a directory
+rebuild without a rules index rc=2 ; 
+   lessons scoped ONLY to other seats now indexed (no row -> tier alone): xcanary03=0 xcanary17=0 (control xneighbour01=9)
+---- K5 BRAINDB_WEAK not a number; search word starting with a dash; empty query
+rc=0 ; traceback: 0 ; (1 result, 21 ms; first result: score 0.0133; it holds all 1 of the question's rarest words [xneighb
+search '-what do I do' rc=0 ; (0 results, 24 ms)
+search '' rc=2 ; braindb: search needs words
+search (no words) rc=2 ; braindb_index.py search: error: the following arguments are required: words
+check: GREEN, 43 files on disk match the index (built 2026-1
+  data directory: /private/tmp/claude-501/-Volumes-DevMASTER
+  skipped for a fault: 0 file(s) unreadable on disk now; at 
+stop: stopped pid 56890 (/private/tmp/claude-501/-
+processes with -D under /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/chk/crash-135307: 0

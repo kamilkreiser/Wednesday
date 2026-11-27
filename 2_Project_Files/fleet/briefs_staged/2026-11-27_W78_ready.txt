@@ -1,0 +1,43 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261127T040323Z.txt)
+     1	[INBOUND] 2026-11-27T04:03 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR QA: PR 2296, KS-2366, TIER 1 (Seat W 78th)
+=========== [INBOUND] 2026-11-27T04:03 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] READY FOR QA: PR 2296, KS-2366, TIER 1 (Seat W 78th)
+[Secuura/Blockchain-W -> Wednesday] READY FOR QA: PR 2296, KS-2366, TIER 1 (Seat W 78th)
+Seat W 78th
+
+READY FOR QA. TIER 1. KS-2366, PR 2296 (https://github.com/Secuura/Distributed_Secuura/pull/2296), base develop, branch feature/ks-2366-legacy-certification-anchor-repair. Title and body read back byte-equal by raw JSON.
+HEAD 329fae8c395fc624033def570058bb8b65e6b990: ONE commit, parent develop 4764b2cfbc28768ef9c7b684e2af2e0f2f1438e5, tree c33086a7dacb, 6 files, +964 -0. Origin was verified equal by ls-remote at 04:01:29Z (the driver's VERIFIED line) and again by the PR tool.
+Meter: 64.5 percent of 1M (ctx_usage_w78.py, at 04:02:39Z).
+
+PUSH: through the new-branch pushlock and the pre-push hook, rc 0 in 993 s (03:44:53Z to 04:01:26Z); lock released, queue left. The hook printed, exactly:
+"PREFLIGHT INCOMPLETE — 13/16 legs ran, 3 SKIPPED. Nothing failed." / "legs 3 4 8 — local stack not up; you can clear this by starting it." / "This is NOT a pass. Do not quote it as one — say which legs ran."
+Legs 3, 4 and 8 did NOT run. Inside the hook's leg 14: shell suites 134 of 134, the new suite 65 of 65.
+Push run, same run: census 13 PRs and 96 rows, 0 hits on my 6 paths, the PR 2099 control fired. Develop unmoved (4764b2cf). Merge-tree both orders gives the head's own tree, with 6 of 6 planted develop-side adds rc 1.
+
+WHAT IT IS (route 1 as ruled at 02:42:52Z, inside the 3 paths):
+- the script, scripts/ks2366-legacy-certification-anchor-repair.sql;
+- the suite (.test.sh), its synthetic fixtures (.sql) and its tsx cells (.ts) in scripts/__tests__;
+- the fragment pair.
+No service code, no migration. Your four additions are in the script: A1 the count guard, A2 no widening, A3 the manifest is box data, A4 the BEGIN line names the box.
+
+TEST EVIDENCE (in the PR body, in full):
+- The new suite on the head: 65 of 65. It covers verdicts, apply, re-run, reverse byte-equal, drift, the concurrent writer, the count guard, no event, charge or audit row, R6 equal to originate's real confirmedBlobOf, and R7 the real honest rule false before and true after.
+- Red-first on develop plus the test files: RED BY ABSENCE ("repair script not found"), not a behavioural red. Develop's own rule reads all 51 eligible-shaped fixtures as not anchored.
+- Mutants: 40, all KILLED by named cells. Each was proven to run its dry, apply and reverse paths first, and the real file's sha256 was unchanged after each. Declared equivalent and not mutated: the apply's target tenant and external_id terms, and the dry run's READ ONLY.
+- run-shell-suites WHOLE: C 134 of 134; A 133 of 134 (only the new suite).
+- originate jest 251 files, 3770 of 3770 on both arms.
+- originate tsc rc 0 on both (plant rc 2).
+- shared vitest 1746 of 1747 on both (KS-278).
+- code guards 13 OK on both.
+- docs-fragments OK on both (head 323, develop 322; plant rc 1).
+- Portability: the guard skips __tests__, so the suite was checked as a copy outside it, 7 rules hold, plant rc 1. That is my STATUS 3 correction.
+
+NOT RUN: any box, any chain lookup, the anchoring service, the gateway, the four platform suites (no local stack), any deploy. Platform S's own repository was not searched (said in the PR with the two guards that bound it in K).
+
+DOES NOT COVER (named in the PR): demo (its own card, Stuart's nod); production; records whose payload an event replaced (refused); KS-1805's failed shape; lineage documents; demo's 29 document-class rows; an audit row (a demo question for Kam).
+
+FOR THE GATE: DESIGN.md 2.1 and 2.2 (the caller census and the stored-payload argument) and the E2 window are yours to re-derive and attack, as you said. The D seat's exact dry, apply and reverse commands are in the PR body; nobody has run them on any box.
+TICKET_DRAFT: REC 5_Project_History/2026-11-27_seatW-78th/TICKET_DRAFT.md, for a licensed board seat.
+
+No merge, no deploy, no run on any box, no Linear write, no comment. Watcher: one armed now on this inbox, for mail naming Seat W 78th, with its own end time (60 min). Wrap follows.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 36  SEEN:       40  BATCH: /private/tmp/wed_newmail/batch_20261127T040323Z.txt

@@ -84,7 +84,9 @@ server_procs() { local snap; snap="$(ps -axww -o pid=,command=)"; printf '%s\n' 
 alive() { [ -n "$(ps -p "$1" -o pid= | tr -d ' ')" ]; }
 line_of() { sed -n "${1}p" "$2"; }                              # line N of a file
 # a foreign process that DIES on the signals a stop would send (SIGINT, SIGTERM), so "still alive" can fail
-sleeper() { "$PY" -c 'import time; time.sleep(600)' & SLEEPER=$!; sleep 1; }
+# (a background child of a non-interactive bash starts with SIGINT IGNORED, and Python then leaves it ignored,
+#  so the sleeper sets SIGINT back to its default itself: pg_ctl's fast stop sends SIGINT)
+sleeper() { "$PY" -c 'import signal, time; signal.signal(signal.SIGINT, signal.SIG_DFL); time.sleep(600)' & SLEEPER=$!; sleep 1; }
 
 echo "brain-db tests: run directory $RUN"
 echo "started $(date '+%Y-%m-%d %H:%M:%S %Z')"
@@ -101,13 +103,13 @@ t_has "  and says why" "may never be loaded into the drive cluster" "$RUN/guard-
 run status0 status; rc_is "status on a cluster that does not exist reports STOPPED" 3 status0
 run start0 start;   rc_not0 "start with no cluster is refused"
 WED_AGENT=tuesday BRAINDB_ROOT="$TREE" BRAINDB_PGDATA="$PGD" BRAINDB_SOCKDIR="$SOCK" /bin/bash "$TOOL" status > "$RUN/seat-mismatch.out" 2>&1; RC=$?
-rc_not0 "WED_AGENT=tuesday on a tree named WEDNESDAY is refused (the tree decides the seat; the variable may only agree)"
+cp "$RUN/seat-mismatch.out" "$RUN/seatmm.out"; rc_is "WED_AGENT=tuesday on a tree named WEDNESDAY is refused with rc 2 (the tree decides the seat; the variable may only agree)" 2 seatmm
 t_has "  and says REFUSED" "REFUSED" "$RUN/seat-mismatch.out"
 WED_AGENT=wednesday BRAINDB_ROOT="$TREE" BRAINDB_PGDATA="$PGD" BRAINDB_SOCKDIR="$SOCK" /bin/bash "$TOOL" status > "$RUN/seat-match.out" 2>&1; RC=$?
 rc_is "(can fail) WED_AGENT=wednesday on the same tree is accepted" 3 seat-match
 mksim elsewhere with-scope
 env -u WED_AGENT BRAINDB_ROOT="$TREE" BRAINDB_PGDATA="$PGD" BRAINDB_SOCKDIR="$SOCK" /bin/bash "$RUN/sim/elsewhere/2_Project_Files/brain-db/braindb.sh" status > "$RUN/seat-unknown.out" 2>&1; RC=$?
-rc_not0 "a tree whose folder is not WEDNESDAY, TUESDAY or FRIDAY is refused, never defaulted to a seat"
+cp "$RUN/seat-unknown.out" "$RUN/seatun.out"; rc_is "a tree whose folder is not WEDNESDAY, TUESDAY or FRIDAY is refused with rc 2, never defaulted to a seat" 2 seatun
 t_has "  and says REFUSED" "REFUSED" "$RUN/seat-unknown.out"
 [ ! -e "$PGD" ] && ok "none of the refused commands created a cluster" || bad "a refused command created $PGD"
 
@@ -568,8 +570,8 @@ alive "$SLEEPER" && ok "  and the foreign process is still alive after start, se
 printf '%s\n%s\n' "$SLEEPER" "/some/other/datadir" > "$PGD/postmaster.pid"
 run stop4 stop; rc_not0 "a pid file naming another data directory is refused"
 alive "$SLEEPER" && ok "  and the foreign process is still alive" || bad "the foreign process was killed"
-kill "$SLEEPER"; wait "$SLEEPER" 2>> "$RUN/sleeper.err"
-alive "$SLEEPER" && bad "the sleeper survived SIGTERM, so 'still alive' above proved nothing" || ok "(can fail) the same sleeper DIES on a signal, so 'still alive' above could have failed"
+kill -INT "$SLEEPER"; wait "$SLEEPER" 2>> "$RUN/sleeper.err"
+alive "$SLEEPER" && bad "the sleeper survived SIGINT, so 'still alive' above proved nothing" || ok "(can fail) the same sleeper DIES on SIGINT, the signal a fast stop sends, so 'still alive' above could have failed"
 printf '%s\n%s\n' "$SLEEPER" "$PGD" > "$PGD/postmaster.pid"
 run stop5 stop; rc_is "a stale pid file (dead pid) is a clean no-op" 0 stop5
 run start7 start; rc_is "  and start clears it by itself (dead pid: nothing to protect)" 0 start7

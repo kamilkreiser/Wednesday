@@ -1,5 +1,165 @@
 READY FOR QA
 
+# ROUND 2 (2026-11-27): answer to the NO GO verdict, under the rulings in ANSWER-2.md
+
+Build seat "nas-backup" (WED-170), Fable 5.2. Round 1's text is kept below, unchanged, under "ROUND 1". Round 1's files are kept in `round1/`.
+
+**Context, as ANSWER-2 asked:** I cannot measure my context use. I judged it under the 70% mark when I started, did the whole round in this session, and did not stop early. A checker should weigh that: this was a long session, and the engine was rewritten whole, not patched.
+
+**Holds, kept:** nothing written to the NAS in this round (ANSWER-1's licensed move is the one exception, done and reported in `RESULT-secrets-move.md`); nothing armed; no `launchctl` verb; the three HOLD files stay; no shared file edited; no commit, no push.
+
+**Also from ANSWER-1, for whoever reads only this file:** the sweep of the Backup share found 37 more secrets folders on the old mirror, eight of them further copies of the two that were moved. I touched none. See `RESULT-secrets-move.md`.
+
+## The numbers
+
+| | Round 1 | Round 2 |
+|---|---|---|
+| Suite (`tests/run.sh`, fake NAS only) | 167 passed, 0 failed | **319 passed, 0 failed** |
+| Mutants (`tests/mutants.sh`) | 20 of the seat's own caught; 14 of the checker's 18 survived | **63 of 63 caught**: the seat's 20, the checker's 18, and 25 new on round 2's code |
+| Real dry run | 1,012,113 files, 67.83 GiB | **1,012,092 files, 68.05 GiB** |
+| Secret-shaped names in the real dry list (independent scan) | 240 | **0** (the same scan run on round 1's list finds the 240) |
+
+Evidence: `evidence/round2/`.
+
+## Per finding: what changed, and the test that owns it
+
+### 1. Blocker: false GOOD. Fixed.
+- **GOOD now means every in-scope file is proven at the destination with the source's content.** Every file a run sends is compared by sha256 afterwards, source against destination, with the source unchanged across the read (`prove_arrival` in `nb_core.py`). A file enters the index only when proven. A file not sent rests on an earlier proof (same size and its exact stat in the index), and 40 a night per set are re-hashed.
+- The engine's exit code decides nothing. Exit 23 or 24 is survived only because every listed path is then proven one by one.
+- An undelivered file fails the run, is named in the last lines (`NOT DELIVERED: <set>/<path>`), counted and named in `state/<seat>.json`, and the watch's line names the first one.
+- Tests, T12: the checker's trigger H1 (destination copy immutable, same-size change): not exit 0, no GOOD, file named, state counts it, the next night with nothing changed is still not good and sends it again; lifted lock: GOOD. Trigger H2 (stub engine skips one file, exits 23): not exit 0, file named, the file that did arrive is current. Exit 23 with everything arrived: GOOD. A destination copy changed behind our back: caught by the sample.
+- **The checker's mutant Q02 (arrival check vacuous) is red: 14 FAIL lines.** Q09 (sample ignored): red.
+- **One place I did not follow ruling 1 to the letter, and why.** It says exit 23 fails "unless every listed path is proven arrived". A listed file that no longer exists at the source when it is checked cannot arrive. I count it as gone from scope, not as a failure; otherwise a temp file deleted mid-run fails the night. It is counted in every run ("gone from the source during the run").
+- **New behaviour to know.** A file that changes while the run is copying is sent again, up to two more passes, each into its own `versions/<stamp>_passN/`, so a re-send never overwrites the copy kept from the night before (T12; mutant N20 red). A file that changes after every pass is never proven, so the run FAILS and names it. On a live tree one constantly-written file could fail every night until it is excluded. Not exercised on the real tree.
+
+### 2. Blocker: secrets. Fixed, by shape, any case.
+- `secret_shape()` in `nb_core.py`, on the lower-cased name of every path component: contains `4_credentials` or `3_access_keys`; starts `.env`, contains `.env.`, ends `.env`; the key and certificate extensions, also before a further suffix; `.tfstate`; ssh key names; credential stores; deploy-key and credential file names. The full list is in README.
+- **Over-exclusion is the accepted cost, and README says so:** `.envrc`, `.env.example`, a Keynote `.key`, `id_rsa.pub`, every `.npmrc`.
+- A regular file with more than one hard link is skipped, counted, and named in the manifest.
+- The run summary counts exclusions per shape and never prints a name.
+- Tests, T13: 35 marked files (the checker's 12 case variants and 24 unlisted shapes, with a few more, and a hard link into `4_Credentials` under an ordinary name): 0 on the fake NAS; the neighbour arrives; a marked file planted by hand is found by the same count. Mutants Q10, M02, N07, N08, N09 red.
+- **Real dry list:** `tests/scan_dry_lists.py`, written separately from the tool's rule, reads the 1,109,007 paths of the round 2 dry run: 0 secret-shaped, 0 containing `datasec`. Positive controls: 52,189 `.md` paths, 5,422 ordinary names containing `env`, 7,060 ordinary names containing `key`. The same scan on round 1's list exits 1 with 240.
+- **Excluded by secret shape in the real scope (entries, counts only):** env-file 2,128; credential-file 130; key-or-certificate 54; credentials-folder-name 14. Total 2,326. Hard-linked files skipped: 9 (git objects in a bare repository inside Secuura's test material).
+
+### 3. Blocker: other clients. Fixed as ruled, with one stricter choice.
+- **Sources:** each `set=` path is resolved with `realpath` first. Any component of the given or the real path that CONTAINS `datasec`, `tuesday` or `friday`, any case, is refused. A source that is a symlink, or reached through a symlinked parent, is refused. T14: `Datasec-archive`, `alias -> Datasec`, a symlinked source, a symlinked clean parent: all exit 2, nothing started; the real path is named. Mutants Q05, Q16, N23 red.
+- **Inside the sets:** a name containing `datasec`, any case, is excluded in every set (T14: `DataSec`, `DATAsec-notes`, `dataSEC`). A name containing `tuesday` or `friday` is excluded inside the seat's own tree only. Mutant Q01 red.
+- **Project-name tokens are reported, not excluded**, per the corrected bullet. One data file, `seats/wednesday.tokens`, with a comment that the seat maintains it. `mps` is bounded as a whole word: a match must have a character that is not a letter or digit (or the start or end of the path) on each side, so `MPS Calculator` counts and `lamps` does not (T14).
+- **Where ANSWER-2 and the verdict differed I took the stricter.** The corrected bullet says the seat's own tree is backed up whole. The verdict's Q01 wants the other-client name exclusion kept and tested. I kept excluding names that contain `datasec` (1,125 entries in the real scope) and other seats' names inside the seat tree (356), and made the project names report-only.
+- **In-scope paths carrying a Datasec project name (reported for Kam, not excluded):** nexusai 4,558; hpsm 2,670; mps 9; quickquote 6; mypki 2; oxpd 2; cypherkey 1; the others 0.
+- **Secuura material now lands under Secuura.** `Testing Agent MAIN/projects/secuura` is its own set to `Secuura/Wednesday/` (145,313 files, 9.14 GiB) and is excluded from the General set by path. Secuura folder total: 732,443 files; General: 279,649. Not moved: Secuura briefs and gate clones inside the seat's own tree stay with the tree in General. It can be done inside the lane with more `set=` lines; I did not, because the ruling says the tree is backed up whole.
+- **Friday and Tuesday are removed from `SEATS`.** Only Wednesday can run. A TUESDAY or FRIDAY tree exits 2 for every command, a dry run included (T14). Their placeholder confs were moved to `round1/` (git shows them as deleted from `seats/`; they were moved, not deleted). INSTRUCTIONS says so as step 1, says STOP where a prerequisite is open, and no longer has any seat edit the shared installer.
+
+### 4. Blocker: configuration fails open. Fixed.
+- The conf's last content line must be `END lines=<N>`. No marker, or a wrong count, is refused with both numbers.
+- An `exclude_path` that does not exist at the source is refused by name. A pattern that matches every name is refused.
+- A set with zero files in scope, or one that fell by more than half against the last good run, FAILS the run with the two numbers. `--accept-shrink <card id>` accepts a real shrink once. The fraction is `max_drop_fraction` in the conf (default 0.5).
+- Tests, T15: the checker's five cases (truncated; exclude lines lost; one-letter typo; `exclude_name=*`; emptied set) and a 17-to-3 fall; `exclude_path`, `exclude_name` and `exclude_name_in` each proven to keep a marked folder out. Mutants Q03, Q04, N01 to N06 red.
+
+### 5 and 9. Major: the flag. Fixed.
+- `first_attempt_at` is stored once and never rolled. When nothing at all is on record and the seat is not held, the watch starts the clock itself. No other script sets a mark. T9: forty refused fires over ten days, never armed: overdue, clock at day 1. Mutants N10, N22 red.
+- A damaged state file: one plain line naming it, the watch exits 3, the file is moved into `state/_quarantine_<date>/`, and the next run starts clean and says so in its output and in `nightly.log`. T16 (truncated, garbage, empty). Mutant N11 red. **Cost, stated:** the record of the last good backup goes with the damaged file, so the three-day clock restarts at the damage.
+
+### 6. Major: the card must reach a seat. Redesigned and proven.
+- The nightly job calls the watch read-only and never prints the card.
+- **The channel is doctor.** I read the real launcher: under `set -u` it carries one thing into a seat's boot prompt, doctor's `✗` lines (lines 400 to 417 and 904 to 914), each cut at 400 characters. `proposed/doctor_nasbackup_block.sh` prints a `✗` line that starts with the command to run, `nas_backup_watch.sh --card`, while a card is due and not recorded as raised.
+- `--card` consumes nothing. It prints the command at every call until a seat records `--mark-raised`. The card id is fixed per gap and `decision_queue.sh` refuses a duplicate id (its line 155).
+- **The launcher proposal is withdrawn: no launcher change is needed.** It names no variable at all now.
+- Test, T8, from "three failed nights" to the place a seat reads: the nightly output has no card; the doctor block prints the `✗` line; cut at 400 characters it still names the command; running the command prints the card with all three attempts in the BLUF; a second call prints it again; after `--mark-raised` no `✗` and no card; a new gap gets a new id. Mutants N12, M18, M19, Q18 red.
+- **Cost, stated:** a `✗` line stops a human launch at the preflight prompt until someone answers. It ends when the card is recorded as raised. One word in the block (`fail` to `warn`) removes the gate and, with it, the only path into a seat's prompt.
+
+### 7. Major: type change. Fixed.
+The old destination entry is moved into `versions/<stamp>/`, then the new one is copied. T17: folder to file and file to folder in one night: GOOD, both old contents under `versions/`, the next night GOOD. Mutant Q11 red.
+
+### 8. Major: the lock after SIGKILL. Fixed for the lock; the orphan itself cannot be stopped.
+- The engine runs in its own process group, recorded in the lock. `--clear-stale-lock` and a new run both refuse while any engine process of this seat is alive. T18: the tool is killed outright while its engine is running; clear refuses, a second run refuses; once the engine has ended, clear works and the next run is GOOD. Mutants N13, N14 red.
+- **What is not fixed and cannot be from here:** after SIGKILL of the tool the engine still finishes its list. Nothing proves or records that run; the next run lists the destination and decides from what is there.
+
+### 10. Major: tests. Every one of the 14 survivors now has a named test.
+All 18 of the checker's mutants re-pointed at round 2's code: 18 caught (`evidence/round2/mutants_round2.txt`, the `Q` lines, each with the test that caught it). 25 new mutants on round 2's code (the `N` lines): 25 caught.
+
+### 11. Major: install order. Fixed by removing the dependency.
+The template now uses only the three placeholders the installer already renders, the schedule is read from the seat's conf, and the hold is enforced by the script launchd calls. T20: rendered with the unedited installer's own five `sed` expressions it lints OK with no placeholder left; the nightly script under the hold exits 3 and logs it. The proposal is ONE change, applied by Wednesday. Mutants M12, N19 red.
+
+### 12. Minors. All fixed, as ruled.
+- Loser of a simultaneous start: a lock with no owner record yet is "another run holds the lock", not STALE (T18; N15).
+- Reused pid: the lock records when the holder started; a different start time is not the holder (T18; N16).
+- PORTABILITY proposal says NN.
+- Doctor block: HELD at most once a day; the seat comes from the tree through `tools/seat_note.sh` (T9).
+- Daylight saving: the window is local wall time; tested on both change days for Australia/Sydney (T19; N17).
+- `._*` matches files only (T13; N18).
+- INSTRUCTIONS: no seat edits a shared file; `--max-seconds` is in the first-copy step; Friday's open questions say STOP.
+- Schedule overlap across seats and the missing wake: stated in README as limits, not changed, as ruled.
+
+### 13. Notes.
+- **The real dry run now lists the real destination, read-only.** What it listed: `/Volumes/DEV-Working/General/Wednesday` (1 entry at its top level) and `/Volumes/DEV-Working/Secuura` (1 entry). The destination below them does not exist yet, so everything is new. The engine is never handed a NAS path in a dry run; it checks the list against an empty local folder. On a fake with an existing destination: the dry run lists it, measures "to copy" against it, and the NAS is unchanged by name, size, time and inode (T20, with a control that the snapshot changes when a file is added).
+- A case-only rename still keeps the old spelling at the destination. Unchanged; stated in README.
+
+## The re-measured real dry run (14:31:03 to 14:38:11, reads only, exit 0)
+
+| | Files | Bytes |
+|---|---|---|
+| WEDNESDAY tree, to `General/Wednesday` | 265,214 | 26.89 GiB |
+| Testing Agent MAIN without Secuura's material, to General | 6,326 | 247 MiB |
+| Eleven smaller general projects, to General | 8,109 | 0.82 GiB |
+| Secuura client folder, to `Secuura/Wednesday` | 587,130 | 30.95 GiB |
+| Secuura's test material from Testing Agent MAIN, to Secuura | 145,313 | 9.14 GiB |
+| **Would copy** | **1,012,092** | **68.05 GiB** |
+
+- Excluded entries: 7,343. By secret shape 2,326 (above); another client's name 1,125; other seats' names 356; `.git` 231; quarantine 177; rebuildable 1,864; system 237; by the conf 1,016; hard links 9; the live database folder 2.
+- 982 symlinks recorded; 14 files left out for case-only name clashes; no PROBLEM line; 0 deleting lines.
+- NAS unchanged: listings, folder mtimes and `df` identical before and after (`evidence/round2/nas_diff.txt` is empty, rc 0).
+- Estimate, unchanged in kind: about 32 hours for the first copy at the 8.9 files a second the old job managed, **plus reading every sent file back for the proof**, which round 1 did not do. Not measured.
+
+## What I could not fix, or chose not to
+
+1. **The checker's scripts were not run from where they lie.** Their fixtures write a conf without the END marker, which round 2 refuses by design, and their `lib.sh` writes into the checker's own scratch folder, which is not mine. I lifted the attacks into `tests/run.sh` (T12 to T20) and re-pointed all 18 mutants.
+2. **The state file has no lock between the watch and a running backup.** Read in the code, not reproduced, not fixed. The watch writes only on `--mark-raised`, `--mark-armed` and once when nothing is on record.
+3. **The orphan engine after SIGKILL** (finding 8, above).
+4. **Content.** Every secret and client rule is by NAME. A secret or another client's material inside an ordinary-named file travels.
+5. **Tuesday and Friday** have nothing runnable. Their scopes are theirs to state and Wednesday's to add.
+
+## My own slips, this task
+
+- Round 1 called a file arrived by size alone and indexed it. That is finding 1, and it is mine.
+- Round 1's secret list was exact names, case-sensitive, on a case-sensitive drive.
+- Round 1's launcher proposal named `$PREFLIGHT_LOG`, a placeholder I never checked against the launcher. The PORTABILITY proposal said 31 from a partial read that ended at section 30.
+- Round 1's suite asserted the flawed flag behaviour (card printed into the nightly log) as correct.
+- Round 2, caught before this file: my first T18 killed the launching shell, not the tool, so it tested nothing (it failed, which is how I saw it); three expectations in T13 and T15 were miscounted by me; the first round 2 mutant pass reported 61 of 63 because two mutants were caught by a different test than the one I had named; and those runs showed the card's failure reason was cut at 220 characters, which hid it under a long path (now 400).
+- ANSWER-1: the first step's exit code did not print (a shell variable empty in zsh). Stated in that result file.
+
+## What is NOT tested in round 2
+
+- **Any write to the real NAS.** Renames into `versions/`, the temp folder, long paths, names SMB dislikes, whether the share keeps times. The first real run is the first test of all of it, and of the sha256 read-back at scale.
+- **launchd.** No job loaded, no `launchctl` verb. The 24-fires-a-day template was linted, not run. Expect a macOS privacy prompt for `python3` as well as `rsync`.
+- **The doctor block inside the real `doctor.sh`**, and the launcher carrying its line into a real boot prompt. The block was run with doctor's three helpers copied; the launcher path was read.
+- **The installer with the two proposed lines.**
+- **Scale.** A million-file real run: the proof pass, the index, memory, the whole-run watchdog, the cap.
+- **A real, naturally occurring exit 23**, a reboot or sleep mid-run, and finding 8 beyond one scripted kill.
+- **A constantly-written file on the real tree** (it would fail the night; see finding 1).
+- **Real case collisions on disk** (T11 supplies the listing; the scratch volume folds case).
+- **`late_fire=run`** beyond its decision. **Python 3.9** beyond T10 (one real run under `/usr/bin/python3`).
+- **The 32-hour estimate.**
+
+## QUESTIONS (not blocking this round)
+
+1. **The `✗` gate** (finding 6): keep the hard failure that stops a human launch until the card is raised, or drop to a warning that no prompt carries?
+2. **Secuura material inside the seat's own tree** (briefs, gate clones): leave it with the tree under General, as built, or split it out to the Secuura folder?
+3. **The token counts above** (4,558 paths with `nexusai`, 2,670 with `hpsm` in folders this seat owns): Wednesday said Kam may narrow her reading. One `exclude_path` line per folder would do it.
+4. Round 1's questions 2, 3, 6 and 7 (`reference/`, the narrowing, the 32-hour first copy, `.git`) stand as asked below.
+
+## For the checker: where to look first
+
+- `nb_core.py`: `secret_shape`, `SEATS`, `Ctx.load_conf`, `plan_set`, `prove_arrival`, the pass loop in `cmd_backup`, `cmd_watch`.
+- Re-run: `bash tests/run.sh /private/tmp/<dir>` (about a minute and a half), `bash tests/mutants.sh /private/tmp/<dir>` (about 15 minutes, five at a time), `bash nas_backup.sh --dry` (seven minutes, reads only), `python3 tests/scan_dry_lists.py logs/wednesday <stamp of that dry run>`.
+- Not armed: `evidence/round2/real_lane_checks.txt` (0 `nasbackup` rows in `launchctl list` and 0 templates in `scheduler/jobs`, each beside a control of 1 for `naspush`; three HOLD files; `--run` exits 3).
+
+---
+
+# ROUND 1 (kept as written; superseded above where round 2 says so)
+
+READY FOR QA
+
 Build seat "nas-backup" (WED-170), Fable 5.2. Nothing is armed, nothing was installed, nothing was written to the NAS, no existing file was edited. Full detail: `CENSUS.md` (facts with their instrument), `README.md` (design and the reason for each choice), `evidence/` (test, mutant, scan and dry-run output).
 
 ## Two things the coordinator should read before anything else
@@ -151,3 +311,6 @@ The round is not blocked. These are for the coordinator and Kam before arming; w
 
 ---
 Last updated by the build seat: 2026-11-27 13:20:34 AEDT. Stopped at READY FOR QA.
+
+---
+ROUND 2 written by the build seat: 2026-11-27 15:03:18 AEDT. Stopped at READY FOR QA.

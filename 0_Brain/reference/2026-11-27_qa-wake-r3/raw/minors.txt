@@ -1,0 +1,41 @@
+## m4. test seams on a tree that is not under a temp directory
+- control, no seam variable, --where on the non-temp tree: rc 0 (seat line: seat:    wednesday)
+- HANDOVER_TEST_STAMP alone, write --stdin                                                 rc 2; tasks dir now [] | handover: REFUSED — HANDOVER_TREE, HANDOVER_TEST_STAMP and HANDOVER_TEST_BREAK are test seams, honoured only for a tree 
+- HANDOVER_TEST_BREAK alone, write --stdin --dry                                           rc 2; tasks dir now [] | handover: REFUSED — HANDOVER_TREE, HANDOVER_TEST_STAMP and HANDOVER_TEST_BREAK are test seams, honoured only for a tree 
+- HANDOVER_TREE naming the non-temp tree itself                                            rc 2; tasks dir now [] | handover: REFUSED — HANDOVER_TREE, HANDOVER_TEST_STAMP and HANDOVER_TEST_BREAK are test seams, honoured only for a tree 
+- HANDOVER_TREE = a SYMLINK under the temp directory that points at the non-temp tree      rc 2; tasks dir now [] | handover: REFUSED — HANDOVER_TREE, HANDOVER_TEST_STAMP and HANDOVER_TEST_BREAK are test seams, honoured only for a tree 
+- the scratch (temp) copy of the tool pointed at the non-temp tree by HANDOVER_TREE        rc 2; tasks dir now [] | handover: REFUSED — HANDOVER_TREE, HANDOVER_TEST_STAMP and HANDOVER_TEST_BREAK are test seams, honoured only for a tree 
+- TMPDIR set to the non-temp tree's parent, HANDOVER_TEST_STAMP set                        rc 2; tasks dir now [] | handover: REFUSED — HANDOVER_TREE, HANDOVER_TEST_STAMP and HANDOVER_TEST_BREAK are test seams, honoured only for a tree 
+- the ENGINE called directly with HANDOVER_TEST_BREAK                                      rc 2; tasks dir now [] | handover: REFUSED — HANDOVER_TEST_BREAK is a test seam and is honoured only for a tree under a system temp or scratch di
+- the ENGINE called directly with --seat tuesday for this tree                             rc 2; tasks dir now [] | handover: REFUSED — the engine was given seat 'tuesday' for the tree /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026
+- the ENGINE called directly with a TYPED --stamp (no seam variable; the engine cannot know) rc 0; tasks dir now [] | handover: DRY — nothing written
+- must-succeed beside them: HANDOVER_TEST_STAMP on a tree under the temp directory: rc 0; stamp honoured: True
+## m5. headings inside a block (--dry, a scratch tree). REFUSED is what m5 asks for; ACCEPTED is listed for judgement
+- control: the five parts                                            ACCEPTED ok
+- '### sub'                                                          REFUSED  ok
+- '# top'                                                            REFUSED  ok
+- indented '  ## x'                                                  REFUSED  ok
+- tab-indented '\t## x'                                              REFUSED  ok
+- zero-width space before ##                                         REFUSED  ok
+- '## FLOOR (4 seats)'                                               REFUSED  ok
+- '## floor' lower case                                              REFUSED  ok
+- '##  FLOOR' two spaces                                             REFUSED  ok
+- '## FLOOR ##' closing hashes                                       REFUSED  ok
+- non-breaking space after ##                                        REFUSED  ok
+- SETEXT heading (a line underlined with ---: Markdown reads an h2)  ACCEPTED <<< accepted although a Markdown reader sees a heading
+- SETEXT heading underlined with ===                                 ACCEPTED <<< accepted although a Markdown reader sees a heading
+- heading inside a blockquote '> ## x'                               ACCEPTED <<< accepted although a Markdown reader sees a heading
+- heading inside a list item '- ## x'                                ACCEPTED <<< accepted although a Markdown reader sees a heading
+- HTML heading <h2>                                                  ACCEPTED <<< accepted although a Markdown reader sees a heading
+- '##' inside a code fence                                           REFUSED  ok
+- a bold line as a sub-title (must be accepted)                      ACCEPTED ok
+- '#123' and 'C# code' (must be accepted)                            ACCEPTED ok
+heading forms still accepted: 5 ['SETEXT heading (a line underlined with ---: Markdown reads an h2)', 'SETEXT heading underlined with ===', "heading inside a blockquote '> ## x'", "heading inside a list item '- ## x'", 'HTML heading <h2>']
+## m3. unreadable files: a refusal naming the path, or a traceback?
+- state file mode 000, write           rc 4; traceback no; names the path True | handover: REFUSED — cannot read /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-wake-r3/minors
+- archive mode 000, write              rc 4; traceback no; names the path True | handover: REFUSED — cannot read /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-wake-r3/minors
+- state file mode 000, show            rc 4; traceback no; names the path True | handover: REFUSED — cannot read /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-wake-r3/minors
+- state file mode 000, check           rc 4; traceback no; names the path True | handover: REFUSED — cannot read /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-wake-r3/minors
+- state file is a DIRECTORY, write     rc 4; traceback no; names the path True | handover: REFUSED — cannot read /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-wake-r3/minors
+- tasks dir read-only, write           rc 4; traceback no; names the path True | handover: REFUSED — cannot take the write lock at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad
+  after all of it: state is still 'two' True; lock directory left behind: False; temp files: []

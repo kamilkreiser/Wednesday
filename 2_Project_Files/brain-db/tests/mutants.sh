@@ -49,7 +49,7 @@ M = {
  "F2_any_server_will_do": ("braindb_index.py", "    if not got or os.path.realpath(got) != os.path.realpath(want):\n", "    if False:\n",
      "addressed to c2|untouched|GREEN line|ANOTHER cluster", "the server is no longer asked for its data directory"),
  "F4_scope_checked_late": ("braindb.sh", "           need_scope; find_pgbin; ensure_up || exit 1; indexer \"$@\" ;;\n", "           find_pgbin; ensure_up || exit 1; indexer \"$@\" ;;\n",
-     "NOTHING was created|nothing created|no server was started", "the scope file is tested after the cluster is created and started"),
+     "created a cluster directory|cluster dir created|left a server running", "the scope file is tested after the cluster is created and started"),
  "F5_no_lock": ("braindb.sh", "locked() { \"$PY\" \"$LANE/braindb_lock.py\" \"$LOCKFILE\" 150 /bin/bash \"$SELF\" \"$@\"; }\n", "locked() { /bin/bash \"$SELF\" \"$@\"; }\n",
      "double init|two starts|two self-starting|NO cluster at all", "init and start are no longer serialised by the lock"),
  "F6_stale_pid_unexplained": ("braindb.sh", "  foreign_pidfile_guard\n  check_sockdir\n", "  check_sockdir\n",
@@ -61,13 +61,13 @@ M = {
  "F8_separators_kept": ("braindb_index.py", "STRIP_BYTES = {0x00: None, 0x1e: None, 0x1f: None}", "STRIP_BYTES = {0x00: None}",
      "separator bytes", "the two separator bytes are no longer stripped on read"),
  "F9_stop_trusts_pidfile": ("braindb.sh", "  case \"$cmd \" in *\" -D $PGDATA \"*) return 0 ;; esac\n  return 1\n", "  return 0\n",
-     "foreign process is still alive|foreign process was killed", "the checker's M2: stop signals whatever the pid file names"),
+     "foreign process was killed", "the checker's M2: stop signals whatever the pid file names"),
  "rules_row_always_first": ("braindb_index.py", "    first = [r for r in know if r[1] == \"rules\" and holds_all(r)]\n    rest = [r for r in know if not (r[1] == \"rules\" and holds_all(r))]\n", "    first = [r for r in know if r[1] == \"rules\"]\n    rest = [r for r in know if r[1] != \"rules\"]\n",
-     "holds only ONE of the question", "a rules-file row is put first whatever it matched"),
+     "result 1 is not the lesson", "a rules-file row is put first whatever it matched"),
  "lessons_first_off": ("braindb_index.py", "    if mode != \"default\":\n", "    if True:\n",
      "the lesson is result 1 although ledger rows score higher|incident rows follow", "the default order is the old mixed one"),
  "seat_follows_WED_AGENT": ("braindb.sh", "  seat_note_dir \"$CODE_ROOT\" braindb || exit 2\n  SEAT=\"$SEAT_NOTE_SEAT\"\n", "  . \"$RESOLVER\"; seat_resolve \"$CODE_ROOT\"\n",
-     "WED_AGENT=tuesday on a tree named WEDNESDAY|not WEDNESDAY, TUESDAY or FRIDAY", "the seat follows WED_AGENT and an unknown tree defaults to wednesday, as before"),
+     "WED_AGENT=tuesday on a tree named WEDNESDAY is refused with rc 2|not WEDNESDAY, TUESDAY or FRIDAY is refused with rc 2", "the seat follows WED_AGENT and an unknown tree defaults to wednesday, as before"),
 }
 if name == "--list":
     print(" ".join(M)); sys.exit(0)

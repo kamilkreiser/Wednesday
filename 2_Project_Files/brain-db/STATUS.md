@@ -1,5 +1,141 @@
 READY FOR QA
 
+# ROUND 3 (answer to `ANSWER-3.md`: the checker's NO GO on F1, and Wednesday's list of eleven fixes and four notes)
+
+WED build seat "brain-db". Round 3 finished; the last process check printed `2026-11-27 13:40:45 AEDT`, and one more suite run under Python 3.9 ended 13:41:32 with 0 postgres executables running. All HOLDS kept: this lane only (plus my scratchpad and socket directories under `/tmp`), no existing shared file edited, the checker's directory read and never written, no git write, no mail, post or network call, nothing installed, no `rm`.
+
+**In one paragraph.** All eleven MUST FIX items and the four notes are built and tested. The suite is 483 passed, 0 failed (also under Python 3.9.6). The checker's own attack tree, re-run by me against the new code, gives **0 unexpected of 69** (it saw 26). A mutant harness breaks the tool 24 ways in a copy, one at a time, and the suite goes red on the matching assertion for 24 of 24, including the checker's M2. **One item ended differently from its first instruction, as that instruction allowed:** WEAK MATCH is removed. The checker's fix was built and measured on 36 questions; no threshold separates right from wrong, so the tool now states a fact instead of a verdict. The drive cluster is STOPPED. Four things I got wrong while working are listed under "Slips of mine".
+
+## The verdict against the answer, where they differ (the stricter taken each time)
+
+| Point | Checker's verdict | `ANSWER-3.md` | Built |
+|---|---|---|---|
+| F2 rating | Major | Blocker | fixed either way; every server-talking command now checks the server's data directory |
+| F6 stale pid file | "move it into quarantine and continue, or at least print the instruction" | do NOT move it; print the `mv -n` line | prints; never moves |
+| F11 | test the name when it begins `_ledger` or the folder is unusual | refused whatever kind the allow line gives | name tested everywhere except a file in its own kind's home folder; ledgers only by `allow ledger`, daily folders only by `allow daily` |
+| Look-alike daily names (zatk81 to 83) | counted as passes | target is 0 unexpected | a daily note must be named as a plain date, so all four are out |
+
+## The eleven items
+
+| # | Item | What changed | Tests (the mutant named is the proof the test can fail) |
+|---|---|---|---|
+| 1 | F1 lesson deciders fail closed | (i) BOM stripped, leading blank lines skipped, frontmatter keys folded; a lesson is EXCLUDED and named when the frontmatter is unclosed, `tier` occurs more than once (block, second block, or stray line above the first heading), or a tier line yields no value. (ii) Own clients are matched on the CLIENT segment only. (iii) Rejected rules-index rows are kept; a lesson named by any of them (stripped, case-folded, path removed) is excluded and listed with the row's line; keys of good rows are normalised the same way; no usable rules index means `rebuild` and `check` REFUSE (rc 2). (iv) Markers in any case, indent and spelling, blank lines allowed; the dropped span runs to the next heading of the same or a higher level; a marker with no heading under it drops to the next heading. (v) UNTAGGED lessons are listed by name. | Every case of `atk_build.py` is lifted into `tests/make_fixtures.py` under its own name and token, each with a neighbour: 23 frontmatter cases and 9 neighbours, 11 marker cases and 6 neighbours, 13 rules-index cases and 2 neighbours. Sections 6, 6b, 7b, 8b. Mutants: `F1i_key_not_folded`, `F1i_faults_ignored`, `F1i_bom_kept`, `F1ii_client_substring`, `F1iii_rejected_rows_ignored`, `F1iii_keys_not_normalised`, `F1iii_no_index_not_refused`, `F1iv_marker_strict_spelling`, `F1iv_marker_blank_line`, `F1iv_subsection_kept`. |
+| 2 | F2 server identified by its data directory | `need_server()` runs `show data_directory` and dies with rc 4 unless it equals the directory the command was addressed to. `rebuild`, `check` and `status` print the data directory. `doctor` reports "ANOTHER cluster is answering". | Section 12b reproduces the checker's P6: main cluster up, second cluster stopped, same socket directory, self-start off. `rebuild`, `check`, `search`, `at` each rc 4; the main index's file count and tree are unchanged; no GREEN is printed. Mutant `F2_any_server_will_do`: 16 lines red. |
+| 3 | F3 hard links | A file with a link count above 1 is skipped with "hard link (link count N)". `DESIGN.md` point 15 says what this cannot do. | Planted `4_Credentials` file hard-linked into `learnings/`; absent, and named in the report. Mutant `F3_hard_link_through`. |
+| 4 | F11 seat words independent of kind | See the table above. | Section 7a widens the allow-list under five kinds onto both other ledgers, both other daily folders, `2_Project_Files/tuesday/`, and `0_Brain/tasks/` (the checker's two routes: `allow skill 0_Brain/tasks/*.md` and `allow lesson` / `allow skill` over `_ledger_*`). All seven planted tokens stay out, while this seat's own pickup file enters by the same line. Mutant `F11_seat_word_by_kind`. |
+| 5 | F4 scope first | `need_scope` runs before anything is created or started, for `rebuild`, `check`, `search`, `at`, `up`. | Section 12: a tree named TUESDAY with no scope file; five commands refused, no cluster directory, no server. Mutant `F4_scope_checked_late`: 6 lines red. |
+| 6 | F5 two commands at once | `init`, `start`, `stop` and the self-start run under `flock` on `pgdata-<seat>.lock` (`braindb_lock.py`); rebuilds take the same lock; after a failed `pg_ctl start` the tool re-tests "running". | Section 13b: two searches on a stopped cluster, two starts, and three trials of two searches with no cluster at all; every command rc 0 and the new cluster survives. Mutant `F5_no_lock`. |
+| 7 | F6 stale pid file | `start`, `search` and `up` print `STALE PID FILE: ... names pid N, which is alive but is NOT this index's server` and the exact `mv -n` line; the file is not moved. The row is in the instructions. | Section 14. Mutant `F6_stale_pid_unexplained`. |
+| 8 | F7 one bad file | An unreadable file is skipped and listed; a row over 80,000 characters is cut with a marker and listed; the rebuild's LAST line says so; `check` prints the counts. | Section 9b: a mode-000 lesson and a 300,000-word section; rebuild rc 0, no traceback, both listed, last line `DONE WITH FAULTS: 1 unreadable file(s) skipped, 1 row(s) truncated`. Mutants `F7_unreadable_aborts`, `F7_row_not_capped`. |
+| 9 | F8 separator bytes | 0x1E and 0x1F are stripped on read. | Section 11: the row holding them is found by `search`; the database holds it once. Mutant `F8_separators_kept`. |
+| 10 | F9 the foreign-process test | The sleeper now sets SIGINT back to default and is killed with SIGINT at the end to show it can die. | Mutant `F9_stop_trusts_pidfile` is the checker's M2: `the foreign process was killed by stop` now FAILS under it (3 lines on that assertion, 29 red in all). My first attempt did not: see slip 1. |
+| 11 | F10 WEAK MATCH | Removed. See the section below. A rules-file row now goes first only when it holds every one of the question's rarest words. The instructions carry the sentence about retrying with three or four key words. | Section 11: the last line states score and held and lacking words; no "WEAK" anywhere. Mutants `rules_row_always_first`, `lessons_first_off`. |
+
+## The four notes
+
+| Note | What changed | Test |
+|---|---|---|
+| Seat follows the tree | `braindb.sh` takes the seat from the tree through `tools/seat_note.sh` (read, sourced, not edited). `WED_AGENT` disagreeing, or a folder with another name, is refused with rc 2. Where a copied tree lacks `seat_note.sh` the same rule is applied inline over `seat_resolve.sh`. | Section 1. Mutant `seat_follows_WED_AGENT`. |
+| `devnas.prf` | The proposal says line 53. The ignore lines are now `pgdata-*`, `pgdata-*.lock` and `_probe_*`, which covers the quarantined probe cluster. | read against the file |
+| `PORTABILITY.md` item number | The file's last item today is 31. The proposal says NN and that the sibling `nas-backup` lane proposes one too, so Wednesday numbers both. I did not read that lane. | read against the file |
+| Test socket directory | Unique per run (`/tmp/wed-bdb-t<pid>` and `...b`), moved into the run directory at the end. | Section 18 |
+
+Also from the checker's N2 and N5: the doctor logic moved into `braindb.sh doctor` (no hard-coded Postgres path; every exit code named); `at` with a trailing newline is refused; a non-numeric setting is a plain message; a broken pipe during a rebuild no longer prints "Exception ignored".
+
+## Tests
+
+`evidence/test_run_round3.log`, tail:
+
+```
+finished 2026-11-27 13:39:45 AEDT
+RESULT: 483 passed, 0 failed
+```
+
+483 PASS, 0 FAIL, 33 lines marked `(can fail)`; 91 planted tokens absent and 61 neighbour tokens present in the whole-index dump (round 2: 295 passed; 36 and 37). The same suite under `/usr/bin/python3` 3.9.6: 483 passed (`evidence/test_run_round3_python39.log`).
+
+**The suite now runs the tool from its own copy** in `<scratch>/.../sim/WEDNESDAY/`, because the tool refuses a tree not named for a seat. Its result no longer depends on which scope files a tree has adopted.
+
+**Mutants** (`tests/mutants.sh`, output `evidence/mutants_round3.log`): control 483 passed, 0 failed; **24 of 24 mutants caught on the expected assertion.** Each mutant is one change to a copy; the lane is never modified.
+
+**The checker's attack tree, re-run by me** (`tests/attack_tree.sh`, which runs the checker's `atk_build.py` unmodified from where it lies; output `evidence/attack_tree_round3.log`): 69 expectations, **0 unexpected**; control `xneighbour01` found 9 times; this lane's own canaries found 0 times; no PWNED file; 0 server processes left.
+
+## Real run on the drive cluster (`evidence/measurements_round3.txt`, `evidence/real_rebuild_round3.txt`)
+
+| Measure | Round 2 | Round 3 |
+|---|---|---|
+| Files indexed | 419 | 419 |
+| Lessons indexed, of 293 lesson files | 264 | 264 |
+| Lessons kept out because the tier or a rules-index row could not be read safely | not measured | 0 |
+| Damaged rules-index rows | not measured | 0 of 379 |
+| Hard links, unreadable files, truncated rows | not measured | 0, 0, 0 |
+| Untagged lessons indexed, now named | not shown | 3 |
+| Search rows | 22,246 | 22,267 |
+| Rebuild | 4.4 to 4.6 s | 4.7 to 4.9 s |
+| `check` | 0.20 s | 0.48 s |
+| Size on the drive | 157 MB | 174 MB (`du`); the database is 118 MB |
+| Search, default order | 117 to 237 ms | 121 to 230 ms |
+| Cold start: one search on a stopped server | 0.53 s | 0.46 s |
+| `at` against `rules_card.py --at`, 22 triggers | 802 and 802 | 802 and 802, none only on either side |
+| End state | STOPPED | STOPPED: `stop` rc 0 (pid 12933), second `stop` rc 0, `server: STOPPED`, no `postmaster.pid`, 0 processes whose executable is postgres (control: 8 bash) |
+
+So fail-closed costs the real Wednesday index nothing today. The first-five lists for the ten questions are the same as round 2's second table (`evidence/ten_questions_round3_raw.txt`).
+
+## F10: the threshold study, and why WEAK MATCH is gone
+
+The questions and what counts as a right first result were written to `evidence/threshold_questions_round3.tsv` before any was run under the new measure: my ten, the checker's eight, eight of its nine probes (the ninth repeats my question 5), and ten new ones. 36 in all; 2 I could not judge and left out; of the 34 judged, the first result is right for 21 and wrong for 13.
+
+| Measure | Best single threshold | Wrong first results NOT flagged | Right first results flagged | Errors |
+|---|---|---|---|---|
+| Round 2's (all terms of the question) | 0.0251 | 4 of 13 | 1 of 21 | 5 of 34 |
+| The checker's fix, rarest 3 terms | 0.0243 | 5 of 13 | 2 of 21 | 7 of 34 |
+| The checker's fix, rarest 4 terms | 0.0340 | 2 of 13 | 3 of 21 | 5 of 34 |
+
+Source: `evidence/threshold_study_round3_confidence_measure.txt`, which has the full 36-row table.
+
+- The new measure is no better overall. It trades two missed wrong answers for two more false alarms.
+- Its best line sits between a wrong first result at 0.0337 and a right one at 0.0343: a gap of 0.0006, narrower than the 0.004 the checker called over-fitted, and chosen on the same 34 questions it is scored on.
+- It does not cure the length problem it was meant to cure. My question 5 (right first result) scores 0.0001 on its rarest four words, against 0.0717 for the checker's four-word form of the same intent: the lesson holds "wake" and "wait" but not "quiet", "gone" or "prove".
+- The two wrong answers it never flags are the dangerous kind: `how do I name a git branch` (0.0546, an unrelated lesson) and `Kam`.
+- To flag every wrong first result, any of the three measures has to flag all 21 right ones.
+
+No threshold separates right from wrong honestly, so, as item 11 directs, the line is replaced by a neutral one:
+
+```
+(7 results, 125 ms; first result: score 0.0172; of the question's 4 rarest words it holds 2 [skip move] and lacks 2 [deploy fail])
+```
+
+That is a fact a reader can weigh. It is not a safe verdict either, and I have not made it one (`evidence/threshold_study_round3_neutral_line.txt`): of the 21 right first results 18 hold every rare word of their question; of the 13 wrong ones, 4 do.
+
+**What this changes in an accepted reading.** `ANSWER-2.md` accepted "a rules row goes first only when its match is not weak". With no threshold left, the rule is now: a rules-file row goes first only when it holds every one of the question's rarest words (up to four); otherwise it competes on score. Same purpose, no fitted number. On the 36 questions the first results are unchanged by this.
+
+## Could not fix, or fixed only in part
+
+1. **WEAK MATCH** has no honest threshold; removed, as above. The guard against "a weak answer that looks confident" is now the reader's eye on the last line plus the instructions, not the tool.
+2. **A hard link cannot be told from a copy** once the original is gone, and pasted secret text is invisible to any path rule. Stated in `DESIGN.md` point 15 and in the instructions.
+3. **The Wednesday seat's own records carry no seat word in their names** (`_ledger.md`, `daily/`, `tasks/NEXT-PICKUP.md`), so a Tuesday or Friday scope is kept out of them by its allow-list and by "a ledger only by `allow ledger`, a daily folder only by `allow daily`", not by a word. A Tuesday scope that wrote `allow ledger 0_Brain/learnings/_ledger.md` would index Wednesday's ledger. The instructions say so in step 1.
+4. **Fail closed has a cost I chose:** "a second frontmatter block" is detected as a `---` line directly after the frontmatter with another within 40 lines, and a stray tier-looking line is looked for in the 60 lines before the first heading. A real lesson shaped like that would be kept out and named. None is today.
+5. **The checker's own harness needs two small changes to run against round 3,** because of fixes it asked for: its mutant anchors for M4, M6, M7 and M13 point at lines that no longer exist (M1, M2, M3, M5, M8, M9, M11 and M14 still match), and any copy of the tool it runs directly must sit in a folder named WEDNESDAY, TUESDAY or FRIDAY. Its `atk_build.py`, `proc.sh`, `crash.sh` and `sim_tuesday.sh` set `WED_AGENT=wednesday` on the real lane or use a tree named TUESDAY, which the new seat rule accepts; I ran only `atk_build.py`.
+
+## Slips of mine in round 3
+
+1. **My first fix for F9 repeated the fault it was fixing.** I swapped `sleep` for a Python sleeper and killed it with SIGTERM to "prove" it could die. A background child of a non-interactive bash starts with SIGINT ignored and Python keeps it ignored, so under the M2 mutant "still alive" still passed. The mutant run showed it. The sleeper now resets SIGINT and is killed with SIGINT.
+2. **I signalled a process by a text pattern.** Cleaning up after the mutant run I selected "postgres with a `-D` under my scratchpad" by grepping command lines, and the only match was my own shell, whose command line held the pattern. I sent it SIGINT; it was my own tool shell and nothing else was touched. The scratch server I was after had already exited. Process lists in this status come from a script that selects by executable, then reads each one's `-D`.
+3. **The F9 mutant left a scratch test server running for a time** (its `stop` is broken on purpose). It had exited by the time I looked. The harness prints the count; it does not clean up.
+4. Smaller: I edited `tests/mutants.sh` while it was running, which aborted that run (re-run whole afterwards); a lifted token (`xcanary151`) contained an older one as a prefix and produced false failures until I renumbered; a recursive grep of a fixture tree hung on a planted FIFO; I typed one clock time into an interim status and removed it; the indexer source briefly held a literal BOM character where an escape was meant, found by a mutant anchor failing to match.
+
+## Not tested in round 3
+
+- Any real TUESDAY or FRIDAY tree, another machine or drive; ejecting or syncing with the server up; a real Postgres major-version difference; the proposed blocks inside the real `doctor.sh` or launcher (they ran in a stub harness: `evidence/proposals_simulated_round3.txt`).
+- The checker's `proc.sh`, `crash.sh`, `sim_tuesday.sh`, `atk_scopes.py` and `atk_inject.py` as scripts. Their cases are covered by my own sections 7a, 9b, 12, 12b, 13b and 14, not by running them.
+- More than three trials of the double-init race.
+- Search quality beyond the 36 questions.
+
+## QUESTION (does not block QA)
+
+The neutral last line replaces a warning Wednesday asked for in `ANSWER-1.md` item 7 ("when the top result's rank is weak ... the tool prints one line"). `ANSWER-3.md` item 11 allows the replacement when no threshold separates honestly, and that is what the data shows. If a warning is still wanted despite the numbers, the least bad one on this data is "the first result lacks one or more of the question's rarest words": it would flag 9 of 13 wrong first results and 3 of 21 right ones. I have not built it.
+
+---
+
 # ROUND 2 (answer to `ANSWER-1.md`: four rulings, three changes)
 
 WED build seat "brain-db". Round 2 finished; last process check printed `2026-11-27 12:23:19 AEDT`. All HOLDS kept: this lane only, no existing shared file edited, no git write, no mail, post or network call, nothing installed, no `rm`.

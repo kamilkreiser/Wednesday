@@ -1,0 +1,108 @@
+doctor block: 11 lines ; launcher block: 15 lines
+
+######## D1 apply to scratch copies of the real files: does the anchor exist, does the result parse (bash 3.2 -n)?
+doctor.sh: anchor (the postgresql@15 keg check) found 1 time(s), at line 471
+launcher: rules-card block found: True, ends at line 282 ; line 29 is 'AGENT="${WED_AGENT:-}"'
+PORTABILITY.md: '- **Machine-local:** `/opt/homebrew/opt/postgresql@15`' x1 ; '- **No service:** no `brew services` job' x1 ; last item heading: 31
+devnas.prf: first ignore line is line 53: 'ignore = Name .git' ; root lines: []
+bash -n doctor.patched.sh rc=0 (GNU bash, version 3.2.57(1)-release (arm64-apple-darwin26))
+bash -n Launch.patched.command rc=0
+doctor.sh shell options: 10:set -uo pipefail ; launcher: 9:set -u
+names the sync-ignore lines would also hide ANYWHERE under the synced roots (they are 'Name' patterns, not paths): existing matches outside this lane, depth <= 6:
+/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate114-ks1868-pr1932/logs/_probe_copies
+/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate154-ks1868-pr1971/logs/_probe_copy_head.ts
+/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate154-ks1868-pr1971/logs/_probe_copy_base.ts
+/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-03_gate137-ks1868-pr1955/logs/_probe_copies
+/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate111-ks1868-pr1929/scripts/_probe_copy_moved_out.ts
+/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-02_gate113-ks1868-pr1931/scripts/_probe_copy_last.ts
+(end of list; control: the same find sees this lane's own: 2 entries)
+
+######## D2 the blocks in a stub harness, on scratch trees (doctor under set -uo pipefail, launcher under set -u)
+-- a. WEDNESDAY tree (copy of the real allowed files), first boot: no cluster yet
+  ⚠ brain-db: no cluster yet               run 2_Project_Files/brain-db/braindb.sh up
+   [doctor continued; WARNS=1]
+check: GREEN, 419 files on disk match the index (built 2026-11-27T14:08:55+11:00)
+   [launcher continued]
+   (returned in 7 s)
+   servers for this tree after the launcher block: 1  (the launcher block STARTS a server and creates the cluster with no human step)
+  ✓ brain-db: index current, a/WEDNESDAY/2_Project_Files/brain-db/pgdata-wednesday (GREEN, 419 files 
+   [doctor continued; WARNS=0]
+-- a2. a file changes; doctor (starts nothing, rebuilds nothing), then the launcher block (rebuilds)
+  ⚠ brain-db: index stale, a/WEDNESDAY/2_Project_Files/brain-db/pgdata-wednesday braindb.sh rebuild (
+   [doctor continued; WARNS=1]
+check: GREEN, 419 files on disk match the index (built 2026-11-27T14:09:02+11:00)
+   [launcher continued]
+   (returned in 6 s)
+-- a3. WED_AGENT=wednesday exported (as a launcher does) and WED_AGENT=tuesday (Launch_Tuesday.command run from the wrong tree)
+  ✓ brain-db: index current, a/WEDNESDAY/2_Project_Files/brain-db/pgdata-wednesday (GREEN, 419 files 
+   [doctor continued; WARNS=0]
+  ⚠ brain-db: doctor gave no verdict       braindb: REFUSED — WED_AGENT='tuesday' but this tree ('WEDNESDAY') is seat 'wednesday' — unset WED_AGENT, or run from the matching tree
+   [doctor continued; WARNS=1]
+⚠ brain-db up FAILED (the brain files are unaffected; search is unavailable this boot):
+braindb: REFUSED — WED_AGENT='tuesday' but this tree ('WEDNESDAY') is seat 'wednesday' — unset WED_AGENT, or run from the matching tree
+   [launcher continued]
+   (returned in 0 s)
+-- a4. server stopped: doctor must start nothing
+stop: stopped pid 18561 (/private/tmp/claude-501/-Volumes-De
+  ✓ brain-db: server stopped (on demand; the next search starts it), a/WEDNESDAY/2_Project_Files/brai
+   [doctor continued; WARNS=0]
+   servers after doctor: 0
+-- a5. a lesson with a broken tier line and a hard-linked skill appear; what does the launcher block SHOW of the fail-closed exclusions?
+check: GREEN, 419 files on disk match the index (built 2026-11-27T14:09:02+11:00)
+   [launcher continued]
+   (returned in 1 s)
+  ✓ brain-db: index current, a/WEDNESDAY/2_Project_Files/brain-db/pgdata-wednesday (GREEN, 419 files 
+   [doctor continued; WARNS=0]
+   (the names of excluded lessons appear in neither line: they are only in the body of a rebuild report nobody is shown)
+stop: stopped pid 27596 (/private/tmp/claude-501/-Volumes-De
+-- b. TUESDAY tree with NO scope file, WED_AGENT=tuesday (as Launch_Tuesday.command exports)
+  ✓ brain-db: not adopted on this seat (no scope/tuesday.scope)
+   [doctor continued; WARNS=0]
+   [launcher continued]
+   (returned in 0 s)
+   cluster directory created? no ; lock file created? no
+-- c. TUESDAY tree that adopted the proposed scope
+check: GREEN, 58 files on disk match the index (built 2026-11-27T14:09:11+11:00)
+   [launcher continued]
+   (returned in 1 s)
+  ✓ brain-db: index current, c/TUESDAY/2_Project_Files/brain-db/pgdata-tuesday (GREEN, 58 files on di
+   [doctor continued; WARNS=0]
+stop: stopped pid 29203 (/private/tmp/claude-501/-Volumes-De
+-- d. FRIDAY tree, no scope, WED_AGENT unset
+  ✓ brain-db: not adopted on this seat (no scope/friday.scope)
+   [doctor continued; WARNS=0]
+   [launcher continued]
+   (returned in 0 s)
+-- e. a tree folder that is not a seat name (a backup copy named WEDNESDAY-old)
+  ⚠ brain-db: doctor gave no verdict       braindb: REFUSED — cannot tell which seat this tree is — run from a WEDNESDAY, TUESDAY or FRIDAY tree (tree: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-
+   [doctor continued; WARNS=1]
+⚠ brain-db up FAILED (the brain files are unaffected; search is unavailable this boot):
+braindb: REFUSED — cannot tell which seat this tree is — run from a WEDNESDAY, TUESDAY or FRIDAY tree (tree: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/pr
+   [launcher continued]
+   (returned in 0 s)
+-- f. python3 absent from PATH; braindb.sh not executable
+/bin/bash: line 13: awk: command not found
+/bin/bash: line 13: sed: command not found
+/bin/bash: line 13: awk: command not found
+/bin/bash: line 13: sed: command not found
+   (returned in 0 s)
+   [doctor continued; WARNS=0]
+   [launcher continued]
+   (returned in 0 s)
+-- g. another cluster answering on this seat's socket directory when doctor runs (tree e's twin: a second WEDNESDAY tree)
+   second WEDNESDAY tree up rc=0
+  ⚠ brain-db: ANOTHER cluster is answering on this seat's socket directory /tmp/qa3p braindb: REFUSED: the server answering on socket directory /tmp/qa3p serves data directory '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDA
+   [doctor continued; WARNS=1]
+⚠ brain-db up FAILED (the brain files are unaffected; search is unavailable this boot):
+2026-11-27 14:09:10.076 AEDT [27596] LOG:  database system is shut down
+2026-11-27 14:09:14.145 AEDT [31208] LOG:  starting PostgreSQL 15.19 (Homebrew) on aarch64-apple-darwin27.0.0, compiled by Apple clang version 21.0.0 (clang-2100.3.34.2), 64-bit
+2026-11-27 14:09:14.145 AEDT [31208] FATAL:  lock file "/tmp/qa3p/.s.PGSQL.5432.lock" already exists
+2026-11-27 14:09:14.145 AEDT [31208] HINT:  Is another postmaster (PID 30602) using socket file "/tmp/qa3p/.s.PGSQL.5432"?
+2026-11-27 14:09:14.145 AEDT [31208] LOG:  database system is shut down
+   [launcher continued]
+   (returned in 1 s)
+stop: stopped pid 30602 (/private/tmp/claude-501/-Volumes-De
+
+######## END
+processes with a data directory under /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/prop-140819: 0
+2026-11-27 14:09:14 AEDT

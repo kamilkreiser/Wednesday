@@ -55,7 +55,28 @@ write_conf() { # [rsync] [late_fire] [extra line]
     echo "set=General|WEDNESDAY|$T/vol/WEDNESDAY"
     echo "set=Secuura|Secuura|$T/vol/CODING/Secuura"
     [ -n "${3:-}" ] && echo "$3"
+    [ -n "${4:-}" ] && echo "$4"
+    [ -n "${5:-}" ] && echo "$5"
   } > "$T/lane/seats/wednesday.conf"
+  seal_conf
+}
+seal_conf() { # append the END marker with the right count (what a careful editor does by hand)
+  local f="$T/lane/seats/wednesday.conf"
+  local n; n="$(/usr/bin/grep -v -E '^[[:space:]]*(#|$)' "$f" | /usr/bin/grep -c -v -E '^END ')"
+  /usr/bin/grep -v -E '^END ' "$f" > "$f.tmp"; mv "$f.tmp" "$f"; echo "END lines=$n" >> "$f"
+}
+owner_json() { # pid -> a lock owner record as the tool writes it (pid + the time that process started)
+  printf '{"pid": %s, "pid_started": "%s", "started_local": "test"}\n' "$1" "$(ps -o lstart= -p "$1" | sed -e 's/^ *//' -e 's/ *$//')" > "$T/lane/state/wednesday.lock.d/owner.json"
+}
+doctor_block() { # <now epoch> : run the PROPOSED doctor block exactly as doctor.sh would source it, with doctor's own three helpers
+  ( QUIET=""          # not --quiet here, so an "ok" outcome is a visible line the tests can read
+    ok()   { [ "$QUIET" = "--quiet" ] || printf "  ✓ %s\n" "$1"; }
+    warn() { printf "  ⚠ %-38s %s\n" "$1" "${2:-}"; }
+    fail() { printf "  ✗ %-38s %s\n" "$1" "${2:-}"; }
+    PROJECT_DIR="$(cd -P "$LANE/../.." && pwd)"
+    unset WED_AGENT
+    export NB_TEST_ROOT="$T" NB_TEST_TREE="$T/vol/WEDNESDAY" NB_DOCTOR_NOW="$1"
+    . "$LANE/proposed/doctor_nasbackup_block.sh" )
 }
 write_mounts() { # [nas fs] [vol opts]
   {
@@ -94,6 +115,7 @@ d=json.load(open(sys.argv[1]))
 for k in sys.argv[2].split("."):
     d = d.get(k) if isinstance(d, dict) else None
 print(d)' "$T/lane/state/wednesday.json" "$1" 2>&1; }
+state_owner() { "$PY" -c 'import json,sys; print(json.load(open(sys.argv[1])).get(sys.argv[2]))' "$T/lane/state/wednesday.lock.d/owner.json" "$1" 2>&1; }
 cards() { cat "$T"/out/"$1"* 2>&1 | /usr/bin/grep -c -F 'CARD-COMMAND:'; }
 
 # predicates used both straight and under sabotage
@@ -129,7 +151,7 @@ is  "T1 no run markers on the NAS" 0 "$(started)"
 echo; echo "T2  a real run copies, counts both sides, records state (neighbour of T1: this one DOES write)"
 to t2.txt nb --run --now "$(at 0 1 0)"
 is  "T2 real run exits 0" 0 "$RC"
-has "T2 says GOOD" "$(OUTF t2.txt)" "GOOD: every in-scope source file"
+has "T2 says GOOD" "$(OUTF t2.txt)" "GOOD: every in-scope source file is PROVEN"
 yes "T2 a.txt arrived byte-identical" cmp -s "$T/vol/WEDNESDAY/a.txt" "$(CUR)/a.txt"
 yes "T2 a name with spaces arrived" cmp -s "$T/vol/WEDNESDAY/sp ace/c d.txt" "$(CUR)/sp ace/c d.txt"
 yes "T2 a non-ASCII name arrived" test -f "$(CUR)/0_Brain/learnings/é-ünï lesson.md"
@@ -264,7 +286,7 @@ is  "T5d NEIGHBOUR enough space: exit 0" 0 "$RC"
 fixture r_lock; mkdir -p "$T/lane/state/wednesday.lock.d"
 bash -c 'exec -a nas_backup_fakeholder sleep 120' & HOLDER=$!
 sleep 1
-echo "{\"pid\": $HOLDER, \"started_local\": \"test\"}" > "$T/lane/state/wednesday.lock.d/owner.json"
+owner_json "$HOLDER"
 to e.txt nb --run --now "$(at 0 1 0)"
 is  "T5e live lock: exit 6" 6 "$RC"
 has "T5e names the holder" "$(OUTF e.txt)" "another run holds the lock"
@@ -349,7 +371,7 @@ is  "T5k NEIGHBOUR confirmed: exit 0" 0 "$RC"
 "$PY" -c 'import sys; sys.path.insert(0, sys.argv[1]); import nb_core
 for flag in ("--delete", "--delete-after", "--del", "--remove-source-files", "--inplace", "--force"):
     try:
-        nb_core.run_rsync(None, ["rsync", "-t", flag, "a/", "b/"], "/dev/null", "/dev/null", 0, 0); print("NOT REFUSED", flag); sys.exit(1)
+        nb_core.check_argv(["rsync", "-t", flag, "a/", "b/"]); print("NOT REFUSED", flag); sys.exit(1)
     except nb_core.Refused: pass
 print("all refused")' "$LANE" > "$T/out/k3.txt" 2>&1; RC=$?
 is  "T5k every deletion-capable engine flag is refused before the engine starts" 0 "$RC"
@@ -429,7 +451,7 @@ write_conf
 mkdir -p "$T/lane/state/wednesday.lock.d"
 bash -c 'exec -a nas_backup_fakeholder sleep 120' & HOLDER=$!
 sleep 1
-echo "{\"pid\": $HOLDER, \"started_local\": \"test\"}" > "$T/lane/state/wednesday.lock.d/owner.json"
+owner_json "$HOLDER"
 to n7.txt nightly --now "$(at 3 0 31)"
 has "T7 a run in progress: SKIP with the reason" "$(OUTF n7.txt)" "SKIP: a run is in progress"
 is  "T7 ... exit 0" 0 "$RC"
@@ -437,68 +459,89 @@ kill "$HOLDER" 2>&1; wait "$HOLDER" 2>&1
 to n7b.txt nb --clear-stale-lock
 yes "T7 every nightly decision is in the nightly log" test "$(/usr/bin/grep -c -F 'nightly[wednesday]' "$T/lane/logs/wednesday/nightly.log")" -ge 6
 
-echo; echo "T8  THREE nights missed: the flag fires once and only once per gap"
+echo; echo "T8  THREE nights missed: the card reaches the place a booting seat READS, consumes nothing, and exists once per gap"
 #   last good = day 2 00:31. The NAS is away for the nights of day 3, 4 and 5.
 write_mounts none
 to f3.txt nightly --now "$(at 3 0 31)"
 is  "T8 night 1 without the NAS: refused, exit 2" 2 "$RC"
 to f4.txt nightly --now "$(at 4 0 31)"
-to f4w.txt watch --flag --now "$(at 4 9 0)"
+to f4w.txt watch --check --now "$(at 4 9 0)"
 is  "T8 after 2 days: not yet overdue (exit 0)" 0 "$RC"
-is  "T8 no card command yet" 0 "$(cards f)"
 to f5.txt nightly --now "$(at 5 0 31)"
-has "T8 night 3: the nightly job itself raises the flag (72 h since the last good backup)" "$(OUTF f5.txt)" "CARD-COMMAND:"
-has "T8 the card command is a decision_queue.sh add" "$(OUTF f5.txt)" "decision_queue.sh add --id nas-backup-overdue-wednesday-"
-has "T8 option a = approve an out-of-sequence backup now" "$(OUTF f5.txt)" "a:Approve an out-of-sequence backup now"
-has "T8 option b = wait for tonight's window, the default" "$(OUTF f5.txt)" "--recommended b"
-has "T8 the BLUF carries the failure reason" "$(OUTF f5.txt)" "not mounted as a network share"
-to f5w.txt watch --flag --now "$(at 5 8 0)"
-is  "T8 the launcher's check the same morning: still overdue (exit 3)" 3 "$RC"
-hasnt "T8 ... but the card command is NOT issued a second time" "$(OUTF f5w.txt)" "CARD-COMMAND:"
-to f5x.txt watch --flag --now "$(at 5 20 0)"
+has   "T8 night 3: the nightly job says OVERDUE in its own log" "$(OUTF f5.txt)" "OVERDUE"
+hasnt "T8 ... but the nightly job (a launchd log no seat reads) NEVER prints the card command" "$(OUTF f5.txt)" "CARD-COMMAND:"
+to f5d.txt doctor_block "$(at 5 8 0)"
+has "T8 at the next boot doctor prints a HARD-failure line" "$(OUTF f5d.txt)" "✗ NO GOOD NAS BACKUP FOR 3 DAYS"
+HARD="$(/usr/bin/grep -F '✗' "$(OUTF f5d.txt)" | cut -c1-400)"
+yes "T8 that line, cut at 400 characters as the launcher cuts it, still names the one command to run" test "${HARD#*nas_backup_watch.sh --card}" != "$HARD"
+to f5c.txt watch --card --now "$(at 5 8 1)"
+is  "T8 running that command: exit 3" 3 "$RC"
+has "T8 ... prints the card command" "$(OUTF f5c.txt)" "CARD-COMMAND:"
+has "T8 it is a decision_queue.sh add with a fixed id for the gap" "$(OUTF f5c.txt)" "decision_queue.sh add --id nas-backup-overdue-wednesday-20261203"
+has "T8 option a = approve an out-of-sequence backup now" "$(OUTF f5c.txt)" "a:Approve an out-of-sequence backup now"
+has "T8 option b = wait for tonight's window, the default" "$(OUTF f5c.txt)" "--recommended b"
+has "T8 the BLUF carries the failure reason" "$(OUTF f5c.txt)" "not mounted as a network share"
+has "T8 the BLUF counts all three failed nights (the attempt history is not cut short)" "$(OUTF f5c.txt)" "3 attempts"
+to f5c2.txt watch --card --now "$(at 5 20 0)"
+has "T8 printing consumed nothing: a second call prints the command again" "$(OUTF f5c2.txt)" "CARD-COMMAND:"
 to f6.txt nightly --now "$(at 6 0 31)"
-is  "T8 across five more checks and fires in the same gap: exactly ONE card command" 1 "$(cards f)"
-to f6c.txt watch --check --now "$(at 6 9 0)"
-is  "T8 --check stays read-only and reports overdue (exit 3)" 3 "$RC"
+to f6d.txt doctor_block "$(at 6 8 0)"
+has "T8 a later boot, card still not raised: doctor still fails hard" "$(OUTF f6d.txt)" "✗ NO GOOD NAS BACKUP"
 to g_mark.txt watch --mark-raised nas-backup-overdue-wednesday-20261203 --now "$(at 6 9 5)"
 is  "T8 state records the card as raised" True "$(state flag.raised)"
+to g6c.txt watch --card --now "$(at 6 9 6)"
+is  "T8 once raised: exit 4" 4 "$RC"
+hasnt "T8 once raised, the card command is not printed again for this gap" "$(OUTF g6c.txt)" "CARD-COMMAND:"
+to g6d.txt doctor_block "$(at 6 9 7)"
+hasnt "T8 once raised, doctor no longer fails hard" "$(OUTF g6d.txt)" "✗"
+has   "T8 ... it warns instead" "$(OUTF g6d.txt)" "⚠ no good NAS backup for 3 days"
 #   the NAS comes back: the next window runs, the gap closes
 write_mounts
 to g7.txt nightly --now "$(at 7 0 31)"
 has "T8 NAS back: the next window runs and names the missed nights" "$(OUTF g7.txt)" "night(s) missed: catching up"
-to g7w.txt watch --flag --now "$(at 7 9 0)"
+to g7w.txt watch --check --now "$(at 7 9 0)"
 is  "T8 after a good backup the watch is quiet (exit 0)" 0 "$RC"
-#   a NEW gap raises a NEW card, once
+to g7d.txt doctor_block "$(at 7 9 1)"
+hasnt "T8 ... and so is doctor" "$(OUTF g7d.txt)" "✗"
+#   a NEW gap is a NEW card
 write_mounts none
 to h8.txt nightly --now "$(at 8 0 31)"; to h9.txt nightly --now "$(at 9 0 31)"; to h10.txt nightly --now "$(at 10 0 31)"
-to h10w.txt watch --flag --now "$(at 10 9 0)"
-is  "T8 a second gap: exactly one NEW card command" 1 "$(cards h)"
+to h10c.txt watch --card --now "$(at 10 9 0)"
+has "T8 a second gap: a NEW card id" "$(OUTF h10c.txt)" "decision_queue.sh add --id nas-backup-overdue-wednesday-20261208"
 
-echo; echo "T9  the watch does not depend on the backup job (a job that never fires cannot report itself)"
+echo; echo "T9  the watch does not depend on the backup job, on the NAS, or on any mark set by another script"
 fixture never
-to w0.txt watch --flag --now "$(at 0 9 0)"
-is  "T9 nothing armed, nothing on record: exit 0" 0 "$RC"
-has "T9 says NOT ARMED" "$(OUTF w0.txt)" "NOT ARMED"
-to w1.txt watch --mark-armed --now "$(at 0 9 0)"
-to w2.txt watch --flag --now "$(at 2 9 0)"
-is  "T9 armed, 48 h, the job never fired: not yet overdue" 0 "$RC"
-to w3.txt watch --flag --now "$(at 3 9 1)"
-is  "T9 armed, 72 h, the job NEVER fired once: OVERDUE (exit 3)" 3 "$RC"
+to w0.txt watch --check --now "$(at 0 9 0)"
+is  "T9 nothing on record: exit 0" 0 "$RC"
+has "T9 the watch starts the clock itself" "$(OUTF w0.txt)" "the three-day clock starts now"
+to w2.txt watch --check --now "$(at 2 9 0)"
+is  "T9 48 h, the job never fired: not yet overdue" 0 "$RC"
+to w3.txt watch --card --now "$(at 3 9 1)"
+is  "T9 72 h, the job NEVER fired and nobody armed anything: OVERDUE (exit 3)" 3 "$RC"
 has "T9 the card says the job did not fire" "$(OUTF w3.txt)" "the job did not fire"
 mv -n "$T/lane/seats/wednesday.conf" "$T/lane/seats/wednesday.conf.aside"; write_mounts none
 to w4.txt watch --check --now "$(at 3 9 2)"
 is  "T9 it still reports with the NAS away and the conf missing (exit 3)" 3 "$RC"
-
-#   HELD is not a missed backup: no card while the hold file exists (pair: the same state without it is overdue)
 mv -n "$T/lane/seats/wednesday.conf.aside" "$T/lane/seats/wednesday.conf"
 echo "held" > "$T/lane/HOLD_wednesday"
-to w5.txt watch --flag --now "$(at 4 9 0)"
+to w5.txt watch --card --now "$(at 4 9 0)"
 is  "T9 HELD: exit 0" 0 "$RC"
 has "T9 HELD is said out loud" "$(OUTF w5.txt)" "HELD:"
 hasnt "T9 HELD raises no card" "$(OUTF w5.txt)" "CARD-COMMAND:"
+to w5d.txt doctor_block "$(at 4 9 0)"
+has "T9 doctor reports HELD" "$(OUTF w5d.txt)" "⚠ nightly NAS backup HELD"
+to w5e.txt doctor_block "$(at 4 9 1)"
+hasnt "T9 ... once a day at most: the second boot the same day does not warn again" "$(OUTF w5e.txt)" "⚠"
 mv -n "$T/lane/HOLD_wednesday" "$T/lane/HOLD_wednesday.lifted"
-to w6.txt watch --check --now "$(at 4 9 1)"
+to w6.txt watch --check --now "$(at 4 9 2)"
 is  "T9 PAIR the hold moved aside, same state: overdue (exit 3)" 3 "$RC"
+#   finding 5: ten days of refused fires, four a night, and no arming mark: the first attempt must not roll away
+fixture noarm; write_mounts none
+for d in 0 1 2 3 4 5 6 7 8 9; do for hm in "0 31" "1 30" "2 30" "3 30"; do nightly --now "$(at $d $hm)" > "$T/out/roll.txt" 2>&1; done; done
+is  "T9 forty refused attempts on record are capped, not unbounded" 40 "$("$PY" -c 'import json,sys; print(len(json.load(open(sys.argv[1]))["recent_attempts"]))' "$T/lane/state/wednesday.json")"
+to r3.txt watch --check --now "$(at 9 9 0)"
+is  "T9 day 10, never armed, 40 refused fires: OVERDUE (exit 3), not 'ok since the first recorded attempt'" 3 "$RC"
+has "T9 the clock still starts at the FIRST attempt (day 1)" "$(OUTF r3.txt)" "2026-12-01 00:31"
 
 echo; echo "T10 the oldest python on the target machines (/usr/bin/python3)"
 if [ -x /usr/bin/python3 ]; then
@@ -521,9 +564,9 @@ def fake(top, rules=None, **kw):
     if rules is None:
         return real(top)
     return {"files": {"keep.txt": (1, 1, 1), "Logs/x.txt": (1, 1, 1), "logs/y.txt": (1, 1, 1), "ev/A.out": (1, 1, 1), "ev/a.out": (1, 1, 1)},
-            "dirs": set(["Logs", "logs", "ev"]), "links": {}, "specials": [], "excluded": {}, "errors": [], "excluded_list": []}
+            "dirs": set(["Logs", "logs", "ev"]), "links": {}, "specials": [], "excluded": {}, "errors": [], "hardlinks": []}
 nb_core.walk = fake
-plan = nb_core.plan_set(ctx, ctx.conf["sets"][0], {}, [], do_hash=False)
+plan = nb_core.plan_set(ctx, ctx.conf["sets"][0], {}, None, None, do_hash=False)
 print("copy=%s" % ",".join(plan["copy"]))
 print("copy_dirs=%s" % ",".join(plan["copy_dirs"]))
 print("skipped=%d names=%d problems=%d" % (len(plan["collision_skipped"]), len(plan["collisions"]), len(plan["problems"])))' "$LANE" > "$T/out/c.txt" 2>&1; RC=$?
@@ -531,6 +574,353 @@ is  "T11 the planner ran" 0 "$RC"
 has "T11 only the non-colliding file is planned for copy" "$(OUTF c.txt)" "copy=keep.txt"
 has "T11 a folder pair that collides is not created; the clean folder is" "$(OUTF c.txt)" "copy_dirs=ev"
 has "T11 four files under four colliding names are counted as not backed up, and it is not a failure" "$(OUTF c.txt)" "skipped=4 names=4 problems=0"
+
+# ═════════════════════════════════════════════ ROUND 2: the checker's attacks, lifted ═════════════════════════
+MARK="NBSECRETMARKERr2"
+on_nas() { /usr/bin/grep -r -l -F -- "$1" "$T/nas" 2>&1 | wc -l | tr -d ' '; }
+
+echo; echo "T12 FALSE GOOD (QA finding 1): a changed file that was not delivered must FAIL the run, be NAMED, and stay unproven"
+#   H1: the destination copy is immutable (stands in for a file locked on the share); same-size change at the source
+fixture fg1; for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do echo "filler $i" > "$T/vol/WEDNESDAY/sub/f$i.txt"; done
+printf 'LEDGER-v1-AAAA\n' > "$T/vol/WEDNESDAY/ledger.db"
+to r0.txt nb --run --now "$(at 0 1 0)"
+is  "T12 first night GOOD" 0 "$RC"
+chflags uchg "$(CUR)/ledger.db"
+sleep 1; printf 'LEDGER-v2-BBBB\n' > "$T/vol/WEDNESDAY/ledger.db"
+to r1.txt nb --run --now "$(at 1 1 0)"
+chflags nouchg "$(CUR)/ledger.db"
+no  "T12 H1 same-size change, destination copy immutable: the run is NOT exit 0" test "$RC" -eq 0
+hasnt "T12 H1 it does not say GOOD" "$(OUTF r1.txt)" "GOOD: every in-scope"
+has "T12 H1 the undelivered file is NAMED in the run's last lines" "$(OUTF r1.txt)" "NOT DELIVERED: WEDNESDAY/ledger.db"
+is  "T12 H1 the state the watch reads counts it" 1 "$(state last_attempt.undelivered_count)"
+is  "T12 H1 the last good run is still the first night" "$(at 0 1 0).0" "$(state last_good.time)"
+to r1w.txt watch --check --now "$(at 1 2 0)"
+has "T12 H1 the watch's line names the file" "$(OUTF r1w.txt)" "NOT DELIVERED, first: WEDNESDAY/ledger.db"
+yes "T12 H1 control: the destination really is stale" /usr/bin/grep -q -F 'LEDGER-v1-AAAA' "$(CUR)/ledger.db"
+chflags uchg "$(CUR)/ledger.db"
+to r2.txt nb --run --now "$(at 2 1 0)"
+chflags nouchg "$(CUR)/ledger.db"
+no  "T12 H1 next night, NOTHING changed at the source: still not GOOD (the file was never indexed as arrived)" test "$RC" -eq 0
+has "T12 H1 ... and it is sent again" "$(OUTF r2.txt)" "to copy: 1 files"
+to r3.txt nb --run --now "$(at 3 1 0)"
+is  "T12 H1 NEIGHBOUR the lock on the destination copy lifted: GOOD" 0 "$RC"
+yes "T12 H1 ... and the new content is there" /usr/bin/grep -q -F 'LEDGER-v2-BBBB' "$(CUR)/ledger.db"
+#   H2: an engine that skips one listed file and exits 23
+fixture fg2; printf 'LEDGER-v1-AAAA\n' > "$T/vol/WEDNESDAY/ledger.db"
+to r0.txt nb --run --now "$(at 0 1 0)"
+S="$(mk_stub rsync_skip_one 'args=(); for a in "$@"; do case "$a" in --files-from=*) L="${a#--files-from=}"; tr "\0" "\n" < "$L" | /usr/bin/grep -v "^ledger.db$" | tr "\n" "\0" > "$L.filtered"; args+=( "--files-from=$L.filtered" );; *) args+=( "$a" );; esac; done; "$REAL" "${args[@]}"; echo "rsync: [sender] read errors mapping \"ledger.db\": Input/output error (5)" >&2; exit 23')"
+write_conf "$S"
+sleep 1; printf 'LEDGER-v2-CCCC\n' > "$T/vol/WEDNESDAY/ledger.db"; echo "also changed" > "$T/vol/WEDNESDAY/a.txt"
+to r1.txt nb --run --now "$(at 1 1 0)"
+no  "T12 H2 engine skips one file and exits 23: the run is NOT exit 0" test "$RC" -eq 0
+has "T12 H2 the skipped file is named" "$(OUTF r1.txt)" "NOT DELIVERED: WEDNESDAY/ledger.db"
+yes "T12 H2 the file that DID arrive is proven and current" cmp -s "$T/vol/WEDNESDAY/a.txt" "$(CUR)/a.txt"
+write_conf
+to r2.txt nb --run --now "$(at 2 1 0)"
+is  "T12 H2 NEIGHBOUR a healthy engine the next night: GOOD" 0 "$RC"
+yes "T12 H2 ... the changed content arrived" /usr/bin/grep -q -F 'LEDGER-v2-CCCC' "$(CUR)/ledger.db"
+#   exit 23 with every listed path proven is survived (a listed file that vanished before the copy)
+fixture fg3
+S="$(mk_stub rsync_exit23_all_arrive '"$REAL" "$@"; echo "rsync: some noise" >&2; exit 23')"; write_conf "$S"
+to r0.txt nb --run --now "$(at 0 1 0)"
+is  "T12 an engine that exits 23 although EVERY listed file arrived and is proven: GOOD (the proof decides, not the code)" 0 "$RC"
+#   a file not sent tonight whose destination copy has gone bad is caught by the sample (QA mutant Q09)
+fixture fg4
+to r0.txt nb --run --now "$(at 0 1 0)"
+printf 'XXX content of a\n' > "$(CUR)/a.txt"
+to r1.txt nb --run --now "$(at 1 1 0)"
+no  "T12 a destination copy that changed behind our back (same size): the run is NOT exit 0" test "$RC" -eq 0
+has "T12 ... the sample of unsent files says so" "$(OUTF r1.txt)" "sha256 sample of files not sent tonight"
+
+#   a file that CHANGES WHILE the run is copying is sent again, and the re-send never overwrites the previous night's kept copy
+fixture live; echo "night1 content" > "$T/vol/WEDNESDAY/live.log"
+to r0.txt nb --run --now "$(at 0 1 0)"
+echo "night2 content, longer" > "$T/vol/WEDNESDAY/live.log"
+S="$(mk_stub rsync_source_moves_once '"$REAL" "$@"; rc=$?; if [ ! -e "$STUBDIR/once" ]; then : > "$STUBDIR/once"; echo "appended during the copy" >> "$STUBDIR/../vol/WEDNESDAY/live.log"; fi; exit $rc')"; write_conf "$S"
+to r1.txt nb --run --now "$(at 1 1 0)"
+is  "T12 a file appended to DURING the copy: the run re-sends it and is GOOD" 0 "$RC"
+has "T12 ... it says one file was re-sent" "$(OUTF r1.txt)" "1 re-sent because the source changed meanwhile"
+yes "T12 ... the destination holds the source's FINAL content" cmp -s "$T/vol/WEDNESDAY/live.log" "$(CUR)/live.log"
+yes "T12 ... night 1's copy is STILL kept under versions/ (the re-send did not overwrite it)" test -n "$(/usr/bin/grep -r -l -x -F 'night1 content' "$(VER)" 2>&1)"
+yes "T12 ... and the intermediate copy went to its own _pass2 folder" test -n "$(find "$(VER)" -path '*_pass2*' -name live.log 2>&1)"
+fixture live2; echo "night1 content" > "$T/vol/WEDNESDAY/live.log"
+to r0.txt nb --run --now "$(at 0 1 0)"
+S="$(mk_stub rsync_source_always_moves '"$REAL" "$@"; rc=$?; echo "appended again" >> "$STUBDIR/../vol/WEDNESDAY/live.log"; exit $rc')"; write_conf "$S"
+echo "night2" >> "$T/vol/WEDNESDAY/live.log"
+to r1.txt nb --run --now "$(at 1 1 0)"
+no  "T12 a file that changes after EVERY pass is never proven: the run is NOT exit 0" test "$RC" -eq 0
+has "T12 ... and it is named" "$(OUTF r1.txt)" "NOT DELIVERED: WEDNESDAY/live.log"
+
+echo; echo "T13 SECRETS BY SHAPE (QA finding 2): any case, any decoration, and hard links"
+fixture sec; W="$T/vol/WEDNESDAY"
+mkdir -p "$W/v1/4_credentials" "$W/v2/4_CREDENTIALS" "$W/v3/3_access_keys" "$W/v4/.SSH" "$W/v5/.AWS" \
+         "$W/d1/4_Credentials (conflict_on_2026-09-17)" "$W/d2/4_Credentials.bak" "$W/d3/4_Credentials copy" "$W/d4/old_3_Access_Keys" \
+         "$W/files" "$W/4_Credentials"
+for d in v1/4_credentials v2/4_CREDENTIALS v3/3_access_keys v4/.SSH v5/.AWS "d1/4_Credentials (conflict_on_2026-09-17)" d2/4_Credentials.bak "d3/4_Credentials copy" d4/old_3_Access_Keys; do echo "$MARK $d" > "$W/$d/inside.txt"; done
+for f in .ENV .Env.local server.PEM private.KEY ID_RSA Credentials.json Secrets.json ".env (conflict_on_2026-09-17)" prod.env.bak .envrc .env1 \
+         github_deploy_rw .git-credentials key.ppk terraform.tfstate client_secret.json x.p12 y.pfx z.key q.env id_ed25519.pub wallet.skey my_deploy_key server.pem.bak; do
+  echo "$MARK $f" > "$W/files/$f"; done
+echo "$MARK real secret" > "$W/4_Credentials/token.txt"
+ln "$W/4_Credentials/token.txt" "$W/files/innocent_name.txt"        # a hard link INTO the secrets folder, under an ordinary name
+echo "ordinary neighbour" > "$W/files/neighbour.txt"
+is  "T13 control: the marker is planted in 35 files at the source" 35 "$(/usr/bin/grep -r -l -F -- "$MARK" "$W" | wc -l | tr -d ' ')"
+to s.txt nb --run --now "$(at 0 1 0)"
+is  "T13 run exits 0" 0 "$RC"
+is  "T13 NOT ONE of the 35 marked files is on the NAS (case variants, decorated names, unlisted shapes, the hard link)" 0 "$(on_nas "$MARK")"
+yes "T13 NEIGHBOUR the ordinary file beside them arrived" test -f "$(CUR)/files/neighbour.txt"
+has "T13 the summary counts exclusions per secret shape" "$(OUTF s.txt)" "excluded as secret-shaped (entries, by shape; counts only): credential-file="
+has "T13 ... the folder-name shape" "$(OUTF s.txt)" "credentials-folder-name=8"
+has "T13 the hard-linked file is skipped and counted" "$(OUTF s.txt)" "SKIPPED: 1 file(s) with more than one hard link"
+yes "T13 ... and NAMED in the manifest" /usr/bin/grep -r -q -F 'innocent_name.txt' "$T/lane/manifests/wednesday"
+hasnt "T13 the summary prints counts, never a secret's name" "$(OUTF s.txt)" "github_deploy_rw"
+echo "$MARK leak" > "$(CUR)/files/leaked_by_hand.txt"
+is  "T13 CAN-FAIL: a marked file put on the fake NAS by hand IS found by the same count" 1 "$(on_nas "$MARK")"
+#   AppleDouble litter is a FILE; a real folder of that shape is kept (QA minor)
+fixture dotunder; mkdir -p "$T/vol/WEDNESDAY/._realfolder"; echo keep > "$T/vol/WEDNESDAY/._realfolder/keep.txt"; echo litter > "$T/vol/WEDNESDAY/._litter"
+to s.txt nb --run --now "$(at 0 1 0)"
+yes "T13 a real FOLDER named ._something is backed up with its contents" test -f "$(CUR)/._realfolder/keep.txt"
+no  "T13 a ._ FILE (AppleDouble litter) is not" test -e "$(CUR)/._litter"
+
+echo; echo "T14 OTHER CLIENTS AND SEATS (QA finding 3)"
+fixture cli; W="$T/vol/WEDNESDAY"
+mkdir -p "$W/sub/DataSec" "$W/sub/DATAsec-notes" "$W/sub/Tuesday-handover" "$W/projects/nexusai" "$W/projects/MPS Calculator" "$T/vol/CODING/Secuura/Blockchain/dataSEC" "$T/vol/CODING/Secuura/Blockchain/src/friday-lib"
+echo "$MARK d1" > "$W/sub/DataSec/x.txt"; echo "$MARK d2" > "$W/sub/DATAsec-notes/x.txt"; echo "$MARK d3" > "$W/sub/Tuesday-handover/x.txt"; echo "$MARK d4" > "$T/vol/CODING/Secuura/Blockchain/dataSEC/x.txt"
+echo "report" > "$W/projects/nexusai/report.md"; echo "calc" > "$W/projects/MPS Calculator/calc.md"; echo "lamps" > "$W/sub/lamps.txt"; echo "lib" > "$T/vol/CODING/Secuura/Blockchain/src/friday-lib/nextFriday.js"
+printf 'token=nexusai\nword=mps\n' > "$T/lane/seats/wednesday.tokens"
+to c.txt nb --run --now "$(at 0 1 0)"
+is  "T14 run exits 0" 0 "$RC"
+is  "T14 a name containing the other client's name, in ANY case, does not travel (4 planted, 3 spellings, both sets)" 0 "$(on_nas "$MARK")"
+has "T14 ... and is counted as other-client" "$(OUTF c.txt)" "other-client="
+yes "T14 inside a PROJECT folder a seat's weekday name is not a seat (a library file stays)" test -f "$T/nas/Secuura/Wednesday/nightly-backup/current/Secuura/Blockchain/src/friday-lib/nextFriday.js"
+yes "T14 a folder under the other client's PROJECT name inside this seat's own tree is backed up (Kam's ruling on shared folders)" test -f "$(CUR)/projects/nexusai/report.md"
+has "T14 ... and REPORTED per token" "$(OUTF c.txt)" "nexusai=1"
+has "T14 the short token is a whole word: 'MPS Calculator' counts, 'lamps' does not" "$(OUTF c.txt)" "mps (whole word)=1"
+#   set= sources: realpath first, forbidden by containment
+fixture cli2; mkdir -p "$T/vol/CODING/Datasec/proj" "$T/vol/CODING/Datasec-archive/proj" "$T/vol/CODING/plain/proj"; echo d > "$T/vol/CODING/Datasec/proj/d.txt"; echo d > "$T/vol/CODING/Datasec-archive/proj/d.txt"; echo p > "$T/vol/CODING/plain/proj/p.txt"
+ln -s "$T/vol/CODING/Datasec" "$T/vol/CODING/alias"; ln -s "$T/vol/CODING/plain/proj" "$T/vol/CODING/linkproj"; ln -s "$T/vol/CODING/plain" "$T/vol/CODING/plainalias"
+write_conf "" refuse "set=General|Proj|$T/vol/CODING/Datasec-archive/proj"
+to a.txt nb --run --now "$(at 0 1 0)"
+is  "T14 a source under a folder whose name merely CONTAINS the client (Datasec-archive): exit 2" 2 "$RC"
+has "T14 ... says why" "$(OUTF a.txt)" "contains 'datasec'"
+write_conf "" refuse "set=General|Proj|$T/vol/CODING/alias/proj"
+to b.txt nb --run --now "$(at 0 1 0)"
+is  "T14 a source reached through a symlinked parent (alias -> Datasec): exit 2" 2 "$RC"
+has "T14 ... the REAL path is named" "$(OUTF b.txt)" "real path $T/vol/CODING/Datasec/proj"
+write_conf "" refuse "set=General|Proj|$T/vol/CODING/linkproj"
+to c.txt nb --run --now "$(at 0 1 0)"
+is  "T14 a source that is itself a symlink: exit 2" 2 "$RC"
+has "T14 ... says it is a symlink" "$(OUTF c.txt)" "is a symlink"
+write_conf "" refuse "set=General|Proj|$T/vol/CODING/plainalias/proj"
+to c2.txt nb --run --now "$(at 0 1 0)"
+is  "T14 a clean source reached through a symlinked parent: exit 2" 2 "$RC"
+is  "T14 nothing started in any of the four" 0 "$(started)"
+write_conf "" refuse "set=General|Proj|$T/vol/CODING/plain/proj"
+to d.txt nb --run --now "$(at 0 1 0)"
+is  "T14 NEIGHBOUR the same folder named by its real path: exit 0" 0 "$RC"
+write_conf "" refuse "set=General|../escape|$T/vol/CODING/plain/proj"
+to e.txt nb --run --now "$(at 1 1 0)"
+is  "T14 a destination name with .. in it: exit 2" 2 "$RC"
+has "T14 ... says so" "$(OUTF e.txt)" "must be a plain relative name"
+#   the other seats are not runnable from this lane at all
+mkdir -p "$T/vol/TUESDAY" "$T/vol/FRIDAY"
+env -u WED_AGENT NB_TEST_ROOT="$T" NB_TEST_TREE="$T/vol/TUESDAY" "$LANE/nas_backup.sh" --dry > "$T/out/tu.txt" 2>&1; RC=$?
+is  "T14 a TUESDAY tree: exit 2 even for a dry run" 2 "$RC"
+has "T14 ... no confirmed scope" "$(OUTF tu.txt)" "has no confirmed scope in this lane"
+env -u WED_AGENT NB_TEST_ROOT="$T" NB_TEST_TREE="$T/vol/FRIDAY" "$LANE/nas_backup.sh" --dry > "$T/out/fr.txt" 2>&1; RC=$?
+is  "T14 a FRIDAY tree: exit 2" 2 "$RC"
+#   a state file that belongs to another seat is refused
+fixture cli3; mkdir -p "$T/lane/state"; echo '{"seat": "tuesday", "schema": 2}' > "$T/lane/state/wednesday.json"
+to s.txt nb --run --now "$(at 0 1 0)"
+no  "T14 a state file that says it is another seat's: the run is NOT exit 0" test "$RC" -eq 0
+has "T14 ... says whose it is" "$(OUTF s.txt)" "belongs to seat 'tuesday'"
+#   the test-mode fence
+env -u WED_AGENT NB_TEST_ROOT="$HOME" NB_TEST_TREE="$T/vol/WEDNESDAY" "$LANE/nas_backup.sh" --dry > "$T/out/fence.txt" 2>&1; RC=$?
+has "T14 test mode outside /private/tmp is refused BY THE FENCE" "$(OUTF fence.txt)" "must be an existing directory under /private/tmp"
+
+echo; echo "T15 THE CONFIGURATION FAILS CLOSED (QA finding 4)"
+fixture cf; W="$T/vol/WEDNESDAY"; mkdir -p "$W/bulk/deep" "$W/_q" "$W/keepme" "$W/cachedir" "$T/vol/CODING/Secuura/Blockchain/onlyhere"
+echo "$MARK bulk" > "$W/bulk/deep/big.bin"; echo "$MARK byname" > "$W/cachedir/c.bin"; echo "$MARK setname" > "$T/vol/CODING/Secuura/Blockchain/onlyhere/s.bin"; echo keep > "$W/keepme/k.txt"
+mkdir -p "$W/onlyhere"; echo "wed" > "$W/onlyhere/w.txt"
+write_conf "" refuse "exclude_path=WEDNESDAY|bulk" "exclude_name=cachedir" "exclude_name_in=Secuura|onlyhere"
+to ok.txt nb --run --now "$(at 0 1 0)"
+is  "T15 intact conf: exit 0" 0 "$RC"
+is  "T15 exclude_path, exclude_name and exclude_name_in each keep their folder out (3 marked files)" 0 "$(on_nas "$MARK")"
+yes "T15 NEIGHBOUR an ordinary folder arrives" test -f "$(CUR)/keepme/k.txt"
+yes "T15 exclude_name_in applies to ITS set only: the same folder name in the other set arrives" test -f "$(CUR)/onlyhere/w.txt"
+C="$T/lane/seats/wednesday.conf"
+#   truncated: the END marker is gone
+cp "$C" "$T/conf.good"; /usr/bin/grep -v -E '^END ' "$T/conf.good" > "$C"
+to t1.txt nb --run --now "$(at 1 1 0)"
+is  "T15 a conf that lost its END marker (truncated): exit 2" 2 "$RC"
+has "T15 ... says so" "$(OUTF t1.txt)" "does not end with its"
+#   every exclude line lost, END marker still there
+/usr/bin/grep -v -E '^exclude' "$T/conf.good" > "$C"
+to t2.txt nb --run --now "$(at 1 1 0)"
+is  "T15 a conf that lost its exclude lines but kept the marker: exit 2" 2 "$RC"
+has "T15 ... both numbers are printed" "$(OUTF t2.txt)" "declares 16 lines and holds 13"
+#   a one-letter typo in an exclude_path
+sed -e 's/^exclude_path=WEDNESDAY|bulk$/exclude_path=WEDNESDAY|bulc/' "$T/conf.good" > "$C"
+to t3.txt nb --run --now "$(at 1 1 0)"
+is  "T15 an exclude_path that names nothing: exit 2" 2 "$RC"
+has "T15 ... refused BY NAME" "$(OUTF t3.txt)" "exclude_path=WEDNESDAY|bulc names nothing"
+#   exclude_name=*
+sed -e 's/^exclude_name=cachedir$/exclude_name=*/' "$T/conf.good" > "$C"
+to t4.txt nb --run --now "$(at 1 1 0)"
+is  "T15 exclude_name=*: exit 2" 2 "$RC"
+has "T15 ... says it would empty the backup" "$(OUTF t4.txt)" "matches every name"
+is  "T15 none of the four damaged confs copied anything: the marked files are still not on the NAS" 0 "$(on_nas "$MARK")"
+cp "$T/conf.good" "$C"
+to t5.txt nb --run --now "$(at 1 1 0)"
+is  "T15 NEIGHBOUR the intact conf again: exit 0" 0 "$RC"
+#   an emptied source, and a sharp fall
+fixture shrink; W="$T/vol/WEDNESDAY"; for i in 1 2 3 4 5 6 7 8 9 10 11 12; do echo "$i" > "$W/sub/n$i.txt"; done
+to g.txt nb --run --now "$(at 0 1 0)"
+is  "T15 first night GOOD with 17 files" "0/17" "$RC/$(state last_good.set_counts.WEDNESDAY)"
+mkdir -p "$T/held2"; for i in 1 2 3 4 5 6 7 8 9 10 11 12; do mv -n "$W/sub/n$i.txt" "$T/held2/"; done; mv -n "$W/a.txt" "$W/same.txt" "$T/held2/"
+to s1.txt nb --run --now "$(at 1 1 0)"
+no  "T15 a set that lost more than half its files overnight (17 -> 3): the run is NOT exit 0" test "$RC" -eq 0
+has "T15 ... with the two numbers" "$(OUTF s1.txt)" "SCOPE FELL SHARPLY: 3 files in scope now, 17 at the last good run"
+is  "T15 ... and the last good run is still night 1" "$(at 0 1 0).0" "$(state last_good.time)"
+to s2.txt nb --run --now "$(at 1 2 0)" --accept-shrink "card-accept-shrink-1"
+is  "T15 NEIGHBOUR the same state, accepted once on a card: exit 0" 0 "$RC"
+mv -n "$T/vol/CODING/Secuura/Blockchain" "$T/held2/Blockchain"
+to s3.txt nb --run --now "$(at 2 1 0)"
+no  "T15 a set that became EMPTY: the run is NOT exit 0" test "$RC" -eq 0
+has "T15 ... says EMPTY SCOPE" "$(OUTF s3.txt)" "EMPTY SCOPE"
+hasnt "T15 ... and never GOOD" "$(OUTF s3.txt)" "GOOD: every in-scope"
+#   an unreadable source folder, and an engine that is not rsync 3
+fixture unread; mkdir -p "$T/vol/WEDNESDAY/locked"; echo x > "$T/vol/WEDNESDAY/locked/x.txt"; chmod 000 "$T/vol/WEDNESDAY/locked"
+to u.txt nb --run --now "$(at 0 1 0)"
+chmod 755 "$T/vol/WEDNESDAY/locked"
+no  "T15 a source folder that cannot be read: the run is NOT exit 0" test "$RC" -eq 0
+has "T15 ... says the source could not be fully read" "$(OUTF u.txt)" "source could not be fully read"
+fixture oldrsync; f="$T/stub/rsync_old"; printf '#!/bin/bash\necho "rsync  version 2.6.9  protocol version 29"\n' > "$f"; chmod +x "$f"; write_conf "$f"
+to v.txt nb --run --now "$(at 0 1 0)"
+is  "T15 an engine that is not rsync 3: exit 2" 2 "$RC"
+has "T15 ... says so" "$(OUTF v.txt)" "is not rsync 3"
+
+echo; echo "T16 A DAMAGED STATE FILE (QA finding 9) stops neither the flag nor the backup"
+fixture dmg
+to g.txt nb --run --now "$(at 0 1 0)"
+echo '{"seat": "wednesday", "last_go' > "$T/lane/state/wednesday.json"
+to w.txt watch --check --now "$(at 0 9 0)"
+is  "T16 the watch on a truncated state file: exit 3 (flag-worthy), not a crash" 3 "$RC"
+has "T16 one plain line naming the file" "$(OUTF w.txt)" "STATE FILE DAMAGED: $T/lane/state/wednesday.json"
+hasnt "T16 no Python traceback" "$(OUTF w.txt)" "Traceback"
+yes "T16 the damaged file was MOVED into the lane's quarantine, not deleted" test -n "$(find "$T/lane/state" -path '*_quarantine_*' -name 'wednesday.json.damaged.*' 2>&1)"
+to w2.txt watch --check --now "$(at 0 9 1)"
+is  "T16 the next check runs on a clean state (exit 0)" 0 "$RC"
+to n.txt nightly --now "$(at 1 0 31)"
+is  "T16 the next night's run starts clean and is GOOD" 0 "$RC"
+echo 'garbage' > "$T/lane/state/wednesday.json"
+to n2.txt nightly --now "$(at 2 0 31)"
+has "T16 the nightly job on a garbage state file SAYS it started clean" "$(OUTF n2.txt)" "STATE FILE DAMAGED"
+yes "T16 ... and wrote that to its own log" /usr/bin/grep -q -F 'STATE FILE DAMAGED' "$T/lane/logs/wednesday/nightly.log"
+hasnt "T16 ... no traceback there either" "$(OUTF n2.txt)" "Traceback"
+: > "$T/lane/state/wednesday.json"
+to d.txt doctor_block "$(at 2 9 0)"
+has "T16 doctor on an EMPTY state file: a hard-failure line, not a traceback" "$(OUTF d.txt)" "✗ NO GOOD NAS BACKUP"
+
+echo; echo "T17 A TYPE CHANGE (QA finding 7): the old entry is kept in versions/, the new one is copied, the run is GOOD"
+fixture typ; W="$T/vol/WEDNESDAY"; mkdir -p "$W/thing"; echo "inside the folder" > "$W/thing/in.txt"; echo "i am a file" > "$W/shape"
+to g.txt nb --run --now "$(at 0 1 0)"
+mkdir -p "$T/held"; mv -n "$W/thing" "$T/held/thing"; echo "thing is now a FILE" > "$W/thing"
+mv -n "$W/shape" "$T/held/shape"; mkdir -p "$W/shape"; echo "shape is now a FOLDER" > "$W/shape/new.txt"
+to c.txt nb --run --now "$(at 1 1 0)"
+is  "T17 folder -> file and file -> folder in one night: exit 0" 0 "$RC"
+yes "T17 the new FILE is at the destination" /usr/bin/grep -q -F 'thing is now a FILE' "$(CUR)/thing"
+yes "T17 the new FOLDER is at the destination" /usr/bin/grep -q -F 'shape is now a FOLDER' "$(CUR)/shape/new.txt"
+yes "T17 the old folder's content is kept under versions/" test -n "$(/usr/bin/grep -r -l -F 'inside the folder' "$(VER)" 2>&1)"
+yes "T17 the old file's content is kept under versions/" test -n "$(/usr/bin/grep -r -l -F 'i am a file' "$(VER)" 2>&1)"
+has "T17 the run says what it did" "$(OUTF c.txt)" "TYPE CHANGE: thing"
+to c2.txt nb --run --now "$(at 2 1 0)"
+is  "T17 the night after is GOOD too (round 1 failed forever here)" 0 "$RC"
+
+echo; echo "T18 THE LOCK MEANS ONE WRITER (QA finding 8 and minors)"
+fixture grp
+S="$(mk_stub rsync_slow_then_real 'sleep 6; exec "$REAL" "$@"')"; write_conf "$S"
+nb --run --now "$(at 0 1 0)" > "$T/out/bg.txt" 2>&1 & BG=$!
+sleep 3
+yes "T18 the lock records the engine's own process group" test "$(state_owner engine_pgid)" != "None"
+TOOLPID="$(state_owner pid)"          # the tool itself (python), not the shell that launched it
+kill -KILL "$TOOLPID" 2>&1; wait "$BG" 2>&1
+no  "T18 control: the tool process is gone" kill -0 "$TOOLPID"
+to k1.txt nb --clear-stale-lock
+is  "T18 the tool was killed outright but its engine is still running: --clear-stale-lock REFUSES (exit 6)" 6 "$RC"
+has "T18 ... and says the engine is still running" "$(OUTF k1.txt)" "STILL RUNNING"
+write_conf
+to k2.txt nb --run --now "$(at 0 1 1)"
+is  "T18 a second run beside the orphan engine is refused (exit 6)" 6 "$RC"
+has "T18 ... for the same reason" "$(OUTF k2.txt)" "copy engine is STILL RUNNING"
+sleep 7
+to k3.txt nb --clear-stale-lock
+is  "T18 NEIGHBOUR once the engine has ended, the stale lock can be moved aside (exit 0)" 0 "$RC"
+to k4.txt nb --run --now "$(at 0 1 2)"
+is  "T18 ... and the next run is GOOD" 0 "$RC"
+#   the loser of a simultaneous start is not told STALE about a live run
+fixture race; mkdir -p "$T/lane/state/wednesday.lock.d"
+to r.txt nb --run --now "$(at 0 1 0)"
+is  "T18 a lock taken this very moment (no owner record yet): exit 6" 6 "$RC"
+has "T18 ... it is 'another run holds the lock'" "$(OUTF r.txt)" "another run holds the lock"
+hasnt "T18 ... not STALE" "$(OUTF r.txt)" "STALE lock"
+#   a reused pid is not the holder
+bash -c 'exec -a nas_backup_lookalike sleep 60' & HOLDER=$!
+sleep 1
+printf '{"pid": %s, "pid_started": "Thu Jan  1 00:00:00 1970", "started_local": "long ago"}\n' "$HOLDER" > "$T/lane/state/wednesday.lock.d/owner.json"
+touch -t 202601010000 "$T/lane/state/wednesday.lock.d"
+to r2.txt nb --run --now "$(at 0 1 0)"
+has "T18 a live process that merely has the holder's pid (started at another time) does not hold the lock: STALE" "$(OUTF r2.txt)" "STALE lock"
+kill "$HOLDER" 2>&1; wait "$HOLDER" 2>&1
+
+echo; echo "T19 DAYLIGHT SAVING: the window is local wall time on both change days (Australia/Sydney)"
+TZ=Australia/Sydney "$PY" -c 'import sys, time, datetime
+sys.path.insert(0, sys.argv[1]); import nb_core
+def ep(y, mo, d, h, mi): return time.mktime((y, mo, d, h, mi, 0, 0, 0, -1))
+def w(y, mo, d, h, mi, fh=2, fm=30, hrs=3):
+    o, c, inw = nb_core.window_for(ep(y, mo, d, h, mi), fh, fm, hrs)
+    return "%s-%s %s" % (o.strftime("%H:%M"), c.strftime("%H:%M"), inw)
+print("spring 03:20 ->", w(2026, 10, 4, 3, 20))     # clocks go 02:00 -> 03:00 on 2026-10-04
+print("spring 05:20 ->", w(2026, 10, 4, 5, 20))
+print("spring 05:40 ->", w(2026, 10, 4, 5, 40))
+print("autumn 02:40 ->", w(2027, 4, 4, 2, 40))      # clocks go 03:00 -> 02:00 on 2027-04-04
+print("autumn 05:40 ->", w(2027, 4, 4, 5, 40))
+print("plain  01:00 ->", w(2026, 12, 1, 1, 0, 0, 30, 5))
+print("plain  05:30 ->", w(2026, 12, 1, 5, 30, 0, 30, 5))' "$LANE" > "$T/out/dst.txt" 2>&1; RC=$?
+is  "T19 the arithmetic ran" 0 "$RC"
+has "T19 spring-forward night, 03:20 on the wall: inside a 02:30-05:30 window" "$(OUTF dst.txt)" "spring 03:20 -> 02:30-05:30 True"
+has "T19 spring-forward night, 05:20: still inside" "$(OUTF dst.txt)" "spring 05:20 -> 02:30-05:30 True"
+has "T19 spring-forward night, 05:40: outside (it closes at the 05:30 shift change, not an hour later)" "$(OUTF dst.txt)" "spring 05:40 -> 02:30-05:30 False"
+has "T19 fall-back night, 02:40: inside" "$(OUTF dst.txt)" "autumn 02:40 -> 02:30-05:30 True"
+has "T19 fall-back night, 05:40: outside" "$(OUTF dst.txt)" "autumn 05:40 -> 02:30-05:30 False"
+has "T19 an ordinary night, 05:30 exactly: the window has closed" "$(OUTF dst.txt)" "plain  05:30 -> 00:30-05:30 False"
+
+echo; echo "T20 THE INSTALL CANNOT WALK PAST A HOLD (QA finding 11), and a dry run only LISTS the destination (note 13)"
+fixture inst
+sed -e "s|@PROJECT_DIR@|/some/tree|g" -e "s|@SEAT@|wednesday|g" -e "s|@HOME@|/Users/x|g" -e "s|@NASHOUR@|3|g" -e "s|@NASMIN@|30|g" "$LANE/jobs/nasbackup.plist.template" > "$T/out/rendered.plist"
+yes "T20 the template rendered by the UNEDITED installer's own five substitutions is a valid plist" /usr/bin/plutil -lint "$T/out/rendered.plist"
+is  "T20 ... with no placeholder left in it" 0 "$(/usr/bin/grep -c -E '@[A-Z0-9_]+@' "$T/out/rendered.plist")"
+is  "T20 ... and 24 fires, one an hour" 24 "$(/usr/bin/grep -c -F '<key>Minute</key><integer>30</integer>' "$T/out/rendered.plist")"
+echo "held" > "$T/lane/HOLD_wednesday"
+to h.txt nightly --now "$(at 0 0 31)"
+is  "T20 the script launchd calls, under the hold, inside the window: exit 3" 3 "$RC"
+has "T20 ... says HELD" "$(OUTF h.txt)" "HELD:"
+is  "T20 ... nothing started on the NAS" 0 "$(started)"
+yes "T20 ... and the refusal is in the nightly log, where a morning seat reads it" /usr/bin/grep -q -F 'HELD' "$T/lane/logs/wednesday/nightly.log"
+mv -n "$T/lane/HOLD_wednesday" "$T/lane/HOLD_wednesday.lifted"
+to h2.txt nightly --now "$(at 0 1 30)"
+is  "T20 NEIGHBOUR hold moved aside: the next fire runs (exit 0)" 0 "$RC"
+#   dry run against an EXISTING destination: it lists it, says so, and changes nothing there
+echo "changed since" > "$T/vol/WEDNESDAY/a.txt"
+snapnas() { find "$T/nas" -exec stat -f '%N %z %m %i' {} + 2>&1 | sort | shasum -a 256 | cut -c1-64; }
+B4="$(snapnas)"
+to dry.txt nb --dry
+is  "T20 dry run exits 0" 0 "$RC"
+has "T20 the dry run says what it LISTED on the NAS" "$(OUTF dry.txt)" "listed on the NAS (read-only): $(CUR): 5 files"
+has "T20 ... measures 'to copy' against it" "$(OUTF dry.txt)" "to copy: 1 files"
+is  "T20 ... and the NAS is byte-for-byte as it was (names, sizes, times, inodes)" "$B4" "$(snapnas)"
+is  "T20 the engine was never handed a NAS path in the dry run (lines naming the NAS in its check)" 0 "$(/usr/bin/grep -F 'engine check of the list' "$(OUTF dry.txt)" | /usr/bin/grep -c -F "$T/nas")"
+echo "x" > "$T/nas/General/extra.txt"
+no  "T20 CAN-FAIL: the same snapshot DOES change when a file is added to the NAS" test "$B4" = "$(snapnas)"
 
 echo
 echo "=== $PASS passed, $FAIL failed — fixtures kept at $RUN ==="

@@ -1,0 +1,58 @@
+## 1. every source x {missing, empty, whitespace only, unreadable, a directory, dangling symlink, symlink to the real content, half-written (cut at 40%), cut to 1 byte}
+   expected: a FAILED build (rc 2, nothing written, last line 'wake_pack: FAILED — part ...') or, where the content is whole, a normal build. A build that exits 0 on a damaged source is listed as EXIT-0.
+   FAILED cleanly (rc 2, nothing written, part named, no traceback): 55; built normally from whole content (symlink): 8; everything else: 9
+- persona cut-40pct: rc 0; pack WRITTEN; traceback no; pack 71513 B; grants '76 rows in the file, 31 kept'; ledger rows 20 | 9b9865881/scratchpad/qa-wake-r3/packsrc/persona_cut-40pct/WEDNESDAY/0_Brain/wake/WAKE-wednesday.md  bytes: 71513  ~tokens: 17879 of 60000  state: lega
+- persona cut-1-byte: rc 0; pack WRITTEN; traceback no; pack 70740 B; grants '76 rows in the file, 31 kept'; ledger rows 20 | 9b9865881/scratchpad/qa-wake-r3/packsrc/persona_cut-1-byte/WEDNESDAY/0_Brain/wake/WAKE-wednesday.md  bytes: 70740  ~tokens: 17685 of 60000  state: leg
+- voice cut-40pct: rc 0; pack WRITTEN; traceback no; pack 70475 B; grants '76 rows in the file, 31 kept'; ledger rows 20 | 9b9865881/scratchpad/qa-wake-r3/packsrc/voice_cut-40pct/WEDNESDAY/0_Brain/wake/WAKE-wednesday.md  bytes: 70475  ~tokens: 17619 of 60000  state: legacy
+- voice cut-1-byte: rc 0; pack WRITTEN; traceback no; pack 69007 B; grants '76 rows in the file, 31 kept'; ledger rows 20 | 9b9865881/scratchpad/qa-wake-r3/packsrc/voice_cut-1-byte/WEDNESDAY/0_Brain/wake/WAKE-wednesday.md  bytes: 69007  ~tokens: 17252 of 60000  state: legac
+- kam cut-40pct: rc 0; pack WRITTEN; traceback no; pack 70132 B; grants '76 rows in the file, 31 kept'; ledger rows 20 | 9b9865881/scratchpad/qa-wake-r3/packsrc/kam_cut-40pct/WEDNESDAY/0_Brain/wake/WAKE-wednesday.md  bytes: 70132  ~tokens: 17533 of 60000  state: legacy p
+- kam cut-1-byte: rc 0; pack WRITTEN; traceback no; pack 68436 B; grants '76 rows in the file, 31 kept'; ledger rows 20 | 9b9865881/scratchpad/qa-wake-r3/packsrc/kam_cut-1-byte/WEDNESDAY/0_Brain/wake/WAKE-wednesday.md  bytes: 68436  ~tokens: 17109 of 60000  state: legacy 
+- card cut-40pct: rc 0; pack WRITTEN; traceback no; pack 70231 B; grants '76 rows in the file, 31 kept'; ledger rows 20 | 9b9865881/scratchpad/qa-wake-r3/packsrc/card_cut-40pct/WEDNESDAY/0_Brain/wake/WAKE-wednesday.md  bytes: 70231  ~tokens: 17558 of 60000  state: legacy 
+- grants cut-40pct: rc 0; pack WRITTEN; traceback no; pack 47781 B; grants '28 rows in the file, 8 kept'; ledger rows 20 | 9b9865881/scratchpad/qa-wake-r3/packsrc/grants_cut-40pct/WEDNESDAY/0_Brain/wake/WAKE-wednesday.md  bytes: 47781  ~tokens: 11946 of 60000  state: legac
+- pickup cut-40pct: rc 0; pack WRITTEN; traceback no; pack 72668 B; grants '76 rows in the file, 31 kept'; ledger rows 20 | 9b9865881/scratchpad/qa-wake-r3/packsrc/pickup_cut-40pct/WEDNESDAY/0_Brain/wake/WAKE-wednesday.md  bytes: 72668  ~tokens: 18167 of 60000  state: legac
+## 2. the state part: a STATE file that is empty / header only / another seat's / unreadable / CRLF
+- STATE tool-written (control)                        rc 0; pack written; legacy pickup used instead False | 
+- STATE empty                                         rc 2; pack not written; legacy pickup used instead False | wake_pack: FAILED — part c (state): source is empty: 0_Brain/tasks/STATE-wednesday.md
+- STATE header only, no block                         rc 2; pack not written; legacy pickup used instead False | wake_pack: FAILED — part c (state): 0_Brain/tasks/STATE-wednesday.md holds no '## FLOOR' part: it is not a block written by handover.sh
+- STATE typed by hand, no FLOOR part                  rc 2; pack not written; legacy pickup used instead False | wake_pack: FAILED — part c (state): 0_Brain/tasks/STATE-wednesday.md holds no '## FLOOR' part: it is not a block written by handover.sh
+- STATE CRLF block                                    rc 0; pack written; legacy pickup used instead False | 
+- STATE header says seat tuesday                      rc 0; pack written; legacy pickup used instead False | 
+- STATE block hand-appended (sha no longer matches)   rc 0; pack written; legacy pickup used instead False | 
+## 3. over budget writes nothing
+- budget one token under the pack (18167): rc 3; wake dir: no wake dir; temp files anywhere: 0
+- over budget with an older pack present: rc 3; old pack untouched True; old sidecar untouched True; last line: wake_pack: FAILED — over budget: ~18167 tokens of 1000; the largest part is 'd. Live grants (not provably dead, not prov
+- budget exactly the pack's tokens (18168): rc 0 (must succeed beside the refusal)
+- a 6 MB ledger: rc 3 in 0.1 s; wake dir no wake dir; last line: wake_pack: FAILED — over budget: ~1096394 tokens of 60000; the largest part is 'e. Own ledger (date, headline, rule)' (4321520 bytes)
+- the pack path is a DIRECTORY: rc 2; sidecar written anyway True; temp files left ['WAKE-wednesday.md.tmp.86091'] | wake_pack: FAILED — cannot write the pack at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scrat
+- the wake directory is read-only: rc 2; [] | wake_pack: FAILED — cannot write the pack at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scrat
+## 4. --check on a tampered pack and a tampered sidecar (expected RED for every tamper; GREEN only for the two controls)
+- control: fresh                                                                           GREEN ok | OK: wake pack current (0_Brain/wake/WAKE-wednesday.md, 72669 bytes, ~18168 tokens of 60000, sha256 e14e71cd785a)
+- one byte changed in a grant row                                                          RED   ok | FAULT: pack content differs from what would be built now (sha256 c88c857e4c84 on disk, e14e71cd785a expected)
+- a trailing space added to one line                                                       RED   ok | FAULT: pack content differs from what would be built now (sha256 59ba4e5beef8 on disk, e14e71cd785a expected)
+- a line added that begins 'generated: ' (round 2's m1)                                    RED   ok | FAULT: pack content differs from what would be built now (sha256 2b34c90c9c1f on disk, e14e71cd785a expected)
+- text APPENDED TO the header's own generated: line (the stamp is free text)               RED   ok | FAULT: pack content differs from what would be built now (sha256 dbcfaace1487 on disk, e355f796cb5d expected)
+- the header's generated: value REPLACED by an instruction                                 RED   ok | FAULT: pack content differs from what would be built now (sha256 d2a0d9dbccf3 on disk, 166f95389cbf expected)
+- sidecar: text appended to its line 2 (its own generated: line)                           GREEN <<< UNEXPECTED | OK: wake pack current (0_Brain/wake/WAKE-wednesday.md, 72669 bytes, ~18168 tokens of 60000, sha256 e14e71cd785a)
+- sidecar: one dropped row deleted                                                         RED   ok | FAULT: dropped-rows sidecar differs from what would be built now (sha256 d9da1127bcbb on disk, 86951a6b9ff1 expected): /
+- sidecar: a row added                                                                     RED   ok | FAULT: dropped-rows sidecar differs from what would be built now (sha256 8c478f407306 on disk, 86951a6b9ff1 expected): /
+- pack converted to CRLF                                                                   RED   ok | FAULT: pack was built for an unknown date, today is 2026-11-27 (the grant filter depends on the date)
+- a BOM put in front of the pack                                                           RED   ok | FAULT: the pack's front matter has no 'generated:' line: it was not written by this tool, or was edited
+- front matter: budget_tokens edited                                                       RED   ok | FAULT: pack content differs from what would be built now (sha256 10eb46e80c75 on disk, e14e71cd785a expected)
+- front matter: seat edited to tuesday                                                     RED   ok | FAULT: pack content differs from what would be built now (sha256 34b825c5876c on disk, e14e71cd785a expected)
+- front matter: built_for_date edited to tomorrow, checked tomorrow (a stale pack re-dated by hand) RED   ok | FAULT: pack content differs from what would be built now (sha256 6cde38f478fd on disk, e14b6e1f69a3 expected)
+- pack truncated to its first half                                                         RED   ok | FAULT: pack content differs from what would be built now (sha256 f02f193cecc4 on disk, e14e71cd785a expected)
+- pack emptied                                                                             RED   ok | FAULT: pack was built for an unknown date, today is 2026-11-27 (the grant filter depends on the date)
+- checked for ANOTHER seat (--seat is wednesday; --out names this pack): see section 5     GREEN ok | OK: wake pack current (0_Brain/wake/WAKE-wednesday.md, 72669 bytes, ~18168 tokens of 60000, sha256 e14e71cd785a)
+- control: restored byte for byte                                                          GREEN ok | OK: wake pack current (0_Brain/wake/WAKE-wednesday.md, 72669 bytes, ~18168 tokens of 60000, sha256 e14e71cd785a)
+## 5. a pack built for one seat or one tree, read on another
+- tree A's pack copied into tree B (sources differ by one line; the copy is NEWER than every source): --check rc 1 | FAULT: pack content differs from what would be built now (sha256 04ea325721c8 on disk, f71286d79e08 expected)
+- the wednesday pack checked as --seat tuesday: rc 1 | FAULT: a build now would FAIL: part b (rules): source missing: 0_Brain/learnings/_rules_card_tuesday.md
+- the wednesday pack checked as --seat friday: rc 1 | FAULT: a build now would FAIL: part b (rules): source missing: 0_Brain/learnings/_rules_card_friday.md
+- wake_pack.py --seat tuesday run on the WEDNESDAY tree (no seat guard in the pack tool; the launcher passes $AGENT): rc 2 | wake_pack: FAILED — part b (rules): source missing: 0_Brain/learnings/_rules_card_tuesday.md
+## 6. conflict copies ('(conflict_on_') and '.pre-' backups in every source folder
+- 12 planted conflict / .pre- files: rc 0; pack identical apart from the generated line True; sidecar identical True; 'POISON-QA' in pack 0 times (positive control: 'WEDNESDAY' 14 times)
+- the real grants file is GONE and only its conflict copy is there: rc 2; pack written False | wake_pack: FAILED — part d (grants): source missing: 0_Brain/tasks/EXPIRING-GRANTS.md
+- persona.md is a SYMLINK to a conflict copy: rc 0 (the name check is on the link's own name)
+## 7. two things at once (the first checker's NOT TESTED): 6 pack builds together; a build during handover writes
+- 6 simultaneous builds: exit codes [0, 0, 0, 0, 0, 0]; files in wake/: ['WAKE-wednesday.dropped.txt', 'WAKE-wednesday.md']; --check afterwards rc 0 | OK: wake pack current (0_Brain/wake/WAKE-wednesday.md, 72669 bytes, ~18168 tokens of 60000, sha256 3312cc1528db)
+- 30 rounds of a pack build started beside a handover write: rounds where the write failed, the build failed, or the pack held no WHOLE state block: 0

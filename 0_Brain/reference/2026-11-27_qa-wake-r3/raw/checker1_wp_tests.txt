@@ -1,0 +1,46 @@
+## 1. baseline
+build rc 0 | /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-wake-r3/checker1/base/wp/base/WEDNESDAY/0_Brain/wake/WAKE-wednesday.md  bytes: 72695  ~tokens: 18174 of 60000  state: legacy pickup, first block only  grant
+manifest total 72695 bytes, file on disk 72695 bytes, equal True; tokens in manifest 18174, ceil(bytes/4) 18174, equal True
+manifest part rows 10; sum of their bytes 72695 == total True
+check on fresh pack rc 0 | OK: wake pack current (0_Brain/wake/WAKE-wednesday.md, 72695 bytes, ~18174 tokens of 60000, sha256 cf3bcd780b21)
+## 2. budget boundary and over-budget writes nothing
+budget == exact tokens (18174): rc 0
+budget one token under: rc 3; wake dir: no wake dir | wake_pack: OVER BUDGET — nothing written. The pack would be 72695 bytes, ~18174 tokens; the budget is 18173 tokens (over by ~1).
+budget 1000: rc 3; wake dir: no wake dir; any tmp anywhere: []
+over budget with an existing pack: rc 3; old pack byte-unchanged True; old sidecar unchanged True (a STALE pack stays on disk)
+## 3. a source missing / unreadable / emptied: does the build still exit 0?
+- persona missing: rc 2; pack not written;  | stderr: wake_pack: FAILED — part a (identity): source missing: 0_Brain/identity/persona.md
+- kam.md missing: rc 2; pack not written;  | stderr: wake_pack: FAILED — part a (identity): source missing: 0_Brain/people/kam.md
+- rules card missing: rc 2; pack not written;  | stderr: wake_pack: FAILED — part b (rules): source missing: 0_Brain/learnings/_rules_card_wednesday.md
+- rules card EMPTY (0 bytes): rc 2; pack not written;  | stderr: wake_pack: FAILED — part b (rules): source is empty: 0_Brain/learnings/_rules_card_wednesday.md
+- rules card 'Most reinforced' heading renamed: rc 2; pack not written;  | stderr: wake_pack: FAILED — part b (rules): 0_Brain/learnings/_rules_card_wednesday.md has no '## Most reinforced' section (regenerate it: python3 2_Project_Files/tools/rules_car
+- rules card unreadable (mode 000): rc 2; pack not written;  | stderr: wake_pack: FAILED — part b (rules): source unreadable: 0_Brain/learnings/_rules_card_wednesday.md (Permission denied)
+- rules_card.py missing: rc 2; pack not written;  | stderr: wake_pack: FAILED — part b (rules): source missing: 2_Project_Files/tools/rules_card.py
+- grants file missing: rc 2; pack not written;  | stderr: wake_pack: FAILED — part d (grants): source missing: 0_Brain/tasks/EXPIRING-GRANTS.md
+- grants file EMPTY: rc 2; pack not written;  | stderr: wake_pack: FAILED — part d (grants): source is empty: 0_Brain/tasks/EXPIRING-GRANTS.md
+- grants file unreadable: rc 2; pack not written;  | stderr: wake_pack: FAILED — part d (grants): source unreadable: 0_Brain/tasks/EXPIRING-GRANTS.md (Permission denied)
+- grants rows indented by one space (still a markdown table): rc 2; pack not written;  | stderr: wake_pack: FAILED — part d (grants): no grants table header ('| grant | given | EXPIRES | ...' at the left margin) found in 0_Brain/tasks/EXPIRING-GRANTS.md, although 90 
+- ledger missing: rc 2; pack not written;  | stderr: wake_pack: FAILED — part e (ledger): source missing: 0_Brain/learnings/_ledger.md
+- ledger with zero dated rows: rc 0; pack WRITTEN; pack 64338 B; telltale lines: ['From `0_Brain/tasks/EXPIRING-GRANTS.md` as of 2026-11-27: 76 rows in the file, 31 kept here.', '(no dated row)'] | stderr: 
+- legacy pickup missing (and no STATE): rc 2; pack not written;  | stderr: wake_pack: FAILED — part c (state): no state file at 0_Brain/tasks/STATE-wednesday.md and no legacy pickup at 0_Brain/tasks/NEXT-PICKUP.md: the seat has no handover to bo
+- persona EMPTY (0 bytes): rc 2; pack not written;  | stderr: wake_pack: FAILED — part a (identity): source is empty: 0_Brain/identity/persona.md
+- persona is a directory: rc 2; pack not written;  | stderr: wake_pack: FAILED — part a (identity): source unreadable: 0_Brain/identity/persona.md (Is a directory)
+## 4. --check: each staleness kind, then attempts to read green on a stale or hand-edited pack
+- fresh: rc 0 (GREEN) | OK: wake pack current (0_Brain/wake/WAKE-wednesday.md, 72695 bytes, ~18174 tokens of 60000, sha256 459274a4d34
+- a source touched newer (content same): rc 1 (RED) | FAULT: source newer than the pack: 0_Brain/learnings/_ledger.md; wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- --today tomorrow (built on an earlier date): rc 1 (RED) | FAULT: pack was built for 2026-11-27, today is 2026-11-28 (the grant filter depends on the date); FAULT: pack content differs from what would be built now (sha256 459274a4d348 on disk, 57cd2118ef7d expected); FAULT: dropped-rows sidecar differs from what would be built now (sha256 9427b939faf5 on disk, f368da899844 ex
+- pack hand-edited (a plain line appended): rc 1 (RED) | FAULT: pack content differs from what would be built now (sha256 d48eb1590308 on disk, 459274a4d348 expected); wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- sidecar hand-edited: rc 1 (RED) | FAULT: dropped-rows sidecar differs from what would be built now (sha256 dcfaaa7130b0 on disk, 9427b939faf5 ex; wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- sidecar missing: rc 1 (RED) | FAULT: dropped-rows sidecar missing: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-9; wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- pack missing: rc 1 (RED) | FAULT: pack missing: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881; wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- restored: rc 0 (GREEN) | OK: wake pack current (0_Brain/wake/WAKE-wednesday.md, 72695 bytes, ~18174 tokens of 60000, sha256 459274a4d34
+- ATTACK: a hand-added line that begins 'generated: ' inside the pack: rc 1 (RED) | FAULT: pack content differs from what would be built now (sha256 70208ea5315f on disk, 459274a4d348 expected); wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- ATTACK: a sidecar row rewritten to begin 'generated: ' (the dropped row vanishes from the list): rc 1 (RED) | FAULT: dropped-rows sidecar differs from what would be built now (sha256 ff01c1542225 on disk, 9427b939faf5 ex; wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- ATTACK: source changed, its mtime set back older than the pack: rc 1 (RED) | FAULT: pack content differs from what would be built now (sha256 459274a4d348 on disk, 3bd6826e8daa expected); wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- TASKS.md changed (pointer only, not in the pack): expected GREEN: rc 0 (GREEN) | OK: wake pack current (0_Brain/wake/WAKE-wednesday.md, 72695 bytes, ~18174 tokens of 60000, sha256 459274a4d34
+- a new family file appears (count line changes): rc 1 (RED) | FAULT: pack content differs from what would be built now (sha256 459274a4d348 on disk, 7fe647695d00 expected); wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- --check with --trust-expired-heading against a default build: rc 1 (RED) | FAULT: pack content differs from what would be built now (sha256 459274a4d348 on disk, dce9562aa69d expected); FAULT: dropped-rows sidecar differs from what would be built now (sha256 9427b939faf5 on disk, 3921a5e391f6 ex; wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- --check with another budget against a default build: rc 1 (RED) | FAULT: pack content differs from what would be built now (sha256 459274a4d348 on disk, 060799d2d8ac expected); wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+## 5. conflict copies and .pre- files planted to change the output
+with 9 planted conflict/.pre- files: rc 0; pack identical (ignoring the generated line) True; sidecar identical True; 'POISON-QA' in pack False
+other conflict-name styles in families/ (capitalised, Syncthing, Dropbox, Finder ' 2'): pack identical False; family-file count line: ['Family files in `0_Brain/learnings/families/`: 28.']

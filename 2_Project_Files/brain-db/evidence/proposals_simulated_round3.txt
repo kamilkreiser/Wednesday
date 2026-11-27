@@ -1,0 +1,21 @@
+proposed blocks, stub harness, bash 3.2.57(1)-release, 2026-11-27 13:27:36 AEDT
+-- 1. launcher block on the real WEDNESDAY tree (server may be up or down; index may be stale)
+check: GREEN, 419 files on disk match the index (built 2026-11-27T13:27:39+11:00)
+   (returned in 10 s)
+-- 2. doctor block, server RUNNING and index just checked
+  ✓ brain-db: index current, /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/brain-db/pgdata-wednesday (GREEN, 419 files on disk match the index (built 2026-11-27T13:27:39+11:00))
+-- 3. doctor block, server STOPPED; postgres executables before: 2
+stop: stopped pid 12673 (/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/brain-db/pgdata-wednesday)
+  ✓ brain-db: server stopped (on demand; the next search starts it), /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/brain-db/pgdata-wednesday
+   postgres executables after doctor (it must start nothing): 0
+-- 4. launcher block again from STOPPED (it starts the server)
+check: GREEN, 419 files on disk match the index (built 2026-11-27T13:27:39+11:00)
+-- 5. a tree named TUESDAY with NO scope file: doctor says not adopted, launcher says nothing
+  ✓ brain-db: not adopted on this seat (no scope/tuesday.scope)
+   launcher block output between the marks: []
+   cluster directory created there? no
+-- 6. WED_AGENT disagreeing with the tree (WED_AGENT=friday on WEDNESDAY): both blocks
+  ⚠ brain-db: doctor gave no verdict       braindb: REFUSED — WED_AGENT='friday' but this tree ('WEDNESDAY') is seat 'wednesday' — unset WED_AGENT, or run from the matching tree
+⚠ brain-db up FAILED (the brain files are unaffected; search is unavailable this boot):
+braindb: REFUSED — WED_AGENT='friday' but this tree ('WEDNESDAY') is seat 'wednesday' — unset WED_AGENT, or run from the matching tree
+-- end: the real server is left as block 4 started it; the round's final stop is separate

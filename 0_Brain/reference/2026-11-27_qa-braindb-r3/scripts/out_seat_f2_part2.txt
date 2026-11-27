@@ -1,0 +1,74 @@
+
+######## F4 again: a scope file that EXISTS but is refused (wrong seat line; a hard-denied allow line; a typo). Is a cluster created and a server left running?
+scope with 'seat tuesday': check rc=2 ; braindb: scope file ba
+   cluster directory created by the refused command? YES ; server left running: 1
+stop: stopped pid 51150 (/private/tmp/claude-501/-Volumes-De
+scope with 'allow skill 4_Credentials/*.md': check rc=2 ; braindb: bad2.scope li
+   cluster directory created by the refused command? YES ; server left running: 1
+stop: stopped pid 52496 (/private/tmp/claude-501/-Volumes-De
+scope with 'alow skill 0_Brain/skills/*.md': check rc=2 ; braindb: bad3.scope li
+   cluster directory created by the refused command? YES ; server left running: 1
+stop: stopped pid 53963 (/private/tmp/claude-501/-Volumes-De
+
+######## S6 a TUESDAY-named tree, its proposed scope, plus allow lines a careless seat might write
+T0 proposed tuesday.scope unchanged (control)              rc=0 | WED ledger xneighbour20=0 archive xneighbour21=7 daily xneighbour30=0 pickup xtasksown202=0 | FRI ledger xcanary22=0 daily xcanary38=0 | control TUE own ledger xcanary23=8
+T1 + allow ledger 0_Brain/learnings/_ledger.md             rc=0 | WED ledger xneighbour20=10 archive xneighbour21=7 daily xneighbour30=0 pickup xtasksown202=0 | FRI ledger xcanary22=0 daily xcanary38=0 | control TUE own ledger xcanary23=8
+T2 + allow ledger 0_Brain/learnings/_ledger*.md            rc=0 | WED ledger xneighbour20=10 archive xneighbour21=11 daily xneighbour30=0 pickup xtasksown202=0 | FRI ledger xcanary22=0 daily xcanary38=0 | control TUE own ledger xcanary23=8
+      2  another seat's records ('friday' in the file name)  (_ledger_friday.md, _ledger_friday_archive.md)
+T3 + allow daily 0_Brain/daily/20*.md                      rc=0 | WED ledger xneighbour20=0 archive xneighbour21=7 daily xneighbour30=10 pickup xtasksown202=0 | FRI ledger xcanary22=0 daily xcanary38=0 | control TUE own ledger xcanary23=8
+T4 + allow skill 0_Brain/tasks/*.md                        rc=0 | WED ledger xneighbour20=0 archive xneighbour21=7 daily xneighbour30=0 pickup xtasksown202=2 | FRI ledger xcanary22=0 daily xcanary38=0 | control TUE own ledger xcanary23=8
+      1  another seat's records ('friday' in the file name)  (WEEK-friday.md)
+T5 + allow daily 0_Brain/daily_friday/20*.md               rc=0 | WED ledger xneighbour20=0 archive xneighbour21=7 daily xneighbour30=0 pickup xtasksown202=0 | FRI ledger xcanary22=0 daily xcanary38=0 | control TUE own ledger xcanary23=8
+      1  another seat's records ('friday' in the folder name)  (2026-01-20.md)
+T6 + allow ledger 0_Brain/learnings/_ledger_friday.md      rc=0 | WED ledger xneighbour20=0 archive xneighbour21=7 daily xneighbour30=0 pickup xtasksown202=0 | FRI ledger xcanary22=0 daily xcanary38=0 | control TUE own ledger xcanary23=8
+      1  another seat's records ('friday' in the file name)  (_ledger_friday.md)
+T7 + allow lesson 0_Brain/daily/20*.md                     rc=0 | WED ledger xneighbour20=0 archive xneighbour21=7 daily xneighbour30=0 pickup xtasksown202=0 | FRI ledger xcanary22=0 daily xcanary38=0 | control TUE own ledger xcanary23=8
+      4  a daily-note folder is indexed only by an 'allow daily' line  (2026-06-01-TUESDAY-handover.md, 2026-06-02_tuеsday.md, 2026-06-03_fri-day.md, 2026-06-04_ｆｒｉｄａｙ.md)
+stop: stopped pid 55587 (/private/tmp/claude-501/-Volumes-De
+
+######## F2a data directory spelled with a trailing slash, through a symlink, and relative; the cluster exists (init by the plain path)
+init (plain path) rc=0
+-- started by the PLAIN path, then addressed through the symlink
+plain: rebuild rc=0 ; processes 1
+link: status rc=3 : server: STOPPED
+link, no self-start: check rc=0 : check: GREEN, 43 files on disk match the index (built 2026-11-27T13:59:37+11:00)
+link, self-start ON: search rc=1 : braindb:   mkdir -p "f2/_quarantine_2026-11-27" && mv -n "/private/tmp/c
+link: stop rc=1 : braindb: REFUSED: f2/link/postmaster.pid names data directory '/private/ ; processes 1
+stop: stopped pid 62573 (/private/tmp/claude-501/-Volumes-De
+-- started THROUGH the symlink, then addressed by the plain path
+link: start rc=0 : start: running (pid 64833, socket /tmp/qa3u/.s.PGSQL.5432, no TCP listener)
+plain, no self-start: check rc=0 : check: GREEN, 43 files on disk match the index (built 2026-11-27T13:59:37+11:00)
+plain: status rc=3 : server: STOPPED
+plain: stop rc=1 : braindb: REFUSED: f2/c/postmaster.pid names data directory '/private/tmp ; processes by link spelling 1
+stop: stopped pid 64833 (/private/tmp/claude-501/-Volumes-De
+   processes: 0
+-- trailing slash on an existing cluster
+slash: start rc=1 : braindb: pg_ctl reported a start but no server of ours is running for /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/ ; processes 1
+slash: stop rc=1 : braindb: REFUSED: f2/c//postmast ; processes 1
+stop: stopped pid 66133 (/private/tmp/claude-501/-Volumes-De
+-- double slash inside the path (lock file path stays valid)
+double slash: start rc=1 : braindb: pg_ctl reported a start but no server of ours is running for f2
+   server processes for this cluster now: 1 (plain spelling) + 0 (double-slash spelling)
+server: STOPPED
+double slash: search rc=1 : braindb:   mkdir -p "f2/_quarant
+double slash: stop rc=1 : braindb: REFUSED: f2//c/postmaster.pid names data directory '/private/tm
+   server processes LEFT after the tool's own stop: 1 + 0
+stop: stopped pid 67038 (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16
+   after stop by the plain path: 0 + 0
+pg_ctl: no server running
+
+######## F2b status exit code when another cluster answers on the port given
+start: running (pid 70057, socket /tmp/qa3u/.s.PGSQL.5501, no TCP listener)
+start: running (pid 70362, socket /tmp/qa3u/.s.PGSQL.5502, no TCP listener)
+status addressed to p2 on p1's port: rc=0
+seat: wednesday   tree: fix
+data directory: f2/p2
+cluster version: 15   binaries: postgres (PostgreSQL) 15.19 (Homebrew)
+server: RUNNING (pid 70362, socket /tmp/qa3u/.s.PGSQL.5501)
+braindb: REFUSED: the server answering on socket directory /tmp/qa3u serves data directory '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-brai
+stop: stopped pid 70057 (/private/tmp/claude-501/-Volumes-De
+stop: stopped pid 70362 (/private/tmp/claude-501/-Volumes-De
+
+######## END
+processes with a data directory under /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/seat2-135921: 0
+2026-11-27 13:59:48 AEDT

@@ -1,0 +1,370 @@
+=== nas-backup tests — fixtures under /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/7631275f-52df-479d-a3dc-1b43569e614d/scratchpad/nbtests2/run_20261127-144609_92224 ===
+lane: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/nas-backup   python: Python 3.14.10   rsync: rsync  version 3.5.2  protocol version 33
+
+T1  --dry is the DEFAULT and writes nothing
+  PASS  T1 no-argument run exits 0 (= 0)
+  PASS  T1 it says DRY RUN
+  PASS  T1 it reports what it would copy (5 files in the seat tree)
+  PASS  T1 nothing created on the fake NAS (no seat folder)
+  PASS  T1 no state file written
+  PASS  T1 no run markers on the NAS (= 0)
+
+T2  a real run copies, counts both sides, records state (neighbour of T1: this one DOES write)
+  PASS  T2 real run exits 0 (= 0)
+  PASS  T2 says GOOD
+  PASS  T2 a.txt arrived byte-identical
+  PASS  T2 a name with spaces arrived
+  PASS  T2 a non-ASCII name arrived
+  PASS  T2 the Secuura set landed in the Secuura client folder
+  PASS  T2 an empty folder was created at the destination
+  PASS  T2 the symlink was NOT created on the NAS
+  PASS  T2 the symlink is recorded in the manifest folder on the NAS
+  PASS  T2 one STARTED marker per client (= 2)
+  PASS  T2 one COMPLETE marker per client (= 2)
+  PASS  T2 state: last attempt good (= good)
+  PASS  T2 state: 6 source files counted (= 6)
+  PASS  T2 state: 6 destination files counted (= 6)
+  PASS  T2 state: source bytes = destination bytes (= 49)
+  PASS  T2 the lock was released (moved aside, not left)
+
+T3  ADDITIVE: a changed file keeps its previous version; a file deleted at the source stays
+  PASS  T3 second run exits 0 (= 0)
+  PASS  T3 says GOOD although the destination now holds a file the source lacks
+  PASS  T3 current/a.txt is the NEW content
+  PASS  T3 the PREVIOUS a.txt is kept under versions/
+  PASS  T3 same-size change detected: current/same.txt is BBBB
+  PASS  T3 same-size change: previous AAAA kept under versions/
+  PASS  T3 the file deleted at the source is STILL at the destination
+  PASS  T3 the run reports previous copies kept
+  PASS  T3 state: 5 source files now, 5 counted at destination (= 5/5)
+  PASS  T3 state: 1 destination-only file reported (= 1)
+  PASS  T3 a run with nothing changed copies 0 files
+  PASS  T3 index lost: still 0 files to copy
+  PASS  T3 index lost: the overlap is compared by sha256
+
+T3x CAN-FAIL: the same predicates under sabotaged engines
+  PASS  CAN-FAIL an engine that keeps no previous version: 'previous a.txt kept' (predicate is false under sabotage)
+  PASS  CAN-FAIL a destination file that goes away: 'deleted-at-source file still at destination' (predicate is false under sabotage)
+
+T4  SECRETS and excluded folders never arrive (neighbour: an ordinary file beside them does)
+  PASS  T4 run exits 0 (= 0)
+  PASS  T4 no secret, .git, node_modules, quarantine, live-database or other-seat file is on the NAS
+  PASS  T4 NEIGHBOUR: the ordinary file beside them arrived
+  PASS  T4 the run names the exclusions by category
+  PASS  CAN-FAIL the no-secret predicate, with a secret planted on the fake NAS by hand (predicate is false under sabotage)
+  PASS  T4 an engine log naming a secret-shaped path FAILS the run
+  PASS  T4 ... and says so
+
+T5  REFUSALS, each with a must-succeed neighbour
+  PASS  T5a NAS not in the mount table: exit 2 (= 2)
+  PASS  T5a says not mounted
+  PASS  T5a nothing written to the fake NAS
+  PASS  T5a the refusal is recorded in the state file (= refused)
+  PASS  T5a NEIGHBOUR mounted: exit 0 (= 0)
+  PASS  T5a' a LOCAL folder at the NAS path: exit 2 (= 2)
+  PASS  T5b top-level client folder absent: exit 2 (= 2)
+  PASS  T5b says which folder
+  PASS  T5b the folder was NOT created for us
+  PASS  T5b NEIGHBOUR folder present: exit 0 (= 0)
+  PASS  T5c 'secuura' where 'Secuura' is expected: exit 2 (= 2)
+  PASS  T5c says the names differ in case
+  PASS  T5c nothing started (= 0)
+  PASS  T5c NEIGHBOUR exact case: exit 0 (= 0)
+  PASS  T5c' seat folder 'wednesday' where 'Wednesday' is expected: exit 2 (= 2)
+  PASS  T5d free space under the floor: exit 2 (= 2)
+  PASS  T5d says the floor
+  PASS  T5d NEIGHBOUR enough space: exit 0 (= 0)
+  PASS  T5e live lock: exit 6 (= 6)
+  PASS  T5e names the holder
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/nas-backup/tests/run.sh: line 293: 97646 Terminated: 15          bash -c 'exec -a nas_backup_fakeholder sleep 120'
+  PASS  T5e the holder died: the lock is now STALE: still exit 6 (= 6)
+  PASS  T5e says STALE and that it was not removed
+  PASS  T5e the stale lock is still there (never removed silently)
+  PASS  T5e --clear-stale-lock exits 0 (= 0)
+  PASS  T5e the stale lock was MOVED into a quarantine folder, not deleted
+  PASS  T5e NEIGHBOUR no lock: exit 0 (= 0)
+  PASS  T5f source volume is a network mount, not a local drive: exit 2 (= 2)
+  PASS  T5f says so
+  PASS  T5f NEIGHBOUR local drive: exit 0 (= 0)
+  PASS  T5f' a source outside the seat's drive: exit 2 (= 2)
+  PASS  T5f' says so
+  PASS  T5f' nothing started (= 0)
+  PASS  T5g destination in another client's folder: exit 2 (= 2)
+  PASS  T5g says allow-list
+  PASS  T5g nothing written under Datasec
+  PASS  T5g' a Datasec source path: exit 2 (= 2)
+  PASS  T5g' says another client's material
+  PASS  T5g NEIGHBOUR own clients only: exit 0 (= 0)
+  PASS  T5h WED_AGENT=tuesday on a WEDNESDAY tree: exit 2 (= 2)
+  PASS  T5h says the sources disagree
+  PASS  T5h a tree that is no seat's: exit 2 (= 2)
+  PASS  T5h says it cannot tell the seat
+  PASS  T5h nothing started (= 0)
+  PASS  T5h NEIGHBOUR WED_AGENT agrees with the tree: exit 0 (= 0)
+  PASS  T5i a real run at 14:00: exit 2 (= 2)
+  PASS  T5i says outside the window and names Kam's approval
+  PASS  T5i nothing started (= 0)
+  PASS  T5i NEIGHBOUR the same time with --out-of-sequence <card id>: exit 0 (= 0)
+  PASS  T5i the manifest records the approval
+  PASS  T5i an empty-ish approval is refused: exit 2 (= 2)
+  PASS  T5j HOLD file present: exit 3 (= 3)
+  PASS  T5j nothing started (= 0)
+  PASS  T5j a dry run is still allowed under the hold: exit 0 (= 0)
+  PASS  T5j NEIGHBOUR hold moved aside: exit 0 (= 0)
+  PASS  T5k status=unconfirmed: exit 2 (= 2)
+  PASS  T5k NEIGHBOUR confirmed: exit 0 (= 0)
+  PASS  T5k every deletion-capable engine flag is refused before the engine starts (= 0)
+  PASS  T5m a set above max_files: exit 2 (= 2)
+  PASS  T5m says where the files are
+  PASS  T5m nothing copied for that set
+  PASS  T5m state: not good (= None)
+  PASS  T5m NEIGHBOUR default ceiling: exit 0 (= 0)
+  PASS  T5n run exits 0 (= 0)
+  PASS  T5n the unlisted folder is named as NOT backed up
+  PASS  T5n another client's folder is named as not this seat's
+  PASS  T5n the unlisted folder did not travel
+  PASS  T5n NEIGHBOUR the listed Secuura folder is not reported as unlisted
+  PASS  T5l --now without test mode: exit 2 (= 2)
+
+T6  a DELETING line in the engine's log fails the run whatever the exit code
+  PASS  T6 exit 9 although the engine exited 0 (= 9)
+  PASS  T6 says DELETING
+  PASS  T6 state: the attempt is failed, not good (= failed)
+  PASS  T6 state: no good backup recorded (= None)
+  PASS  T6 no COMPLETE marker (= 0)
+  PASS  T6 NEIGHBOUR the real engine, same fixture: exit 0 (= 0)
+  PASS  T6 a silent, idle engine is stopped as STALLED: exit 7 (= 7)
+  PASS  T6 state says stalled (= stalled)
+  PASS  T6 an overlong engine is stopped by the cap: exit 4 (= 4)
+  PASS  T6 state says killed-cap (= killed-cap)
+
+T7  NIGHTLY catch-up, with the clock supplied
+  PASS  T7 first night, in the window, no backup on record: runs, exit 0 (= 0)
+  PASS  T7 decision RUN
+  PASS  T7 a second fire the same night SKIPS (already backed up)
+  PASS  T7 ... and only one run happened (= 2)
+  PASS  T7 a fire at 14:00 the same day SKIPS (already backed up for that window)
+  PASS  T7 missed one night: the next window RUNS and says it is catching up
+  PASS  T7 ... good (= good)
+  PASS  T7 day 3, 14:00, day-3 night missed: SKIP, outside the window
+  PASS  T7 PAIR the same state at 03:00: RUN
+  PASS  T7 with late_fire=run the 14:00 fire would run
+  PASS  T7 a run in progress: SKIP with the reason
+  PASS  T7 ... exit 0 (= 0)
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/nas-backup/tests/run.sh: line 458:  6300 Terminated: 15          bash -c 'exec -a nas_backup_fakeholder sleep 120'
+  PASS  T7 every nightly decision is in the nightly log
+
+T8  THREE nights missed: the card reaches the place a booting seat READS, consumes nothing, and exists once per gap
+  PASS  T8 night 1 without the NAS: refused, exit 2 (= 2)
+  PASS  T8 after 2 days: not yet overdue (exit 0) (= 0)
+  PASS  T8 night 3: the nightly job says OVERDUE in its own log
+  PASS  T8 ... but the nightly job (a launchd log no seat reads) NEVER prints the card command
+  PASS  T8 at the next boot doctor prints a HARD-failure line
+  PASS  T8 that line, cut at 400 characters as the launcher cuts it, still names the one command to run
+  PASS  T8 running that command: exit 3 (= 3)
+  PASS  T8 ... prints the card command
+  PASS  T8 it is a decision_queue.sh add with a fixed id for the gap
+  PASS  T8 option a = approve an out-of-sequence backup now
+  PASS  T8 option b = wait for tonight's window, the default
+  PASS  T8 the BLUF carries the failure reason
+  PASS  T8 the BLUF counts all three failed nights (the attempt history is not cut short)
+  PASS  T8 printing consumed nothing: a second call prints the command again
+  PASS  T8 a later boot, card still not raised: doctor still fails hard
+  PASS  T8 state records the card as raised (= True)
+  PASS  T8 once raised: exit 4 (= 4)
+  PASS  T8 once raised, the card command is not printed again for this gap
+  PASS  T8 once raised, doctor no longer fails hard
+  PASS  T8 ... it warns instead
+  PASS  T8 NAS back: the next window runs and names the missed nights
+  PASS  T8 after a good backup the watch is quiet (exit 0) (= 0)
+  PASS  T8 ... and so is doctor
+  PASS  T8 a second gap: a NEW card id
+
+T9  the watch does not depend on the backup job, on the NAS, or on any mark set by another script
+  PASS  T9 nothing on record: exit 0 (= 0)
+  PASS  T9 the watch starts the clock itself
+  PASS  T9 48 h, the job never fired: not yet overdue (= 0)
+  PASS  T9 72 h, the job NEVER fired and nobody armed anything: OVERDUE (exit 3) (= 3)
+  PASS  T9 the card says the job did not fire
+  PASS  T9 it still reports with the NAS away and the conf missing (exit 3) (= 3)
+  PASS  T9 HELD: exit 0 (= 0)
+  PASS  T9 HELD is said out loud
+  PASS  T9 HELD raises no card
+  PASS  T9 doctor reports HELD
+  PASS  T9 ... once a day at most: the second boot the same day does not warn again
+  PASS  T9 PAIR the hold moved aside, same state: overdue (exit 3) (= 3)
+  PASS  T9 forty refused attempts on record are capped, not unbounded (= 40)
+  PASS  T9 day 10, never armed, 40 refused fires: OVERDUE (exit 3), not 'ok since the first recorded attempt' (= 3)
+  PASS  T9 the clock still starts at the FIRST attempt (day 1)
+
+T10 the oldest python on the target machines (/usr/bin/python3)
+  PASS  T10 a real run under Python 3.9.6: exit 0 (= 0)
+  PASS  T10 GOOD
+
+T11 names that differ only in case: neither is copied, both are named (the scratch volume cannot hold such a pair, so the listing is supplied)
+  PASS  T11 the planner ran (= 0)
+  PASS  T11 only the non-colliding file is planned for copy
+  PASS  T11 a folder pair that collides is not created; the clean folder is
+  PASS  T11 four files under four colliding names are counted as not backed up, and it is not a failure
+
+T12 FALSE GOOD (QA finding 1): a changed file that was not delivered must FAIL the run, be NAMED, and stay unproven
+  PASS  T12 first night GOOD (= 0)
+  PASS  T12 H1 same-size change, destination copy immutable: the run is NOT exit 0
+  PASS  T12 H1 it does not say GOOD
+  PASS  T12 H1 the undelivered file is NAMED in the run's last lines
+  PASS  T12 H1 the state the watch reads counts it (= 1)
+  PASS  T12 H1 the last good run is still the first night (= 1796047200.0)
+  PASS  T12 H1 the watch's line names the file
+  PASS  T12 H1 control: the destination really is stale
+  PASS  T12 H1 next night, NOTHING changed at the source: still not GOOD (the file was never indexed as arrived)
+  PASS  T12 H1 ... and it is sent again
+  PASS  T12 H1 NEIGHBOUR the lock on the destination copy lifted: GOOD (= 0)
+  PASS  T12 H1 ... and the new content is there
+  PASS  T12 H2 engine skips one file and exits 23: the run is NOT exit 0
+  PASS  T12 H2 the skipped file is named
+  PASS  T12 H2 the file that DID arrive is proven and current
+  PASS  T12 H2 NEIGHBOUR a healthy engine the next night: GOOD (= 0)
+  PASS  T12 H2 ... the changed content arrived
+  PASS  T12 an engine that exits 23 although EVERY listed file arrived and is proven: GOOD (the proof decides, not the code) (= 0)
+  PASS  T12 a destination copy that changed behind our back (same size): the run is NOT exit 0
+  PASS  T12 ... the sample of unsent files says so
+  PASS  T12 a file appended to DURING the copy: the run re-sends it and is GOOD (= 0)
+  PASS  T12 ... it says one file was re-sent
+  PASS  T12 ... the destination holds the source's FINAL content
+  PASS  T12 ... night 1's copy is STILL kept under versions/ (the re-send did not overwrite it)
+  PASS  T12 ... and the intermediate copy went to its own _pass2 folder
+  PASS  T12 a file that changes after EVERY pass is never proven: the run is NOT exit 0
+  PASS  T12 ... and it is named
+
+T13 SECRETS BY SHAPE (QA finding 2): any case, any decoration, and hard links
+  PASS  T13 control: the marker is planted in 35 files at the source (= 35)
+  PASS  T13 run exits 0 (= 0)
+  PASS  T13 NOT ONE of the 35 marked files is on the NAS (case variants, decorated names, unlisted shapes, the hard link) (= 0)
+  PASS  T13 NEIGHBOUR the ordinary file beside them arrived
+  PASS  T13 the summary counts exclusions per secret shape
+  PASS  T13 ... the folder-name shape
+  PASS  T13 the hard-linked file is skipped and counted
+  PASS  T13 ... and NAMED in the manifest
+  PASS  T13 the summary prints counts, never a secret's name
+  PASS  T13 CAN-FAIL: a marked file put on the fake NAS by hand IS found by the same count (= 1)
+  PASS  T13 a real FOLDER named ._something is backed up with its contents
+  PASS  T13 a ._ FILE (AppleDouble litter) is not
+
+T14 OTHER CLIENTS AND SEATS (QA finding 3)
+  PASS  T14 run exits 0 (= 0)
+  PASS  T14 a name containing the other client's name, in ANY case, does not travel (4 planted, 3 spellings, both sets) (= 0)
+  PASS  T14 ... and is counted as other-client
+  PASS  T14 inside a PROJECT folder a seat's weekday name is not a seat (a library file stays)
+  PASS  T14 a folder under the other client's PROJECT name inside this seat's own tree is backed up (Kam's ruling on shared folders)
+  PASS  T14 ... and REPORTED per token
+  PASS  T14 the short token is a whole word: 'MPS Calculator' counts, 'lamps' does not
+  PASS  T14 a source under a folder whose name merely CONTAINS the client (Datasec-archive): exit 2 (= 2)
+  PASS  T14 ... says why
+  PASS  T14 a source reached through a symlinked parent (alias -> Datasec): exit 2 (= 2)
+  PASS  T14 ... the REAL path is named
+  PASS  T14 a source that is itself a symlink: exit 2 (= 2)
+  PASS  T14 ... says it is a symlink
+  PASS  T14 a clean source reached through a symlinked parent: exit 2 (= 2)
+  PASS  T14 nothing started in any of the four (= 0)
+  PASS  T14 NEIGHBOUR the same folder named by its real path: exit 0 (= 0)
+  PASS  T14 a destination name with .. in it: exit 2 (= 2)
+  PASS  T14 ... says so
+  PASS  T14 a TUESDAY tree: exit 2 even for a dry run (= 2)
+  PASS  T14 ... no confirmed scope
+  PASS  T14 a FRIDAY tree: exit 2 (= 2)
+  PASS  T14 a state file that says it is another seat's: the run is NOT exit 0
+  PASS  T14 ... says whose it is
+  PASS  T14 test mode outside /private/tmp is refused BY THE FENCE
+
+T15 THE CONFIGURATION FAILS CLOSED (QA finding 4)
+  PASS  T15 intact conf: exit 0 (= 0)
+  PASS  T15 exclude_path, exclude_name and exclude_name_in each keep their folder out (3 marked files) (= 0)
+  PASS  T15 NEIGHBOUR an ordinary folder arrives
+  PASS  T15 exclude_name_in applies to ITS set only: the same folder name in the other set arrives
+  PASS  T15 a conf that lost its END marker (truncated): exit 2 (= 2)
+  PASS  T15 ... says so
+  PASS  T15 a conf that lost its exclude lines but kept the marker: exit 2 (= 2)
+  PASS  T15 ... both numbers are printed
+  PASS  T15 an exclude_path that names nothing: exit 2 (= 2)
+  PASS  T15 ... refused BY NAME
+  PASS  T15 exclude_name=*: exit 2 (= 2)
+  PASS  T15 ... says it would empty the backup
+  PASS  T15 none of the four damaged confs copied anything: the marked files are still not on the NAS (= 0)
+  PASS  T15 NEIGHBOUR the intact conf again: exit 0 (= 0)
+  PASS  T15 first night GOOD with 17 files (= 0/17)
+  PASS  T15 a set that lost more than half its files overnight (17 -> 3): the run is NOT exit 0
+  PASS  T15 ... with the two numbers
+  PASS  T15 ... and the last good run is still night 1 (= 1796047200.0)
+  PASS  T15 NEIGHBOUR the same state, accepted once on a card: exit 0 (= 0)
+  PASS  T15 a set that became EMPTY: the run is NOT exit 0
+  PASS  T15 ... says EMPTY SCOPE
+  PASS  T15 ... and never GOOD
+  PASS  T15 a source folder that cannot be read: the run is NOT exit 0
+  PASS  T15 ... says the source could not be fully read
+  PASS  T15 an engine that is not rsync 3: exit 2 (= 2)
+  PASS  T15 ... says so
+
+T16 A DAMAGED STATE FILE (QA finding 9) stops neither the flag nor the backup
+  PASS  T16 the watch on a truncated state file: exit 3 (flag-worthy), not a crash (= 3)
+  PASS  T16 one plain line naming the file
+  PASS  T16 no Python traceback
+  PASS  T16 the damaged file was MOVED into the lane's quarantine, not deleted
+  PASS  T16 the next check runs on a clean state (exit 0) (= 0)
+  PASS  T16 the next night's run starts clean and is GOOD (= 0)
+  PASS  T16 the nightly job on a garbage state file SAYS it started clean
+  PASS  T16 ... and wrote that to its own log
+  PASS  T16 ... no traceback there either
+  PASS  T16 doctor on an EMPTY state file: a hard-failure line, not a traceback
+
+T17 A TYPE CHANGE (QA finding 7): the old entry is kept in versions/, the new one is copied, the run is GOOD
+  PASS  T17 folder -> file and file -> folder in one night: exit 0 (= 0)
+  PASS  T17 the new FILE is at the destination
+  PASS  T17 the new FOLDER is at the destination
+  PASS  T17 the old folder's content is kept under versions/
+  PASS  T17 the old file's content is kept under versions/
+  PASS  T17 the run says what it did
+  PASS  T17 the night after is GOOD too (round 1 failed forever here) (= 0)
+
+T18 THE LOCK MEANS ONE WRITER (QA finding 8 and minors)
+  PASS  T18 the lock records the engine's own process group
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/nas-backup/tests/run.sh: line 36: kill: (10037) - No such process
+  PASS  T18 control: the tool process is gone
+  PASS  T18 the tool was killed outright but its engine is still running: --clear-stale-lock REFUSES (exit 6) (= 6)
+  PASS  T18 ... and says the engine is still running
+  PASS  T18 a second run beside the orphan engine is refused (exit 6) (= 6)
+  PASS  T18 ... for the same reason
+  PASS  T18 NEIGHBOUR once the engine has ended, the stale lock can be moved aside (exit 0) (= 0)
+  PASS  T18 ... and the next run is GOOD (= 0)
+  PASS  T18 a lock taken this very moment (no owner record yet): exit 6 (= 6)
+  PASS  T18 ... it is 'another run holds the lock'
+  PASS  T18 ... not STALE
+  PASS  T18 a live process that merely has the holder's pid (started at another time) does not hold the lock: STALE
+/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/nas-backup/tests/run.sh: line 873: 13887 Terminated: 15          bash -c 'exec -a nas_backup_lookalike sleep 60'
+
+T19 DAYLIGHT SAVING: the window is local wall time on both change days (Australia/Sydney)
+  PASS  T19 the arithmetic ran (= 0)
+  PASS  T19 spring-forward night, 03:20 on the wall: inside a 02:30-05:30 window
+  PASS  T19 spring-forward night, 05:20: still inside
+  PASS  T19 spring-forward night, 05:40: outside (it closes at the 05:30 shift change, not an hour later)
+  PASS  T19 fall-back night, 02:40: inside
+  PASS  T19 fall-back night, 05:40: outside
+  PASS  T19 an ordinary night, 05:30 exactly: the window has closed
+
+T20 THE INSTALL CANNOT WALK PAST A HOLD (QA finding 11), and a dry run only LISTS the destination (note 13)
+/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/7631275f-52df-479d-a3dc-1b43569e614d/scratchpad/nbtests2/run_20261127-144609_92224/inst/out/rendered.plist: OK
+  PASS  T20 the template rendered by the UNEDITED installer's own five substitutions is a valid plist
+  PASS  T20 ... with no placeholder left in it (= 0)
+  PASS  T20 ... and 24 fires, one an hour (= 24)
+  PASS  T20 the script launchd calls, under the hold, inside the window: exit 3 (= 3)
+  PASS  T20 ... says HELD
+  PASS  T20 ... nothing started on the NAS (= 0)
+  PASS  T20 ... and the refusal is in the nightly log, where a morning seat reads it
+  PASS  T20 NEIGHBOUR hold moved aside: the next fire runs (exit 0) (= 0)
+  PASS  T20 dry run exits 0 (= 0)
+  PASS  T20 the dry run says what it LISTED on the NAS
+  PASS  T20 ... measures 'to copy' against it
+  PASS  T20 ... and the NAS is byte-for-byte as it was (names, sizes, times, inodes) (= 0da58b6f669631b90eeee8030e1de48a78e0f3192e6ebe2513dfee6df300ef0f)
+  PASS  T20 the engine was never handed a NAS path in the dry run (lines naming the NAS in its check) (= 0)
+  PASS  T20 CAN-FAIL: the same snapshot DOES change when a file is added to the NAS
+
+=== 319 passed, 0 failed — fixtures kept at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/7631275f-52df-479d-a3dc-1b43569e614d/scratchpad/nbtests2/run_20261127-144609_92224 ===

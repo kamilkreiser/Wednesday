@@ -1,0 +1,137 @@
+proc run dir /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/chk/proc-135153 ; 2026-11-27 13:51:53 AEDT
+
+######## P1 two starts at once (cluster exists, stopped)
+init rc=0
+start A rc=0 : start: running (pid 6190, socket /tmp/qa3c/.s.PGSQL.5432, no TCP listener)
+start B rc=0 : start: already running (pid 6190, /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/chk/proc-135153/c1)
+FATAL lines seen by A: 0  by B: 0
+server processes with -D c1: 1
+  index: no database yet (run: braindb.sh rebuild)
+rebuild rc=0 ; 59 files, built 2026-11-27T13:51:56+11:00, root …indb-r3/chk/atk/r135105/tree
+
+######## P2 two self-starting searches at once on a STOPPED cluster
+waiting for server to shut down.... done
+server stopped
+stop: stopped pid 6190 (/private/tmp/claude-501/-Volumes-Dev
+processes: 0
+search A rc=0 : (1 result, 25 ms; first result: score 0.0133; it holds all 1 of the question's rarest words [xneighbour01])
+search B rc=0 : (1 result, 30 ms; first result: score 0.0133; it holds all 1 of the question's rarest words [xneighbour01])
+server processes with -D c1: 1
+waiting for server to shut down.... done
+server stopped
+stop: stopped pid 7348 (/private/tmp/claude-501/-Volumes-Dev
+after stop: 0 process(es)
+
+######## P2b two self-starting searches at once with NO cluster at all (double init), 4 trials, socket dir /tmp/qa3c-b
+trial 1: A rc=0 ((1 result, 24 ms; first result: score 0.0133; it holds all 1 of the question's rarest words [xneighb) | B rc=0 ((1 result, 33 ms; first result: score 0.0133; it holds all 1 of the question's rarest words [xneighb)
+   data dir after the race: 25 entries, PG_VERSION present
+   a third search, alone, afterwards: rc=0 ((1 result, 23 ms; first result: score 0.0133; it holds all 1 of the question's rarest words [xneighbour01]))
+stop: stopped pid 9041 (/private/tmp/claude-501/-V
+   processes left for n1: 0
+trial 2: A rc=0 ((1 result, 28 ms; first result: score 0.0133; it holds all 1 of the question's rarest words [xneighb) | B rc=0 ((1 result, 22 ms; first result: score 0.0133; it holds all 1 of the question's rarest words [xneighb)
+   data dir after the race: 25 entries, PG_VERSION present
+   a third search, alone, afterwards: rc=0 ((1 result, 37 ms; first result: score 0.0133; it holds all 1 of the question's rarest words [xneighbour01]))
+stop: stopped pid 11469 (/private/tmp/claude-501/-
+   processes left for n2: 0
+trial 3: A rc=0 ((1 result, 26 ms; first result: score 0.0133; it holds all 1 of the question's rarest words [xneighb) | B rc=0 ((1 result, 26 ms; first result: score 0.0133; it holds all 1 of the question's rarest words [xneighb)
+   data dir after the race: 25 entries, PG_VERSION present
+   a third search, alone, afterwards: rc=0 ((1 result, 29 ms; first result: score 0.0133; it holds all 1 of the question's rarest words [xneighbour01]))
+stop: stopped pid 13830 (/private/tmp/claude-501/-
+   processes left for n3: 0
+trial 4: A rc=0 ((1 result, 30 ms; first result: score 0.0133; it holds all 1 of the question's rarest words [xneighb) | B rc=0 ((1 result, 38 ms; first result: score 0.0133; it holds all 1 of the question's rarest words [xneighb)
+   data dir after the race: 25 entries, PG_VERSION present
+   a third search, alone, afterwards: rc=0 ((1 result, 24 ms; first result: score 0.0133; it holds all 1 of the question's rarest words [xneighbour01]))
+stop: stopped pid 15524 (/private/tmp/claude-501/-
+   processes left for n4: 0
+
+######## P4 stale pid file whose pid belongs to an unrelated LIVE process (a python sleeper that DIES on SIGINT or SIGTERM)
+sleeper pid 16491: alive ; c1 processes: 0
+server: STOPPED
+braindb: REFUSED: pid 16491 is alive but was not started with -D /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16
+braindb: TO RECOVER (a person or the coordinator runs this; the tool does not, because a wrong guess here would touch a 
+braindb:   mkdir -p "/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpa
+stop rc=1 ; sleeper alive
+start rc=1 ; sleeper alive
+braindb: STALE PID FILE: c1/postmaster.pid names pid 16491, which is alive but is NOT this index's server (it was not started with -D c1). This happens after a power cut or a pulled drive, when the ol
+braindb: TO RECOVER (a person or the coordinator runs this; the tool does not, because a wrong guess here would touch a live process that is not ours):
+braindb:   mkdir -p "_quarantine_2026-11-27" && mv -n "c1/postmaster.pid" "_quarantine_2026-11-27/postmaster.pid.stale-16491"   then: braindb.sh start
+search rc=1 ; sleeper alive
+up rc=1 ; sleeper alive
+server processes with -D c1: 0 ; pid file line 1 still: 16491
+-- recovery by hand: move the stale pid file aside (mv -n), then start
+start: running (pid 18227, socket /tmp/qa3c/.s.PGSQL.5432, no TCP listener)
+sleeper alive ; c1 processes: 1
+
+######## P5 pid file pointing at ANOTHER Postgres server (c1 RUNNING; c2 a second cluster, stopped, own socket dir)
+c1 server pid 18227 alive
+c2 init rc=0 ; c2 processes: 0
+-- 5a: c2's pid file is a byte copy of c1's (c1's pid AND c1's data directory)
+server: STOPPED
+braindb: REFUSED: c2/postmaster.pid names data directory 'c1', not 'c2'; nothing stopped
+braindb: TO RECOVER (a person or the coordinator runs this; the tool does not, because a wrong guess here would touch a live process that is not ours):
+braindb:   mkdir -p "_quarantine_2026-11-27" && mv -n "c2/postmaster.pid" "_quarantine_2026-11-27/postmaster.pid.stale-18227"   then: braindb.sh start
+c2 stop rc=1 ; c1 server alive
+c2 start rc=1 ; c1 server alive ; c2 processes: 0
+braindb: STALE PID FILE: c2/postmaster.pid names data directory 'c1', not 'c2'. Nothing was started or stopped and the file was left in place.
+braindb: TO RECOVER (a person or the coordinator runs this; the tool does not, because a wrong guess here would touch a live process that is not ours):
+braindb:   mkdir -p "_quarantine_2026-11-27" && mv -n "c2/postmaster.pid" "_quarantine_2026-11-27/postmaster.pid.stale-18227"   then: braindb.sh start
+-- 5b: c2's pid file names c1's pid but c2's OWN data directory
+server: STOPPED
+braindb: REFUSED: pid 18227 is alive but was not started with -D c2; it is not this index's server and was not touched
+braindb: TO RECOVER (a person or the coordinator runs this; the tool does not, because a wrong guess here would touch a live process that is not ours):
+braindb:   mkdir -p "_quarantine_2026-11-27" && mv -n "c2/postmaster.pid" "_quarantine_2026-11-27/postmaster.pid.stale-18227"   then: braindb.sh start
+c2 stop rc=1 ; c1 server alive
+c2 start rc=1 ; c1 server alive ; c2 processes: 0
+c1 still answers:   skipped for a fault: 0 file(s) unreadable on disk now; at  ; c1 pid alive
+
+######## P6 one socket directory, two data directories: can a command addressed to c2 (STOPPED) act on c1's server?
+c1 index before: 59 files, built 2026-11-27T13:51:56+11:00, root …indb-r3/chk/atk/r135105/tree ; c2 processes: 0
+-- 6a default (self-start on): PGDATA=c2, SOCKDIR=c1's, a different tree; rebuild
+rc=1
+braindb: the server did not start; last lines of c2/braindb-server.log follow
+2026-11-27 13:52:15.357 AEDT [21088] FATAL:  lock file "/tmp/qa3c/.s.PGSQL.5432.lock" already exists
+2026-11-27 13:52:15.357 AEDT [21088] HINT:  Is another postmaster (PID 18227) using socket file "/tmp/qa3c/.s.PGSQL.5432"?
+c1 index after 6a: 59 files, built 2026-11-27T13:51:56+11:00, root …indb-r3/chk/atk/r135105/tree ; c2 processes: 0
+-- 6b BRAINDB_NO_AUTOSTART=1 (the mode doctor.sh is proposed to use): same call
+rc=4
+braindb: REFUSED: the server answering on socket directory /tmp/qa3c serves data directory '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4
+c1 index after 6b: 59 files, built 2026-11-27T13:51:56+11:00, root …indb-r3/chk/atk/r135105/tree
+-- 6c BRAINDB_NO_AUTOSTART=1 check, addressed to c2 (stopped)
+braindb: REFUSED: the server answering on socket directory /tmp/qa3c serves data directory '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/chk/proc-135153/c1', but this command is addressed to '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/chk/proc-135153/c2'. Nothing was read or changed. Another cluster is using this socket directory: stop it with its own braindb.sh, or give this one its own BRAINDB_SOCKDIR.
+check rc=4 (the proposed doctor block prints rc 0 as 'index current')
+server: STOPPED
+c1 restored rc=0 : 59 files, built 2026-11-27T13:52:16+11:00, root …indb-r3/chk/atk/r135105/tree
+
+######## P7 command substitution (the launcher's form) returns: out=$(braindb.sh up 2>&1)
+stop: stopped pid 18227 (/private/tmp/cl
+up rc=0 in 1 s ; last line:   skipped for a fault: 0 file(s) unreadable on disk now; at the last rebuild 0 unreadable, 1 row(s) truncated ; c1 processes 1
+
+######## P3 search during a rebuild; two rebuilds at once; stop during a rebuild (scratch cluster c3 over the REAL tree, read-only)
+start: running (pid 23526, socket /tmp/qa3c-b/.s.PGSQL.5432, no TCP listener)
+first full rebuild rc=0 :   total             419    22270   (search rows) ; 419 files, built 2026-11-27T13:52:19+11:00, root …raindb-r3/realcopy/WEDNESDAY
+-- 3a search DURING a rebuild
+rebuild rc=0 ; search rc=0 after 6 s :  1. 0.1127  [lesson, live, ×14]  0_Brain/learnings/2026-09-03_a-pane-close-is-a-session-kill.md:9 / (2 results, 184 ms; first result: score 0.1127; it holds all 2 of the question's rarest words [pane close])
+-- 3b two rebuilds at once
+rebuild A rc=0 (rebuild: done; no file was unreadable and no row was truncated) | rebuild B rc=0 (rebuild: done; no file was unreadable and no row was truncated)
+check: GREEN, 419 files on disk match the index (built 2026-11-27T13:52:41+11:00)
+-- 3c stop DURING a rebuild (before: 419 files, built 2026-11-27T13:52:41+11:00, root …raindb-r3/realcopy/WEDNESDAY)
+stop: stopped pid 23526 (/private/tmp/claude-501/-Volumes-De
+stop rc=0
+interrupted rebuild rc=0 :            0_Brain/learnings/2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md   time: 7.69 s (read and parse 1.02 s, load and index 6.67 s) rebuild: done; no file was unreadable and no row was truncated 
+processes with -D c3 after stop: 0
+start: running (pid 49932, socket /tmp/qa3c-b/.s.PGSQL.5432, no TCP listener)
+after restart: 419 files, built 2026-11-27T13:52:50+11:00, root …raindb-r3/realcopy/WEDNESDAY ; chunks 22270
+check: GREEN, 419 files on disk match the index (built 2026-11-27T13:52:50+11:00)
+
+######## END: stop everything of mine, each with its own socket directory, and count by data directory
+sleeper GONE
+stop: stopped pid 22443 (/private/tmp/claude-501/-Volumes-De
+stop: not running (no pid file in /private/tmp/claude-501/-V
+stop: stopped pid 49932 (/private/tmp/claude-501/-Volumes-De
+stop: not running (no pid file in /private/tmp/claude-501/-V
+stop: not running (no pid file in /private/tmp/claude-501/-V
+stop: not running (no pid file in /private/tmp/claude-501/-V
+stop: not running (no pid file in /private/tmp/claude-501/-V
+processes with a data directory under /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/chk/proc-135153: 0
+socket dirs: [] []
+2026-11-27 13:53:00 AEDT

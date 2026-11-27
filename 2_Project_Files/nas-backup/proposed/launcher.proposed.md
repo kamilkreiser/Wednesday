@@ -1,24 +1,25 @@
-# PROPOSED lines for the seat launcher (`Launch_Wednesday.command`, shared by all three seats). Nothing here is applied.
+# The seat launcher: NO change is proposed (round 2)
 
-The launcher is shared: per the WED-170 design, a change to it is claimed with Tuesday and Friday first.
+Round 1 proposed five lines for `Launch_Wednesday.command` that piped into `tee -a "$PREFLIGHT_LOG"`. QA finding 6: the real launcher has no such variable and runs under `set -u`, so every boot of every seat would have printed `PREFLIGHT_LOG: unbound variable` and lost the line. That proposal is withdrawn (kept at `round1/launcher.proposed.md.round1`). My slip: I wrote a placeholder name into a proposal without reading the file it was for.
 
-## 1. In the preflight section, beside the `doctor.sh` call (it must run at EVERY boot, whether or not the backup job ever fired)
+## Why nothing is needed
+I read the real launcher this round. It already does the one thing required:
+
+- Line 9: `set -u`.
+- Lines 400 to 417: it runs `2_Project_Files/doctor.sh --quiet`, captures the output in a `mktemp` file, and collects doctor's `✗` lines into `PREFLIGHT_HARD` (each cut at 400 characters).
+- Lines 904 to 914: on a rotation, `PREFLIGHT_HARD` is appended to the boot prompt under "FIX THEM FIRST". On a human launch the boot stops and shows them.
+
+The three-day flag now reaches a seat through that existing path: the doctor block (`proposed/doctor.proposed.md`) prints a `✗` line that names `nas_backup_watch.sh --card` while a card is due and not recorded as raised. No launcher line, no new variable, nothing that can break a boot.
+
+## What a seat does when it sees the line
 ```
-# Nightly NAS backup, three-day flag (WED-170, Kam 2026-11-27: "Flag it with me if backup not done for 3 days").
-# Prints one status line; when overdue it prints the ONE decision-card command, once per gap. It never runs it.
-if [ -x "$PROJECT_DIR/2_Project_Files/nas-backup/nas_backup_watch.sh" ]; then
-  bash "$PROJECT_DIR/2_Project_Files/nas-backup/nas_backup_watch.sh" --flag 2>&1 | tee -a "$PREFLIGHT_LOG"
-fi
+bash 2_Project_Files/nas-backup/nas_backup_watch.sh --card
 ```
-(`$PREFLIGHT_LOG` stands for whatever file the launcher already collects its preflight lines in; use that name.)
-
-Rollback: remove the five lines (take `Launch_Wednesday.command.pre-<date>-nasbackup` first).
-
-## 2. One sentence in the boot prompt, where preflight warnings are handled
+It prints one line starting `CARD-COMMAND:`. Run that command (it adds ONE card for Kam, default "wait for tonight's window"), then:
 ```
-If the preflight printed a line starting "CARD-COMMAND:" from nas_backup_watch.sh, the NAS backup has not completed for three days: run that exact command (it adds ONE card for Kam, default "wait for tonight's window"), then run `nas_backup_watch.sh --mark-raised <the card id>`. Do NOT run a backup outside the window unless Kam rules option a; if he does: `nas_backup.sh --run --out-of-sequence <the card id>`.
+bash 2_Project_Files/nas-backup/nas_backup_watch.sh --mark-raised <the card id>
 ```
-Rollback: remove the sentence.
+Do not run a backup outside the window unless Kam rules option a. If he does: `bash 2_Project_Files/nas-backup/nas_backup.sh --run --out-of-sequence <the card id>`.
 
-## Why the command is printed and not run by the tool
-The brief for this round forbids any `decision_queue` write. Beyond this round it is still the safer split: the tool has no board credentials and cannot double-post; the coordinator that adds the card is the one that will read Kam's answer. The price is named: a printed command nobody reads is a flag nobody raised (2026-09-10 lesson). Three things cover that: the watch keeps exiting 3 and printing a reminder line at every boot until `--mark-raised` is recorded; doctor warns on the same condition; the state file shows `flag.raised: false`.
+## Not tested
+The launcher carrying the line into a real boot prompt: read in the launcher's source, not exercised (no launcher was run).

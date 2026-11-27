@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<!-- NIGHTLY COPY-ONLY NAS BACKUP (WED-170; Kam 2026-11-27 12:03: "in the middle of the night (you decide timing but about 2 hours
-     apart) so agents don't all do it at once, each agent backs up / syncs their folder and the working projects to the NAS").
+<!-- NIGHTLY COPY-ONLY NAS BACKUP (WED-170; Kam 2026-11-27 12:03). ROUND 2 TEMPLATE.
      TEMPLATE, NOT INSTALLED: it lives in 2_Project_Files/nas-backup/jobs/ on purpose. scheduler/install_all_jobs.sh installs every
-     template in scheduler/jobs/, so copying this file there IS the arming step, and that is the coordinator's on Kam's word
-     (proposed/install_all_jobs.proposed.md). Same shape as scheduler/jobs/naspush.plist.template; placeholders @PROJECT_DIR@, @SEAT@,
-     @HOME@ as there, plus four fire times @NBH0@:@NBM0@ .. @NBH3@:@NBM3@ rendered per seat:
-       wednesday 00:30 01:40 02:50 04:00 (window 00:30-05:30)   tuesday 02:30 03:20 04:10 05:00 (window 02:30-05:30)
-       friday    04:30 05:40 06:50 08:10 (window 04:30-09:30)
-     WHY FOUR FIRES: nas_backup_nightly.sh runs at most ONE backup per window (it skips when one is good or running), so the later
-     fires only matter when the first could not run: the Mac was asleep, or the NAS was away. launchd also runs a missed fire once
-     on wake. A fire outside the window is logged and skipped by the script. Logs in ~/Library/Logs (PORTABILITY 22: launchd cannot
-     open paths on the drive); the script's own logs are on the drive in nas-backup/logs/<seat>/. -->
+     template in scheduler/jobs/, so copying this file there is part of arming, and that is Wednesday's on Kam's word.
+     IT USES ONLY THE THREE PLACEHOLDERS THE INSTALLER ALREADY RENDERS (PROJECT_DIR, SEAT, HOME, each between @ signs), so an
+     installer that has not been edited yet still writes a VALID plist (QA finding 11: round 1's template had eight placeholders the
+     unedited installer left in, and it would have loaded past the hold).
+     THE SCHEDULE IS NOT IN THIS FILE. It fires at minute 30 of every hour; nas_backup_nightly.sh reads the seat's window from
+     seats/<seat>.conf (Wednesday 00:30 for 5 hours, Tuesday 02:30, Friday 04:30) and does nothing outside it but log one line. Inside
+     the window it runs at most ONE backup, so the later fires only matter when the first could not run (Mac asleep, NAS away).
+     THE HOLD IS NOT IN THE INSTALLER EITHER: the script launchd calls refuses while nas-backup/HOLD_<seat> exists (exit 3, one
+     line in logs/<seat>/nightly.log), whatever order anything was installed in.
+     Logs in ~/Library/Logs (PORTABILITY 22: launchd cannot open paths on the drive). -->
 <plist version="1.0">
 <dict>
   <key>Label</key><string>com.@SEAT@.nasbackup</string>
@@ -22,10 +22,30 @@
   </array>
   <key>StartCalendarInterval</key>
   <array>
-    <dict><key>Hour</key><integer>@NBH0@</integer><key>Minute</key><integer>@NBM0@</integer></dict>
-    <dict><key>Hour</key><integer>@NBH1@</integer><key>Minute</key><integer>@NBM1@</integer></dict>
-    <dict><key>Hour</key><integer>@NBH2@</integer><key>Minute</key><integer>@NBM2@</integer></dict>
-    <dict><key>Hour</key><integer>@NBH3@</integer><key>Minute</key><integer>@NBM3@</integer></dict>
+    <dict><key>Hour</key><integer>0</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>1</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>2</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>3</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>4</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>5</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>6</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>7</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>8</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>9</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>10</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>11</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>12</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>13</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>14</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>15</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>16</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>17</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>18</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>19</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>20</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>21</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>22</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>23</integer><key>Minute</key><integer>30</integer></dict>
   </array>
   <key>EnvironmentVariables</key>
   <dict>

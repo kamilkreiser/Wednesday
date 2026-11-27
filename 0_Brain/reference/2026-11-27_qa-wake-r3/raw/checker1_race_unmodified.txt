@@ -1,0 +1,7 @@
+CRASH: engine rc 137 (killed by os._exit between the archive rename and the state rename)
+  after the crash: state block is S1 True; S1 in archive 1 time(s); S0 in archive 1; S2 anywhere on disk as state/archive False; files ['STATE-wednesday-archive.md', 'STATE-wednesday.lock.d', 'STATE-wednesday.md', 'STATE-wednesday.md.tmp.87885']
+  check after crash: rc 0 handover: OK — one block, 108 bytes of 10000, written 2026-11-27 14:15:13 AEDT
+  next normal write rc 5: state S3 False; archive now holds S1 x1, S0 x1 (a duplicate, nothing lost)
+INTERLEAVE: writer A rc 5 (); writer B rc 0 (handover: written QA-B)
+  final state is B True; S0 in archive x1; A in archive x0; A is the state False  => block A LOST (acknowledged 'written', now in neither file)
+NATURAL RACE: 60 trials of two simultaneous writes: both acknowledged 60; one refused/errored 0; acknowledged block LOST 0; base block not exactly once in archive 0

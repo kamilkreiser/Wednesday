@@ -31,7 +31,7 @@ add("empty-part check off", [(HC, "        elif not body.get(p):", "        elif
 add("--dry writes", [(HC, "    if a.dry:  # a dry run reads and prints; it takes no lock and writes nothing", "    if False:"),
                      (HC, '    if a.dry:\n        print("\\n".join(plan))', '    if False:\n        print("\\n".join(plan))')], "H", ["H12"])
 add("write accepted without --stdin", [(HS, 'if [ "$CMD" = "write" ] && [ "$STDIN" != 1 ]; then', "if false; then")], "H", ["H13"])
-add("seat hardcoded instead of resolved", [(HS, 'seat_note_dir "$TREE" handover || exit 2', "SEAT_NOTE_SEAT=wednesday")], "H", ["H14", "H14b", "H14c"])
+add("seat hardcoded instead of resolved", [(HS, 'seat_note_dir "$TREE" handover || exit 2', "SEAT_NOTE_SEAT=wednesday")], "H", ["H14", "H14c"])
 
 # ── handover: conservation, one block, hand edits ───────────────────────────────────────────────
 add("conservation assert off", [(HC, "        fault = assert_conserved(new_arch, prev_arch, old_body, prefix_len, entry_head, sep)", '        fault = ""')], "H", ["H15"])
@@ -112,7 +112,7 @@ add("expired-heading flag ignored", [(WP, "            if b.trust_expired:\n", "
 # ── wake pack: parts, budget, sidecar, check, failed builds ─────────────────────────────────────
 add("budget check off", [(WP, "    over = tok(total) > a.budget_tokens", "    over = False")], "W", ["W09", "W09b"])
 add("identity truncated", [(WP, '"### %s (verbatim)\\n\\n%s" % (rel, text)', '"### %s (verbatim)\\n\\n%s" % (rel, text[:20])')], "W", ["W02"])
-add("family lines leak into the pack", [(WP, '        if top_text is None and name.lower().startswith("most reinforced"):', "        if top_text is None:")], "W", ["W03"])
+add("family lines leak into the pack", [(WP, '            top_text = "\\n".join(body).rstrip("\\n") + "\\n"', "            top_text = card")], "W", ["W03"])
 add("whole legacy pickup instead of its first block", [(WP, "    end = idx[1] if len(idx) > 1 else len(lines)", "    end = len(lines)")], "W", ["W04"])
 add("ledger rows not reduced", [(WP, '    return "- %s | **%s** | %s" % (date, headline, rule)', "    return line")], "W", ["W07"])
 add("sidecar not written", [(WP, "        for path, body in ((side, side_text), (out, text)):", "        for path, body in ((out, text),):")], "W", ["W17"])
@@ -127,7 +127,7 @@ add("--check skips every line that starts 'generated: ' (round 2's hole, m1)",
 add("Q11 --check ignores a sidecar whose content differs", [(WP, "                    if sha(shave) != sha(swant):", "                    if False:")], "W", ["W11i"])
 add("--check ignores a missing sidecar", [(WP, "            if not os.path.isfile(side):\n                faults.append(", "            if not os.path.isfile(side):\n                (lambda x: None)(")], "W", ["W11g"])
 add("--check ignores the build date", [(WP, "            if not m or m.group(1) != today.isoformat():", "            if False:")], "W", ["W11e"])
-add("M2: an empty source is accepted", [(WP, "        if not data.strip() and not allow_empty:", "        if False:")], "W", ["W18f", "W18l"])
+add("M2: an empty source is accepted", [(WP, "        if not data.strip() and not allow_empty:", "        if False:")], "W", ["W18l"])
 add("M2: a rules card without 'Most reinforced' builds with a placeholder", [(WP, "    if top_text is None:\n        raise BuildFail(", '    if top_text is None:\n        top_text = "(none)\\n"\n    if False:\n        raise BuildFail(')], "W", ["W18c"])
 add("M2: a grants file without its table header is read anyway", [(WP, "    if not any(GRANTS_HEADER.match(l) for l in all_lines):", "    if False:")], "W", ["W18h"])
 add("M2: indented grant rows are silently skipped", [(WP, "    if indented:\n", "    if False:\n")], "W", ["W18i"])
@@ -152,7 +152,7 @@ add("M3: the notice is appended at the END of the prompt, not its first lines",
     [(HB, '    "ultrathink${WAKE_NL}${WAKE_NL}"*) INITIAL_PROMPT="ultrathink${WAKE_NL}${WAKE_NL}${WAKE_NOTICE}${WAKE_NL}${INITIAL_PROMPT#"ultrathink${WAKE_NL}${WAKE_NL}"}" ;;',
       '    "ultrathink${WAKE_NL}${WAKE_NL}"*) INITIAL_PROMPT="${INITIAL_PROMPT}${WAKE_NL}${WAKE_NOTICE}" ;;')], "P", ["P04"])
 add("M3: the notice gives no reason", [(HB, "Why: ${WAKE_FAIL:-no reason was recorded}", "Why: see the terminal")], "P", ["P04", "P04c"])
-add("a text proposal quotes text that is not in its target", [("proposed/06_wrap_step.md", "1. Distil the session: new learnings", "1. Distil the day: new learnings")], "P", ["P10"])
+add("a text proposal quotes text that is not in its target", [("proposed/08_nas_staleness.md", "$SEAT_DIR/0_Brain/tasks/NEXT-PICKUP.md", "$SEAT_DIR/0_Brain/tasks/NEXT-PICKUPS.md")], "P", ["P10"])
 add("M4: a proposal's new text is worded for every seat", [("proposed/03_brain_CLAUDE_md.md", "**On a seat that boots on a wake pack**", "**On every seat**")], "P", ["P18"])
 add("M4: proposal 2 deletes Kam's lesson-load sentence again",
     [("proposed/02_root_CLAUDE_md.md", "1. Read this file → `0_Brain/CLAUDE.md` → `0_Brain/identity/persona.md` +\n```\n\n```new",

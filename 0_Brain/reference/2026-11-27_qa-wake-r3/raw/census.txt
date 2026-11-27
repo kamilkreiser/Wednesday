@@ -1,0 +1,60 @@
+scratch pack build: rc 0, 72669 bytes
+wake_census.sh rc 0; stderr ''; real tasks listing unchanged by it: True; real 0_Brain/wake exists: False
+wake census: seat wednesday, tree /Volumes/DevMASTER/WEDNESDAY, measured 2026-11-27 14:10:48 AEDT
+
+BEFORE: whole reads the current boot prompt mandates (steps 1 to 5)
+  step  file                                                            bytes   ~tokens
+  1     CLAUDE.md                                                       11072      2768
+  1     0_Brain/CLAUDE.md                                                4487      1122
+  2     0_Brain/identity/persona.md                                      1925       482
+  2     0_Brain/identity/voice-protocol.md                               3658       915
+  2     0_Brain/people/kam.md                                            4228      1057
+  3     0_Brain/learnings/_rules_card_wednesday.md                     113173     28294
+  3     0_Brain/learnings/_ledger.md                                    32222      8056
+  4     0_Brain/tasks/NEXT-PICKUP.md                                   304347     76087
+  4     0_Brain/tasks/EXPIRING-GRANTS.md                                87458     21865
+  4     0_Brain/tasks/TASKS.md                                           1553       389
+  4     0_Brain/projects_index/INDEX.md                                230651     57663
+  4     0_Brain/projects_index/entries/* (9 files, 2 conflict/backup)     391930     97983
+  4     0_Brain/tasks/WEEK-INSTRUCTION.md                                5051      1263
+  5     0_Brain/daily/2026-11-26.md (yesterday)                         45076     11269
+  5     0_Brain/daily/2026-11-27.md (today)                             78207     19552
+        TOTAL, with INDEX.md and entries whole                        1315038    328760
+        TOTAL, without the 2 sync-conflict / backup copies            1190847    297712
+        TOTAL, without INDEX.md and entries                            692457    173115
+  (The prompt says 'every file in entries/', so a seat obeying it reads the conflict copies too: the first total.
+   A seat that skips them reads the second. The honest headline is the reduction against the SECOND, the lower one.)
+
+AFTER: the wake pack
+        pack: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-wake-r3/census/WEDNESDAY/0_Brain/wake/WAKE-wednesday.md      72669     18168
+        pack + rules files + week instruction + two daily notes        216562     54141
+        the same with earlier notes on demand (Kam's to rule)           93279     23320
+
+  pack, per part (its own manifest):
+  | part | source | source bytes | bytes in pack | est. tokens (bytes/4) |
+  |---|---|---|---|---|
+  | a | `0_Brain/identity/persona.md` | 1925 | 1969 | 493 |
+  | a | `0_Brain/identity/voice-protocol.md` | 3658 | 3709 | 928 |
+  | a | `0_Brain/people/kam.md` | 4228 | 4266 | 1067 |
+  | b | `0_Brain/learnings/_rules_card_wednesday.md (Most reinforced)` | 113173 | 6623 | 1656 |
+  | b | `family headings + fetch lines (generated)` | - | 3626 | 907 |
+  | c | `0_Brain/tasks/NEXT-PICKUP.md (first block)` | 304347 | 6299 | 1575 |
+  | d | `0_Brain/tasks/EXPIRING-GRANTS.md (filtered rows)` | 87458 | 34970 | 8743 |
+  | e | `0_Brain/learnings/_ledger.md (reduced rows)` | 32222 | 8628 | 2157 |
+  | f | `pointers (generated)` | - | 645 | 162 |
+  | - | headings, manifest, this header | - | 1934 | 484 |
+  | **total** | | | **72669** | **18168** of 60000 |
+
+REDUCTION (headline, the lower figure): 1190847 -> 216562 bytes, 81.8% less, against BEFORE without sync-conflict copies; ~297712 -> ~54141 tokens.
+           against BEFORE with the conflict copies counted (1315038 bytes): 83.5% less.
+           against BEFORE without INDEX.md and entries (692457 bytes): 68.7% less.
+
+Not counted on either side: partial reads (scoreboard head, other ledgers' headlines), live sources (Linear, mail, boards), on-demand files and the prompt itself.
+
+MY OWN SUM (independent of the script), measured 2026-11-27 14:10:48:
+  files missing from the list: none; entries: 9 files 391930 bytes, of which conflict/backup copies 2 files 124191 bytes
+  BEFORE with the conflict copies: 1315038 bytes (~328760 tokens); BEFORE without them: 1190847 bytes (~297712 tokens)
+  AFTER as proposed (pack 72669 + rules files + week instruction + two notes 143893): 216562 bytes (~54141 tokens); with earlier notes on demand: 93279 bytes (~23320 tokens)
+  REDUCTION against BEFORE without conflict copies: 81.8% (notes on demand: 92.2%); against BEFORE with them: 83.5% (notes on demand: 92.9%)
+  the script's three figures equal mine: with True, without True, after True
+  (the legacy pickup and today's note grow while seats work, so these differ from STATUS.md's 13:28 figures by that growth)

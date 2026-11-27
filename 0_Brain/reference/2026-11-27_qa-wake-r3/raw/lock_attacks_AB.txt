@@ -1,0 +1,12 @@
+## A. 2, 3, 5 and 10 simultaneous handover.sh writers (9 KB blocks), generous wait
+RACE w2           writers  2, trials  60, wait 30 s: acknowledged 120, refused 0 (exit codes seen {0: 120}); acknowledged LOST 0; any block more than once 0; refused-but-present 0; refused yet stdout said written 0; archive entry count wrong 0; lock left behind 0; temp files left 0
+RACE w3           writers  3, trials  40, wait 30 s: acknowledged 120, refused 0 (exit codes seen {0: 120}); acknowledged LOST 0; any block more than once 0; refused-but-present 0; refused yet stdout said written 0; archive entry count wrong 0; lock left behind 0; temp files left 0
+RACE w5           writers  5, trials  30, wait 30 s: acknowledged 149, refused 1 (exit codes seen {0: 149, 5: 1}); acknowledged LOST 0; any block more than once 0; refused-but-present 0; refused yet stdout said written 0; archive entry count wrong 0; lock left behind 0; temp files left 0
+RACE w10          writers 10, trials  20, wait 60 s: acknowledged 200, refused 0 (exit codes seen {0: 200}); acknowledged LOST 0; any block more than once 0; refused-but-present 0; refused yet stdout said written 0; archive entry count wrong 0; lock left behind 0; temp files left 0
+## A2. the same with the wait cut to the floor (0.2 s): starved writers must be REFUSED rc 5, never written, never lost when acknowledged
+RACE w5starve     writers  5, trials  30, wait 0.2 s: acknowledged 150, refused 0 (exit codes seen {0: 150}); acknowledged LOST 0; any block more than once 0; refused-but-present 0; refused yet stdout said written 0; archive entry count wrong 0; lock left behind 0; temp files left 0
+RACE w10starve    writers 10, trials  20, wait 0.2 s: acknowledged 200, refused 0 (exit codes seen {0: 200}); acknowledged LOST 0; any block more than once 0; refused-but-present 0; refused yet stdout said written 0; archive entry count wrong 0; lock left behind 0; temp files left 0
+## B. NEGATIVE CONTROL: the same harness against a copy of the engine with the lock removed must SEE losses
+RACE NOLOCKw3     writers  3, trials  40, wait 30 s: acknowledged 115, refused 5 (exit codes seen {0: 115, 4: 5}); acknowledged LOST 1; any block more than once 0; refused-but-present 0; refused yet stdout said written 0; archive entry count wrong 1; lock left behind 0; temp files left 5
+   control verdict: the harness SEES a lost acknowledged block when the lock is off
+rc=0

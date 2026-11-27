@@ -50,7 +50,7 @@ TARGET: `CLAUDE.md`
    tokens in the boot.
 ```
 
-And in `0_Brain/CLAUDE.md`, the one line (shown here, not as a machine-checked block, because the checker's test reads one target per file):
+And in `0_Brain/CLAUDE.md`, the one line (shown here, not as a machine-checked block, because the lane's test reads one target per file):
 
 - old: `3. **All** of \`learnings/\` (this is deliberate — token cost accepted)`
 - new: `3. The seat's rules as its boot prompt names them (the wake pack's rules part, or \`learnings/_rules_card_<seat>.md\`); lesson files are opened when a rule fires, not all at boot`

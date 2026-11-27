@@ -1,0 +1,30 @@
+## unit: parse_frontmatter on tier-looking lines INSIDE a closed frontmatter block (ANSWER-3 item 1(i): 'a line that looks like a tier line but no tier was parsed -> EXCLUDE')
+  control: plain     line 'tier: P-Datasec/X'          looks like a tier line (the tool's own TIERISH regex): True  | parsed tier: 'P-Datasec/X'      | faults: none  => EXCLUDED
+  list dash          line '- tier: P-Datasec/X'        looks like a tier line (the tool's own TIERISH regex): True  | parsed tier: None               | faults: none  => INDEXED as untagged
+  nested list        line '  - tier: P-Datasec/X'      looks like a tier line (the tool's own TIERISH regex): True  | parsed tier: None               | faults: none  => INDEXED as untagged
+  zero-width space   line '\u200btier: P-Datasec/X'    looks like a tier line (the tool's own TIERISH regex): True  | parsed tier: None               | faults: none  => INDEXED as untagged
+  asterisk           line '* tier: P-Datasec/X'        looks like a tier line (the tool's own TIERISH regex): True  | parsed tier: None               | faults: none  => INDEXED as untagged
+  quote mark         line '> tier: P-Datasec/X'        looks like a tier line (the tool's own TIERISH regex): True  | parsed tier: None               | faults: none  => INDEXED as untagged
+  bracket            line '[tier: P-Datasec/X]'        looks like a tier line (the tool's own TIERISH regex): True  | parsed tier: None               | faults: none  => INDEXED as untagged
+  key with suffix    line 'tier (project): P-Datasec/X' looks like a tier line (the tool's own TIERISH regex): False | parsed tier: None               | faults: none  => INDEXED as untagged
+  the branch meant to catch it: 'elif TIERISH.match(line)' sits under 'if ":" in line' -> TIERISH needs a ':' so the elif can never run: True
+## F8 from the first checker's injection run (its control-byte row): search zatkctl1
+rc=0 args=['search', 'zatkctl1']
+      | search: "zatkctl1"  rules and lessons first
+      |     snippet: touch /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/chk/atk/r135105/cwd/PWNED_sub1) `touch /private/tmp/claude
+      | (1 result, 22 ms; first result: score 0.0106; it holds all 1 of the question's rarest words [zatkctl1])
+## WEAK anywhere in the tool's code or a search output of mine: 0 code lines ; 0 output lines (control: 'LAST LINE' lines 17)
+## one leaked lesson is reachable through the tool's own search (tree-main of f1_new)
+rebuild rc=0 ; rebuild: done; no file was unreadable and no row was truncated
+search qzcase13tok rc=0 :  1. 0.0203  [lesson, live]  0_Brain/learnings/2026-02-02_list-item-tier.md:8
+search qzcase75tok rc=0 :  1. 0.0217  [lesson, live]  0_Brain/learnings/2026-02-04_tabs-to-spaces.md:8
+search qzcase51tok rc=0 :  1. 0.0183  [lesson, live]  0_Brain/learnings/2026-02-03_mk-nested-fence.md:21
+search qzcase72tok rc=0 :  1. 0.0217  [lesson, live]  0_Brain/learnings/2026-02-04_key-no-ext.md:8
+search qzcase04tok rc=0 : NO MATCH: none of these words is in the index. If you know the moment, try: braindb.sh at <trigger>
+-- the rebuild report's lines about the rules index and the UNTAGGED list length
+  rules index: 14 well-formed rows, 2 joined to an indexed lesson, 12 dropped (their lesson is excluded or missing)
+  rules index: 1 DAMAGED row(s) ignored (wrong field count or a bad '#n'); a lesson named by one is excluded and listed below
+  UNTAGGED lessons indexed (no tier in the frontmatter; treated as W, as boot_digest.py does): 17
+           0_Brain/learnings/2026-02-01_ctl-untagged.md
+0
+stop: stopped pid 63230 (/private/tmp/claude-501/-

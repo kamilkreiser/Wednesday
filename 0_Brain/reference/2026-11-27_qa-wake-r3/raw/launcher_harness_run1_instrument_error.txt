@@ -1,0 +1,62 @@
+## 0. apply and parse
+patch on the scratch copy: rc 0 
+/bin/bash -n orig.command: rc 0 
+/bin/bash -n patched.command: rc 0 
+shell: GNU bash, version 3.2.57(1)-release (arm64-apple-darwin26)
+rollback line (patch -R) on the patched copy: rc 0; byte-identical to the original again: True
+line-level difference original -> patched: [('insert', 282, 282, 312), ('insert', 870, 901, 984)] (inserted lines 115, deleted 0, replaced 0)
+names the added lines assign (16): WAKE_FAIL WAKE_HEAD WAKE_LAST WAKE_M1 WAKE_M2 WAKE_NL WAKE_NOTES WAKE_NOTICE WAKE_OUT WAKE_PACK WAKE_PACK_OK WAKE_PY WAKE_RC WAKE_STEP5 WAKE_SUMMARY WAKE_TAIL
+  of those, already used in the ORIGINAL launcher (whole word): none (positive control: WAKE_MODE_FILE occurs 3 times)
+in the added lines (comments excluded): backticks 0; '$(' 2; eval 0; 'set -e' 0; 'exit' 0; 'rm ' 0; 'export' 0; bash-4-only forms 0 (positive control: 'if [' 9)
+    the '$(' lines: WAKE_OUT="$(python3 "$WAKE_PY" --seat "$AGENT" 2>&1)"; WAKE_RC=$?
+    the '$(' lines: WAKE_LAST="$(printf '%s\n' "$WAKE_OUT" | tail -1)"
+added statements OUTSIDE an `if AGENT = wednesday` block: ['fi', '  WAKE_PACK="$BRAIN_DIR/wake/WAKE-${AGENT}.md"', '  WAKE_PY="$PROJECT_DIR/2_Project_Files/wake/wake_pack.py"', '  if [ -f "$WAKE_PY" ]; then', '  [ "$WAKE_PACK_OK" = "1" ] || echo "⚠ WAKE PACK NOT BUILT — $WAKE_FAIL — this boot uses the legacy read list, and the prompt says so in its first lines"']
+## 1. tuesday and friday: the prompt before and after, identical dummy variables
+- tuesday: original rc 0, 21100 bytes, sha 2b1cc46eb2035fed | patched rc 0, 21100 bytes, sha 2b1cc46eb2035fed | BYTE-IDENTICAL True | stdout identical True ('') | stderr identical True ('') | a wake directory was created: False
+    control (the prompts are the seats' own, not empty stubs): [b'NEXT-PICKUP-TUESDAY', b'_ledger_laptop_datasec', b'STUB-NOTE-ENTRY-WHERE']; 'WAKE' occurs 0 times in the patched prompt
+- friday: original rc 0, 21991 bytes, sha e2e2e2d0925736cb | patched rc 0, 21991 bytes, sha e2e2e2d0925736cb | BYTE-IDENTICAL True | stdout identical True ('') | stderr identical True ('') | a wake directory was created: False
+    control (the prompts are the seats' own, not empty stubs): [b'NEXT-PICKUP-FRIDAY', b'_ledger_laptop_datasec', b'_ledger_friday', b'STUB-NOTE-ENTRY-WHERE']; 'WAKE' occurs 0 times in the patched prompt
+## 2. wednesday: the original prompt, then each build outcome on the patched copy
+- original: rc 0, 19850 bytes, sha aeb76e92cf4db5f4; stderr ''
+- the pack builds (real wake_pack.py on a scratch copy of the real sources) rc 0 -> PACK PROMPT; notice is the FIRST text after 'ultrathink': False; as expected
+      why: -
+      stdout: wake pack: bytes: 72669  ~tokens: 18168 of 60000  state: legacy pickup, first block only  grants kept 31 of 76 (21 unclassified)  dropped rows listed in WAKE-wednesday.dropped.txt  ledger rows: 20 / b | stderr: ''
+      the prompt names the pack path: True; the pack file exists: True (72669 bytes)
+- the pack tool is missing                                       rc 0 -> OTHER; notice is the FIRST text after 'ultrathink': False; <<< NOT AS EXPECTED
+      why: -
+      stdout: ⚠ WAKE PACK NOT BUILT — wake_pack.py is missing at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-wake-r3/launcher_trees/w_notool/WEDNESDAY/2_P | stderr: ''
+- build rc non-zero (the grants file is missing)                 rc 0 -> OTHER; notice is the FIRST text after 'ultrathink': False; <<< NOT AS EXPECTED
+      why: -
+      stdout: ⚠ WAKE PACK NOT BUILT — wake_pack.py rc=2: wake_pack: FAILED — part d (grants): source missing: 0_Brain/tasks/EXPIRING-GRANTS.md — this boot uses the legacy read list, and the prompt says so in its fi | stderr: ''
+- build rc non-zero while an OLDER pack from a previous launch is on disk rc 0 -> OTHER; notice is the FIRST text after 'ultrathink': False; <<< NOT AS EXPECTED
+      why: -
+      stdout: ⚠ WAKE PACK NOT BUILT — wake_pack.py rc=2: wake_pack: FAILED — part e (ledger): source missing: 0_Brain/learnings/_ledger.md — this boot uses the legacy read list, and the prompt says so in its first  | stderr: ''
+      the older pack is still on disk: True; the prompt names it: False
+- exit 0 with an EMPTY pack file                                 rc 0 -> OTHER; notice is the FIRST text after 'ultrathink': False; <<< NOT AS EXPECTED
+      why: -
+      stdout: ⚠ WAKE PACK NOT BUILT — wake_pack.py exited 0 but there is no pack (or an empty one) at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-wake-r3/ | stderr: ''
+- exit 0 with NO pack file                                       rc 0 -> OTHER; notice is the FIRST text after 'ultrathink': False; <<< NOT AS EXPECTED
+      why: -
+      stdout: ⚠ WAKE PACK NOT BUILT — wake_pack.py exited 0 but there is no pack (or an empty one) at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-wake-r3/ | stderr: ''
+- python3 is not on the PATH (rc 127)                            rc 0 -> OTHER; notice is the FIRST text after 'ultrathink': False; <<< NOT AS EXPECTED
+      why: -
+      stdout: ⚠ WAKE PACK NOT BUILT — wake_pack.py rc=127: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-wake-r3/launcher/harness_wed_w_nopython.sh: line 42 | stderr: ''
+- over budget (a huge ledger)                                    rc 0 -> OTHER; notice is the FIRST text after 'ultrathink': False; <<< NOT AS EXPECTED
+      why: -
+      stdout: ⚠ WAKE PACK NOT BUILT — wake_pack.py rc=3: wake_pack: FAILED — over budget: ~140117 tokens of 60000; the largest part is 'e. Own ledger (date, headline, rule)' (496419 bytes) — this boot uses the lega | stderr: ''
+- build fails with a HOSTILE last line (backticks, $( ), quotes) rc 0 -> OTHER; notice is the FIRST text after 'ultrathink': False; <<< NOT AS EXPECTED
+      why: -
+      stdout: ⚠ WAKE PACK NOT BUILT — wake_pack.py rc=2: wake_pack: FAILED — `touch "$PROJECT_DIR/PWNED_BACKTICK"` $(touch "$PROJECT_DIR/PWNED_DOLLAR") "; touch "$PROJECT_DIR/PWNED_QUOTE"; echo " ${PROJECT_DIR} \$( | stderr: ''
+      files named PWNED* in the tree: []; the hostile text is in the prompt literally: True
+- the build SUCCEEDS with a hostile summary line                 rc 0 -> PACK PROMPT; notice is the FIRST text after 'ultrathink': False; as expected
+      why: -
+      stdout: wake pack: bytes: 1 `touch "$PROJECT_DIR/PWNED_BACKTICK"` $(touch "$PROJECT_DIR/PWNED_DOLLAR") "; touch "$PROJECT_DIR/PWNED_QUOTE"; echo " ${PROJECT_DIR} / boot prompt: wake pack read list (steps 1 to | stderr: ''
+      files named PWNED* in the tree: []; the hostile text is in the prompt literally: True
+every wednesday case as expected: False
+## 3. the new wednesday prompt against the legacy one
+head before FIRST ACTIONS identical: True (1543 bytes); tail from step 5 identical: True (13227 bytes); steps 1 to 4: legacy 5080 bytes -> new 3913 bytes
+in the new steps 1 to 4: unexpanded '${' 0; '$WAKE' 0; '<<' sentinels []; backticks 0; '$(' 0; STUB-NOTE-ENTRY-WHERE new/legacy 1/1
+## 4. does anything in the ADDED text execute? (xtrace: a command substitution shows as a '++T' line)
+- orig          rc 0; command substitutions executed: 2; the commands: ['bash', 'hostname']
+- patched_ok    rc 0; command substitutions executed: 5; the commands: ['bash', 'hostname', 'printf', 'python3', 'tail']
+- patched_fail  rc 0; command substitutions executed: 5; the commands: ['bash', 'hostname', 'printf', 'python3', 'tail']

@@ -1,0 +1,78 @@
+run dir /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/f357-140110 ; 2026-11-27 14:01:10 AEDT
+
+######## F3a a LEGITIMATE own file with link count 2 (a skill that someone hard-linked into a backup folder): skipped loudly?
+rebuild rc=0
+47:      3  hard link: the same file exists under another name
+48:           0_Brain/learnings/2026-05-01_own-linked.md  [hard link (link count 2): the same file exists under another name]
+49:           0_Brain/learnings/2026-07-27_hardlink.md  [hard link (link count 2): the same file exists under another name]
+50:           0_Brain/skills/legit-ritual.md  [hard link (link count 2): the same file exists under another name]
+last line: rebuild: done; no file was unreadable and no row was truncated
+in index: zlegitskill=0 zlegitlesson=0 (control xneighbour01=9)
+check rc=0 ; does check mention the skipped hard links? lines naming 'hard link' or the files: 0
+check: GREEN, 43 files on disk match the index (built 2026-11-27T14:01:13+11:00)
+  data directory: pg
+  skipped for a fault: 0 file(s) unreadable on disk now; at the last rebuild 0 unreadable, 0 row(s) truncated
+NO MATCH: none of these words is in the index. If you know the moment, try: braindb.sh at <trigger>
+(0 results, 29 ms)
+
+######## F3b symlink chain, and a symlink to a device
+rebuild rc=0 ; zsecretchain in index: 0 ; symlink lines:       4  symlink  (2026-01-15_link.md, 2026-05-02_chain.md, 2026-05-03_devzero.md, abs-link.md)
+
+######## F3c a file swapped between a regular file and a symlink to a 4_Credentials file WHILE rebuilds run (lstat, then open by path)
+40 rebuilds while the file flipped 54692 times: the 4_Credentials text entered the index in 10 rebuild(s); the regular text was indexed in 5 (control: the instrument can see both states)
+last rebuild's last line: rebuild: done; no file was unreadable and no row was truncated
+after the file is moved away and one more rebuild: zsecretswap=0
+
+######## F7 odd files
+rebuild rc=0 ; tracebacks: 0 ; last: rebuild: DONE WITH FAULTS: 0 unreadable file(s) skipped, 1 row(s) truncated; they are listed above
+      4  not a regular file  (2026-05-13_a-dir.md, 2026-05-14_fifo.md, 2026-08-02_a-directory.md, 2026-08-03_a-fifo.md)
+  UNTAGGED lessons indexed (no tier in the frontmatter; treated as W, as boot_digest.py does): 4
+           0_Brain/learnings/2026-01-12_untagged.md
+  rows TRUNCATED at their size limit: 1
+rebuild: DONE WITH FAULTS: 0 unreadable file(s) skipped, 1 row(s) truncated; they are listed above
+in index: zinvalidutf8=3 znulword=3 zmanyheads=20001 zlongbody=2
+check: GREEN, 49 files on disk match the index (built 2026-11-27T14:01:46+11:00)
+-- a file that changes DURING a rebuild (a 60 MB daily note makes the rebuild slow; a lesson is rewritten meanwhile)
+slow rebuild rc=0 (  time: 24.25 s (read and parse 1.40 s, load and index 22.85 s)) ; index holds zbefore=2 zafter=0
+check rc=1 : check: RED, 1 path(s) differ (run: braindb.sh rebuild)   changed since the last rebuild: 0_Brain/learnings/2026-05-21_changing.md 
+
+######## F5a lock: a holder that DIES (kill -9) while a command waits; a holder that stays (the indexer's own lock has no time limit)
+stop: stopped pid 21360 (/private/tmp/claude-501/-Volumes-De
+after 3 s the start is still waiting (correct)
+holder killed with SIGKILL; start rc=0 after 4 s : start: running (pid 70535, socket /tmp/qa3v/.s.PGSQL.5432, no TCP listener)
+-- a live holder that never lets go: rebuild (indexer flock, no timeout) and stop (lock wrapper, 150 s limit)
+rebuild is STILL WAITING after 20 s with no message (output so far: 0 bytes); it has no time limit
+holder ended; rebuild rc=0 : rebuild: DONE WITH FAULTS: 0 unreadable file(s) skipped, 1 row(s) truncated; they are listed above
+
+######## F5b flock on the DRIVE volume (Case-sensitive APFS, owners disabled) versus /tmp: is the lock exclusive there?
+/Volumes/DevMASTER: three holders of 2 s each took 6.3 s in all (exclusive = about 6 s; not exclusive = about 2 s) ; lock file mode 600 kamil
+/System/Volumes/Data: three holders of 2 s each took 6.3 s in all (exclusive = about 6 s; not exclusive = about 2 s) ; lock file mode 600 kamil
+
+######## F5c twelve trials of FOUR commands at once, mixes of search / check / rebuild / start / up / at on a cluster in a random starting state (none, stopped, running)
+trial 1 (stopped): [start] [search xneighbour01] [at pane] [rebuild] -> rc 0 0 0 0 | afterwards: rebuild rc=0, check: GREEN, 50 files on disk match the index (built 2026-1, servers 1, PG_VERSION present
+trial 2 (running, no index): [search zebraword --kind lesson] [start] [search xneighbour01] [at pane] -> rc 0 0 0 0 | afterwards: rebuild rc=0, check: GREEN, 50 files on disk match the index (built 2026-1, servers 1, PG_VERSION present
+trial 3 (no cluster): [check] [search zebraword --kind lesson] [start] [search xneighbour01] -> rc 1 0 0 0 | afterwards: rebuild rc=0, check: GREEN, 50 files on disk match the index (built 2026-1, servers 1, PG_VERSION present
+trial 4 (stopped): [up] [check] [search zebraword --kind lesson] [start] -> rc 0 1 0 0 | afterwards: rebuild rc=0, check: GREEN, 50 files on disk match the index (built 2026-1, servers 1, PG_VERSION present
+trial 5 (running, no index): [rebuild] [up] [check] [search zebraword --kind lesson] -> rc 0 0 1 0 | afterwards: rebuild rc=0, check: GREEN, 50 files on disk match the index (built 2026-1, servers 1, PG_VERSION present
+trial 6 (no cluster): [rebuild] [rebuild] [up] [check] -> rc 0 0 0 1 | afterwards: rebuild rc=0, check: GREEN, 50 files on disk match the index (built 2026-1, servers 1, PG_VERSION present
+trial 7 (stopped): [at pane] [rebuild] [rebuild] [up] -> rc 0 0 0 0 | afterwards: rebuild rc=0, check: GREEN, 50 files on disk match the index (built 2026-1, servers 1, PG_VERSION present
+trial 8 (running, no index): [search xneighbour01] [at pane] [rebuild] [rebuild] -> rc 0 0 0 0 | afterwards: rebuild rc=0, check: GREEN, 50 files on disk match the index (built 2026-1, servers 1, PG_VERSION present
+trial 9 (no cluster): [start] [search xneighbour01] [at pane] [rebuild] -> rc 0 0 0 0 | afterwards: rebuild rc=0, check: GREEN, 50 files on disk match the index (built 2026-1, servers 1, PG_VERSION present
+trial 10 (stopped): [search zebraword --kind lesson] [start] [search xneighbour01] [at pane] -> rc 0 0 0 0 | afterwards: rebuild rc=0, check: GREEN, 50 files on disk match the index (built 2026-1, servers 1, PG_VERSION present
+trial 11 (running, no index): [check] [search zebraword --kind lesson] [start] [search xneighbour01] -> rc 1 0 0 0 | afterwards: rebuild rc=0, check: GREEN, 50 files on disk match the index (built 2026-1, servers 1, PG_VERSION present
+trial 12 (no cluster): [up] [check] [search zebraword --kind lesson] [start] -> rc 0 1 0 0 | afterwards: rebuild rc=0, check: GREEN, 50 files on disk match the index (built 2026-1, servers 1, PG_VERSION present
+commands run at once: 48 ; lost (non-zero other than an honest RED check): 0
+
+######## F5d stop racing a search and a rebuild (6 trials): what do the losers print?
+trial 1: search rc=3 stop rc=0 rebuild rc=3 ; tracebacks 0 ; servers 0 ; braindb: the index server is not answering on /tmp/qa3v-m (run: braindb.sh start) braindb: the index server is not answering on /tmp/qa3v-m (run: braindb.sh start) 
+trial 2: search rc=3 stop rc=0 rebuild rc=3 ; tracebacks 0 ; servers 0 ; braindb: no index yet (never built, or emptied by an unclean stop): building it now braindb: the index server is not answering on /tmp/qa3v-m (run: braindb.sh start) 
+trial 3: search rc=0 stop rc=0 rebuild rc=0 ; tracebacks 0 ; servers 1 ; 
+trial 4: search rc=3 stop rc=0 rebuild rc=3 ; tracebacks 0 ; servers 0 ; braindb: the index server is not answering on /tmp/qa3v-m (run: braindb.sh start) braindb: the index server is not answering on /tmp/qa3v-m (run: braindb.sh start) 
+trial 5: search rc=4 stop rc=0 rebuild rc=0 ; tracebacks 0 ; servers 1 ; braindb: REFUSED: the server answering on socket directory /tmp/qa3v-m serves data directory '(unknown)', but this command is addressed to '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-281
+trial 6: search rc=3 stop rc=0 rebuild rc=3 ; tracebacks 0 ; servers 0 ; braindb: the index server is not answering on /tmp/qa3v-m (run: braindb.sh start) braindb: the index server is not answering on /tmp/qa3v-m (run: braindb.sh start) 
+stop: not running (no pid file in /private/tmp/claude-501/-V
+
+######## END
+stop: stopped pid 70535 (/private/tmp/claude-501/-Volumes-De
+processes with a data directory under /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/f357-140110: 0
+2026-11-27 14:04:34 AEDT

@@ -1,0 +1,127 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261127T024152Z.txt)
+     1	[QUESTION] 2026-11-27T02:41 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] QUESTION: repair design (Seat W 78th)
+=========== [QUESTION] 2026-11-27T02:41 | Secuura/Blockchain-W | [Secuura/Blockchain-W -> Wednesday] QUESTION: repair design (Seat W 78th)
+[Secuura/Blockchain-W -> Wednesday] QUESTION: repair design (Seat W 78th)
+Seat W 78th
+
+QUESTION: repair design. The full note is REC 5_Project_History/2026-11-27_seatW-78th/DESIGN.md (sections 0 to 8). Every line below was re-read in my own clone worktrees/s-w78-base at develop 4764b2cfbc28 (made 02:26Z under STAMP W4; config writes read back equal; no user identity). No code written, nothing touched on any box. WAITING for your ANSWER.
+
+RE-MEASURED AT THIS QUESTION (02:39:58Z): develop 4764b2cfbc28768ef9c7b684e2af2e0f2f1438e5, unmoved. Ordinal 'seat w 78th' 0, 'seat w 77th' 1, control 'seat w 76th' 2. Census: 13 PRs, 96 rows, 0 hits on every path in my plan (the new script, suite and fragment names, run-shell-suites.sh, plus the brief's watches). Control originate/src: 2 rows, PR 2099. Meter 37.8 percent of 1M.
+
+1. RECOMMENDED: ROUTE (1), A ONE-OFF DATA REPAIR, carried as a standalone SQL script.
+- Who runs it: a deploy seat, once per box, as the box's postgres superuser, through docker exec secuura-postgres psql. Migrations and the S seats already use that route (S 129th and S 130th read rolsuper t, rolbypassrls t).
+- Modes: dry is the default when no mode is set; apply; reverse (it takes the apply manifest as a psql-quoted literal, never as SQL text). Sentinel lines on the backfill-subject-deks.js pattern.
+- It is not a migration: the runner never sees it, so no box runs it at its next deploy.
+- Why SQL and not a Node script, measured:
+  - originate has no pg dependency;
+  - originate runs as secuura_app under row security (docker-compose.yml 581), so it would see one tenant per transaction;
+  - Blockchain/Dev/scripts is copied into no image (originate Dockerfile 46-67);
+  - so a Node script would also have to ride an image, which on demo ties the repair to demo's full deploy (point 5).
+
+2. THE BIND: a confirmed row CAN hold a later anchoring. The data still proves which payload confirmed.
+- Caller census (whole repository): four document lifecycle routes load a row with getDocument, which falls back to the PRIMARY KEY (documentRepo.ts 250-257). Those routes are transfer-custody 2419, share 2880, revoke 3037 and lifecycle-events 3172; the re-anchor route (1578) loads the same way. They re-post the anchor under the certification's id with the same content hash (emitLifecycleAnchor, documents.ts 1462-1520; calls 2563, 2983, 3089, 3216). originate's anchors.ts 269 and 384, and the gateway's POST /api/anchors and /batch (proxy.ts 996-1006, connectors), take a caller-supplied id.
+- What bounds a connector here:
+  - mayWriteAnchorRows (anchorOverwriteGuard.ts 536, called at index.ts 1564) refuses ONLY an id owned by another tenant;
+  - mayOverwriteStoredMetadata (350; index.ts 1638-1659, since 2026-10-15) replaces the payload only for the issuer's or custodian's organisation, with equal content_hash and equal anchor_type.
+  Platform S's own repository was NOT searched; it reaches K only through those two routes and those two guards.
+- Why the stored payload is still proof:
+  - (a) A single-path transaction is always built from the row's STORED payload: index.ts 2046-2055, then anchorSubmission.ts 775. The same held on 2026-07-30 (c50d033c6 index.ts 1512-1530) and on 2026-10-15 (8cbadd8d4 1734-1742).
+  - (b) Any overwrite resets status in the same statement (1591). So a confirmed row whose stored payload is the create's was confirmed by a transaction carrying the create's payload.
+  - (c) A batch can never confirm an existing row: it updates only its freshly minted ids (853, 881, 889, 2171-2181).
+  - (d) content_hash is never updated, and a different-hash payload is kept (1640).
+- The extra evidence, all in the data and all in the script's SQL:
+  - E1: the payload names the certification and its hash (anchorSchema.ts 352-356);
+  - E2: the payload timestamp lies in [certified_at, certified_at + 10 s]. certified_at is the route's own now (certificationRepo.ts 267, certifications.ts 476), minted before a POST with a 10 s timeout (687; since 2d837a409, 2026-06-09, before the oldest stuck row). Originate and anchoring share one VM clock. An event's replaced payload falls outside the window;
+  - E3: anchor_store.created_at lies in the same window (it is never updated; it equals the payload timestamp since bf6a43631, 2026-10-31, and before that it is a few ms off, reported, not required);
+  - E4: content_hash equal on both sides;
+  - E5: single anchor_type, no merkle root.
+- What the 47-of-47 agreement proves: the LINK, by construction (the row id never changes, 1666; document_id is the certification id). It does not prove the attempt; E1 to E5 do.
+- STAMP W2: the route choice does NOT turn on the 47 stored timestamps. Both routes would need the same evidence, and the values decide only how many rows get written. The dry run reports them per row (verdict WRITE or REFUSE with every failed predicate named, deltas in ms, expiry flag) before any write. So I ask for no S seat before your ruling. A read-only S seat, or the D seat's Kintsugi dry run, measures them.
+
+3. THE WRITE, exactly writeCertificationAnchorConfirmedIf's semantics with confirmedBlobOf's shape.
+- Both copies are set by MERGE (certificationRepo.ts 444-455); metadata GAINS a blockchain key (certifications are inserted with metadata {}, 265).
+- Keys: the blob loses txHash null, blockHeight null, anchoredAt null, confidence and anchoringStatus. It gains a 64-hex txHash, blockHeight (a stored 0 becomes null, as the GET body does at 1028), anchoredAt (= confirmed_at, else created_at, as confirmedBlobOf 146 does through the GET's mapping at 1030-1031), network and status confirmed. It keeps anchorId and threadToken.
+- updated_at moves. The status column, content_hash and certified_at are never written. No anchored key (G420-4). No certification_events row, no charge, no audit_logs row.
+- The WHERE re-evaluates the WHOLE predicate inside the UPDATE (G420-5 in SQL):
+  - in flight by the product's own test, in SQL;
+  - the measured legacy shape: anchoringStatus submitted, status, txHash and anchoredAt null, NO createAttempts;
+  - the same row by both keys; confirmed; simulated not true; 64-hex;
+  - E1 to E5.
+- Idempotent (a repaired blob leaves the predicate). Reverse is a compare-and-set of the whole metadata, certification_metadata and updated_at columns, only where they still equal the apply's AFTER values. Drift is reported and not written. The proof is byte equality of md5(d::text) per row.
+- The demo row whose anchor failed (failed, simulated t, fabricated prefix) is refused by three independent predicates; a fixture pins it and three mutants test it.
+- Races (G420-6 and the revoke save): a save from a pre-apply read puts the submitted blob back. The post-apply dry run shows it, and a re-run of apply heals it.
+
+4. REJECTED: ROUTE (2), A CODE RULE in certificationAnchorSync.ts. MEASURED REASON: REACH.
+- A certification's anchor read needs a bearer (certificationAnchorSync.ts 60; anchoring's JWT and tenant gates). The rule therefore heals a row only on a PARTY GET more than 15 minutes after its last write (certifications.ts 1187; 138). An anonymous verify never heals.
+- No seat holds the sessions of the issuers of Kintsugi's 10 (2026-09-17 to 2026-11-16). A bounded sweep needs a service credential, which is a new security surface and Kam's.
+- So "stuck 10 to 0" could not be scheduled.
+- Also: it would change the binding on every box at its next deploy, production included, for good. G420-5's JavaScript-only refusal would stay open. And anchoring's GET body does not carry the payload's documentId and hash, so E1 would rest on document_id and content_hash alone.
+
+5. WHO SEES WHAT AT VERIFY (facts; demo is NOT ruled by me).
+- Kintsugi (4764b2cf): the 10 read false today. After apply all 10 read true, and the GET re-reads of G420-1 stop for them.
+- Demo (d4ffc8308249, presence test): all 37 read true today.
+  - (a) KS-2366 deployed alone: all 37 flip to false and stay false.
+  - (b) Repair BEFORE the deploy (possible only with a standalone carrier): verify stays true for all 37 and only the blockchain object of 36 changes. At the deploy 36 stay true and 1 flips to false. Certifications made in between need a second run.
+  - (c) Deploy and repair in one round: all 37 false until the apply, then 36 true and 1 false.
+  - (d) Deploy now, repair later: all 37 false until the repair.
+  - Route (2) on demo: all 37 false at the deploy, each healing only when a party opens it.
+
+6. PHASE B PLAN.
+Closed path list (3 items; anything else is a STOP):
+- (i) NEW Blockchain/Dev/scripts/ks2366-legacy-certification-anchor-repair.sql. BEFORE absent; AFTER the script of point 1 and 3.
+- (ii) NEW Blockchain/Dev/scripts/__tests__/ks2366_legacy_cert_anchor_repair.test.sh, plus a NEW fixtures .sql and a NEW cells .ts beside it (the ks2060 tsx pattern). BEFORE absent; AFTER the suite below.
+- (iii) NEW Projects Documents/fragments/cheat/KS-2366-legacy-certification-anchor-repair.html and the flow twin.
+- NOT touched: every originate and anchoring source file, any migration, any baseline. (So the brief's "pure helper beside the writer" is not needed: the SQL lives in the script.)
+
+The suite follows the repository's own throwaway-Postgres contract:
+- ks949_main_seed_idempotence and ks1401_058 both run on develop: a socket-only PG 15 cluster built as the deployed shape (docker/init plus every non-platform migration);
+- the SKIP contract: no binaries gives one SKIP line, 0/N run, exit 0;
+- the mutant seam KS2366_REPAIR_SQL_UNDER_TEST;
+- found by run-shell-suites.sh's glob (65), so it runs in pre-push leg 14.
+
+Fixtures (synthetic, no box data):
+- K10: Kintsugi shape, both timestamp eras;
+- D37: 36 confirmed plus the failed, simulated, mock_tx_ row;
+- one named negative per predicate: createAttempts present; blob confirmed, failed, anchor_failed or simulated (true and the string 'false'); bad anchorId; anchor row submitted; tx_ prefix or 63 hex; simulated row; another document; hash mismatch; payload documentId or hash mismatch; timestamp 11 s late or before certified_at; created_at outside the window; malformed timestamp; no secuura object; batch type; a lineage document row with external_id; a threadToken to carry; an expired and a revoked certification.
+
+Cells, declared:
+- R1 dry: writes 0; verdicts K10 10 WRITE, D37 36 WRITE and 1 REFUSE naming three predicates; every negative REFUSE naming its own predicate.
+- R2 apply: exact key set in both copies; metadata gained blockchain; status column, content_hash, certified_at and other keys unchanged; updated_at moved; charge_events, billing_charge_events, certification_events and audit_logs counts unchanged; anchor_store aggregate unchanged.
+- R3 re-run: writes 0.
+- R4 reverse: byte-equal per row, and the table aggregate equal.
+- R5 drift: the reverse refuses a re-saved row; a second apply heals it.
+- R6 shape: the SQL-built blob equals the REAL confirmedBlobOf over tsx.
+- R7 flag: the REAL isAnchoredHonestly(presentBlockchainHonestly(blob)) answers false before and true after for K10, and false after for the D37 failed row.
+- R8: a lineage row and an other-document row are untouched.
+- R9: no mode set writes nothing.
+
+Red-first: on arm A (develop plus the suite only) the suite is RED BY ABSENCE of the script. I will say exactly that: it is not a behavioural red. R7's before-half states the defect and is green on both arms.
+
+Mutants: about 30, one counted edit per predicate of point 3 and per SET and WHERE term, plus the reverse compare-and-set and the default mode. Each parses (an R9 dry run rc 0; a parse failure is no kill), is restored by sha256 in a finally, and is killed by a NAMED cell.
+
+Legs (arms A, C and D side by side; one result file per run):
+- the new suite: A red by absence, C green;
+- run-shell-suites.sh WHOLE on both arms: only the new suite differs;
+- every mutant;
+- docs-fragments check ending OK with the new KS-2366 pair;
+- run-code-guards.sh, whose check-script-portability scans the new .sh;
+- originate jest WHOLE and tsc on both arms: unchanged expected (no originate file changes);
+- packages/shared vitest WHOLE: KS-278 alone;
+- the pre-push hook verdict exactly as it prints it (13/16 with 3 skipped is not a pass).
+PR body: the D seat's exact dry, apply and reverse invocations, stated as never run on any box.
+
+TIER 1 (it changes what verify answers on a box once run; routing row C4).
+
+STAMP W3, the branch: KS-2366's Linear branchName (feature/ks-2366-originate-certification-verify-answers) was consumed by PR 2295, merged as 4764b2cf. The repair ticket does not exist yet: my TICKET_DRAFT goes to a board seat at the wrap. So I recommend the drafter's name, feature/ks-2366-legacy-certification-anchor-repair, with the title "Refs KS-2366: ...". If a board seat files the ticket first, its branchName wins. KS-2366 read (read-only): In Progress, PR 2295 attached, 1 comment.
+
+7. POINTS THAT ARE KAM'S, NOT WEDNESDAY'S (flagged, none built on your word alone):
+- K1. Any repair run on DEMO, and its order against demo's KS-2366 deploy (point 5). It changes client-visible answers on demo, needs Stuart's nod (KS-2196) and is its own card.
+- K2. The meaning card secuura-ks2366-what-anchored-means-1126: NOT changed. The same confirmed shape is written and isAnchoredHonestly is untouched. BUT the repair binds a legacy row by stored-payload evidence (E1 to E5) where the live path binds by createAttempts. Kam's option a names "a code rule that lets old records pick up their confirmed anchor", so I read an evidence rule as inside his ruling. If you read it as touching the meaning, it is Kam's.
+- K3. No service credential (the superuser route migrations use). Route (2)'s sweep would need one: Kam's.
+- K4. No migration, no new event type, no column. An audit_logs row for the repair would need a new action name: NOT proposed; Kam's if wanted.
+
+ONE QUESTION: do you rule route (1), carried as the standalone SQL script, with the Phase B plan above (3 paths, the suite, about 30 mutants, tier 1, branch feature/ks-2366-legacy-certification-anchor-repair)? Or route (2), or a change?
+Meanwhile: BLOCKED for Phase B. I will draft TICKET_DRAFT.md and DECLARED.md in REC only; no tree, no donor and no code until your ANSWER.
+Needed by: whenever you can. A successor's longer wait is understood.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 35  SEEN:       35  BATCH: /private/tmp/wed_newmail/batch_20261127T024152Z.txt

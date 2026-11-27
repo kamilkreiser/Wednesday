@@ -1,0 +1,54 @@
+mutants: output /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/01f74c3c-f2ed-47c5-9828-e1c0b495c563/scratchpad/mutants-20261127-133351-27152 ; 2026-11-27 13:33:51 AEDT
+none                           CONTROL-OK  483 passed, 0 failed
+                                 broke: nothing (control)
+F1i_key_not_folded             CAUGHT  7 failing line(s), 3 on the expected assertion  [absent  xcanary601  F1(i/ii) lesson, tier key spelled 'Tier:' ('xcanary601' found 3 time(s) in dump-A.sql)]
+                                 broke: frontmatter keys are no longer folded (Tier:, "tier":, TIER:)
+F1i_faults_ignored             CAUGHT  11 failing line(s), 3 on the expected assertion  [absent  xcanary605  F1(i/ii) lesson, tier given twice, other client first, W last ('xcanary605' found 3 time(s) in dump-A.sql)]
+                                 broke: a head that is ambiguous about its tier no longer excludes the lesson
+F1i_bom_kept                   CAUGHT  3 failing line(s), 1 on the expected assertion  [present xneighbour831  F1 neighbour, a BOM, then tier W (no 'xneighbour831' in dump-A.sql)]
+                                 broke: the BOM is no longer stripped
+F1ii_client_substring          CAUGHT  7 failing line(s), 2 on the expected assertion  [absent  xcanary610  F1(i/ii) lesson, another client's project whose NAME contains the own-client word 'general' ('xcanary610' found 3 time(s) ]
+                                 broke: own clients are matched as substrings of the whole tier again
+F1iii_rejected_rows_ignored    CAUGHT  10 failing line(s), 4 on the expected assertion  [absent  xcanary660  F1(iii) other seat's lesson, a TAB inside the rule field (8 fields) ('xcanary660' found 3 time(s) in dump-A.sql)]
+                                 broke: a damaged rules-index row no longer excludes the lesson it names
+F1iii_keys_not_normalised      CAUGHT  8 failing line(s), 3 on the expected assertion  [absent  xcanary662  F1(iii) other seat's lesson, a key with a trailing space ('xcanary662' found 3 time(s) in dump-A.sql)]
+                                 broke: rules-index keys are no longer stripped, case-folded and path-stripped
+F1iii_no_index_not_refused     CAUGHT  10 failing line(s), 2 on the expected assertion  [rebuild with the rules index missing is refused (rc 0, wanted non-zero)]
+                                 broke: a missing rules index no longer refuses the rebuild
+F1iv_marker_strict_spelling    CAUGHT  7 failing line(s), 4 on the expected assertion  [absent  xcanary641  F1(iv) section, marker in the bracket spelling P (Datasec/OXPd) ('xcanary641' found 3 time(s) in dump-A.sql)]
+                                 broke: section markers are matched in the old strict spelling only
+F1iv_marker_blank_line         CAUGHT  4 failing line(s), 1 on the expected assertion  [absent  xcanary640  F1(iv) section, a blank line between the marker and its heading ('xcanary640' found 3 time(s) in dump-A.sql)]
+                                 broke: a blank line between a marker and its heading is no longer skipped
+F1iv_subsection_kept           CAUGHT  4 failing line(s), 1 on the expected assertion  [absent  xcanary644sub  F1(iv) section, the SUB-SECTION under a marked section ('xcanary644sub' found 3 time(s) in dump-A.sql)]
+                                 broke: a dropped section ends at the next heading of ANY level again
+F3_hard_link_through           CAUGHT  9 failing line(s), 5 on the expected assertion  [absent  xcanary680  F3 a 4_Credentials file HARD-LINKED into learnings/ ('xcanary680' found 3 time(s) in dump-A.sql)]
+                                 broke: hard links are indexed again
+F11_seat_word_by_kind          CAUGHT  2 failing line(s), 2 on the expected assertion  [seat words still exclude xcanary700 ('xcanary700' found 2 time(s) in dump-W.sql)]
+                                 broke: the seat-word test on file names depends on the declared kind again
+daily_name_any                 CAUGHT  8 failing line(s), 3 on the expected assertion  [absent  xcanary691  daily note named with a Cyrillic look-alike of 'tuesday' ('xcanary691' found 3 time(s) in dump-A.sql)]
+                                 broke: a daily note need no longer be named as a plain date
+F2_any_server_will_do          CAUGHT  16 failing line(s), 4 on the expected assertion  [with self-start OFF, a rebuild addressed to c2 while the main cluster answers on the same socket directory is REFUSED (rc 0, wanted 4)]
+                                 broke: the server is no longer asked for its data directory
+F4_scope_checked_late          CAUGHT  6 failing line(s), 6 on the expected assertion  [the refused command created a cluster directory]
+                                 broke: the scope file is tested after the cluster is created and started
+F5_no_lock                     CAUGHT  1 failing line(s), 1 on the expected assertion  [a double init lost a command or the cluster (see the trial lines above)]
+                                 broke: init and start are no longer serialised by the lock
+F6_stale_pid_unexplained       CAUGHT  3 failing line(s), 3 on the expected assertion  [  it says STALE PID FILE in one line (no 'STALE PID FILE: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/01f74c3c-f2ed-47c5-9828-e1c0b49]
+                                 broke: start no longer explains a pid file that names a live foreign process
+F7_unreadable_aborts           CAUGHT  10 failing line(s), 4 on the expected assertion  [rebuild with one unreadable lesson and one 3 MB section still succeeds (rc 1, wanted 0)]
+                                 broke: an unreadable file is no longer caught
+F7_row_not_capped              CAUGHT  7 failing line(s), 2 on the expected assertion  [rebuild with one unreadable lesson and one 3 MB section still succeeds (rc 1, wanted 0)]
+                                 broke: an over-long row is no longer truncated
+F8_separators_kept             CAUGHT  1 failing line(s), 1 on the expected assertion  [a row holding the separator bytes 0x1F and 0x1E is FOUND by search (ANSWER-3 F8) (no '2026-07-28_separator-bytes.md' in s8.out)]
+                                 broke: the two separator bytes are no longer stripped on read
+F9_stop_trusts_pidfile         CAUGHT  29 failing line(s), 3 on the expected assertion  [the foreign process was killed by stop]
+                                 broke: the checker's M2: stop signals whatever the pid file names
+rules_row_always_first         CAUGHT  1 failing line(s), 1 on the expected assertion  [result 1 is not the lesson:  1. 0.0115  [rules]  CLAUDE.md:9]
+                                 broke: a rules-file row is put first whatever it matched
+lessons_first_off              CAUGHT  3 failing line(s), 1 on the expected assertion  [default: incident rows follow under their own heading (no 'also, incident rows from the ledger and daily notes' in k1.out)]
+                                 broke: the default order is the old mixed one
+seat_follows_WED_AGENT         CAUGHT  4 failing line(s), 2 on the expected assertion  [WED_AGENT=tuesday on a tree named WEDNESDAY is refused with rc 2 (the tree decides the seat; the variable may only agree) (rc 3, wanted 2)]
+                                 broke: the seat follows WED_AGENT and an unknown tree defaults to wednesday, as before
+server processes left under /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/01f74c3c-f2ed-47c5-9828-e1c0b495c563/scratchpad/mutants-20261127-133351-27152: 1
+finished 2026-11-27 13:38:59 AEDT
+MUTANTS: 24 of 24 caught on the expected assertion; 0 not

@@ -239,7 +239,7 @@ def read_file(p):
     with open(p, "rb") as f:
         raw = f.read()
     text = raw.decode("utf-8", errors="replace")
-    if text.startswith("﻿"):
+    if text.startswith("\ufeff"):
         text = text[1:]
     return raw, text.replace("\r\n", "\n").translate(STRIP_BYTES)
 

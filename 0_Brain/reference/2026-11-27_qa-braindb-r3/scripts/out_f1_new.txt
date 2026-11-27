@@ -1,0 +1,190 @@
+MAIN TREE rebuild rc=0 ; last line: rebuild: done; no file was unreadable and no row was truncated
+ok   qzneigh01tok   want present got present (3) control: tier W, row all
+       report names it under: NOT NAMED ANYWHERE
+ok   qzneigh02tok   want present got present (3) control: own project tier, no row
+       report names it under: NOT NAMED ANYWHERE
+ok   qzneigh03tok   want present got present (3) control: untagged, no row
+       report names it under: ['0_Brain/learnings/2026-02-01_ctl-untagged.md']
+ok   qzcase04tok    want absent  got absent  (0) control (absent): plain Datasec project tier
+       report names it under: ["0_Brain/learnings/2026-02-01_ctl-plainds.md  [tier 'P-Datasec/NexusAI'"]
+ok   qzcase10tok    want absent  got absent  (0) CRLF line endings
+       report names it under: ["0_Brain/learnings/2026-02-02_crlf.md  [tier 'P-Datasec/NexusAI' names "]
+LEAK qzcase11tok    want absent  got present (3) CR-only line endings (classic Mac), tier is the 3rd key
+       report names it under: ['0_Brain/learnings/2026-02-02_cr-only-tier-later.md']
+ok   qzcase12tok    want absent  got absent  (0) CR-only line endings, tier is the 1st key
+       report names it under: ['0_Brain/learnings/2026-02-02_cr-only-tier-first.md  [tier cannot be re']
+LEAK qzcase13tok    want absent  got present (3) '- tier: P-Datasec/..' (list-item dash before the key) inside the frontmatter
+       report names it under: ['0_Brain/learnings/2026-02-02_list-item-tier.md']
+LEAK qzcase14tok    want absent  got present (3) tier as a nested list item under meta:
+       report names it under: ['0_Brain/learnings/2026-02-02_nested-list-tier.md']
+ok   qzcase15tok    want absent  got absent  (0) YAML folded block scalar  tier: >-
+       report names it under: ["0_Brain/learnings/2026-02-02_block-folded.md  [unknown tier value '>-'"]
+ok   qzcase16tok    want absent  got absent  (0) YAML literal block scalar  tier: |
+       report names it under: ["0_Brain/learnings/2026-02-02_block-literal.md  [unknown tier value '|'"]
+ok   qzcase17tok    want absent  got absent  (0) tier value as a YAML block list
+       report names it under: ['0_Brain/learnings/2026-02-02_tier-in-list.md  [tier cannot be read saf']
+ok   qzcase18tok    want absent  got absent  (0) tier value as a flow list [W, P-Datasec/..]
+       report names it under: ["0_Brain/learnings/2026-02-02_tier-flow-list.md  [tier '[W, P-Datasec/N"]
+LEAK qzcase19tok    want absent  got present (3) key 'tier' with a Cyrillic i look-alike
+       report names it under: ['0_Brain/learnings/2026-02-02_cyrillic-key.md']
+LEAK qzcase20tok    want absent  got present (3) full-width colon after tier
+       report names it under: ['0_Brain/learnings/2026-02-02_fullwidth-colon.md']
+LEAK qzcase21tok    want absent  got present (3) zero-width space before the key
+       report names it under: ['0_Brain/learnings/2026-02-02_zwsp-key.md']
+LEAK qzcase22tok    want absent  got present (3) soft hyphen inside the key
+       report names it under: ['0_Brain/learnings/2026-02-02_softhyphen-key.md']
+ok   qzcase23tok    want absent  got absent  (0) tabs round key and value
+       report names it under: ["0_Brain/learnings/2026-02-02_tab-forms.md  [tier 'P-Datasec/NexusAI' n"]
+ok   qzcase24tok    want absent  got absent  (0) UTF-16 LE with BOM
+       report names it under: ['0_Brain/learnings/2026-02-02_utf16le.md  [tier cannot be read safely: ']
+ok   qzcase25tok    want absent  got absent  (0) UTF-16 BE, no BOM
+       report names it under: ["0_Brain/learnings/2026-02-02_utf16be.md  [tier 'P-Datasec/NexusAI' nam"]
+ok   qzcase26tok    want absent  got absent  (0) BOM + two blank lines + CRLF
+       report names it under: ["0_Brain/learnings/2026-02-02_bom-blank-crlf.md  [tier 'P-Datasec/Nexus"]
+LEAK qzcase27tok    want absent  got present (3) fence written '--- # frontmatter' (not recognised), tier line after 62 other keys (beyond the 60-line look)
+       report names it under: ['0_Brain/learnings/2026-02-02_fence-with-comment-61.md']
+LEAK qzcase28tok    want absent  got present (3) fence written '--- # frontmatter', then a YAML '# comment' line (read as a heading), then tier
+       report names it under: ['0_Brain/learnings/2026-02-02_fence-comment-yaml-comment.md']
+LEAK qzcase29tok    want absent  got present (3) second frontmatter block whose closing fence is 72 lines later, tier at its end
+       report names it under: ['0_Brain/learnings/2026-02-02_second-block-far.md']
+ok   qzcase30tok    want absent  got absent  (0) second frontmatter block closing 47 lines later
+       report names it under: ['0_Brain/learnings/2026-02-02_second-block-45.md  [tier cannot be read ']
+ok   qzcase31tok    want absent  got absent  (0) Cyrillic a in the client name of the VALUE
+       report names it under: ["0_Brain/learnings/2026-02-02_lookalike-client.md  [project tier 'P-Dаt"]
+LEAK qzcase32tok    want absent  got present (3) U+2028 line separator between date and tier (one physical line for str.split)
+       report names it under: ['0_Brain/learnings/2026-02-02_ls-separator.md']
+LEAK qzcase33tok    want absent  got present (3) form feed between date and tier
+       report names it under: ['0_Brain/learnings/2026-02-02_ff-separator.md']
+LEAK qzcase34tok    want absent  got present (3) byte 0x1E between date and tier (the tool strips 0x1E)
+       report names it under: ['0_Brain/learnings/2026-02-02_rs-separator.md']
+LEAK qzcase35tok    want absent  got present (3) key written 'tier (project):'
+       report names it under: ['0_Brain/learnings/2026-02-02_key-suffix.md']
+LEAK qzcase36tok    want absent  got present (3) 'tier = value' (TOML habit, no colon)
+       report names it under: ['0_Brain/learnings/2026-02-02_tier-eq.md']
+LEAK qzcase37tok    want absent  got present (3) TOML '+++' frontmatter
+       report names it under: ['0_Brain/learnings/2026-02-02_plusplus-fence.md']
+ok   qzcase38tok    want absent  got absent  (0) no-break space after the opening fence
+       report names it under: ["0_Brain/learnings/2026-02-02_fence-nbsp.md  [tier 'P-Datasec/NexusAI' "]
+ok   qzcase39tok    want absent  got absent  (0) one space before the opening fence
+       report names it under: ['0_Brain/learnings/2026-02-02_indented-fence.md  [tier cannot be read s']
+ok   qzcase40tok    want absent  got absent  (0) an HTML comment line before the frontmatter
+       report names it under: ['0_Brain/learnings/2026-02-02_html-comment-first.md  [tier cannot be re']
+ok   qzneigh41tok   want present got present (3) own client, project name carries a look-alike of the denied client
+       report names it under: NOT NAMED ANYWHERE
+ok   qzneigh42tok   want present got present (3) client segment 'general', project is the other client's by abbreviation (indexed by design: record only)
+       report names it under: NOT NAMED ANYWHERE
+ok   qzcase43tok    want absent  got absent  (0) tier twice, second in capitals with a space before the colon
+       report names it under: ['0_Brain/learnings/2026-02-02_tier-dup-case.md  [tier cannot be read sa']
+ok   qzcase44tok    want absent  got absent  (0) single-quoted key and value
+       report names it under: ["0_Brain/learnings/2026-02-02_tier-quoted-single.md  [tier 'P-Datasec/N"]
+ok   qzcase45tok    want absent  got absent  (0) Latin-1 encoded file (invalid UTF-8 byte before the tier line)
+       report names it under: ["0_Brain/learnings/2026-02-02_latin1.md  [tier 'P-Datasec/NexusAI' name"]
+ok   qzcase50tok    want absent  got absent  (0) control (absent): plain marker
+       report names it under: NOT NAMED ANYWHERE
+LEAK qzcase51tok    want absent  got present (3) marked section holding a 4-backtick fence with a 3-backtick fence inside and a '# comment' line
+       report names it under: NOT NAMED ANYWHERE
+LEAK qzcase52tok    want absent  got present (3) marked section: a ``` code block containing a line '~~~' and then a '# shell comment'
+       report names it under: NOT NAMED ANYWHERE
+LEAK qzcase53tok    want absent  got present (3) marker written as a three-line HTML comment
+       report names it under: NOT NAMED ANYWHERE
+ok   qzcase54tok    want absent  got absent  (0) marker followed by a second comment on the same line
+       report names it under: NOT NAMED ANYWHERE
+ok   qzcase55tok    want absent  got absent  (0) marker with no spaces at all
+       report names it under: NOT NAMED ANYWHERE
+ok   qzcase56tok    want absent  got absent  (0) marker on the line BELOW its heading
+       report names it under: NOT NAMED ANYWHERE
+ok   qzcase57tok    want absent  got absent  (0) marker above a setext (underlined) heading
+       report names it under: NOT NAMED ANYWHERE
+ok   qzcase58tok    want absent  got absent  (0) marked ### with a #### under it
+       report names it under: NOT NAMED ANYWHERE
+ok   qzcase59tok    want absent  got absent  (0) marker value with an en dash
+       report names it under: NOT NAMED ANYWHERE
+LEAK qzcase60tok    want absent  got present (3) marker written as a list item
+       report names it under: NOT NAMED ANYWHERE
+ok   qzcase61tok    want absent  got absent  (0) marked section holding a bare '# ' line
+       report names it under: NOT NAMED ANYWHERE
+ok   qzneigh62tok   want present got present (3) marked ## section holding a line '# then, as root' (a real H1 to markdown; span ends there by design: record)
+       report names it under: NOT NAMED ANYWHERE
+ok   qzcase70tok    want absent  got absent  (0) control (absent): row names tuesday only
+       report names it under: ['4  every rules-index row for it names only other seats  (2026-02-04_ct']
+LEAK qzcase71tok    want absent  got present (3) file name stored NFD, index key NFC, row tuesday only
+       report names it under: NOT NAMED ANYWHERE
+LEAK qzcase72tok    want absent  got present (3) index key written without '.md', row tuesday only
+       report names it under: NOT NAMED ANYWHERE
+LEAK qzcase73tok    want absent  got present (3) index key in double quotes (spreadsheet export), row tuesday only
+       report names it under: NOT NAMED ANYWHERE
+LEAK qzcase74tok    want absent  got present (3) zero-width space after the key, row tuesday only
+       report names it under: NOT NAMED ANYWHERE
+LEAK qzcase75tok    want absent  got present (3) the row's TABs became 4 spaces (editor), row tuesday only
+       report names it under: NOT NAMED ANYWHERE
+ok   qzneigh76tok   want present got present (3) two rows disagree: tuesday, then all (indexed by ruling: record)
+       report names it under: NOT NAMED ANYWHERE
+ok   qzneigh77tok   want present got present (3) row commented out with '# ' (tuesday only) - no row, tier alone (record)
+       report names it under: NOT NAMED ANYWHERE
+ok   qzcase78tok    want absent  got absent  (0) seats written 'tuesday friday' (space, not comma)
+       report names it under: ['4  every rules-index row for it names only other seats  (2026-02-04_ct']
+ok   qzcase79tok    want absent  got absent  (0) seats written 'ALL' (not 'all'): excluded, loudly? (record)
+       report names it under: ['4  every rules-index row for it names only other seats  (2026-02-04_ct']
+LEAK qzcase80tok    want absent  got present (3) index key with one letter wrong (typo), row tuesday only
+       report names it under: NOT NAMED ANYWHERE
+ok   qzcase81tok    want absent  got absent  (0) row with a leading space before the key, tuesday only
+       report names it under: ['4  every rules-index row for it names only other seats  (2026-02-04_ct']
+LEAK qzcase82tok    want absent  got present (3) row line starts with a stray BOM mid-file, tuesday only
+       report names it under: NOT NAMED ANYWHERE
+LEAK qzcase83tok    want absent  got present (3) key written as a wikilink [[name]], tuesday only
+       report names it under: NOT NAMED ANYWHERE
+MAIN TREE: 67 cases, 28 LEAK ; control tokens qzmixedneigh=27 qzafter=27
+check rc=0: check: GREEN, 46 files on disk match the index (built 2026-11-27T13:49:45+11:00)
+
+WHOLE-INDEX VARIANTS (want: refused, or qzidxtue and qzidxds absent; qzidxok is the control)
+ok   ctl-good                     rc=0 tueonly=0 dsproj=0 ok(control)=3  control: well-formed index
+       | rules index: 2 well-formed rows, 1 joined to an indexed lesson, 1 dropped (their lesson is excluded or missing)
+       | 1  every rules-index row for it names only other seats  (2026-03-01_tueonly.md)
+ok   crlf                         rc=0 tueonly=0 dsproj=0 ok(control)=3  CRLF index
+       | rules index: 2 well-formed rows, 1 joined to an indexed lesson, 1 dropped (their lesson is excluded or missing)
+       | 1  every rules-index row for it names only other seats  (2026-03-01_tueonly.md)
+ok   cr-only                      REFUSED rc=2  CR-only index
+       | braindb: REFUSED: lessons are on the allow-list but no readable rules index with at least one well-formed row was found under /private/tmp/claude-501/
+ok   utf16                        rc=0 tueonly=0 dsproj=0 ok(control)=3  UTF-16 LE index
+       | rules index: 2 well-formed rows, 1 joined to an indexed lesson, 1 dropped (their lesson is excluded or missing)
+       | rules index: 1 DAMAGED row(s) ignored (wrong field count or a bad '#n'); a lesson named by one is excluded and listed below
+       | 1  every rules-index row for it names only other seats  (2026-03-01_tueonly.md)
+ok   bom                          rc=0 tueonly=0 dsproj=0 ok(control)=3  UTF-8 BOM index
+       | rules index: 2 well-formed rows, 1 joined to an indexed lesson, 1 dropped (their lesson is excluded or missing)
+       | 1  every rules-index row for it names only other seats  (2026-03-01_tueonly.md)
+ok   empty                        REFUSED rc=2  0-byte index
+       | braindb: REFUSED: lessons are on the allow-list but no readable rules index with at least one well-formed row was found under /private/tmp/claude-501/
+ok   header-only                  REFUSED rc=2  header line only
+       | braindb: REFUSED: lessons are on the allow-list but no readable rules index with at least one well-formed row was found under /private/tmp/claude-501/
+ok   extra-col                    REFUSED rc=2  an 8th column on every row
+       | braindb: REFUSED: lessons are on the allow-list but no readable rules index with at least one well-formed row was found under /private/tmp/claude-501/
+ok   cols-swapped-status-seats    rc=0 tueonly=0 dsproj=0 ok(control)=0  columns reordered: seats and status swapped (header says so)
+       | rules index: 2 well-formed rows, 0 joined to an indexed lesson, 2 dropped (their lesson is excluded or missing)
+       | 2  every rules-index row for it names only other seats  (2026-03-01_tueonly.md, 2026-03-03_ok.md)
+LEAK cols-triggers-in-seats-slot  rc=0 tueonly=2 dsproj=0 ok(control)=0  columns reordered: triggers sit where seats is expected, one trigger is 'all'
+       | rules index: 2 well-formed rows, 1 joined to an indexed lesson, 1 dropped (their lesson is excluded or missing)
+ok   symlink                      REFUSED rc=2  the index is a symlink to a file outside learnings/
+       | braindb: REFUSED: lessons are on the allow-list but no readable rules index with at least one well-formed row was found under /private/tmp/claude-501/
+ok   hardlink                     REFUSED rc=2  the index has link count 2
+       | braindb: REFUSED: lessons are on the allow-list but no readable rules index with at least one well-formed row was found under /private/tmp/claude-501/
+ok   mode000                      REFUSED rc=2  the index is unreadable
+       | braindb: REFUSED: lessons are on the allow-list but no readable rules index with at least one well-formed row was found under /private/tmp/claude-501/
+ok   directory                    REFUSED rc=2  the index path is a directory
+       | braindb: REFUSED: lessons are on the allow-list but no readable rules index with at least one well-formed row was found under /private/tmp/claude-501/
+ok   fifo                         REFUSED rc=2  the index path is a FIFO
+       | braindb: REFUSED: lessons are on the allow-list but no readable rules index with at least one well-formed row was found under /private/tmp/claude-501/
+ok   spaces-not-tabs              REFUSED rc=2  every TAB became 4 spaces
+       | braindb: REFUSED: lessons are on the allow-list but no readable rules index with at least one well-formed row was found under /private/tmp/claude-501/
+LEAK one-good-rest-spaces         rc=0 tueonly=2 dsproj=0 ok(control)=3  the tuesday-only row lost its TABs; the other row is fine
+       | rules index: 1 well-formed rows, 1 joined to an indexed lesson, 0 dropped (their lesson is excluded or missing)
+       | rules index: 1 DAMAGED row(s) ignored (wrong field count or a bad '#n'); a lesson named by one is excluded and listed below
+ok   dup-disagree-damaged         rc=0 tueonly=0 dsproj=0 ok(control)=3  three rows for one lesson: all, tuesday, and a damaged one
+       | rules index: 3 well-formed rows, 1 joined to an indexed lesson, 2 dropped (their lesson is excluded or missing)
+       | rules index: 1 DAMAGED row(s) ignored (wrong field count or a bad '#n'); a lesson named by one is excluded and listed below
+       | 0_Brain/learnings/2026-03-01_tueonly.md  [a damaged rules-index row names it (rules index line 4)]
+ok   nul-in-key                   rc=0 tueonly=0 dsproj=0 ok(control)=3  a NUL byte inside the key (stripped on read, so the row applies)
+       | rules index: 2 well-formed rows, 1 joined to an indexed lesson, 1 dropped (their lesson is excluded or missing)
+       | 1  every rules-index row for it names only other seats  (2026-03-01_tueonly.md)
+ok   second-index-name            REFUSED rc=2  the index is named _rules_index.TSV (capital extension) on this case-sensitive volume
+       | braindb: REFUSED: lessons are on the allow-list but no readable rules index with at least one well-formed row was found under /private/tmp/claude-501/
+stop: stop: stopped pid 22109 (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-braindb-r3/f1/pg)

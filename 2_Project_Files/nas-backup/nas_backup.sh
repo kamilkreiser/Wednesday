@@ -11,12 +11,13 @@
 #   nas_backup.sh --run --out-of-sequence <card id>
 #                                 a real run OUTSIDE the window: only after Kam approved it on the card named.
 #   nas_backup.sh --clear-stale-lock   move a lock whose process is dead into state/_quarantine_<date>/.
-#   nas_backup.sh --scan [--measure-excluded]   census numbers for the configured sets (reads the drive only).
+#   nas_backup.sh --run --accept-shrink <card id>   accept ONCE that a set really lost more than half its files.
+#   nas_backup.sh --scan          what is in scope, per set (reads the drive only).
 #
 # Where it writes: <NAS>/<own client>/<Seat>/nightly-backup/ (allow-list in nb_core.py SEATS) and, on the drive,
 # this lane's state/, logs/ and manifests/. Sources and schedule: seats/<seat>.conf.
 # Exit: 0 good (or dry run done) · 2 refused · 3 held · 4 run-time cap · 5 engine error · 6 locked · 7 stalled
-#       · 8 not counted equal · 9 the engine's log held a deleting line.
+#       · 8 not every in-scope file PROVEN at the destination · 9 the engine's log held a deleting line.
 # NEVER add >/dev/null here (2026-08-06_never-discard-stderr).
 set -u
 . "$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)/nb_common.sh"
@@ -28,13 +29,13 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --run) MODE="--run"; shift ;;
     --dry|--dry-run) MODE="--dry"; shift ;;
-    --no-hash|--scheduled|--measure-excluded) EXTRA+=( "$1" ); shift ;;
-    --out-of-sequence|--max-seconds|--now)
+    --no-hash|--scheduled) EXTRA+=( "$1" ); shift ;;
+    --out-of-sequence|--accept-shrink|--max-seconds|--now)
       [ $# -ge 2 ] || { echo "nas_backup: $1 needs a value" >&2; exit 2; }
       EXTRA+=( "$1" "$2" ); shift 2 ;;
     --clear-stale-lock) CMD="clear-stale-lock"; shift ;;
     --scan) CMD="scan"; shift ;;
-    -h|--help) sed -n '2,22p' "${BASH_SOURCE[0]}"; exit 0 ;;
+    -h|--help) sed -n '2,24p' "${BASH_SOURCE[0]}"; exit 0 ;;
     *) echo "nas_backup: REFUSED — unknown argument '$1' (see --help); nothing run" >&2; exit 2 ;;
   esac
 done

@@ -79,7 +79,7 @@ GRANTS = """# Expiring grants (fixture)
 | **WEDNESDAY: G08-FUTURE-DATE** | Kam | **END OF SUNDAY 2026-11-29** | scope |
 | **WEDNESDAY: G09-ENDS-TODAY** | Kam | **END OF FRIDAY 2026-11-27** | scope |
 | **WEDNESDAY: G10-DATE-NOT-LEADING** | Kam | **EVENT: ends when he signs in (asked 2026-11-01)** | scope |
-| **WEDNESDAY: G11-PAST-BUT-A-LATER-DATE** | Kam | **END OF SUNDAY 2026-11-08**; the board grant runs to 2026-12-05 | scope |
+| **WEDNESDAY: G11-PAST-WITH-A-SECOND-DATE** | Kam | **END OF SUNDAY 2026-11-08**; the board grant runs to 2026-12-05 | scope |
 | **\u26a0 EXTENDED 2026-11-20 by Kam: G12-EXTENDED-HINT** | Kam | **END OF SATURDAY 2026-10-31** | scope |
 | **G13-UNLABELLED standing rule** | Kam | **OPEN-ENDED** | scope |
 | **EXPIRED 2026-11-02: G14-EXPIRED-MARKED** | Kam | **EVENT** | scope |
@@ -131,6 +131,7 @@ GRANTS = """# Expiring grants (fixture)
 | **DEAD since 2026-11-20? NOT DEAD: G63-MARKED-THEN-DENIED Kam says it is live** | Kam | **No end stated.** | scope |
 | **WEDNESDAY: G64-PROVISIONAL-END** | Kam | END OF SUNDAY 2026-11-22 (provisional) | scope |
 | **WEDNESDAY: G65-AT-LEAST** | Kam | until 2026-11-22 at least | scope |
+| ~~**EXPIRED 2026-11-20**~~ back in force on his word: G66-STRUCK-MARKER-ONLY | Kam | **No end stated.** | scope |
 
 ## When a grant expires
 
@@ -147,7 +148,7 @@ GRANTS = """# Expiring grants (fixture)
 """
 KEEP_WED = ["G01", "G03", "G05", "G06", "G08", "G09", "G10", "G11", "G12", "G13", "G15", "G18", "G19", "G22", "G24", "G25", "G26", "G28",
             "G30", "G31", "G32", "G33", "G34", "G35", "G36", "G37", "G38", "G39", "G40", "G41", "G42", "G44", "G45", "G46", "G47", "G48",
-            "G49", "G50", "G51", "G55", "G56", "G57", "G58", "G59", "G60", "G62", "G63", "G64", "G65"]
+            "G49", "G50", "G51", "G55", "G56", "G57", "G58", "G59", "G60", "G62", "G63", "G64", "G65", "G66"]
 DEAD_WED = ["G02", "G14", "G21", "G23", "G27"]
 OTHER_WED = ["G04", "G16", "G17", "G43", "G54", "G61"]
 PAST_WED = ["G07", "G20", "G52", "G53"]
@@ -434,7 +435,9 @@ def group_h(scratch):
 
     seatx = os.path.join(base, "seatx", "WEDNESDAY")
     os.makedirs(os.path.join(seatx, "0_Brain", "tasks"))
-    shutil.copy(os.path.join(tue, "0_Brain", "tasks", "STATE-tuesday.md"), os.path.join(seatx, "0_Brain", "tasks", "STATE-wednesday.md"))
+    tsrc = os.path.join(tue, "0_Brain", "tasks", "STATE-tuesday.md")
+    if os.path.exists(tsrc):
+        shutil.copy(tsrc, os.path.join(seatx, "0_Brain", "tasks", "STATE-wednesday.md"))
     rc, out, err = run(["bash", ho, "check"], None, {"HANDOVER_TREE": seatx})
     check("H23", "check goes red on a state file whose header names another seat", rc == 1 and "names seat 'tuesday'" in out, out + err)
 
@@ -524,7 +527,8 @@ def group_w(scratch):
           and "PICKUP-OWED-MARKER" not in pack)
     kept = [g for g in KEEP_WED if g + "-" in pack]
     dropped = [g for g in DROP_WED if g + "-" not in pack]
-    side0 = rb(out_default[:-3] + ".dropped.txt").decode("utf-8") if ok else ""
+    side0p = out_default[:-3] + ".dropped.txt"
+    side0 = rb(side0p).decode("utf-8") if os.path.exists(side0p) else ""
 
     def cls(g):
         hit = [l.split(" | ")[0] for l in side0.split("\n") if g + "-" in l]
@@ -1315,7 +1319,8 @@ def group_r(scratch):
     check("R03", "a STALE lock is reported at once (no 30 s wait) with the exact recovery line, and is NOT removed; nothing is written",
           rc == 5 and "STALE LOCK" in e and took < 5 and len(rec) == 1 and rec[0].startswith("mv -n '%s' '%s.stale-" % (lock, lock))
           and os.path.isdir(lock) and rb(os.path.join(lock, "owner")).startswith(b"pid: %d\n" % dead.pid) and body(t) == S0, e)
-    shutil.move(lock, lock + ".stale-test")   # the recovery line, done by the test
+    if os.path.isdir(lock):
+        shutil.move(lock, lock + ".stale-test")   # the recovery line, done by the test
     rc, o, e = write(r, A)
     check("R03b", "after the recovery line is run by a person the write succeeds (must succeed beside R03)", rc == 0 and body(t) == A and S0 in arch(t), o + e)
 
@@ -1341,7 +1346,8 @@ def group_r(scratch):
     lock = os.path.join(t, "STATE-wednesday.lock.d")
     check("R05b", "the dead writer's lock is then reported as STALE with the recovery line (not removed, not waited on)",
           rc == 5 and "STALE LOCK" in e and os.path.isdir(lock) and body(t) == S1, e)
-    shutil.move(lock, lock + ".stale-test")
+    if os.path.isdir(lock):
+        shutil.move(lock, lock + ".stale-test")
     rc, o, e = write(r, S3)
     check("R05c", "after recovery the next write succeeds; the archive holds a duplicate of the old block, never a gap",
           rc == 0 and body(t) == S3 and arch(t).count(S1) == 2 and arch(t).count(S0) == 1, o + e)
