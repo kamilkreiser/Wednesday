@@ -1,0 +1,39 @@
+deploy/azure/main.bicep describes the foundation of the mock client
+environment as it exists in its one resource group: a virtual network
+with a server subnet and a private endpoint subnet, the server subnet's
+network security group (every inbound flow denied; two outbound allow
+rules to the private endpoint subnet on 443 and 9400-9599), an Azure
+Relay namespace (Standard, public network access disabled) with its
+hybrid connections (client authorization required on each), its private
+endpoint, DNS zone group and the private DNS zone
+privatelink.servicebus.windows.net linked to the network, a key vault
+(Azure RBAC, soft delete, no access policies), a Log Analytics workspace
+with a daily ingestion cap, and the public DNS zone of the server name.
+deploy/azure/README.md says how it is checked and its known differences.
+
+The template was compiled with the Bicep CLI (0 warnings) and checked
+with az deployment group what-if only, in Incremental mode, against the
+existing group: every declared resource read NoChange, or Modify only on
+six listed values Azure sets itself (the endpoint's default
+ipVersionType; a zone config's etag, id, type and provisioning state;
+the namespace's record of its own private endpoint). Five planted
+differences (Relay public access, client authorization, the inbound
+deny rule's priority, the vault's RBAC switch, one more hybrid
+connection) were each seen. The group's resources and deployments read
+the same before and after.
+
+The deployment-specific values (name prefix, tags, hybrid connection
+names, the DNS zone name) stay in a parameters file outside the
+repository, and the compiled JSON is not committed. The resources came
+first, by the Azure CLI; the template follows them. Still open: the
+network security group keeps Azure's default outbound rules (VNet and
+Internet), so the two outbound rules do not restrict outbound yet; the
+README's check sentence is stricter than the check run (it allows no
+Modify); the key vault keeps public network access with no purge
+protection; the log store keeps public ingestion and query; the
+namespace keeps the shared access rule Azure creates with it.
+
+Nothing was deployed; what-if only. No resource was made, changed or
+deleted.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
