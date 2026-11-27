@@ -4,7 +4,7 @@ Gate G1, ROUND 2 OF 2 of lane AZ-1 (the text-only fix of the Bicep of the mock c
 Opus reader (claude-opus-5-5), in-session, read-only, for Tuesday s337. Kit B2205 (seat X104; stamp S4: Q1 to Q3 "a" IN
 WORDS; every choice the coordinator's, none the product owner's). Head `24e94ef2a9df278d0797fadc8954a5ff4e90ede3` on
 `b2191/az1-bicep-foundation-r2`, ONE commit over HEAD0 `14896ed06f46536073a25a4d1388d4431ca04169` (one parent, a
-fast-forward), tree `4340cacc762f349f37feae8e502b381f200d9644`, 764 files. Measured 2026-11-28 03:55:13 to 04:0x AEDT.
+fast-forward), tree `4340cacc762f349f37feae8e502b381f200d9644`, 764 files. Measured 2026-11-28 03:55:13 to 04:03:18 AEDT.
 **I ran NO az command** (every Azure fact is read from X92's saved answers in `<project>/.tools/b2179-x92/logs/`, READ
 ONLY, or RELAYED from gate B2204); no dotnet; no lock; nothing to any printer, device, tenant or person; no pull
 request, no push, no Jira. Writes: this folder and the scratch `fleet/state/s337/g2206/` only (`repo/`: a clone of the
@@ -23,7 +23,7 @@ seat's clone, push URL `invalid://no-push`, detached at the head). Grades: **Blo
   newest issue or pull request).
 - The two files and the message fetched from the origin at the head (`contents?ref=24e94ef2`, raw): `main.bicep` sha256
   `97bb8cb18be31653a9d4c93322a63124549d7b077272981971f86460cd8972b1` (272 lines, 7744 bytes), `README.md`
-  `1426ded7444a46cbb21e34fce6f8dfa3d72492b75fa3bfd22a85f8303cbe5422` (53 lines, 3439 bytes), message `12d83f7a...d7bc`
+  `1426ded7444a46cbb21e34fce6f8dfa3d72492b75fa3bfd22a85f8303cbe5422` (53 lines, 3439 bytes), message `12d83f7a...c7d7`
   (403 bytes, 3 lines, `cmp` equal to the frozen `commit-message.txt`): each equal to kit S8 and to my scratch clone.
 
 ## THE GATE list of the kit (FOR TUESDAY), whole
@@ -142,5 +142,16 @@ is not decided), owed to the mainTemplate lane.
 | P3 | an id, word or secret a client must not see | covered: words, B-number, gitleaks (control first); "lane" named I1 |
 | P3 | a client cannot act on a true sentence | named: I1 |
 
-## MAIN AT THE END
-See the line written into landing.txt at its writing (main read again then).
+## SCANS OF THE LANDING TEXTS
+`squash_scan.py` (head's, = main aa520ba5's, sha256 `d718569b...`) over the subject with `#65` and squash-body.txt:
+`SQUASH-SCAN: clean` (control rc 1, found 2). `words.py` over subject, body, title: `WORDS: clean (3 files)`;
+pr-body.md 0 in every class (its 4 non-ASCII bytes are the generated-by emoji). Details: FOR-RECORDS.md.
+
+## MAIN AT THE END: aa520ba5 (MOVED from the kit's e1802e24)
+Read 04:03:18 AEDT: main `aa520ba5e23c8d3319733d8b649aea0617bbf7a7` (unchanged since 03:57:58), the branch
+`24e94ef2...` (unchanged), open pull requests 0; Analyze (csharp) on aa520ba5 now `completed success` (7 of 7 rows).
+Main's own push run, re-read by me: `HOSTED aa520ba5...: PASS` at `--total 2564 --rules 780 --guard-linux 28
+--guard-windows 29` (skipped 4 / 21, unit and floor 117): **the test total and BOTH guard counts moved with PR 64**
+(2539 and 14/15 before). e1802e24 also PASS at 2539/774, 14/15. landing.txt MAIN MOVES (B) carries these numbers:
+merge ref T 2564, RULES 782, guards 28/29; new main tree 782 files. `pgrep -fl 'Caskroom/azure-cli'` at 04:03: no line
+(rc 1).

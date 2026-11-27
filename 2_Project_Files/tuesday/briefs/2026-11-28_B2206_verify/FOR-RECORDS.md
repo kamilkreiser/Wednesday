@@ -70,7 +70,7 @@ network path). The first lane that runs a `create` from this file over an existi
   `features.enableLogAccessUsingOnlyResourcePermissions` live value is UNMEASURED.
 - **CodeQL does not read Bicep or Markdown** (B2204 I5): the PR's Analyze rows are actions, csharp, python.
 
-## GATE SCANS OF THE LANDING TEXTS (B2206, measured 04:0x AEDT in the gate's scratch `fleet/state/s337/g2206/`)
+## GATE SCANS OF THE LANDING TEXTS (B2206, measured 03:59 to 04:00 AEDT in the gate's scratch `fleet/state/s337/g2206/`)
 - `squash_scan.py` (the head's `build/squash_scan.py`, sha256 `d718569b...ef5c`, equal to main aa520ba5's) over
   squash-subject.txt with `#65` in place of `#PRNUM` (238 bytes) and squash-body.txt (2625 bytes): `control ... rc 1,
   found 2`, `message: rc 0, found 0`, `SQUASH-SCAN: clean`, rc 0. **A different number changes the bytes: scan again.**

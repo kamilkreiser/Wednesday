@@ -1,0 +1,128 @@
+LANDING FORM for lane AZ-1 (the Bicep of the mock client environment's foundation, proved by what-if, its text made
+true), gate ROUND 2 OF 2 (kit B2205, seat X104; S4: Q1 to Q3 "a" IN WORDS; every choice the coordinator's). It
+REPLACES the B2204 landing form, which is VOID (it pins 14896ed0 and main d9f89115). Head to land:
+24e94ef2a9df278d0797fadc8954a5ff4e90ede3 on the branch b2191/az1-bicep-foundation-r2: TWO commits over the merge base
+d9f89115333bbed2ade723e4c11d523b2a9cd079 (14896ed0, the template; 24e94ef2, text only), tree
+4340cacc762f349f37feae8e502b381f200d9644, 764 files. The landing is ONE SQUASH, head-pinned (`--match-head-commit`),
+one parent on main, by <project>/CLAUDE.md:82 ("Tuesday lands a pull request by SQUASH, pinned to the reviewed head
+(`--match-head-commit`), one parent", RELAYED from kit B2205 THE AUTHORITY). Gate verdict (G1, round 2 of 2):
+VERDICT.md in this folder (B2206). Land only when its first line reads GO or GO WITH FINDINGS (it reads GO: Blocker 0,
+Major 0, Minor 0, Info 7). Who decides to land, and when: the coordinator (Tuesday), never the product owner. Landing
+deploys nothing and reaches no tenant, printer or device.
+
+*** MAIN HAS MOVED TWICE SINCE THE KIT (read 03:57:58 and again 04:01:51 AEDT): main =
+aa520ba5e23c8d3319733d8b649aea0617bbf7a7, PR #64's squash (lane L3a, merged 03:56:37 AEDT), one parent e1802e24
+(PR #63), tree e9a3684d405028854d433cbeb6c481a8c574caa1, 780 files. compare d9f89115...aa520ba5: 28 files, 0 under
+deploy/ and 0 under .github/. compare aa520ba5...24e94ef2: diverged, ahead 2, behind 2, merge base d9f89115, 2 files
+both added. USE MAIN MOVES (B) BELOW with <M> = aa520ba5 (numbers MEASURED by the gate, below). The next pull request
+number is most likely 65 (#64 is the newest issue or pull request, closed and merged; open pull requests 0 at
+04:01:51). ***
+
+MAIN'S OWN PUSH RUN (<M> = aa520ba5, run 46037807791, read by the gate's hosted3.py sha256 969fe376..., GET only):
+`HOSTED aa520ba5e23c8d3319733d8b649aea0617bbf7a7: PASS` at --total 2564 --rules 780 --skipped-linux 4
+--skipped-windows 21 --unit 117 --floor 117 --hardened-scan --guard-linux 28 --guard-windows 29 (linux succeeded 2560,
+windows succeeded 2543; `GUARD: clean (28 files)` linux, `(29 files)` windows; `RULES: clean (780 files)`; `UNIT-TEST
+FLOOR: ran 117, floor 117`). NOTE: the guard counts MOVED with PR 64 (they were 14 and 15 up to e1802e24): never use
+14/15 again for this landing. The same numbers with --total 2539 printed FAIL 6 and with the guards swapped FAIL 2 (the
+gate's discovery runs, kept in g2206/). Analyze (csharp) on aa520ba5 was still in_progress at 04:02:02 (the other six
+rows success): read it at step 3. Earlier mains, also PASS by the gate's hosted3.py: e1802e24 at 2539/774 guards 14/15.
+
+NOTHING DEPLOYS (read at main aa520ba5 by GET, 03:57:58): the only workflow file is .github/workflows/ci.yml (218
+lines, sha256 567a3a74ad6eaad3feb97b5acbcaeaea3191dc6a6dd7dd0877fb62c4fc3560fc, byte-equal to the head's copy; the word
+"deploy" 0 times; azure, bicep, `environment:`, `az ` 0 times; triggers `push` to main and 'b[0-9]*/**',
+`pull_request`, `workflow_dispatch`; no `paths` filter). deploy/azure/** is read by no workflow step except the
+repository-wide `rules` (repo_rules.py over every file) and `secret-scan` (every stored object). `contents/deploy` at
+main: Not Found. CodeQL (default setup) analyses actions, csharp and python only: it does not read Bicep or Markdown.
+
+Never land a head or a merge a gate did not read: if the branch moves off 24e94ef2, stop.
+
+Environment for every gh line: GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/OXPd_2/4_Credentials/.gh-config'
+Every line below is a GET except opening the pull request, the one re-trigger of step 2 if it is needed, and the one
+merge line of step 5.
+
+1. THE PULL REQUEST. Base main, head b2191/az1-bicep-foundation-r2. Title: pr-title.txt (one line). Body: pr-body.md
+   (why; what changed; what proves it; still open, the outbound rule first; nothing was deployed, what-if only; no
+   person, card, seat or build id). Use the number GitHub gives (most likely 65) everywhere PRNUM stands below.
+
+2. PROVE WHICH TREE THE PULL REQUEST'S CHECKS BUILT:
+
+   gh api -X GET 'repos/datasecau/OXPd_2/actions/runs?head_sha=24e94ef2a9df278d0797fadc8954a5ff4e90ede3&event=pull_request' --jq '.workflow_runs[] | [.id, .name, .status, .conclusion, .created_at] | @tsv'
+   bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_retrigger.sh --check datasecau/OXPd_2 <run id> 24e94ef2a9df278d0797fadc8954a5ff4e90ede3 <main sha40 at that moment>
+
+   rc 0 (MATCH) = go on. rc 3 (STALE) = run the default mode once (`pr_retrigger.sh datasecau/OXPd_2 PRNUM`) and check
+   the NEW run again. rc 4 (no Merge line) is NOT a match. The one re-trigger is for a STALE merge ref only, never for a
+   red job.
+
+3. THE CHECK WAIT (head pinned, distinct NAMES). Run as a tracked background task:
+
+   GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/OXPd_2/4_Credentials/.gh-config' bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_checks_wait.sh datasecau/OXPd_2 PRNUM 24e94ef2a9df278d0797fadc8954a5ff4e90ede3 60 40 --min-checks 8
+
+   8 = the distinct check names on the heads of PRs 60, 61, 62 and 63 (check-runs by GET, 03:57:58; 8 each): Analyze
+   (actions), Analyze (csharp), Analyze (python), CodeQL, linux, rules, secret-scan, windows. The branch push carried
+   the four CI names only (linux, rules, secret-scan, windows: all success). UNMEASURED: that default CodeQL setup posts
+   all three Analyze rows for a pull request that changes no file of those languages; if fewer than 8 names come, read
+   which are missing and STOP (never lower --min-checks without a reading of why).
+
+   Required on the merge ref, with <M> = aa520ba5 (MEASURED above; if main moves again, MAIN MOVES (B) with the new
+   main's own PASS line): linux and windows each `total: 2564` (twice), `failed: 0`; linux `succeeded: 2560`, `skipped:
+   4`, `GUARD: clean (28 files)`; windows `succeeded: 2543`, `skipped: 21`, `GUARD: clean (29 files)`; the total is
+   <M>'s own (this change adds no test); rules `RULES: clean (782 files)` (= 780 + 2), `Ran 117 tests`, `UNIT-TEST
+   FLOOR: ran 117, floor 117`; secret-scan both PLANTED-CONTROL lines, `no leaks found`, `objects of this commit not
+   among them 0`, both NEUTRAL-EXPORT lines `wrong 0`, NEUTRAL-SCAN-REACH `not among the stored objects 0`. A red =
+   STOP: a new finding, never a re-run. hosted3.py on the merge ref's run, if used, ALWAYS with --guard-linux 28
+   --guard-windows 29 (or the newer main's own guard counts, read from its PASS line).
+
+   CODE SCANNING. Read the analyses FIRST, then the alerts:
+
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/analyses?ref=refs/pull/PRNUM/head&per_page=10' --jq '.[] | [.commit_sha, .category, .results_count, .created_at] | @tsv'
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?ref=refs/pull/PRNUM/head&state=open' --jq 'length'
+   gh api -X GET 'repos/datasecau/OXPd_2/code-scanning/alerts?state=open' --jq 'length'
+   gh api -X GET repos/datasecau/OXPd_2/pulls/PRNUM --jq '[.head.sha, .mergeable, .mergeable_state] | @tsv'
+
+   Required: open alerts on the PR ref 0 and repository-wide 0 (main's baseline at the gate, 03:57:58: 0 on
+   refs/heads/main, 0 repository-wide, 0 on the branch ref); the head 24e94ef2...; mergeable true and state clean. Any
+   open alert or blocked = STOP: an alert is fixed by a new commit and a new gate, never dismissed. CodeQL reads none of
+   the two files (VERDICT.md I6); this gate and B2204 are the security read of them.
+
+4. LAST READ BEFORE THE MERGE: the branch ref equals 24e94ef2...; main equals the <M> that step 2 proved.
+
+   gh api -X GET repos/datasecau/OXPd_2/git/matching-refs/heads/b2191 --jq '.[] | [.ref, .object.sha] | @tsv'
+   gh api -X GET repos/datasecau/OXPd_2/git/matching-refs/heads/main --jq '.[] | [.ref, .object.sha] | @tsv'
+
+5. THE SQUASH (one parent, head pinned; the real number in place of PRNUM; the body exactly the file). First run
+   `python3 -I build/squash_scan.py <subject file with the number> squash-body.txt --scanner /opt/homebrew/bin/gitleaks`
+   from a clone of main: last line `SQUASH-SCAN: clean` (the gate ran it with #65 in place of #PRNUM: FOR-RECORDS.md
+   GATE SCANS; a different number changes characters: scan again). squash-subject.txt names the whole change (both
+   commits) plus ` (#PRNUM)`.
+
+   gh pr merge PRNUM --repo datasecau/OXPd_2 --squash --match-head-commit 24e94ef2a9df278d0797fadc8954a5ff4e90ede3 --subject "$(sed 's/#PRNUM/#'PRNUM'/' squash-subject.txt)" --body-file squash-body.txt
+
+   No --admin and no bypass. If the merge is refused, stop and read why.
+
+6. AFTER, on main (GET only): the new main commit has ONE parent (<M>); its tree = <M>'s files + exactly
+   deploy/azure/README.md and deploy/azure/main.bicep: **782 files when <M> is aa520ba5** (780 + 2), and the test total
+   UNCHANGED from <M>'s (2564 at aa520ba5: no test added); `contents/deploy/azure` lists exactly README.md and
+   main.bicep, their blob contents sha256 `1426ded7...5422` and `97bb8cb1...72b1`; its push run reads four jobs success
+   with the numbers of step 3, and the Analyze rows success; open code-scanning alerts on main 0. **main's push run must
+   read PASS**:
+
+   gh api -X GET repos/datasecau/OXPd_2/commits/main --jq '[.sha, (.parents | length), .commit.tree.sha, .commit.message[0:130]] | @tsv'
+   python3 -I '/Volumes/Datasec_DEV/!CODING/Datasec/OXPd_2/.tools/b2205-x104/gate/hosted3.py' <new main sha40> <a new log folder of yours> --wait --total 2564 --rules 782 --skipped-linux 4 --skipped-windows 21 --unit 117 --floor 117 --hardened-scan --guard-linux 28 --guard-windows 29
+
+   (hosted3.py sha256 969fe376db2f8823f29610e3989e5b341fd0bae7df91209d203281f4acae44ce, the lane's copy; GET only.) A red
+   here is a NEW finding, never a re-run. Then the records pass reads FOR-RECORDS.md (rounds 1 and 2 together).
+
+MAIN MOVES (measured: e1802e24 at 03:55:25; aa520ba5 at 03:57:58 and 04:01:51 AEDT).
+(A) [void] main d9f89115 or e1802e24: both are history; do not use their numbers.
+(B) MAIN = aa520ba5 (this is the case now): steps 1 to 6 with <M> = aa520ba5: T 2564, linux succeeded 2560, windows
+    succeeded 2543, guards 28 / 29, RULES 782 on the merge ref; the new main's tree 782 files. IF MAIN MOVES AGAIN
+    (any other landing first): do not merge on this reading. Read the new main and confirm
+    `gh api -X GET 'repos/datasecau/OXPd_2/compare/d9f89115333bbed2ade723e4c11d523b2a9cd079...<new main>' --jq
+    '[.files[].filename | select(startswith("deploy/") or startswith(".github/"))] | length'` prints 0 (a non-zero is a
+    STOP and a new gate). Then run hosted3.py --wait on the new main first and take <T>, its rules count PLUS 2, the
+    skipped and the GUARD counts from ITS PASS line (they moved with PR 64; they can move again), and prove the merge
+    ref against the NEW main (step 2). The two files touch no path any other lane owns, so no merge conflict is
+    possible on a main that adds nothing under deploy/ (DERIVED; NOT MEASURED by this gate: no such merge was built).
+
+No line above reaches a tenant or a device. No setting is changed by any line above. No Jira call in any line above. No
+az command in any line above.
