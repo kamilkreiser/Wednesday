@@ -1,0 +1,65 @@
+B2136 LANDING TEXT for Tuesday. Gate G1 (Opus), round 1 of 2: see VERDICT.md for the grade; this text assumes a grade with no Blocker.
+Repo datasecau/Reporting_Dashboard_Au. NO pull request exists yet (open PRs 0, gate read 09:04 AEDT 27 Nov). Branch b2133/lane2-erasure.
+HEAD (pin) abef7000195f550a7bd562e33ee8e36c7b8c1adf (E; six commits A b96228b9, B cdcf3b9c, C 21db2207, D 471d8655, K 6675c397, E abef7000; E~6 = BASE 279b22352dbcbd85664534395aeb366fec719a50; the tree at E on GitHub, aaac1a5c, equals the gate's clone's).
+Main at gate 279b22352dbcbd85664534395aeb366fec719a50 = BASE (the merge of records PR 266), read 09:04 AEDT by gh api -X GET. The counts file blob at main is 1067fa78 (= BASE's: 6530 / 411), so the branch's 6588 / 415 needs no regeneration while main stays here.
+Every gh call is made with GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config'.
+
+0. RE-MEASURE BEFORE OPENING
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/ref/heads/main --jq .object.sha  -> 279b22352dbcbd85664534395aeb366fec719a50
+     If main moved: git diff --name-only 279b2235..<new main> must touch none of the kit's HOLD 20 list (backend/dataErasure.js, backend/recoveryLocations.js, backend/customerDataFiles.js, backend/dataDir.js, backend/logger.js, backend/services/schedulers/erasureSweeperScheduler.js, __tests__/rd744-*, rd745-*, rd750-*, rd824-*, rd838-*, rd685-*, rd684-*, rd640-*, rd627a-*, rd639-*, erasure-*, rd324-*, rd525-*, rd424-*, __tests__/helpers/**, scripts/verify-suite.sh, package*.json, jest.config.js, .github/**).
+     A move that touches scripts/verify-expected-counts.json or adds or removes tests means the counts must be regenerated (the verify fails on a difference in either direction): back to a seat, never edit the file by hand.
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/ref/heads/b2133/lane2-erasure --jq .object.sha -> abef7000195f550a7bd562e33ee8e36c7b8c1adf
+   gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/compare/main...abef7000195f550a7bd562e33ee8e36c7b8c1adf' --jq '[.ahead_by,.behind_by,.merge_base_commit.sha[0:8],([.files[]|[.filename,.additions,.deletions]])]'
+     -> [6,0,"279b2235",[rd744 test 468/0, rd745 test 285/0, rd750 test 228/0, rd824 test 286/0, rd838 test 7/8, backend/dataErasure.js 93/10, verify-expected-counts.json 3/3]]
+   If main moves before the merge, behind N is fine: the ruleset's required_status_checks has strict_required_status_checks_policy false (gate read of rules/branches/main, 09:1x), so the branch needs no update, and an update would move the pinned head. Never press "Update branch".
+
+1. OPEN THE PULL REQUEST (Tuesday's verb, the seat never)
+   Title: pr-title.txt. Body: pr-body.md (no name, card, seat or build id; the choices named as the coordinator's; the named limits, including the gate's two Major findings as limits).
+   Base main, head b2133/lane2-erasure, NOT a draft. build.yml builds pull requests to main, so the PR's own checks include the hosted `build` job: the FIRST real Linux run of the four new files (THE LINUX LEG, Q-10).
+
+2. WAIT FOR THE CHECKS
+   bash '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_checks_wait.sh' datasecau/Reporting_Dashboard_Au <n> abef7000195f550a7bd562e33ee8e36c7b8c1adf 60 40 --min-checks 7
+   Seven distinct names, eight runs (gate read of PR 265 head a38a078a and PR 266 head bb109502, each `total 8`): Analyze (actions) | Analyze (javascript-typescript) | Analyze (python) | CodeQL | audit-production-deps (twice: push and pull_request) | build | scan.
+     NOTE: an `audit-production-deps` run (npm-audit, push to any branch) ALREADY exists on abef7000 from the seat's branch push (success; gate read 09:04). The PR adds the pull_request one. Exit 0 = all green; exit 1 or 5 = STOP: read the run, never re-run blindly.
+   Read the `build` job log (gh api -X GET repos/datasecau/Reporting_Dashboard_Au/actions/jobs/<id>/logs) for: `VERDICT: PASS` with `6588/6588 tests passed across 415 suites` (match the words; the dash may be an em dash); `PASS __tests__/rd744-hard-link-refusal-is-carried-by-its-inode.test.js`, `PASS __tests__/rd750-a-file-is-named-once-in-the-erasure-record.test.js`, `PASS __tests__/rd745-non-normalised-data-dir-names-do-not-refuse-each-other.test.js`, `PASS __tests__/rd824-link-through-a-file-resolves-to-nothing.test.js`, `PASS __tests__/rd838-chain-canonical-key-and-cap.test.js`; counts of `FAIL ` lines 0 and `EADDRINUSE` 0 (print a control for each literal on a line known to hold it).
+   LINUX LEG: a red on a NEW cell (H1-H4, R1-R16, C1; O1-O9; K1-K14; N1-N14; the turned U2) = NO MERGE, a fix round of the B2099 class: read the failure text, send it to a seat, never re-run to a green. The cells most exposed to Linux:
+     - the hard-link cells (fs.linkSync under os.tmpdir());
+     - the inode keys (dev:ino as a JS number);
+     - N8 and U2 (a 41-link chain: Linux's limit is 40, so the resolver must answer ELOOP first);
+     - K2, K7 and K14 (process.chdir, restored in a finally).
+     The gate's whole-suite run in the Linux SHAPE read 6588/6588 (macOS, not Linux).
+   Code scanning: the ruleset's code_scanning rule is `security_alerts_threshold: high_or_higher` AND `alerts_threshold: errors` (gate read of rules/branches/main). Main's baseline (gate read 09:1x): javascript-typescript analysis 2257151397 at 279b2235 reads 29 results (python 0, actions 0); 22 open alerts.
+     gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/code-scanning/analyses?ref=refs/pull/<n>/head&per_page=6' --jq '.[]|[.commit_sha[0:8],.results_count,.category]|@tsv'
+       DRAFTER_RULES: a 0 or "no new alert" read here cannot fail as proof of absence; it is NOT a landing condition. The check that can fail is 3b.
+     The gate read main's SARIF (29 results, every primary, related and flow-step location): 0 locations in backend/dataErasure.js or any changed test file (control: backend/server.js holds 346). The gate's own local CodeQL, run as the seat ran it: see VERDICT.md (K rc 1 as the control that can fail; E as the result). If the PR's code-scanning check names any alert as new (the one to expect if anything is js/file-system-race in the rd745 test file): NO MERGE, read it; never dismiss or comment.
+
+3. LAND: A MERGE COMMIT PINNED TO THE HEAD. NEVER SQUASH, NEVER REBASE.
+   Rule: C-190 (/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/1_Project_Definition/CLARIFICATIONS.md line 2067, read by the gate with awk NR==2067): "2. Merge path: open a PR from the gated branch, wait for CodeQL (a background wait that EXITS), then land the SAME commit. Never squash, never rebase ([[C-68]])."
+   gh pr merge <n> --repo datasecau/Reporting_Dashboard_Au --merge --match-head-commit abef7000195f550a7bd562e33ee8e36c7b8c1adf
+   Then: gh api -X GET repos/datasecau/Reporting_Dashboard_Au/pulls/<n> --jq .merge_commit_sha   (call it M)
+         gh api -X GET repos/datasecau/Reporting_Dashboard_Au/commits/<M> --jq '[.parents[].sha]'
+           -> two parents: 279b22352dbcbd85664534395aeb366fec719a50 (or the main before the merge) and abef7000195f550a7bd562e33ee8e36c7b8c1adf; one parent = squashed or rebased: STOP.
+         gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/ref/heads/main --jq .object.sha -> M
+   3b. AFTER THE MERGE (the check that can fail): gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/code-scanning/analyses?ref=refs/heads/main&per_page=6' --jq '.[]|[.commit_sha[0:8],.results_count,.category]|@tsv'
+       -> the javascript-typescript analysis at M reads 29 (as main). A higher count is a new round: read each new alert (above all any js/file-system-race or js/path-injection in backend/dataErasure.js or a new test file); never dismiss one. Open alerts expected 22.
+   3c. Main's own push `build` at M: read it for `VERDICT: PASS` 6588/415 as in step 2.
+
+4. DEPLOY DEMO: READ ONLY. A RUN WILL START; BOTH JOBS MUST READ SKIPPED; APPROVE NOTHING. C-224 HOLD STANDS.
+   .github/workflows/deploy-demo.yml at main 279b2235 (gate read with git show, lines 26 to 33): `on: push` to main with `paths-ignore: '**.md', 'docs/**', 'tests/**'` (backend/** and __tests__/** are NOT ignored) plus workflow_dispatch. This merge touches backend/** and __tests__/**, so the push STARTS a `Deploy demo` run (workflow id 333076536).
+   Both jobs need vars.CI_DEPLOY_ENABLED == 'true': the `if:` of build at line 53 and of deploy at line 91. The deploy job is also bound to environment `demo` (line 95).
+     - Gate read of the repo's Actions variables: total_count 0 (09:1x).
+     - Newest Deploy demo runs: 45817165636 at e5fa5478 (the merge of PR 265) completed/skipped, and 45757473204 at e20b30cf completed/skipped.
+     - 279b2235 (HISTORY.md only) started no run (paths-ignore).
+   The gate read nothing about the `demo` environment's protection rules and makes no claim about them. Package (deploy.yml) is workflow_dispatch only: it does not start.
+     gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/actions/workflows/333076536/runs?head_sha=<M>' --jq '.workflow_runs[] | [.id,.event,.status,.conclusion] | @tsv'
+       Expect one push run, completed/skipped within about a minute. If none appears after about 5 minutes, read runs?per_page=5 and say so. Do not dispatch one.
+     gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/actions/runs/<run id>/jobs' --jq '.jobs[] | [.name,.status,.conclusion] | @tsv'
+       Expected: build completed skipped, deploy completed skipped. BOTH must read skipped: the landing reads it as NOT DEPLOYING.
+   IF EITHER JOB RUNS (queued, in_progress, waiting, success), THE SWITCH IS ON:
+     - Do NOT approve the pending deployment. Do not cancel, re-run or dispatch.
+     - Approving or rejecting is approval-class: card it to the product owner under the C-224 hold (CLARIFICATIONS.md line 2412: no NexusAI demo deploy until RD-876 part 2 lands), with the run id and the job states.
+     - Record in the records pass that the switch read ON at <M>.
+   Make no HTTP request to the demo site in any case.
+
+5. AFTER THE LANDING
+   Hand FOR-RECORDS.md to the records pass. It holds the four ticket comments and moves, RD-745's Dockerfile part staying with lane 4, LEFT FOR OTHERS 1 to 8 of the kit, and the gate's ticket candidates (the two Majors, and the pre-existing census aliasing).
