@@ -1,0 +1,47 @@
+wake census: seat wednesday, tree /Volumes/DevMASTER/WEDNESDAY, measured 2026-11-27 12:53:21 AEDT
+
+BEFORE: whole reads the current boot prompt mandates (steps 1 to 5)
+  step  file                                                            bytes   ~tokens
+  1     CLAUDE.md                                                       11072      2768
+  1     0_Brain/CLAUDE.md                                                4487      1122
+  2     0_Brain/identity/persona.md                                      1925       482
+  2     0_Brain/identity/voice-protocol.md                               3658       915
+  2     0_Brain/people/kam.md                                            4228      1057
+  3     0_Brain/learnings/_rules_card_wednesday.md                     113173     28294
+  3     0_Brain/learnings/_ledger.md                                    32222      8056
+  4     0_Brain/tasks/NEXT-PICKUP.md                                   294541     73636
+  4     0_Brain/tasks/EXPIRING-GRANTS.md                                87458     21865
+  4     0_Brain/tasks/TASKS.md                                           1553       389
+  4     0_Brain/projects_index/INDEX.md                                230651     57663
+  4     0_Brain/projects_index/entries/* (9 files, 2 conflict/backup)     391930     97983
+  4     0_Brain/tasks/WEEK-INSTRUCTION.md                                5051      1263
+  5     0_Brain/daily/2026-11-26.md (yesterday)                         45076     11269
+  5     0_Brain/daily/2026-11-27.md (today)                             51112     12778
+        TOTAL, with INDEX.md and entries whole                        1278137    319535
+        TOTAL, without INDEX.md and entries                            655556    163889
+
+AFTER: the wake pack
+        pack: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-wake/realpack/WAKE-wednesday.md      61994     15499
+        pack + rules files + week instruction + two daily notes        178792     44698
+        the same with earlier notes on demand (Kam's to rule)           82604     20651
+
+  pack, per part (its own manifest):
+  | part | source | source bytes | bytes in pack | est. tokens (bytes/4) |
+  |---|---|---|---|---|
+  | a | `0_Brain/identity/persona.md` | 1925 | 1969 | 493 |
+  | a | `0_Brain/identity/voice-protocol.md` | 3658 | 3709 | 928 |
+  | a | `0_Brain/people/kam.md` | 4228 | 4266 | 1067 |
+  | b | `0_Brain/learnings/_rules_card_wednesday.md (Most reinforced)` | 113173 | 6623 | 1656 |
+  | b | `family headings + fetch lines (generated)` | - | 3626 | 907 |
+  | c | `0_Brain/tasks/NEXT-PICKUP.md (first block)` | 294541 | 4479 | 1120 |
+  | d | `0_Brain/tasks/EXPIRING-GRANTS.md (filtered rows)` | 87458 | 26128 | 6532 |
+  | e | `0_Brain/learnings/_ledger.md (reduced rows)` | 32222 | 8628 | 2157 |
+  | f | `pointers (generated)` | - | 645 | 162 |
+  | - | headings, manifest, this header | - | 1921 | 481 |
+  | **total** | | | **61994** | **15499** of 60000 |
+
+REDUCTION: 1278137 -> 178792 bytes (pack + kept reads): 86% less; ~319535 -> ~44698 tokens.
+           against the total without INDEX.md and entries (655556 bytes): 72% less.
+
+Not counted on either side: partial reads (scoreboard head, other ledgers' headlines), live sources (Linear, mail, boards), on-demand files and the prompt itself.
+census rc=0

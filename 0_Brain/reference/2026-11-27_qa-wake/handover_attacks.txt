@@ -1,0 +1,57 @@
+PASS A-CRLF :: write rc 0, stored==input(+nl) True, 2nd write rc 0, old block byte-identical in archive True (count 1), check rc 0 | stderr1: 
+PASS A-no-trailing-newline :: write rc 0, stored==input(+nl) True, 2nd write rc 0, old block byte-identical in archive True (count 1), check rc 0 | stderr1: 
+PASS A-NUL-byte :: write rc 0, stored==input(+nl) True, 2nd write rc 0, old block byte-identical in archive True (count 1), check rc 0 | stderr1: 
+PASS A-non-UTF-8 :: write rc 0, stored==input(+nl) True, 2nd write rc 0, old block byte-identical in archive True (count 1), check rc 0 | stderr1: 
+PASS A-archive-heading-inside :: write rc 0, stored==input(+nl) True, 2nd write rc 0, old block byte-identical in archive True (count 1), check rc 0 | stderr1: 
+PASS A-frontmatter-fence-inside :: write rc 0, stored==input(+nl) True, 2nd write rc 0, old block byte-identical in archive True (count 1), check rc 0 | stderr1: 
+PASS B-9999-bytes :: rc 0, state file written | 
+PASS B-10000-bytes :: rc 0, state file written | 
+PASS B-10001-bytes :: rc 3, state file absent | handover: REFUSED — nothing written (1 fault):
+PASS B-10000-bytes-without-trailing-newline :: INFO rc 3 (the tool adds a newline, making 10001) | handover: REFUSED — nothing written (1 fault):
+PASS C-fullwidth-look-alike FLOOR :: INFO rc 3 | handover: REFUSED — nothing written (2 faults):
+PASS C-nbsp after ## :: INFO rc 3 | handover: REFUSED — nothing written (1 fault):
+PASS C-cyrillic O in FLOOR :: INFO rc 3 | handover: REFUSED — nothing written (2 faults):
+PASS C-## inside a code fence :: INFO rc 3 | handover: REFUSED — nothing written (5 faults):
+PASS C-stack via h1 + h3 (second dated block under # and ###) :: INFO rc 0 | ACCEPTED
+PASS C-zero-width space in heading :: INFO rc 0 | ACCEPTED
+PASS C-tab instead of space :: INFO rc 3 | handover: REFUSED — nothing written (1 fault):
+PASS C-FLOOR with suffix text :: INFO rc 0 | ACCEPTED
+PASS C-indented ## heading :: INFO rc 0 | ACCEPTED
+PASS D-xclock :: no var rc 3; 14 chars rc 3; 15 chars rc 0; header has reason True; archive heading: # ARCHIVED 2026-11-27 12:45:31 AEDT | block written 2026-11-27 12:45:31 AEDT | 213 bytes | sha256 506fd290e1d16ba2 | x-clock override: quoting a grant
+PASS D-xclock-padding :: INFO 'a b c d e f g h' (15 with spaces) rc 0; 15 spaces rc 3; 'a'+13 spaces+'b' rc 3 (whitespace is collapsed before counting: handover: REFUSED — nothing written (1 fault):)
+   INFO x-clock probe 'at 9:5x'  -> rc 3
+   INFO x-clock probe 'T11:4x'   -> rc 0
+   INFO x-clock probe '11:4X'    -> rc 3
+   INFO x-clock probe '11:xx'    -> rc 3
+   INFO x-clock probe '1x:30'    -> rc 0
+   INFO x-clock probe '23:5x.'   -> rc 3
+   INFO x-clock probe '(08:0x)'  -> rc 3
+   INFO x-clock probe '11:4x5'   -> rc 0
+   INFO x-clock probe 'v1:2x'    -> rc 0
+PASS E-TUESDAY-tree-holding-wednesday-files :: rc 0; STATE-wednesday.md untouched True; wrote STATE-tuesday.md True
+PASS E-WED_AGENT-against-tree :: rc 2; tasks dir [] | handover: REFUSED — WED_AGENT='wednesday' but this tree ('TUESDAY') is seat 'tuesday' — unset WED_AGENT, or run from the matching tree
+   INFO tree name 'SOMETHING'      -> rc 2 files [] | handover: REFUSED — cannot tell which seat this tree is — run from a WEDNESDAY, TUESDAY or FRIDAY tree (tree: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-wake/ho/E3_SOMET
+        same with WED_AGENT=wednesday -> rc 2 files []
+   INFO tree name 'wednesday_copy' -> rc 2 files [] | handover: REFUSED — cannot tell which seat this tree is — run from a WEDNESDAY, TUESDAY or FRIDAY tree (tree: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-wake/ho/E3_wedne
+        same with WED_AGENT=wednesday -> rc 2 files []
+   INFO tree name 'WEDNESDAY 2'    -> rc 2 files [] | handover: REFUSED — cannot tell which seat this tree is — run from a WEDNESDAY, TUESDAY or FRIDAY tree (tree: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-wake/ho/E3_WEDNE
+        same with WED_AGENT=wednesday -> rc 2 files []
+   INFO tree name 'TuEsday'        -> rc 2 files [] | handover: REFUSED — cannot tell which seat this tree is — run from a WEDNESDAY, TUESDAY or FRIDAY tree (tree: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-wake/ho/E3_TuEsd
+        same with WED_AGENT=wednesday -> rc 2 files []
+   INFO tree name 'Wednesday'      -> rc 0 files ['STATE-wednesday.md'] | 
+        same with WED_AGENT=wednesday -> rc 0 files ['STATE-wednesday-archive.md', 'STATE-wednesday.md']
+PASS E-HANDOVER_TREE-seam-crosses-trees (no WED_AGENT) :: INFO rc 0; files in the TUESDAY tree: ['STATE-tuesday.md'] | 
+PASS E-HANDOVER_TREE-seam with WED_AGENT=wednesday (as a launched seat has it) :: rc 2 | handover: REFUSED — WED_AGENT='wednesday' but this tree ('TUESDAY') is seat 'tuesday' — unset WED_AGENT, or run from the matching tree
+PASS F-symlinked-state-file :: rc 0; target file unchanged True; state path is now a regular file; target's content copied into this seat's archive True
+PASS F-dangling-symlink-state :: rc 0; dangling target created False; state is regular file
+PASS F-symlinked-archive-file :: rc 0; link target unchanged True; archive path now regular file; target content carried into new archive True
+PASS G-hand-appended-then-write :: check rc 1 (FAULT: the block does not match the header's sha256: it was edited or appended to outside the tool); write rc 0; the hand-edited body is whole in the archive True; NOTE line: ['  NOTE: the state file was changed outside this tool since it was written: what is on disk (164 bytes) is archived verbatim']
+PASS G-header-removed-by-hand :: rc 0; whole hand content archived True
+PASS G-header-broken-by-hand (early ---) :: rc 0; everything after the first header close is in the archive True; bytes of the old file NOT in the archive: 37 (header lines only)
+PASS G-body-emptied-by-hand :: rc 0; archive absent (nothing to archive)
+PASS G-archive-hand-edited (header pushed down) :: rc 0; previous archive bytes all present True; old archive is a contiguous suffix True
+PASS H-unreadable-state :: rc 1; state unchanged True | PermissionError: [Errno 13] Permission denied: '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-wake/ho/
+PASS H-read-only-tasks-dir :: rc 4; state and archive unchanged True | handover: REFUSED — I/O fault, the state file was not replaced: [Errno 13] Permission denied: '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-w
+PASS I-dry :: rc 0 files []
+PASS J-whitespace-only :: rc 3
+PASS K-engine-called-directly-with---seat-tuesday :: INFO rc 0; files ['STATE-tuesday.md'] (the engine itself has no seat guard; handover.sh is the guard)

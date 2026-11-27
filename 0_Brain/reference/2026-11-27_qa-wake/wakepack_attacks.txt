@@ -1,0 +1,46 @@
+## 1. baseline
+build rc 0 | /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-wake/wp/base/WEDNESDAY/0_Brain/wake/WAKE-wednesday.md  bytes: 62033  ~tokens: 15509 of 60000  state: legacy pickup, first block only  grants kept 22 of 76 (
+manifest total 62033 bytes, file on disk 62033 bytes, equal True; tokens in manifest 15509, ceil(bytes/4) 15509, equal True
+manifest part rows 10; sum of their bytes 62033 == total True
+check on fresh pack rc 0 | OK: wake pack current (0_Brain/wake/WAKE-wednesday.md, 62033 bytes, ~15509 tokens of 60000)
+## 2. budget boundary and over-budget writes nothing
+budget == exact tokens (15509): rc 0
+budget one token under: rc 3; wake dir: no wake dir | wake_pack: OVER BUDGET — nothing written. The pack would be 62033 bytes, ~15509 tokens; the budget is 15508 tokens (over by ~1).
+budget 1000: rc 3; wake dir: no wake dir; any tmp anywhere: []
+over budget with an existing pack: rc 3; old pack byte-unchanged True; old sidecar unchanged True (a STALE pack stays on disk)
+## 3. a source missing / unreadable / emptied: does the build still exit 0?
+- persona missing: rc 2; pack not written;  | stderr: wake_pack: REFUSED — required source missing: 0_Brain/identity/persona.md (root /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/
+- kam.md missing: rc 2; pack not written;  | stderr: wake_pack: REFUSED — required source missing: 0_Brain/people/kam.md (root /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratc
+- rules card missing: rc 0; pack WRITTEN; pack 51929 B; telltale lines: ['NO RULES CARD for this seat at `0_Brain/learnings/_rules_card_wednesday.md`. Generate it: `python3 2_Project_Files/tools/rules_card.py --seat wednesda', 'From `0_Brain/tasks/EXPIRING-GRANTS.md` as of 2026-11-27: 76 rows in the file, 22 kept here.'] | stderr: 
+- rules card EMPTY (0 bytes): rc 0; pack WRITTEN; pack 52674 B; telltale lines: ["(the card at `0_Brain/learnings/_rules_card_wednesday.md` has no 'Most reinforced' section; read the card's head)", 'From `0_Brain/tasks/EXPIRING-GRANTS.md` as of 2026-11-27: 76 rows in the file, 22 kept here.'] | stderr: 
+- rules card 'Most reinforced' heading renamed: rc 0; pack WRITTEN; pack 55772 B; telltale lines: ["(the card at `0_Brain/learnings/_rules_card_wednesday.md` has no 'Most reinforced' section; read the card's head)", 'From `0_Brain/tasks/EXPIRING-GRANTS.md` as of 2026-11-27: 76 rows in the file, 22 kept here.'] | stderr: 
+- rules card unreadable (mode 000): rc 1; pack not written;  | stderr: PermissionError: [Errno 13] Permission denied: '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-wake/wp/src_rules_
+- rules_card.py missing: rc 0; pack WRITTEN; pack 61826 B; telltale lines: ['- WARNING: `2_Project_Files/tools/rules_card.py` has no `--at` flag in this tree; open the card section instead.', 'From `0_Brain/tasks/EXPIRING-GRANTS.md` as of 2026-11-27: 76 rows in the file, 22 kept here.'] | stderr: 
+- grants file missing: rc 0; pack WRITTEN; pack 35909 B; telltale lines: ['No grants file at `0_Brain/tasks/EXPIRING-GRANTS.md`.'] | stderr: 
+- grants file EMPTY: rc 0; pack WRITTEN; pack 36401 B; telltale lines: ['From `0_Brain/tasks/EXPIRING-GRANTS.md` as of 2026-11-27: 0 rows in the file, 0 kept here.'] | stderr: 
+- grants file unreadable: rc 1; pack not written;  | stderr: PermissionError: [Errno 13] Permission denied: '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-wake/wp/src_grants
+- grants rows indented by one space (still a markdown table): rc 0; pack WRITTEN; pack 36405 B; telltale lines: ['From `0_Brain/tasks/EXPIRING-GRANTS.md` as of 2026-11-27: 0 rows in the file, 0 kept here.'] | stderr: 
+- ledger missing: rc 0; pack WRITTEN; pack 53404 B; telltale lines: ['From `0_Brain/tasks/EXPIRING-GRANTS.md` as of 2026-11-27: 76 rows in the file, 22 kept here.', 'No ledger at `0_Brain/learnings/_ledger.md`.'] | stderr: 
+- ledger with zero dated rows: rc 0; pack WRITTEN; pack 53676 B; telltale lines: ['From `0_Brain/tasks/EXPIRING-GRANTS.md` as of 2026-11-27: 76 rows in the file, 22 kept here.', '(no dated row)'] | stderr: 
+- legacy pickup missing (and no STATE): rc 0; pack WRITTEN; pack 57744 B; telltale lines: ['No legacy pickup at `0_Brain/tasks/NEXT-PICKUP.md` either.', 'From `0_Brain/tasks/EXPIRING-GRANTS.md` as of 2026-11-27: 76 rows in the file, 22 kept here.'] | stderr: 
+- persona EMPTY (0 bytes): rc 0; pack WRITTEN; pack 60102 B; telltale lines: ['From `0_Brain/tasks/EXPIRING-GRANTS.md` as of 2026-11-27: 76 rows in the file, 22 kept here.'] | stderr: 
+- persona is a directory: rc 2; pack not written;  | stderr: wake_pack: REFUSED — required source missing: 0_Brain/identity/persona.md (root /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/
+## 4. --check: each staleness kind, then attempts to read green on a stale or hand-edited pack
+- fresh: rc 0 (GREEN) | OK: wake pack current (0_Brain/wake/WAKE-wednesday.md, 62033 bytes, ~15509 tokens of 60000)
+- a source touched newer (content same): rc 1 (RED) | FAULT: source newer than the pack: 0_Brain/learnings/_ledger.md; wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- --today tomorrow (built on an earlier date): rc 1 (RED) | FAULT: pack was built for 2026-11-27, today is 2026-11-28 (the grant filter depends on the date); FAULT: pack content differs from what would be built now; FAULT: dropped-rows sidecar differs from what would be built now: /private/tmp/claude-501/-Volumes-DevMASTER-W
+- pack hand-edited (a plain line appended): rc 1 (RED) | FAULT: pack content differs from what would be built now; wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- sidecar hand-edited: rc 1 (RED) | FAULT: dropped-rows sidecar differs from what would be built now: /private/tmp/claude-501/-Volumes-DevMASTER-W; wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- sidecar missing: rc 1 (RED) | FAULT: dropped-rows sidecar missing: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b; wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- pack missing: rc 1 (RED) | FAULT: pack missing: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71; wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- restored: rc 0 (GREEN) | OK: wake pack current (0_Brain/wake/WAKE-wednesday.md, 62033 bytes, ~15509 tokens of 60000)
+- ATTACK: a hand-added line that begins 'generated: ' inside the pack: rc 1 (RED) | FAULT: pack content differs from what would be built now; wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- ATTACK: a sidecar row rewritten to begin 'generated: ' (the dropped row vanishes from the list): rc 1 (RED) | FAULT: dropped-rows sidecar differs from what would be built now: /private/tmp/claude-501/-Volumes-DevMASTER-W; wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- ATTACK: source changed, its mtime set back older than the pack: rc 1 (RED) | FAULT: pack content differs from what would be built now; wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- TASKS.md changed (pointer only, not in the pack): expected GREEN: rc 0 (GREEN) | OK: wake pack current (0_Brain/wake/WAKE-wednesday.md, 62033 bytes, ~15509 tokens of 60000)
+- a new family file appears (count line changes): rc 1 (RED) | FAULT: pack content differs from what would be built now; wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- --check with --trust-expired-heading against a default build: rc 1 (RED) | FAULT: pack content differs from what would be built now; FAULT: dropped-rows sidecar differs from what would be built now: /private/tmp/claude-501/-Volumes-DevMASTER-W; wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+- --check with another budget against a default build: rc 1 (RED) | FAULT: pack content differs from what would be built now; wake_pack: STALE — rebuild: python3 2_Project_Files/wake/wake_pack.py --seat wednesday
+## 5. conflict copies and .pre- files planted to change the output
+with 9 planted conflict/.pre- files: rc 0; pack identical (ignoring the generated line) True; sidecar identical True; 'POISON-QA' in pack False
+other conflict-name styles in families/ (capitalised, Syncthing, Dropbox, Finder ' 2'): pack identical False; family-file count line: ['Family files in `0_Brain/learnings/families/`: 28.']

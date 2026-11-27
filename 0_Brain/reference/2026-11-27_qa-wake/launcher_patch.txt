@@ -1,0 +1,56 @@
+## patch --dry-run on a scratch copy
+patching file '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-wake/launcher/patched.command'
+dry rc=0
+## patch
+patching file '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-wake/launcher/patched.command'
+patch rc=0
+orig.command
+patched.command
+## bash -n (macOS /bin/bash 3.2)
+bash -n patched rc=0
+bash -n orig rc=0
+    1004 /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-wake/launcher/orig.command
+    1095 /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-wake/launcher/patched.command
+    2099 total
+## diff orig patched: removed/changed lines (count of '<' lines), added lines (count of '>' lines)
+0
+91
+283a284,308
+869a895,960
+## bash-4-only constructs in ADDED lines (expect 0 each; positive control: count of 'if \[' in added lines)
+declare -A : 0
+mapfile : 0
+readarray : 0
+&>> : 0
+\$\{[A-Za-z_]+(,,|\^\^|,|\^)\} : 0
+\|& : 0
+coproc : 0
+\$\{[A-Za-z_]+@ : 0
+local -n : 0
+\[\[ -v : 0
+control if [ : 6
+## backticks, $( and eval in ADDED lines
+backtick lines: 0
+dollar-paren lines: 2
+13:>     WAKE_OUT="$(python3 "$WAKE_PY" --seat "$AGENT" 2>&1)"; WAKE_RC=$?
+16:>       WAKE_SUMMARY="$(printf '%s\n' "$WAKE_OUT" | tail -1)"; WAKE_SUMMARY="${WAKE_SUMMARY#*  }"
+eval: 0
+## names the hunks assign: are any used in the ORIGINAL launcher? (expect 0; control: count of AGENT in original)
+WAKE_PACK_OK : 0
+WAKE_PACK : 0
+WAKE_SUMMARY : 0
+WAKE_PY : 0
+WAKE_OUT : 0
+WAKE_RC : 0
+WAKE_NL : 0
+WAKE_NOTES : 0
+WAKE_M1 : 0
+WAKE_M2 : 0
+WAKE_STEP5 : 0
+WAKE_HEAD : 0
+WAKE_TAIL : 0
+any WAKE_ name in original:    3 WAKE_MODE_FILE;
+control AGENT : 38
+## set -e / errexit / ERR trap anywhere in the original (expect 0; control: set -u count)
+0
+1

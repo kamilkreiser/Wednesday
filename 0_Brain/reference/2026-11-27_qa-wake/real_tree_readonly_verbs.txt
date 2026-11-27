@@ -1,0 +1,44 @@
+## --where
+seat:    wednesday
+state:   /Volumes/DevMASTER/WEDNESDAY/0_Brain/tasks/STATE-wednesday.md  (absent)
+archive: /Volumes/DevMASTER/WEDNESDAY/0_Brain/tasks/STATE-wednesday-archive.md  (absent)
+cap:     10000 bytes (HANDOVER_CAP_BYTES)
+parts:   ## FLOOR, ## FIRST WORK, ## OWED, ## OPEN CARDS, ## GRANTS IN PLAY
+rc=0
+## check
+handover: ABSENT — no state file at /Volumes/DevMASTER/WEDNESDAY/0_Brain/tasks/STATE-wednesday.md (not a fault before the cut-over)
+rc=0
+## show
+handover: no state file at /Volumes/DevMASTER/WEDNESDAY/0_Brain/tasks/STATE-wednesday.md
+rc=1
+seed dry rc=0
+handover: seed, DRY — nothing written. The block above (4262 bytes) is what `handover.sh seed --from-legacy --run` would write to /Volumes/DevMASTER/WEDNESDAY/0_Brain/tasks/STATE-wednesday.md.
+  legacy block: 6 lines; 3 labelled bullets mapped by their label, 3 unlabelled or unknown bullets placed under FIRST WORK
+  parts with nothing in the legacy block (written as 'none stated'): OPEN CARDS, GRANTS IN PLAY
+  The legacy file is read, never written.
+## tasks dir listing before vs after the dry seed (diff, empty means identical):
+listing diff rc=0
+## legacy pickup sha before/after:
+sha diff rc=0
+## STATE files or temp files in tasks (expect none; control: NEXT-PICKUP count)
+0
+365
+## 0_Brain/wake exists?
+ls: /Volumes/DevMASTER/WEDNESDAY/0_Brain/wake: No such file or directory
+## my seed block vs the builder's saved one
+    4262 /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-wake/seed_block.txt
+    3627 /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/wake/out/seed_dry_wednesday.block.txt
+    7889 total
+/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-wake/seed_block.txt /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/wake/out/seed_dry_wednesday.block.txt differ: char 93, line 2
+cmp rc=1
+## faithfulness of the seed mapping
+legacy file: 927 lines, 111 '## ' blocks; lines before the first block (header/preamble): 10
+newest legacy block: 6 lines (6 non-blank), 3865 bytes; non-blank lines NOT found verbatim in the seed: 0
+legacy block heading line carried into the seed (inside the generated FLOOR line): True
+seed lines that are not legacy lines (generated): 8 -> ['## FLOOR', '- Seeded from the newest block of the legacy pickup `NEXT-PI', '## FIRST WORK', '## OWED', '## OPEN CARDS', '- none stated in the legacy block', '## GRANTS IN PLAY', '- none stated in the legacy block']
+leading bold labels of the block's bullets (first 40 chars each): ['FLOOR (4 panes + 2 in-session checkers):', 'SECUURA DONE TODAY (verified):', 'OWED TO KAM (in this order):', 'WED-170 NOT STARTED:', 'WAKE RUNNER:', 'OWED (carried, still true):']
+bullets per part in the seed: {'FLOOR': 2, 'FIRST WORK': 3, 'OWED': 2, 'OPEN CARDS': 1, 'GRANTS IN PLAY': 1}
+legacy '## ' headings beyond the newest block that mention STANDING / OWED / GRANT: 2 of 110 (not seeded; the seed takes the newest block only)
+    OWED (in order, after the floor)
+    STANDING (unchanged; the lessons carry the detail)
+x-digit clocks in the seed: []

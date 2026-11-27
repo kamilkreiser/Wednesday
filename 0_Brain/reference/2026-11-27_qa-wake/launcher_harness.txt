@@ -1,0 +1,43 @@
+## A. other seats: prompt bytes, original vs patched (python3 stub would succeed if called)
+tuesday: original rc 0, 19217 bytes, sha 9cf6f7d3b875eb46 | patched rc 0, 19217 bytes, sha 9cf6f7d3b875eb46 | BYTE-IDENTICAL True | harness stdout identical True (patched stdout: '') | stderr orig '' patched '' | python3 called by the patched region: '' | pack file created: False
+   control: the prompt carries the seat's own files: [b'NEXT-PICKUP-TUESDAY', b'_ledger_laptop_datasec']
+friday: original rc 0, 19204 bytes, sha bd40e653f86e229b | patched rc 0, 19204 bytes, sha bd40e653f86e229b | BYTE-IDENTICAL True | harness stdout identical True (patched stdout: '') | stderr orig '' patched '' | python3 called by the patched region: '' | pack file created: False
+   control: the prompt carries the seat's own files: [b'NEXT-PICKUP-FRIDAY', b'_ledger_laptop_datasec', b'_ledger_friday']
+## B. wednesday: original prompt, then each build outcome on the patched copy
+original wednesday prompt: rc 0, 19172 bytes, sha 7faf3b9d70e8ce54; stderr ''
+- build OK (rc 0, pack written): rc 0; prompt 18060 bytes sha da12164792d76639 -> WAKE-PACK prompt; names the pack path True; says anything about the failure IN THE PROMPT False
+    stdout: wake pack: bytes: 61206  ~tokens: 15302 of 60000  state: legacy pickup, first block only  grants kept 22 of 76 (12 unclassified)  dropped rows listed in WAKE-wednesday.dropped.txt  ledger rows: 19 / boot prompt: wake pack read list (steps 1 to 4 replaced; the rest is the legacy text)
+    stderr: ''
+- build OVER BUDGET (rc 3): rc 0; prompt 19172 bytes sha 7faf3b9d70e8ce54 -> LEGACY (byte-identical to the original); names the pack path False; says anything about the failure IN THE PROMPT False
+    stdout: ⚠ wake_pack.py did not build a pack (rc=3) — this boot uses the legacy read list: / wake_pack: OVER BUDGET — nothing written. The pack would be 300000 bytes
+    stderr: ''
+- build crashes (rc 1, traceback): rc 0; prompt 19172 bytes sha 7faf3b9d70e8ce54 -> LEGACY (byte-identical to the original); names the pack path False; says anything about the failure IN THE PROMPT False
+    stdout: ⚠ wake_pack.py did not build a pack (rc=1) — this boot uses the legacy read list: / Traceback (most recent call last): / PermissionError: [Errno 13]
+    stderr: ''
+- required source missing (rc 2): rc 0; prompt 19172 bytes sha 7faf3b9d70e8ce54 -> LEGACY (byte-identical to the original); names the pack path False; says anything about the failure IN THE PROMPT False
+    stdout: ⚠ wake_pack.py did not build a pack (rc=2) — this boot uses the legacy read list: / wake_pack: REFUSED — required source missing
+    stderr: ''
+- wake_pack.py missing: rc 0; prompt 19172 bytes sha 7faf3b9d70e8ce54 -> LEGACY (byte-identical to the original); names the pack path False; says anything about the failure IN THE PROMPT False
+    stdout: ⚠ wake_pack.py missing at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-wake/launcher/run2_wednesday/2_Project_Files/wake/wake_pack.py — this boot uses the legacy read list
+    stderr: ''
+- rc 0 but NO pack file on disk (deleted or never written): rc 0; prompt 18060 bytes sha da12164792d76639 -> WAKE-PACK prompt; names the pack path True; says anything about the failure IN THE PROMPT False
+    stdout: wake pack: bytes: 61206  ~tokens: 15302 of 60000  state: legacy pickup, first block only  grants kept 22 of 76 (12 unclassified)  dropped rows listed in WAKE-wednesday.dropped.txt  ledger rows: 19 / boot prompt: wake pack read list (steps 1 to 4 replaced; the rest is the legacy text)
+    stderr: ''
+- rc 0 with EMPTY output: rc 0; prompt 17875 bytes sha 29a00a47818265d9 -> WAKE-PACK prompt; names the pack path True; says anything about the failure IN THE PROMPT False
+    stdout: wake pack:  / boot prompt: wake pack read list (steps 1 to 4 replaced; the rest is the legacy text)
+    stderr: ''
+- python3 not found (rc 127): rc 0; prompt 19172 bytes sha 7faf3b9d70e8ce54 -> LEGACY (byte-identical to the original); names the pack path False; says anything about the failure IN THE PROMPT False
+    stdout: ⚠ wake_pack.py did not build a pack (rc=127) — this boot uses the legacy read list: / bash: python3: command not found
+    stderr: ''
+- rc 0 with a HOSTILE summary line (backticks, $( ), quotes): rc 0; prompt 18024 bytes sha 073f7e07a00d2011 -> WAKE-PACK prompt; names the pack path True; says anything about the failure IN THE PROMPT False
+    stdout: wake pack: bytes: 1 `touch "$PROJECT_DIR/PWNED_BACKTICK"` $(touch "$PROJECT_DIR/PWNED_DOLLAR") "; touch "$PROJECT_DIR/PWNED_QUOTE"; echo " ${PROJECT_DIR} \$(id) / boot prompt: wake pack read list (steps 1 to 4 replaced; the rest is the legacy text)
+    stderr: ''
+    files named PWNED* created by the hostile summary: [] ; the text arrived literally in the prompt: True
+- marker M1 reworded in the legacy text: rc 0; prompt is the (reworded) legacy text True; contains 'WAKE PACK boot' False
+    stdout: wake pack: bytes: 61206  ~tokens: 15302 of 60000  state: legacy pickup, first block only  grants kept 22 of 76 (12 unclassified)  dropped rows listed in WAKE-wednesday.dropped.txt  ledger rows: 19 / ⚠ wake pack built, but the boot prompt's slice markers were not found — this boot uses the legacy rea
+## C. the new wednesday prompt against the legacy one
+head before FIRST ACTIONS identical: True (1204 bytes)
+tail from step 5 identical: True (12988 bytes)
+middle (steps 1 to 4): legacy 4980 bytes -> new 3868 bytes
+unexpanded sentinel check: every <<VAR>> in the new middle: []
+backticks in the new middle: 0 ; '$(' in the new middle: 0 ; STUB-NOTE-ENTRY-WHERE occurrences new/legacy: 1/1 (the legacy backtick pair, unchanged, ran the STUB)
