@@ -29,8 +29,8 @@ references; no package is added).
 ## What proves it
 
 - Cells W01 to W11 (25 cases) start the host on 127.0.0.1 port 0 with certificates made in the test; the server test
-  executable `Total: 43, Failed: 0`; whole solution 2513 / failed 0 locally and on both hosted legs of the branch push
-  (locked restore on both legs; release guard 28 and 29 files: the six wired project assemblies with their symbols and
+  executable `Total: 43, Failed: 0`; whole solution 2513 / failed 0 locally and on both hosted legs of the branch push,
+  and 2564 / failed 0 locally on this change squashed over the current main (locked restore on both legs; release guard 28 and 29 files: the six wired project assemblies with their symbols and
   the two logging assemblies, nothing else).
 - Nine mutants of the change each turn their intended cell red (re-run independently: 9 of 9 MATCH).
 - Secret scan and word scan clean over the added lines and the message.
@@ -41,8 +41,9 @@ references; no package is added).
    the chain unchecked; no renewal alert; the certificate is read once at build (a renewal needs a restart).
 2. Only the FIRST certificate of the certificate secret is the served one: a secret holding several certificates is
    not searched for the valid or the longest-lived one (a mismatched key or an expired first certificate refuses the
-   build).
-3. A refused build leaves the half-built host undisposed (the process ends on it; the cells cannot dispose it either).
+   build). The PEM blocks must be separated by a line break; two blocks run together are refused as unreadable.
+3. A refused build leaves the half-built host undisposed (the process ends on it; in the cells each refusal leaves
+   about one thread and some file handles behind).
 4. A local secret store that cannot open, with `Suite:Tls` set, refuses the build with the store's own fixed-text
    exception rather than `TlsStoreFailed`; a malformed enhanced key usage extension refuses it with the platform's
    exception.

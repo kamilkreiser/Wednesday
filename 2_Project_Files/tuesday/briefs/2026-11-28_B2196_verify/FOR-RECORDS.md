@@ -16,13 +16,15 @@ For the records pass after the landing (no text of the gate goes into a project 
   Vault into the store (AZ lanes), a settings file, any route, any chain or revocation check, the 30-day renewal alert.
 - **Owed to L3b (from the gate's VERDICT.md):** replace the `ITokenRefresher` registration with Entra's; wire
   `MyDriveFiles` with a download client that carries no default Authorization header; consider disposing the half-built
-  host on a refused build (F2) and mapping the store-open failure into `TlsStoreFailed` (F3).
+  host on a refused build (F1), reading the EKU inside the refusal mapping (F2) and mapping the store-open failure
+  into `TlsStoreFailed` (F4). The host's Graph client honours the machine's proxy settings (F5).
 - **Owed to the AZ lanes:** the host expects two secrets in its local store at start: `<Suite:Tls:CertificateSecret>`
-  (PEM, the LEAF FIRST, then issuers; only the first certificate is served and checked) and `<Suite:Tls:KeySecret>`
+  (PEM, the LEAF FIRST, then issuers, each block on its own lines; only the first certificate is served and
+  checked, the rest are sent unchecked as the chain) and `<Suite:Tls:KeySecret>`
   (PKCS#8 PEM of the leaf's key); plain ASCII (a UTF-8 byte-order mark is refused as unreadable); the deployment
   configures only HTTPS endpoints (`Suite:Tls` does not refuse an HTTP endpoint beside it).
 - **The Server.Tests hang (Tuesday's point a):** not reproduced by the gate (Server.Tests alone 5 of 5 green on the
-  head, 3 of 3 on main cf224e1f, plus whole-solution runs on the head); the new cells hold no unbounded wait. It stays
+  head, 3 of 3 on main cf224e1f, plus 2 of 2 whole-solution runs on the head and the squash over the moved main); the new cells hold no unbounded wait. It stays
   the pre-existing open item (owed 137), not this lane's. Windows hosted time of the executable rose 12 s -> 53 s with
   the new cells (cost, not a hang).
 - Nothing here ran against a device, a printer, a tenant or Azure.
