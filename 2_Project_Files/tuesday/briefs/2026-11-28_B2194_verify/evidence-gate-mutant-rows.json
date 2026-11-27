@@ -1,0 +1,136 @@
+{
+ "suites": {
+  "entra": {
+   "project": "tests/Datasec.Suite.Identity.Entra.Tests/Datasec.Suite.Identity.Entra.Tests.csproj",
+   "exe": "tests/Datasec.Suite.Identity.Entra.Tests/bin/Release/net10.0/Datasec.Suite.Identity.Entra.Tests",
+   "prefix": "src/Datasec.Suite.Identity.Entra/",
+   "cells": [
+    "EntraTests.E01",
+    "EntraTests.E02",
+    "EntraTests.E03",
+    "EntraTests.E04",
+    "EntraTests.E05",
+    "EntraTests.E06",
+    "EntraTests.E07",
+    "EntraTests.E08",
+    "EntraTests.E09",
+    "EntraTests.E10",
+    "EntraTests.E11",
+    "EntraTests.E12",
+    "EntraTests.E13",
+    "EntraTests.E14",
+    "EntraTests.E15",
+    "EntraTests.E16",
+    "EntraTests.E17",
+    "EntraTests.E18",
+    "EntraTests.E19"
+   ]
+  }
+ },
+ "rows": [
+  [
+   "gIssuerUnchecked",
+   "entra",
+   "src/Datasec.Suite.Identity.Entra/IdTokenReader.cs",
+   "if (!string.Equals(issuer, ",
+   "if (issuer is null && !string.Equals(issuer, ",
+   "EntraTests.E06"
+  ],
+  [
+   "gOidUnchecked",
+   "entra",
+   "src/Datasec.Suite.Identity.Entra/IdTokenReader.cs",
+   "if (!Guid.TryParse(objectId, out Guid oid) || oid == Guid.Empty)",
+   "if (!Guid.TryParse(objectId, out Guid oid) && objectId is null)",
+   "EntraTests.E06"
+  ],
+  [
+   "gAssertionLife",
+   "entra",
+   "src/Datasec.Suite.Identity.Entra/CertificateClientCredential.cs",
+   "now + AssertionLifetimeSeconds",
+   "now + AssertionLifetimeSeconds + 1",
+   "EntraTests.E11"
+  ],
+  [
+   "gAssertionAud",
+   "entra",
+   "src/Datasec.Suite.Identity.Entra/CertificateClientCredential.cs",
+   "w.WriteString(\"aud\", tokenAddress.AbsoluteUri);",
+   "w.WriteString(\"aud\", tokenAddress.GetLeftPart(UriPartial.Authority));",
+   "EntraTests.E11"
+  ],
+  [
+   "gGrantTextLeaks",
+   "entra",
+   "src/Datasec.Suite.Identity.Entra/EntraUserGrant.cs",
+   "public override string ToString() => \"[entra user grant]\";",
+   "public override string ToString() => ObjectId;",
+   "EntraTests.E17"
+  ],
+  [
+   "gSweepDropped",
+   "entra",
+   "src/Datasec.Suite.Identity.Entra/EntraSignIn.cs",
+   "entry.Value.Started) > _pendingLifetime)",
+   "entry.Value.Started) > _pendingLifetime * 100)",
+   "EntraTests.E18"
+  ],
+  [
+   "gMarginDropped",
+   "entra",
+   "src/Datasec.Suite.Identity.Entra/AppTokenSource.cs",
+   "answer.Lifetime - _client.Options.AppTokenMargin",
+   "answer.Lifetime + TimeSpan.Zero",
+   "EntraTests.E14"
+  ],
+  [
+   "gSessionRefusalThrows",
+   "entra",
+   "src/Datasec.Suite.Identity.Entra/SessionGraphTokens.cs",
+   "null lets the 401 stand.\n            return null;",
+   "null lets the 401 stand.\n            throw;",
+   "EntraTests.E16"
+  ],
+  [
+   "gKeepsRenewalDropped",
+   "entra",
+   "src/Datasec.Suite.Identity.Entra/EntraTokenRefresher.cs",
+   "answer.Refresh is null ? renewalState.Span : answer.Refresh",
+   "answer.Refresh is null ? ReadOnlySpan<byte>.Empty : answer.Refresh",
+   "EntraTests.E13"
+  ],
+  [
+   "gTimeoutNotMapped",
+   "entra",
+   "src/Datasec.Suite.Identity.Entra/EntraTokenClient.cs",
+   "catch (TimeoutException)\n        {\n            stop.Cancel();\n            throw new EntraException(EntraError.TimedOut);",
+   "catch (TimeoutException)\n        {\n            stop.Cancel();\n            throw new EntraException(EntraError.TransportFailed);",
+   "EntraTests.E09"
+  ],
+  [
+   "gReadBoundDroppedS",
+   "entra",
+   "src/Datasec.Suite.Identity.Entra/EntraTokenClient.cs",
+   "if (held > bound)",
+   "if (held < 0)",
+   "EntraTests.E07"
+  ],
+  [
+   "gDeclaredLengthDroppedS",
+   "entra",
+   "src/Datasec.Suite.Identity.Entra/EntraTokenClient.cs",
+   "declared > bound",
+   "declared < 0",
+   "EntraTests.E07"
+  ],
+  [
+   "gCodeUncheckedS",
+   "entra",
+   "src/Datasec.Suite.Identity.Entra/EntraSignIn.cs",
+   "if (!EntraOptions.IsVisibleAscii(code, 8192))",
+   "if (code.Length < 0)",
+   "EntraTests.E04"
+  ]
+ ]
+}

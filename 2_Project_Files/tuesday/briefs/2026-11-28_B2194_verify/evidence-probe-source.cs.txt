@@ -1,0 +1,673 @@
+using System.Net;
+using System.Net.Sockets;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using Datasec.Suite.Graph;
+using Datasec.Suite.Secrets;
+using Datasec.Suite.Sessions;
+using Xunit;
+
+namespace Datasec.Suite.Identity.Entra.Tests;
+
+// GATE B2194 PROBE ONLY: never committed. Copied into the gate's scratch clone and moved out after the run.
+// Every cell records what it saw into the gate's results file and asserts nothing (the record is the evidence).
+// Every value is synthetic (the rig's); the only sockets are on 127.0.0.1 inside this process.
+public class GateProbeTests
+{
+    private const string Out = "/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s336/g2194/probe-results.txt";
+    private static readonly Lock Sync = new();
+    private static readonly SessionKey Key = new("SERIAL0001", SessionPlatform.Oxpd2, "session0001");
+
+    private static void Note(string line)
+    {
+        lock (Sync)
+        {
+            File.AppendAllText(Out, line + "\n");
+        }
+    }
+
+    private static string Outcome(Exception? e) => e switch
+    {
+        null => "RETURNED",
+        EntraException x => "EntraException " + x.Reason,
+        TokenBrokerException b => "TokenBrokerException " + b.Reason,
+        _ => e.GetType().Name,
+    };
+
+    private static async Task<Exception?> Try(Func<Task> call)
+    {
+        try
+        {
+            await call();
+            return null;
+        }
+        catch (Exception e)
+        {
+            return e;
+        }
+    }
+
+    private static Exception? TrySync(Action call)
+    {
+        try
+        {
+            call();
+            return null;
+        }
+        catch (Exception e)
+        {
+            return e;
+        }
+    }
+
+    private static string GoodId(SignInStart start, Action<Dictionary<string, string?>>? change = null)
+    {
+        Dictionary<string, string?> claims = IdTokens.Good(FormText.QueryOf(start.Address)["nonce"]);
+        change?.Invoke(claims);
+        return IdTokens.Make(claims);
+    }
+
+    // ---- G01 (P1): sixteen completions of one state at once ----
+    [Fact]
+    public async Task G01_concurrent_completion()
+    {
+        using EntraRig rig = new();
+        SignInStart start = rig.SignIn.Begin(null);
+        string id = GoodId(start);
+        rig.Endpoint.Answer = async (_, _, t) =>
+        {
+            await Task.Delay(50, t);
+            return Answers.Json(200, Answers.Token(Synthetic.UserAccess, Synthetic.UserRefresh, id, 3600));
+        };
+        Task<Exception?>[] calls = [.. Enumerable.Range(0, 16).Select(_ => Task.Run(() => Try(async () => { using var g = await rig.SignIn.CompleteAsync(start.State, Synthetic.Code, CancellationToken.None); })))];
+        Exception?[] results = await Task.WhenAll(calls);
+        Note($"G01 concurrent-16-same-state: returned {results.Count(r => r is null)}, StateUnknown {results.Count(r => r is EntraException { Reason: EntraError.StateUnknown })}, other {results.Count(r => r is not null && r is not EntraException { Reason: EntraError.StateUnknown })}, token requests {rig.Endpoint.Requests}");
+
+        // a bad code leaves the entry; a later good code completes it
+        SignInStart s2 = rig.SignIn.Begin(null);
+        rig.AnswerGood(s2);
+        int before = rig.Endpoint.Requests;
+        Exception? bad = await Try(() => rig.SignIn.CompleteAsync(s2.State, "a b", CancellationToken.None));
+        Exception? good = await Try(async () => { using var g = await rig.SignIn.CompleteAsync(s2.State, Synthetic.Code, CancellationToken.None); });
+        Note($"G01 bad-code-then-good: bad {Outcome(bad)}, then good {Outcome(good)}, requests added {rig.Endpoint.Requests - before}");
+
+        // the state compared ordinally (another case) and a state of 10 000 characters
+        SignInStart s3 = rig.SignIn.Begin(null);
+        Exception? upper = await Try(() => rig.SignIn.CompleteAsync(s3.State.ToUpperInvariant() == s3.State ? s3.State.ToLowerInvariant() : s3.State.ToUpperInvariant(), Synthetic.Code, CancellationToken.None));
+        Exception? huge = await Try(() => rig.SignIn.CompleteAsync(new string('a', 10000), Synthetic.Code, CancellationToken.None));
+        Note($"G01 state-other-case: {Outcome(upper)}; state-10000-chars: {Outcome(huge)}; still held {rig.SignIn.VerifierOf(s3.State) is not null}");
+
+        // the caller cancels during the redeem: the entry is gone (single use), the call leaves as a cancellation
+        SignInStart s4 = rig.SignIn.Begin(null);
+        rig.Endpoint.Answer = async (_, _, t) =>
+        {
+            await Task.Delay(Timeout.InfiniteTimeSpan, t);
+            return Answers.Json(200, "{}");
+        };
+        using CancellationTokenSource cts = new(TimeSpan.FromMilliseconds(100));
+        Exception? cancelled = await Try(() => rig.SignIn.CompleteAsync(s4.State, Synthetic.Code, cts.Token));
+        Note($"G01 caller-cancel-mid-redeem: {Outcome(cancelled)}; entry still held {rig.SignIn.VerifierOf(s4.State) is not null}");
+
+        // a hint that tries to add a parameter
+        SignInStart s5 = rig.SignIn.Begin("a&prompt=none");
+        string q = s5.Address.Query;
+        Note($"G01 hint-injection 'a&prompt=none': prompt= occurrences {CountOf(q, "prompt=")}, raw '&prompt=none' present {q.Contains("&prompt=none", StringComparison.Ordinal)}, login_hint encoded {q.Contains("login_hint=a%26prompt%3Dnone", StringComparison.Ordinal)}");
+    }
+
+    private static int CountOf(string text, string part)
+    {
+        int n = 0;
+        for (int i = text.IndexOf(part, StringComparison.Ordinal); i >= 0; i = text.IndexOf(part, i + 1, StringComparison.Ordinal))
+        {
+            n++;
+        }
+
+        return n;
+    }
+
+    // ---- G02 (Tuesday's point b): the pending bound under load, default options ----
+    [Fact]
+    public void G02_pending_bound_denial()
+    {
+        using EntraRig rig = new();
+        System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
+        int made = 0;
+        Exception? at = null;
+        for (int i = 0; i < 200 && at is null; i++)
+        {
+            at = TrySync(() => rig.SignIn.Begin(null));
+            if (at is null)
+            {
+                made++;
+            }
+        }
+
+        watch.Stop();
+        Note($"G02 default MaxPending {rig.Options.MaxPending}, PendingLifetime {rig.Options.PendingLifetime}: Begins accepted {made} in {watch.ElapsedMilliseconds} ms, next {Outcome(at)}");
+        rig.Clock.Advance(TimeSpan.FromMinutes(9));
+        Note($"G02 after 9 min: {Outcome(TrySync(() => rig.SignIn.Begin(null)))}");
+        rig.Clock.Advance(TimeSpan.FromMinutes(1) + TimeSpan.FromSeconds(1));
+        Note($"G02 after 10 min 1 s: {Outcome(TrySync(() => rig.SignIn.Begin(null)))}, held {rig.SignIn.PendingCount}");
+
+        // a refused Begin holds nothing; Cancel of an unknown state is false
+        Note($"G02 cancel-unknown: {rig.SignIn.Cancel("synthetic-state-0009")}");
+
+        // at the top of the range: 10000 entries, the time of one more Begin (the sweep is linear)
+        using EntraRig big = new(maxPending: 10000);
+        for (int i = 0; i < 9999; i++)
+        {
+            big.SignIn.Begin(null);
+        }
+
+        System.Diagnostics.Stopwatch one = System.Diagnostics.Stopwatch.StartNew();
+        big.SignIn.Begin(null);
+        one.Stop();
+        Note($"G02 MaxPending 10000: held {big.SignIn.PendingCount}, the 10000th Begin {one.Elapsed.TotalMilliseconds:F2} ms, next {Outcome(TrySync(() => big.SignIn.Begin(null)))}, GC total memory {GC.GetTotalMemory(false) / 1024} KiB");
+    }
+
+    // ---- G03 (P2): id token shapes ----
+    [Fact]
+    public async Task G03_id_token_shapes()
+    {
+        (string Label, Func<SignInStart, string?> Make)[] shapes =
+        [
+            ("control-good", s => GoodId(s)),
+            ("oid-upper-case", s => GoodId(s, c => c["oid"] = Synthetic.ObjectId.ToUpperInvariant())),
+            ("aud-braces", s => GoodId(s, c => c["aud"] = "{" + Synthetic.Client + "}")),
+            ("aud-no-hyphens", s => GoodId(s, c => c["aud"] = Synthetic.Client.Replace("-", "", StringComparison.Ordinal))),
+            ("aud-spaces", s => GoodId(s, c => c["aud"] = " " + Synthetic.Client + " ")),
+            ("iss-trailing-slash", s => GoodId(s, c => c["iss"] = Synthetic.Issuer + "/")),
+            ("iss-upper-host", s => GoodId(s, c => c["iss"] = Synthetic.Issuer.Replace("login.example.test", "LOGIN.example.test", StringComparison.Ordinal))),
+            ("nonce-absent", s => GoodId(s, c => c["nonce"] = null)),
+            ("oid-empty-guid", s => GoodId(s, c => c["oid"] = "00000000-0000-0000-0000-000000000000")),
+            ("dup-oid", s => DupClaim(s, "oid", "00000000-0000-4000-8000-000000000009")),
+            ("dup-aud-last-wrong", s => DupClaim(s, "aud", "00000000-0000-4000-8000-000000000009")),
+            ("aud-array", s => RawPayload(s, "\"aud\":[\"" + Synthetic.Client + "\"]")),
+            ("exp-in-past", s => RawPayload(s, "\"aud\":\"" + Synthetic.Client + "\",\"exp\":1")),
+            ("header-alg-none", s => { string t = GoodId(s); return IdTokens.Encode("{\"alg\":\"none\"}") + t[t.IndexOf('.')..]; }),
+            ("header-not-json", s => { string t = GoodId(s); return IdTokens.Encode("not json") + t[t.IndexOf('.')..]; }),
+            ("signature-empty", s => { string t = GoodId(s); return t[..(t.LastIndexOf('.') + 1)]; }),
+            ("four-parts", s => GoodId(s) + ".x"),
+            ("payload-padding", s => { string[] p = GoodId(s).Split('.'); return p[0] + "." + PadB64(p[1]) + "." + p[2]; }),
+            ("payload-std-base64-chars", s => { string[] p = GoodId(s).Split('.'); return p[0] + "." + p[1].Replace('-', '+').Replace('_', '/') + "." + p[2]; }),
+            ("payload-depth-9", s => RawPayload(s, "\"aud\":\"" + Synthetic.Client + "\",\"deep\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":1}}}}}}}}")),
+        ];
+        foreach ((string label, Func<SignInStart, string?> make) in shapes)
+        {
+            using EntraRig rig = new();
+            SignInStart start = rig.SignIn.Begin(null);
+            string? id = make(start);
+            rig.Endpoint.Answer = (_, _, _) => Answers.JsonTask(200, Answers.Token(Synthetic.UserAccess, Synthetic.UserRefresh, id, 3600));
+            string objectId = "-";
+            Exception? e = await Try(async () =>
+            {
+                using EntraUserGrant g = await rig.SignIn.CompleteAsync(start.State, Synthetic.Code, CancellationToken.None);
+                objectId = g.ObjectId == Synthetic.ObjectId ? "the rig's oid" : g.ObjectId.Length == 36 ? "another oid (" + g.ObjectId[^4..] + ")" : "?";
+            });
+            Note($"G03 {label}: {Outcome(e)}{(e is null ? ", object id " + objectId : string.Empty)}");
+        }
+    }
+
+    private static string PadB64(string s) => s + new string('=', (4 - (s.Length % 4)) % 4);
+
+    private static string DupClaim(SignInStart s, string name, string second)
+    {
+        string nonce = FormText.QueryOf(s.Address)["nonce"];
+        string json = "{\"aud\":\"" + Synthetic.Client + "\",\"tid\":\"" + Synthetic.Tenant + "\",\"iss\":\"" + Synthetic.Issuer + "\",\"oid\":\"" + Synthetic.ObjectId + "\",\"nonce\":\"" + nonce + "\",\"" + name + "\":\"" + second + "\"}";
+        return IdTokens.Encode("{\"alg\":\"RS256\"}") + "." + IdTokens.Encode(json) + "." + IdTokens.Encode("sig");
+    }
+
+    private static string RawPayload(SignInStart s, string audPart)
+    {
+        string nonce = FormText.QueryOf(s.Address)["nonce"];
+        string json = "{" + audPart + ",\"tid\":\"" + Synthetic.Tenant + "\",\"iss\":\"" + Synthetic.Issuer + "\",\"oid\":\"" + Synthetic.ObjectId + "\",\"nonce\":\"" + nonce + "\"}";
+        return IdTokens.Encode("{\"alg\":\"RS256\"}") + "." + IdTokens.Encode(json) + "." + IdTokens.Encode("sig");
+    }
+
+    // ---- G04 (P2, P4): answer shapes and the read bound ----
+    [Fact]
+    public async Task G04_answer_shapes_and_bound()
+    {
+        (string Label, Func<string, HttpResponseMessage> Make)[] shapes =
+        [
+            ("control-good", id => Answers.Json(200, Answers.Token(Synthetic.UserAccess, Synthetic.UserRefresh, id, 3600))),
+            ("no-length-over-bound-4096 (stream, no Content-Length)", id => new HttpResponseMessage(HttpStatusCode.OK) { Content = new StreamContent(new EndlessStream()) }),
+            ("declared-10-body-5000", id => Declared(10, new string(' ', 4990) + Answers.Token(Synthetic.UserAccess, Synthetic.UserRefresh, id, 3600))),
+            ("declared-10-body-200-good", id => Declared(10, Answers.Token(Synthetic.UserAccess, Synthetic.UserRefresh, id, 3600))),
+            ("expires-fraction", id => Answers.Json(200, Answers.Token(Synthetic.UserAccess, Synthetic.UserRefresh, id, 3600.5))),
+            ("expires-int32-max", id => Answers.Json(200, Answers.Token(Synthetic.UserAccess, Synthetic.UserRefresh, id, int.MaxValue))),
+            ("expires-1e3", id => Answers.Json(200, Answers.Token(Synthetic.UserAccess, Synthetic.UserRefresh, id, System.Text.Json.Nodes.JsonNode.Parse("1e3")))),
+            ("access-non-ascii-escape", id => Answers.Json(200, Answers.Token("synthetic-é-0001", Synthetic.UserRefresh, id, 3600))),
+            ("dup-access", id => Answers.Json(200, "{\"access_token\":\"a1\",\"access_token\":\"a2\",\"refresh_token\":\"r\",\"id_token\":\"" + id + "\",\"expires_in\":3600}")),
+            ("id-token-number", id => Answers.Json(200, "{\"access_token\":\"a1\",\"refresh_token\":\"r\",\"id_token\":5,\"expires_in\":3600}")),
+            ("refresh-empty-string", id => Answers.Json(200, Answers.Token(Synthetic.UserAccess, string.Empty, id, 3600))),
+            ("content-type-text-html", id => new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(Answers.Token(Synthetic.UserAccess, Synthetic.UserRefresh, id, 3600), Encoding.UTF8, "text/html") }),
+            ("status-203", id => Answers.Json(203, Answers.Token(Synthetic.UserAccess, Synthetic.UserRefresh, id, 3600))),
+            ("status-204", id => new HttpResponseMessage(HttpStatusCode.NoContent)),
+            ("status-307", id => new HttpResponseMessage(HttpStatusCode.TemporaryRedirect)),
+            ("400-over-bound-invalid-grant", id => Answers.Json(400, "{\"error\":\"invalid_grant\",\"pad\":\"" + new string('a', 5000) + "\"}")),
+            ("401-invalid-grant", id => Answers.Json(401, "{\"error\":\"invalid_grant\"}")),
+            ("400-not-json", id => Answers.Json(400, "<html>")),
+            ("429", id => Answers.Json(429, "{}")),
+        ];
+        foreach ((string label, Func<string, HttpResponseMessage> make) in shapes)
+        {
+            using EntraRig rig = new(maxAnswerBytes: 4096);
+            SignInStart start = rig.SignIn.Begin(null);
+            string id = GoodId(start);
+            rig.Endpoint.Answer = (_, _, _) => Task.FromResult(make(id));
+            System.Diagnostics.Stopwatch w = System.Diagnostics.Stopwatch.StartNew();
+            Exception? e = await Try(async () => { using var g = await rig.SignIn.CompleteAsync(start.State, Synthetic.Code, CancellationToken.None); });
+            Note($"G04 {label}: {Outcome(e)} ({w.ElapsedMilliseconds} ms), requests {rig.Endpoint.Requests}");
+        }
+
+        EndlessStream.Report();
+    }
+
+    private static HttpResponseMessage Declared(long length, string body)
+    {
+        ByteArrayContent content = new(Encoding.UTF8.GetBytes(body));
+        content.Headers.ContentLength = length;
+        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+        return new HttpResponseMessage(HttpStatusCode.OK) { Content = content };
+    }
+
+    private sealed class EndlessStream : Stream
+    {
+        private static long _served;
+
+        internal static void Report() => Note($"G04 endless stream bytes served in all: {Interlocked.Read(ref _served)}");
+
+        public override bool CanRead => true;
+
+        public override bool CanSeek => false;
+
+        public override bool CanWrite => false;
+
+        public override long Length => throw new NotSupportedException();
+
+        public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+
+        public override void Flush()
+        {
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            int n = Math.Min(count, 1000);
+            buffer.AsSpan(offset, n).Fill((byte)' ');
+            Interlocked.Add(ref _served, n);
+            return n;
+        }
+
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+
+        public override void SetLength(long value) => throw new NotSupportedException();
+
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+    }
+
+    // ---- G05 (P4): the caller's client, its default header and its redirects, over a real handler on loopback ----
+    [Fact]
+    public async Task G05_host_client_shapes()
+    {
+        // a default Authorization header on the caller's client
+        using (EntraRig rig = new())
+        {
+            rig.Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "synthetic-default-0001");
+            SignInStart start = rig.SignIn.Begin(null);
+            rig.AnswerGood(start);
+            Exception? e = await Try(async () => { using var g = await rig.SignIn.CompleteAsync(start.State, Synthetic.Code, CancellationToken.None); });
+            Note($"G05 caller-default-authorization: {Outcome(e)}, token request Authorization {(rig.Endpoint.Request(0).Authorization is null ? "null" : "PRESENT")}");
+        }
+
+        foreach ((int status, bool follow) in new[] { (307, true), (308, true), (302, true), (307, false) })
+        {
+            using Loopback target = new(Loopback.TokenAnswer);
+            using Loopback first = new(_ => (status, "Location: http://127.0.0.1:" + target.Port + "/steal\r\n", string.Empty));
+            using EntraRig rig = new();
+            SocketsHttpHandler real = new() { AllowAutoRedirect = follow, UseProxy = false };
+            using HttpClient http = new(new ToLoopback(first.Port) { InnerHandler = real });
+            EntraTokenClient client = new(http, rig.Options, new SecretClientCredential(rig.Secrets), rig.Clock);
+            EntraSignIn signIn = new(client, rig.Clock);
+            SignInStart start = signIn.Begin(null);
+            target.Nonce = FormText.QueryOf(start.Address)["nonce"];
+            string oid = "-";
+            Exception? e = await Try(async () =>
+            {
+                using EntraUserGrant g = await signIn.CompleteAsync(start.State, Synthetic.Code, CancellationToken.None);
+                oid = g.ObjectId == Loopback.OtherOid ? "the redirect target's oid" : "?";
+            });
+            Note($"G05 redirect {status} follow={follow}: {Outcome(e)}{(e is null ? ", grant object id " + oid : string.Empty)}; first got {first.Seen}; target got {target.Seen}; target saw client_secret {target.Body.Contains("client_secret=" + Synthetic.Secret, StringComparison.Ordinal)}, code_verifier {target.Body.Contains("code_verifier=", StringComparison.Ordinal)}, code {target.Body.Contains("code=" + Synthetic.Code, StringComparison.Ordinal)}");
+        }
+    }
+
+    /// <summary>Sends every request to 127.0.0.1:port over http, keeping the path (the gate's stand-in for a host's handler).</summary>
+    private sealed class ToLoopback(int port) : DelegatingHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            request.RequestUri = new Uri("http://127.0.0.1:" + port + request.RequestUri!.PathAndQuery);
+            return base.SendAsync(request, cancellationToken);
+        }
+    }
+
+    /// <summary>A one-connection-at-a-time HTTP/1.1 server on 127.0.0.1 inside the test process.</summary>
+    private sealed class Loopback : IDisposable
+    {
+        internal const string OtherOid = "00000000-0000-4000-8000-000000000099";
+        private readonly TcpListener _listener = new(IPAddress.Loopback, 0);
+        private readonly Func<Loopback, (int Status, string Headers, string Body)> _answer;
+        private readonly CancellationTokenSource _stop = new();
+
+        internal Loopback(Func<Loopback, (int, string, string)> answer)
+        {
+            _answer = answer;
+            _listener.Start();
+            Port = ((IPEndPoint)_listener.LocalEndpoint).Port;
+            _ = Task.Run(RunAsync);
+        }
+
+        internal int Port { get; }
+
+        internal string Seen { get; private set; } = "nothing";
+
+        internal string Body { get; private set; } = string.Empty;
+
+        internal string? Nonce { get; set; }
+
+        internal static (int, string, string) TokenAnswer(Loopback self)
+        {
+            Dictionary<string, string?> claims = IdTokens.Good(self.Nonce);
+            claims["oid"] = OtherOid;
+            return (200, "Content-Type: application/json\r\n", Answers.Token("synthetic-forged-access-0001", "synthetic-forged-refresh-0001", IdTokens.Make(claims), 3600));
+        }
+
+        private async Task RunAsync()
+        {
+            try
+            {
+                while (!_stop.IsCancellationRequested)
+                {
+                    using TcpClient c = await _listener.AcceptTcpClientAsync(_stop.Token);
+                    NetworkStream s = c.GetStream();
+                    byte[] buf = new byte[65536];
+                    int held = 0;
+                    int headerEnd = -1;
+                    while (headerEnd < 0)
+                    {
+                        int n = await s.ReadAsync(buf.AsMemory(held), _stop.Token);
+                        if (n == 0)
+                        {
+                            break;
+                        }
+
+                        held += n;
+                        headerEnd = Encoding.ASCII.GetString(buf, 0, held).IndexOf("\r\n\r\n", StringComparison.Ordinal);
+                    }
+
+                    string head = Encoding.ASCII.GetString(buf, 0, Math.Max(headerEnd, 0));
+                    int length = 0;
+                    foreach (string line in head.Split("\r\n"))
+                    {
+                        if (line.StartsWith("Content-Length:", StringComparison.OrdinalIgnoreCase))
+                        {
+                            length = int.Parse(line[15..].Trim(), System.Globalization.CultureInfo.InvariantCulture);
+                        }
+                    }
+
+                    while (held < headerEnd + 4 + length)
+                    {
+                        int n = await s.ReadAsync(buf.AsMemory(held), _stop.Token);
+                        if (n == 0)
+                        {
+                            break;
+                        }
+
+                        held += n;
+                    }
+
+                    string requestLine = head.Split("\r\n")[0];
+                    Seen = requestLine.Split(' ')[0] + " " + requestLine.Split(' ')[1] + " body " + length + " bytes" + (head.Contains("Authorization:", StringComparison.OrdinalIgnoreCase) ? " WITH Authorization" : string.Empty);
+                    Body = Encoding.ASCII.GetString(buf, headerEnd + 4, Math.Max(0, held - headerEnd - 4));
+                    (int status, string headers, string body) = _answer(this);
+                    byte[] payload = Encoding.UTF8.GetBytes(body);
+                    string response = "HTTP/1.1 " + status + " X\r\n" + headers + "Content-Length: " + payload.Length + "\r\nConnection: close\r\n\r\n";
+                    await s.WriteAsync(Encoding.ASCII.GetBytes(response), _stop.Token);
+                    await s.WriteAsync(payload, _stop.Token);
+                }
+            }
+            catch (Exception)
+            {
+                // the listener stops at Dispose
+            }
+        }
+
+        public void Dispose()
+        {
+            _stop.Cancel();
+            _listener.Stop();
+        }
+    }
+
+    // ---- G06 (P5, P8): the credentials ----
+    [Fact]
+    public async Task G06_credentials()
+    {
+        using (EntraRig rig = new())
+        {
+            rig.Endpoint.Answer = (_, _, _) => Answers.JsonTask(200, Answers.Token(Synthetic.AppAccess, null, null, 3600));
+            AppTokenSource source = new(rig.Client, "https://graph.example.test/.default", rig.Clock);
+            await source.GetNewTokenAsync(CancellationToken.None);
+            rig.Secrets.Put(SecretClientCredential.DefaultSecretName, Encoding.ASCII.GetBytes("synthetic-secret-0002"));
+            await source.GetNewTokenAsync(CancellationToken.None);
+            Note($"G06 secret-replaced-between-calls: first form secret is -0001 {rig.Endpoint.Request(0).Form()["client_secret"] == Synthetic.Secret}, second is -0002 {rig.Endpoint.Request(1).Form()["client_secret"] == "synthetic-secret-0002"}");
+        }
+
+        using (EntraRig rig = new(withSecret: false, credential: _ => new SecretClientCredential(new ThrowingStore(), "entra/client-secret")))
+        {
+            AppTokenSource source = new(rig.Client, "https://graph.example.test/.default", rig.Clock);
+            Exception? e = await Try(() => source.GetTokenAsync(CancellationToken.None).AsTask());
+            Exception? n = await Try(async () => Note("G06 throwing-store GetNewTokenAsync returned " + ((await source.GetNewTokenAsync(CancellationToken.None)) is null ? "null" : "a token")));
+            Note($"G06 store-throws-InvalidOperation(text holds 'synthetic-store-text-0001'): GetTokenAsync {Outcome(e)}, message holds the store text {(e?.Message.Contains("synthetic-store-text-0001", StringComparison.Ordinal) ?? false)}; GetNewTokenAsync {Outcome(n)}; requests {rig.Endpoint.Requests}");
+        }
+
+        using (EntraRig rig = new(credential: _ => new SecretClientCredential(new FakeSecretStore(), "Not/A..Valid name")))
+        {
+            Exception? e = await Try(() => new AppTokenSource(rig.Client, "https://graph.example.test/.default", rig.Clock).GetTokenAsync(CancellationToken.None).AsTask());
+            Note($"G06 secret-name-outside-the-store-rule (fake store): {Outcome(e)}, requests {rig.Endpoint.Requests}");
+        }
+
+        // certificate shapes
+        using RSA small = RSA.Create(1024);
+        using X509Certificate2 smallCert = new CertificateRequest("CN=synthetic-assertion-0002", small, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1).CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+        Note($"G06 rsa-1024: {Outcome(TrySync(() => _ = new CertificateClientCredential(smallCert)))}");
+        using ECDsa ec = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        using X509Certificate2 ecCert = new CertificateRequest("CN=synthetic-assertion-0003", ec, HashAlgorithmName.SHA256).CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+        Note($"G06 ecdsa: {Outcome(TrySync(() => _ = new CertificateClientCredential(ecCert)))}");
+        using RSA k = RSA.Create(2048);
+        X509Certificate2 expired = new CertificateRequest("CN=synthetic-assertion-0004", k, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1).CreateSelfSigned(new DateTimeOffset(2020, 1, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2020, 1, 2, 0, 0, 0, TimeSpan.Zero));
+        using (EntraRig rig = new(credential: clock => new CertificateClientCredential(expired, clock)))
+        {
+            rig.Endpoint.Answer = (_, _, _) => Answers.JsonTask(200, Answers.Token(Synthetic.AppAccess, null, null, 3600));
+            AppTokenSource source = new(rig.Client, "https://graph.example.test/.default", rig.Clock);
+            Exception? e = await Try(() => source.GetTokenAsync(CancellationToken.None).AsTask());
+            Note($"G06 certificate-expired-2020 (clock 2026): {Outcome(e)}, requests {rig.Endpoint.Requests}");
+            string a1 = rig.Endpoint.Requests > 0 ? rig.Endpoint.Request(0).Form()["client_assertion"] : "";
+            await source.GetNewTokenAsync(CancellationToken.None);
+            string a2 = rig.Endpoint.Requests > 1 ? rig.Endpoint.Request(1).Form()["client_assertion"] : "";
+            Note($"G06 two assertions at one clock instant differ (fresh jti): {a1 != a2 && a1.Length > 0}");
+            expired.Dispose();
+            Exception? d = await Try(() => source.GetNewTokenAsync(CancellationToken.None).AsTask());
+            Exception? d2 = null;
+            rig.Clock.Advance(TimeSpan.FromHours(2));
+            d2 = await Try(() => source.GetTokenAsync(CancellationToken.None).AsTask());
+            Note($"G06 certificate-disposed-after-construction: GetNewTokenAsync {Outcome(d)}{(d is null ? " (null or token)" : string.Empty)}; GetTokenAsync {Outcome(d2)}; message '{d2?.Message}'; requests {rig.Endpoint.Requests}");
+        }
+    }
+
+    private sealed class ThrowingStore : ISecretStore
+    {
+        public int Put(string name, ReadOnlySpan<byte> value) => throw new InvalidOperationException("synthetic-store-text-0001");
+
+        public bool TryGet(string name, out SecretValue? value) => throw new InvalidOperationException("synthetic-store-text-0001");
+
+        public bool Delete(string name) => false;
+
+        public IReadOnlyList<SecretEntry> ListNames() => [];
+    }
+
+    // ---- G07 (P6): the app token under concurrency and a short life ----
+    [Fact]
+    public async Task G07_app_token_shapes()
+    {
+        using (EntraRig rig = new())
+        {
+            rig.Endpoint.Answer = async (_, _, t) =>
+            {
+                await Task.Delay(50, t);
+                return Answers.Json(200, Answers.Token(Synthetic.AppAccess, null, null, 3600));
+            };
+            AppTokenSource source = new(rig.Client, "https://graph.example.test/.default", rig.Clock);
+            await Task.WhenAll(Enumerable.Range(0, 16).Select(_ => Task.Run(async () => await source.GetTokenAsync(CancellationToken.None))));
+            Note($"G07 sixteen-concurrent-gets: requests {rig.Endpoint.Requests}");
+        }
+
+        using (EntraRig rig = new())
+        {
+            rig.Endpoint.Answer = (_, _, _) => Answers.JsonTask(200, Answers.Token(Synthetic.AppAccess, null, null, 60));
+            AppTokenSource source = new(rig.Client, "https://graph.example.test/.default", rig.Clock);
+            for (int i = 0; i < 3; i++)
+            {
+                await source.GetTokenAsync(CancellationToken.None);
+            }
+
+            Note($"G07 life-60s-under-margin-300s: three gets made requests {rig.Endpoint.Requests}");
+        }
+
+        using (EntraRig rig = new())
+        {
+            int status = 200;
+            rig.Endpoint.Answer = (_, _, _) => status == 200 ? Answers.JsonTask(200, Answers.Token(Synthetic.AppAccess, Synthetic.UserRefresh, "x.y.z", 3600)) : Answers.JsonTask(500, "{}");
+            AppTokenSource source = new(rig.Client, "https://graph.example.test/.default", rig.Clock);
+            await source.GetTokenAsync(CancellationToken.None);
+            status = 500;
+            GraphToken? fresh = await source.GetNewTokenAsync(CancellationToken.None);
+            await source.GetTokenAsync(CancellationToken.None);
+            Note($"G07 refresh-and-id-token-in-app-answer: taken; after a failed GetNewTokenAsync ({(fresh is null ? "null" : "token")}) then GetTokenAsync: requests {rig.Endpoint.Requests} (2 = the kept token handed out without a call)");
+        }
+    }
+
+    // ---- G08 (P3, P7): the refresh and the broker ----
+    [Fact]
+    public async Task G08_refresh_and_broker()
+    {
+        foreach (string row in new[] { "other-tenant", "other-aud", "no-access", "oid-upper", "id-token-with-nonce" })
+        {
+            using EntraRig rig = new();
+            Dictionary<string, string?> claims = IdTokens.Good(row == "id-token-with-nonce" ? "synthetic-nonce-0003" : null);
+            if (row == "other-tenant")
+            {
+                claims["tid"] = "00000000-0000-4000-8000-000000000009";
+            }
+
+            if (row == "other-aud")
+            {
+                claims["aud"] = "00000000-0000-4000-8000-000000000009";
+            }
+
+            if (row == "oid-upper")
+            {
+                claims["oid"] = Synthetic.ObjectId.ToUpperInvariant();
+            }
+
+            string id = IdTokens.Make(claims);
+            rig.Endpoint.Answer = (_, _, _) => Answers.JsonTask(200, Answers.Token(row == "no-access" ? null : Synthetic.UserAccess2, Synthetic.UserRefresh2, id, 3600));
+            EntraTokenRefresher refresher = new(rig.Client, rig.Clock);
+            Exception? e = await Try(async () => { using var g = await refresher.RefreshAsync(Key, Encoding.ASCII.GetBytes(Synthetic.UserRefresh), Synthetic.ObjectId, CancellationToken.None); });
+            Note($"G08 refresh {row}: {Outcome(e)}");
+        }
+
+        // the broker after a SubjectMismatch: does the session go on with the held token?
+        using (EntraRig rig = new())
+        {
+            Dictionary<string, string?> claims = IdTokens.Good(null);
+            claims["oid"] = "00000000-0000-4000-8000-000000000009";
+            string id = IdTokens.Make(claims);
+            rig.Endpoint.Answer = (_, _, _) => Answers.JsonTask(200, Answers.Token(Synthetic.UserAccess2, Synthetic.UserRefresh2, id, 3600));
+            using TokenBroker broker = new(new TokenBrokerOptions(), new FakeRecordStore(), new EntraTokenRefresher(rig.Client, rig.Clock), rig.Clock);
+            using (TokenGrant grant = new(Encoding.ASCII.GetBytes(Synthetic.UserAccess), Encoding.ASCII.GetBytes(Synthetic.UserRefresh), Synthetic.ObjectId, rig.Clock.GetUtcNow() + TimeSpan.FromHours(1)))
+            {
+                broker.SignIn(Key, Synthetic.ObjectId, TimeSpan.FromMinutes(30), grant);
+            }
+
+            Exception? n = await Try(async () => { using AccessToken t = await broker.GetNewTokenAsync(Key, CancellationToken.None); });
+            string held = "-";
+            Exception? g = await Try(async () =>
+            {
+                using AccessToken t = await broker.GetTokenAsync(Key, CancellationToken.None);
+                held = t.AsSpan().SequenceEqual(Encoding.ASCII.GetBytes(Synthetic.UserAccess)) ? "the first user's held token" : t.AsSpan().SequenceEqual(Encoding.ASCII.GetBytes(Synthetic.UserAccess2)) ? "the OTHER user's new token" : "?";
+            });
+            SessionGraphTokens tokens = new(broker, Key);
+            GraphToken? viaSource = await tokens.GetNewTokenAsync(CancellationToken.None);
+            Note($"G08 broker-after-SubjectMismatch: GetNewTokenAsync {Outcome(n)}; then GetTokenAsync {Outcome(g)} -> {held}; SessionGraphTokens.GetNewTokenAsync {(viaSource is null ? "null (the 401 stands)" : "a token")}; token requests {rig.Endpoint.Requests}");
+        }
+
+        // a session token holding a byte outside printable ASCII
+        using (EntraRig rig = new())
+        {
+            using TokenBroker broker = new(new TokenBrokerOptions(), new FakeRecordStore(), new EntraTokenRefresher(rig.Client, rig.Clock), rig.Clock);
+            using (TokenGrant grant = new(Encoding.ASCII.GetBytes("synthetic access-0001"), Encoding.ASCII.GetBytes(Synthetic.UserRefresh), Synthetic.ObjectId, rig.Clock.GetUtcNow() + TimeSpan.FromHours(1)))
+            {
+                broker.SignIn(Key, Synthetic.ObjectId, TimeSpan.FromMinutes(30), grant);
+            }
+
+            Exception? e = await Try(async () => await new SessionGraphTokens(broker, Key).GetTokenAsync(CancellationToken.None));
+            Exception? u = await Try(async () => await new SessionGraphTokens(broker, new SessionKey("SERIAL0002", SessionPlatform.Oxpd2, "session0002")).GetTokenAsync(CancellationToken.None));
+            Note($"G08 session-token-with-space: {Outcome(e)}; unknown session: {Outcome(u)}");
+        }
+    }
+
+    // ---- G09 (P8): argument messages and the time-out ----
+    [Fact]
+    public async Task G09_messages_and_time()
+    {
+        string[] values = [Synthetic.Secret, Synthetic.Code, Synthetic.Hint, "not-a-id-synthetic-0001", "synthetic-scope-0001 x"];
+        List<string> texts = [];
+        texts.Add(TrySync(() => _ = new EntraOptions(Synthetic.Authority, "not-a-id-synthetic-0001", Synthetic.Client))?.Message ?? "");
+        texts.Add(TrySync(() => new EntraOptions(Synthetic.Authority, Synthetic.Tenant, Synthetic.Client) { ExtraScopes = ["synthetic-scope-0001 x"] }.Validate())?.Message ?? "");
+        using EntraRig rig = new();
+        texts.Add(TrySync(() => rig.SignIn.Begin(Synthetic.Hint + " "))?.Message ?? "");
+        texts.Add((await Try(() => rig.SignIn.CompleteAsync("s", Synthetic.Code + " ", CancellationToken.None)))?.Message ?? "");
+        texts.Add(TrySync(() => _ = new AppTokenSource(rig.Client, "synthetic-scope-0001 x"))?.Message ?? "");
+        int hits = texts.Sum(t => values.Count(v => t.Contains(v, StringComparison.OrdinalIgnoreCase)));
+        Note($"G09 argument messages {texts.Count}, values found in them {hits}");
+
+        // mutable ExtraScopes after Validate
+        List<string> extra = ["synthetic.scope.0001"];
+        EntraOptions o = new(Synthetic.Authority, Synthetic.Tenant, Synthetic.Client) { RedirectUri = Synthetic.Redirect, ExtraScopes = extra };
+        EntraTokenClient c = new(rig.Http, o, rig.Credential, rig.Clock);
+        extra.Add("synthetic scope with spaces");
+        SignInStart s = new EntraSignIn(c, rig.Clock).Begin(null);
+        Note($"G09 extra-scopes-list-changed-after-validate: scope sent '{FormText.QueryOf(s.Address)["scope"]}'");
+
+        // an answer that arrives after the time-out, the caller's cancellation type
+        using EntraRig slow = new(requestTimeout: TimeSpan.FromMilliseconds(100));
+        SignInStart st = slow.SignIn.Begin(null);
+        slow.Endpoint.Answer = async (_, _, _) =>
+        {
+            await Task.Delay(400);
+            return Answers.Json(200, Answers.Token(Synthetic.UserAccess, Synthetic.UserRefresh, GoodId(st), 3600));
+        };
+        System.Diagnostics.Stopwatch w = System.Diagnostics.Stopwatch.StartNew();
+        Exception? late = await Try(async () => { using var g = await slow.SignIn.CompleteAsync(st.State, Synthetic.Code, CancellationToken.None); });
+        Note($"G09 answer-after-timeout (handler ignores its token): {Outcome(late)} after {w.ElapsedMilliseconds} ms");
+        using CancellationTokenSource pre = new();
+        pre.Cancel();
+        SignInStart st2 = slow.SignIn.Begin(null);
+        int before = slow.Endpoint.Requests;
+        Exception? precancel = await Try(() => slow.SignIn.CompleteAsync(st2.State, Synthetic.Code, pre.Token));
+        Note($"G09 already-cancelled-token: {Outcome(precancel)}, requests added {slow.Endpoint.Requests - before}, entry held after {slow.SignIn.VerifierOf(st2.State) is not null}");
+    }
+}

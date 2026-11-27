@@ -1,0 +1,33 @@
+EntraSignIn starts a Microsoft sign-in (authorization code with a
+SHA-256 PKCE challenge, prompt=login): state and nonce of 16 bytes and a
+verifier of 64, kept in memory for ten minutes, at most 64 at a time.
+CompleteAsync removes the started sign-in before anything else, so a
+state completes at most once; it redeems the code with that verifier,
+requires an access token and a refresh token, and requires an id token
+whose aud, tid, iss, nonce and oid pass. The id token's signature is not
+checked: it arrives directly from the token address over the host's TLS
+connection (a named limit of the module README).
+
+EntraTokenRefresher is the session broker's ITokenRefresher: it redeems
+the held refresh token, keeps it when the answer holds none, and refuses
+an id token that names another user. AppTokenSource is the card store's
+app-only Graph token (client credentials), kept until five minutes
+before its stated expiry; after a 401 it answers null when the call
+fails. SessionGraphTokens hands the Graph layer a session's token from
+the broker and the broker's refreshed one after a 401.
+
+The client proves itself by a secret read from the secret store at every
+request, or by an RS256 assertion signed with a certificate the host
+hands in. Every token request is one form POST over the host's
+HttpClient, with no Authorization header; a 3xx is refused, never
+followed; the answer is read under a bound. Messages and ToString texts
+carry no secret, code, token, state, nonce, verifier, object id or hint.
+
+Cells E01 to E19 (51 cases) run against a fake handler; the module
+README names the call shapes (from the source app's analysis, not
+measured against Microsoft Entra) and the limits: no device code, no id
+token signature check, sign-ins in memory only, the host's HttpClient
+must carry no default Authorization header and follow no redirect.
+Nothing ran against a tenant or a device. Nothing is deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

@@ -1,0 +1,78 @@
+==== probe run a 02:30:27
+G05 caller-default-authorization: RETURNED, token request Authorization PRESENT
+G05 redirect 307 follow=True: RETURNED, grant object id the redirect target's oid; first got POST /00000000-0000-4000-8000-000000000001/oauth2/v2.0/token body 347 bytes; target got POST /steal body 347 bytes; target saw client_secret True, code_verifier True, code True
+G05 redirect 308 follow=True: RETURNED, grant object id the redirect target's oid; first got POST /00000000-0000-4000-8000-000000000001/oauth2/v2.0/token body 347 bytes; target got POST /steal body 347 bytes; target saw client_secret True, code_verifier True, code True
+G05 redirect 302 follow=True: RETURNED, grant object id the redirect target's oid; first got POST /00000000-0000-4000-8000-000000000001/oauth2/v2.0/token body 347 bytes; target got GET /steal body 0 bytes; target saw client_secret False, code_verifier False, code False
+G05 redirect 307 follow=False: EntraException Redirected; first got POST /00000000-0000-4000-8000-000000000001/oauth2/v2.0/token body 347 bytes; target got nothing; target saw client_secret False, code_verifier False, code False
+G01 concurrent-16-same-state: returned 1, StateUnknown 15, other 0, token requests 1
+G01 bad-code-then-good: bad EntraException InvalidArgument, then good RETURNED, requests added 1
+G01 state-other-case: EntraException StateUnknown; state-10000-chars: EntraException StateUnknown; still held True
+G01 caller-cancel-mid-redeem: TaskCanceledException; entry still held False
+G01 hint-injection 'a&prompt=none': prompt= occurrences 1, raw '&prompt=none' present False, login_hint encoded True
+G06 secret-replaced-between-calls: first form secret is -0001 True, second is -0002 True
+G06 store-throws-InvalidOperation(text holds 'synthetic-store-text-0001'): GetTokenAsync InvalidOperationException, message holds the store text True; GetNewTokenAsync InvalidOperationException; requests 0
+G06 secret-name-outside-the-store-rule (fake store): EntraException CredentialMissing, requests 0
+G06 rsa-1024: ArgumentException
+G06 ecdsa: ArgumentException
+G06 certificate-expired-2020 (clock 2026): RETURNED, requests 1
+G06 two assertions at one clock instant differ (fresh jti): True
+G06 certificate-disposed-after-construction: GetNewTokenAsync CryptographicException; GetTokenAsync CryptographicException; message 'm_safeCertContext is an invalid handle.'; requests 2
+G03 control-good: RETURNED, object id the rig's oid
+G03 oid-upper-case: RETURNED, object id the rig's oid
+G03 aud-braces: RETURNED, object id the rig's oid
+G03 aud-no-hyphens: RETURNED, object id the rig's oid
+G03 aud-spaces: RETURNED, object id the rig's oid
+G03 iss-trailing-slash: EntraException IdTokenRefused
+G03 iss-upper-host: EntraException IdTokenRefused
+G03 nonce-absent: EntraException IdTokenRefused
+G03 oid-empty-guid: EntraException IdTokenRefused
+G03 dup-oid: EntraException IdTokenRefused
+G03 dup-aud-last-wrong: EntraException IdTokenRefused
+G03 aud-array: EntraException IdTokenRefused
+G03 exp-in-past: RETURNED, object id the rig's oid
+G03 header-alg-none: RETURNED, object id the rig's oid
+G03 header-not-json: RETURNED, object id the rig's oid
+G03 signature-empty: RETURNED, object id the rig's oid
+G03 four-parts: EntraException IdTokenRefused
+G03 payload-padding: RETURNED, object id the rig's oid
+G03 payload-std-base64-chars: RETURNED, object id the rig's oid
+G03 payload-depth-9: EntraException IdTokenRefused
+G09 argument messages 5, values found in them 0
+G09 extra-scopes-list-changed-after-validate: scope sent 'openid profile offline_access synthetic.scope.0001 synthetic scope with spaces'
+G09 answer-after-timeout (handler ignores its token): EntraException TimedOut after 102 ms
+G09 already-cancelled-token: TaskCanceledException, requests added 1, entry held after False
+G02 default MaxPending 64, PendingLifetime 00:10:00: Begins accepted 64 in 0 ms, next EntraException TooManyPending
+G02 after 9 min: EntraException TooManyPending
+G02 after 10 min 1 s: RETURNED, held 1
+G02 cancel-unknown: False
+G02 MaxPending 10000: held 10000, the 10000th Begin 0.15 ms, next EntraException TooManyPending, GC total memory 12416 KiB
+G07 sixteen-concurrent-gets: requests 1
+G07 life-60s-under-margin-300s: three gets made requests 3
+G07 refresh-and-id-token-in-app-answer: taken; after a failed GetNewTokenAsync (null) then GetTokenAsync: requests 2 (2 = the kept token handed out without a call)
+G08 refresh other-tenant: EntraException IdTokenRefused
+G08 refresh other-aud: EntraException IdTokenRefused
+G08 refresh no-access: EntraException AnswerInvalid
+G08 refresh oid-upper: RETURNED
+G08 refresh id-token-with-nonce: RETURNED
+G08 broker-after-SubjectMismatch: GetNewTokenAsync TokenBrokerException RefreshFailed; then GetTokenAsync RETURNED -> the first user's held token; SessionGraphTokens.GetNewTokenAsync null (the 401 stands); token requests 2
+G08 session-token-with-space: EntraException AnswerInvalid; unknown session: TokenBrokerException SessionNotFound
+G04 control-good: RETURNED (0 ms), requests 1
+G04 no-length-over-bound-4096 (stream, no Content-Length): EntraException AnswerInvalid (0 ms), requests 1
+G04 declared-10-body-5000: EntraException AnswerInvalid (0 ms), requests 1
+G04 declared-10-body-200-good: RETURNED (0 ms), requests 1
+G04 expires-fraction: EntraException AnswerInvalid (0 ms), requests 1
+G04 expires-int32-max: RETURNED (0 ms), requests 1
+G04 expires-1e3: EntraException AnswerInvalid (0 ms), requests 1
+G04 access-non-ascii-escape: EntraException AnswerInvalid (0 ms), requests 1
+G04 dup-access: EntraException AnswerInvalid (0 ms), requests 1
+G04 id-token-number: EntraException AnswerInvalid (0 ms), requests 1
+G04 refresh-empty-string: EntraException AnswerInvalid (0 ms), requests 1
+G04 content-type-text-html: RETURNED (0 ms), requests 1
+G04 status-203: EntraException UnexpectedStatus (0 ms), requests 1
+G04 status-204: EntraException UnexpectedStatus (0 ms), requests 1
+G04 status-307: EntraException Redirected (0 ms), requests 1
+G04 400-over-bound-invalid-grant: EntraException Refused (0 ms), requests 1
+G04 401-invalid-grant: EntraException GrantRefused (0 ms), requests 1
+G04 400-not-json: EntraException Refused (0 ms), requests 1
+G04 429: EntraException UnexpectedStatus (0 ms), requests 1
+G04 endless stream bytes served in all: 4097
