@@ -1,0 +1,25 @@
+HostRig.BoundedAsync hands a host step a token that one clock cancels
+at the bound, waits until the step ends or the token is cancelled, then
+asks one question: is the token cancelled? Yes is a TimeoutException
+naming the step ("the host's start did not end within 60 s"), whatever
+order the step's end and the bound came in; no passes the step's own end
+on unchanged.
+
+HostRig.StartAsync runs the host's start through it, and DisposeAsync
+runs the host's stop and its disposal through it as one step, each at
+60 s, so every landed Server cell that starts a host is bounded with no
+line of it changed. Two test seams and a settable bound make it
+testable. Cell H17 pins the helper in seven shapes and cell H18 pins
+its two uses; every wait of both sits under an outer 20 s wait.
+
+The README of the Jobs transport, the OXPd 1.x client and the lab tool
+each say that their handler sets no certificate chain policy, so
+nothing there turns certificate downloads off, and that a fetch during
+the handshake is UNMEASURED on every platform.
+
+Not bounded: a call that blocks its thread (the hang met three times on
+macOS arm64 has that shape; its cause is UNMEASURED), the work before
+the host's start and the folder delete after its stop. No device has
+been reached. Nothing is deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
