@@ -1,0 +1,32 @@
+The device token holder gains an internal test seam, AfterArrivalCheck,
+called with an answer that passed the checks made when it arrived, just
+before the registration's lock is taken to hold it; it is null outside
+the tests and changes nothing there. Cell T15 uses it to reach the
+check of a disposed answer under the lock in two shapes: an answer
+disposed in the seam, and the held object answered again and
+invalidated in the seam. Each is refused TokenAnswerRefused, nothing is
+held, and the next call asks the issuer again.
+
+Cell K07 pins that a key the platform cannot make leaves
+CreateRegistration as the platform's exception (CryptographicException,
+InvalidOperationException) and that nothing is put, with a control
+that a good registration puts one name. No product code changes for
+it; the README's first rule gains that one exception.
+
+The registration README names, each measured on macOS arm64 only: a
+configured issuer disposed after construction makes every certificate
+IssuerNotTrusted with no signal; the one-element chain rule's reach; a
+leaf's extensions (none read); a record put back to its first form
+after an attach; two instances each accepting an attach for the same
+registration. It also names the two catches no cell reaches on macOS
+(each can only refuse), a platform failure inside CreateRegistration,
+and which check the disposed-first forms of the limit cells reach.
+
+Two new cells, two class summaries changed, no other landed test line
+changed. Two mutants each turn exactly their cell red: the check under
+the lock kept only for a removed entry (T15), and the key failure
+turned into a typed refusal (K07). C# totals plus 2 on both legs; the
+rules count unchanged. No device has been reached. Nothing is
+deployed; nothing was sent.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

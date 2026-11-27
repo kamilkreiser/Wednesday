@@ -1,0 +1,121 @@
+B2150 LANDING TEXT for Tuesday. Gate G1 (Opus), round 1 of 2 on the output-escaping class (lane 3 kit 1). See VERDICT.md for the grade. This text applies only if the grade has no Blocker.
+Repo datasecau/Reporting_Dashboard_Au. Branch b2143/lane3-kit1. NO pull request exists for it yet (open PRs: only 267, b2133/lane2-erasure; gate read 13:57:10 AEDT 27 Nov).
+HEAD AS GATED 895da3f4630e170e038a1b5b2c78008ae7633b93 (K). The three commits on BASE 279b22352dbcbd85664534395aeb366fec719a50:
+  A 08e67b7c RD-1016, B 2ec5fed1 RD-1015, K 895da3f4 counts (6558 / 413). Each is the parent of the next; K~3 = BASE.
+  K's tree on GitHub, 115dd91a, equals the gate's clone's (gate read 13:57).
+Main at gate: 279b22352dbcbd85664534395aeb366fec719a50 = BASE (gh api -X GET, 13:57:10).
+Every gh call is made with GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config'.
+
+ORDER: pull request 267 (the erasure branch, 52040f2e) LANDS FIRST. It also changes scripts/verify-expected-counts.json (6606 / 417).
+After it lands, THIS BRANCH CONFLICTS ON THE COUNTS FILE. The gate measured it in its own clone:
+  git merge-tree --write-tree --name-only 52040f2ed92734a450f64d39fb5610451a135bd5 895da3f4630e170e038a1b5b2c78008ae7633b93
+  -> CONFLICT (content): Merge conflict in scripts/verify-expected-counts.json, rc 1 (the only conflicted path).
+  So a plain new commit ON TOP OF K cannot make the PR mergeable: both sides changed the same three lines from BASE.
+  GitHub's "Update branch" cannot resolve a conflict either. Never press it.
+  The fix is a MERGE of main into the branch, made by Tuesday (step 0b). It is a merge, never a rebase (C-190).
+
+0. RE-MEASURE BEFORE OPENING
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/ref/heads/main --jq .object.sha
+     -> expect the merge commit of PR 267 (call it M1), else 279b2235 if 267 has not landed yet.
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/ref/heads/b2143/lane3-kit1 --jq .object.sha -> 895da3f4630e170e038a1b5b2c78008ae7633b93
+   If main moved by anything other than PR 267's merge: git diff --name-only 279b2235..<main> must touch nothing on the kit's HOLD 20 list:
+     static/js/settings.js, static/js/index.js, static/settings.html, static/index.html,
+     __tests__/rd835-*, rd861-*, rd778-*, rd1008-*, rd1026-*, rd1039-*, rd395-*, rd1015-*, rd1016-*, job-type-filter*,
+     every path of the 35-line neighbour list, __tests__/helpers/**, scripts/verify-suite.sh, package*.json, jest.config.js, .github/**.
+     PR 267's nine paths (backend/dataErasure.js, seven rd7xx/rd8xx test files, the counts file) are allowed.
+
+0b. COUNTS, after PR 267 has landed (Tuesday's commit; the only write this landing makes before the PR)
+   In a NEW dot-free tree (no segment starting with '.'), inside ONE jest-lock acquisition, NODE_OPTIONS unset:
+     - a worktree of a clone that holds both M1 and K, checked out at K on a local branch named b2143/lane3-kit1;
+     - git merge --no-ff --no-commit <M1>   (expected: one conflict, scripts/verify-expected-counts.json, and nothing else; any other conflicted path = STOP);
+     - write main's version of the counts file into the tree (git show <M1>:scripts/verify-expected-counts.json > that path). Reason: verify-suite.sh parses the file BEFORE
+       --update-counts (lines 237-256) and fails with "parse-error" on conflict markers;
+     - npm run verify -- --maxWorkers=2 --update-counts   (the project's own command; never edit the pair by hand);
+     - EXPECT VERDICT: PASS and the pair 6634 / 419 (= 6606 + 28, 417 + 2; PREDICTED by arithmetic, nobody has measured it). Any other pair = STOP naming both;
+     - git add scripts/verify-expected-counts.json; git commit (the repo's own configured identity; never -c user.*, never GIT_AUTHOR_*/GIT_COMMITTER_*);
+       message: "RD-1016 RD-1015: merge main; suite counts 6634 tests in 419 suites, written by the project's own command".
+   Then check, each by program:
+     - git rev-parse <M2>^1 = 895da3f4...  and  <M2>^2 = M1 (two parents);
+     - git diff --name-only <M1> <M2> = exactly the six paths of this branch;
+     - for the five paths other than the counts file, the blob at M2 equals the blob at K
+       (settings.js 07c2d16b, index.js b60cdd12, rd835 test 968d6380, rd1016 test 86870556, rd1015 test c8c904b1);
+     - git diff <M1> <M2> -- scripts/verify-expected-counts.json changes tests, suites and _updated only.
+   Push M2 to refs/heads/b2143/lane3-kit1 as a fast-forward of K (never --force, never +).
+   WHAT THE GATE'S READS STILL COVER after this: every byte of the six paths except the counts pair, and the merge brings in only what PR 267 landed
+   (gated by B2149). The gate did NOT run the whole suite at M2; the verify in this step and the PR's hosted build are the reads of the merged tree.
+   The pin MOVES from K to M2: every step below uses M2 where it says <HEAD>.
+   If PR 267 has NOT landed when this PR opens: <HEAD> = K, main = BASE, and no 0b is needed now. But then PR 267 conflicts after this lands, and the same merge-and-regenerate falls to that branch.
+
+1. OPEN THE PULL REQUEST (Tuesday's verb, never the seat's)
+   Title: pr-title.txt. Body: pr-body.md. It has no name, card, seat or build id; the choices are named as the coordinator's; the named limits are listed.
+   If step 0b ran, append to the body under "Commits": "<M2 short> merge of main (the erasure branch), counts 6634 / 419".
+   Base main, head b2143/lane3-kit1, NOT a draft. build.yml builds pull requests to main (node-version '24'), so the PR's own checks include the hosted `build` job.
+   That job is the FIRST real Linux run of the two new files (Q-10).
+
+2. WAIT FOR THE CHECKS
+   bash '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_checks_wait.sh' datasecau/Reporting_Dashboard_Au <n> <HEAD sha40> 60 40 --min-checks 7
+   Expect seven distinct names in eight runs, from the gate's read of the last merged NexusAI PR (PR 266, head bb109502, `total 8`, 14:03:50):
+     Analyze (actions) | Analyze (javascript-typescript) | Analyze (python) | CodeQL | audit-production-deps (twice: push and pull_request) | build | scan.
+   (PR 267's own head 52040f2e read the same eight names at 14:03:50, with build still in progress.)
+   Exit 0 = all green. Exit 1 or 5 = STOP: read the run, never re-run blindly.
+   Read the `build` job log (gh api -X GET repos/datasecau/Reporting_Dashboard_Au/actions/jobs/<id>/logs). Match the words; the dash may be an em dash.
+     Expect `VERDICT: PASS` with `6634/6634 tests passed across 419 suites` (after 0b) or `6558/6558 tests passed across 413 suites` (if <HEAD> = K).
+     Expect a PASS line for each of these files:
+       __tests__/rd1016-settings-has-one-escapehtml.test.js
+       __tests__/rd1015-csv-number-cells-are-not-formulas.test.js
+       __tests__/rd835-csv-cells-are-not-formulas.test.js
+       __tests__/rd861-server-text-stays-text.test.js
+       __tests__/rd778-dom-text-stays-text.test.js
+     Expect `FAIL ` lines 0 and `EADDRINUSE` 0. Print a control for each literal on a line known to hold it.
+   LINUX LEG: a red on ANY cell of the two new files or of the rd835 file = NO MERGE. It is a fix round: read the failure text, send it to a seat, never re-run to a green.
+     No cell of the two new files reads a platform path, env, port or locale (the kit's scan, and the gate ran both shapes green); the hosted build is still the first Linux read.
+   Code scanning: the ruleset's code_scanning rule is CodeQL `security_alerts_threshold: high_or_higher` AND `alerts_threshold: errors` (gate read 14:06:38).
+     Main's baseline (gate read 14:03:34): javascript-typescript analysis 2257151397 at 279b2235 reads 29 results (python 0, actions 0), with 22 open alerts
+     (backend/server.js 13, emailService 2, entraProvisioning 2, jsonStorage 2, incidents 2, tests/uat-run.js 1). After PR 267 lands, re-read it at M1.
+     gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/code-scanning/analyses?ref=refs/pull/<n>/head&per_page=6' --jq '.[]|[.commit_sha[0:8],.results_count,.category]|@tsv'
+       DRAFTER_RULES: a 0 or a "no new alert" read here cannot fail as proof of absence, so it is NOT a landing condition. The check that can fail is 3b.
+     The gate read main's SARIF (29 results, 1648 primary, related and flow-step locations): 0 locations in static/js/settings.js, static/js/index.js, any static/ path,
+       or the three test files (control: backend/server.js holds 346).
+     The gate's own local CodeQL: see VERDICT.md (control first: round 1's K 6675c397 against BASE).
+     If the PR's code-scanning check names any alert as new: NO MERGE. Read it; never dismiss it or comment on it.
+
+3. LAND: A MERGE COMMIT PINNED TO THE HEAD. NEVER SQUASH, NEVER REBASE.
+   Rule C-190 (/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/1_Project_Definition/CLARIFICATIONS.md line 2067; the gate re-printed it with awk NR==2067 at 14:06):
+     "2. Merge path: open a PR from the gated branch, wait for CodeQL (a background wait that EXITS), then land the SAME commit. Never squash, never rebase ([[C-68]])."
+   gh pr merge <n> --repo datasecau/Reporting_Dashboard_Au --merge --match-head-commit <HEAD sha40>
+   Then:
+     gh api -X GET repos/datasecau/Reporting_Dashboard_Au/pulls/<n> --jq .merge_commit_sha   (call it M)
+     gh api -X GET repos/datasecau/Reporting_Dashboard_Au/commits/<M> --jq '[.parents[].sha]'
+       -> expect two parents: main before the merge (M1, or BASE) and <HEAD>. One parent = squashed or rebased: STOP.
+     gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/ref/heads/main --jq .object.sha -> M
+   The ruleset's required_status_checks has strict_required_status_checks_policy false (gate read 14:06:38): once 0b has run the branch needs no further update.
+   If main moves AGAIN between 0b and the merge and touches the counts file, 0b is repeated (a second merge); never press "Update branch".
+   3b. AFTER THE MERGE (the check that can fail):
+       gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/code-scanning/analyses?ref=refs/heads/main&per_page=6' --jq '.[]|[.commit_sha[0:8],.results_count,.category]|@tsv'
+       -> the javascript-typescript analysis at M reads the same count as main's analysis before the merge (29 at BASE; re-read at M1).
+       A higher count is a new round: read each new alert, above all any js/xss, js/xss-through-dom or js/html-constructed-from-input in static/js. Never dismiss one.
+   3c. Main's own push `build` at M: read it for `VERDICT: PASS` with the pair of step 2.
+
+4. DEPLOY DEMO: READ ONLY. A RUN WILL START; BOTH JOBS MUST READ SKIPPED; APPROVE NOTHING. THE C-224 HOLD STANDS.
+   .github/workflows/deploy-demo.yml at K (unchanged from BASE: git diff BASE..K -- .github is empty; gate read with git show):
+     - `on: push` to main, with `paths-ignore` of '**.md', 'docs/**', 'tests/**' (lines 29 to 32), plus workflow_dispatch;
+     - static/** and __tests__/** are NOT ignored, so this merge STARTS a `Deploy demo` run (workflow id 333076536);
+     - both jobs need vars.CI_DEPLOY_ENABLED == 'true': the `if:` of build at line 53 and of deploy at line 91;
+     - the deploy job is bound to environment `demo` (line 95).
+   Gate read of the repo's Actions variables: total_count 0 (14:06:38).
+   Newest Deploy demo runs, each push completed/skipped: 45817165636 at e5fa5478, 45757473204 at e20b30cf, 45722722201 at 89663a44, 45628111539 at 5ba5ca37 (14:06:38).
+   The gate read nothing about the `demo` environment's protection rules and makes no claim about them. Package (deploy.yml) is workflow_dispatch only: it does not start.
+     gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/actions/workflows/333076536/runs?head_sha=<M>' --jq '.workflow_runs[] | [.id,.event,.status,.conclusion] | @tsv'
+       Expect one push run, completed/skipped within about a minute. If none appears after about 5 minutes, read runs?per_page=5 and say so. Do not dispatch one.
+     gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/actions/runs/<run id>/jobs' --jq '.jobs[] | [.name,.status,.conclusion] | @tsv'
+       Expected: build completed skipped, deploy completed skipped. BOTH must read skipped: the landing reads that as NOT DEPLOYING.
+   IF EITHER JOB RUNS (queued, in_progress, waiting, success), THE SWITCH IS ON:
+     - Do NOT approve the pending deployment. Do not cancel, re-run or dispatch.
+     - Card it to the product owner under the C-224 hold (CLARIFICATIONS.md line 2412), with the run id and the job states.
+     - Record in the records pass that the switch read ON at <M>.
+   Make no HTTP request to the demo site in any case.
+
+5. AFTER THE LANDING
+   Hand FOR-RECORDS.md to the records pass: RD-1016 (met, Testing), RD-1015 (part 1 met for the leading-formula shape; stays open), RD-1014 (untouched), and the new ticket
+   for a number cell holding a comma, a double quote or a line break (the thousands-comma row split, finding 6, plus this gate's Finding 1: one fix closes both).
+   The next lane-3 kit (RD-1014) must name M in its stamp: it builds escapeAttrValue in settings.js on the escapeHtml this branch made single.
