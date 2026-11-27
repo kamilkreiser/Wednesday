@@ -1,0 +1,64 @@
+B2192 LANDING TEXT for Tuesday. Gate G1 (Opus), round 1 of 2: see VERDICT.md for the grade; this text assumes a grade with no Blocker.
+Repo datasecau/Reporting_Dashboard_Au. NO pull request exists yet (open PRs 0, gate read 01:12:54 AEDT Sat 28 Nov). Branch b2175/rd490-portband.
+HEAD (pin) fc5975f631bb1fdd2536345f8eeee9e2e4eec165 = M2, a MERGE commit: parents K f1df71f5125994d964b695ebc185947fd401642c (first) and main 826bb7a89bfe9517f5aa538a110ab0b1dea3317f (second). K's parent A 07fb8eb6ff3ea767517a563d07eb1e50bb6b2b87; A's parent d2aeecf8cda67265cc316646953c45d92b861f77.
+Main at gate 826bb7a89bfe9517f5aa538a110ab0b1dea3317f (= M2^2; compare main...head ahead 3 behind 0; the reverse reads behind 0/3), read by gh api -X GET at 01:12:54 AEDT and again at the close (VERDICT.md "Lane").
+Every gh call is made with GH_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/4_Credentials/.gh-config'.
+
+0. RE-MEASURE BEFORE OPENING
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/ref/heads/main --jq .object.sha  -> 826bb7a89bfe9517f5aa538a110ab0b1dea3317f
+     If main moved: THE COUNTS FILE. This branch rewrites scripts/verify-expected-counts.json from main's 6654/421 to 6655/421. Any merge that lands first and changes the suite size or the counts file makes the pinned head WRONG (a textual conflict on the same lines, and the verify fails on any difference anyway). Back to a seat: never edit the file by hand, never press "Update branch", never rebase. The seat makes a MERGE commit of the new origin/main into b2175/rd490-portband, regenerates the counts by the project's own command `npm run verify -- --maxWorkers=2 --update-counts` in the Linux shape on that merge tree (inside ONE nexusai-lock.sh jest acquisition, NODE_OPTIONS unset, dot-free tree), commits, pushes the new head. Expected pair: main's new committed pair plus 1 test and plus 0 suites. The new head is a NEW pin: a delta reader reads the new merge commit's diff before landing.
+     If main moved and the counts file did NOT move: git diff --name-only 826bb7a8..<new main> must touch none of __tests__/rd490-*, __tests__/helpers/**, __tests__/rd573-*, __tests__/rd591-*, tests/e2e/open-access-banner-*, backend/server.js, scripts/verify-suite.sh, package*.json, jest.config.js, .github/**. Otherwise back to a seat as above.
+   gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/ref/heads/b2175/rd490-portband --jq .object.sha -> fc5975f631bb1fdd2536345f8eeee9e2e4eec165
+   gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/compare/main...fc5975f631bb1fdd2536345f8eeee9e2e4eec165' --jq '[.status,.ahead_by,.behind_by,([.files[]|[.filename,.additions,.deletions]])]'
+     -> ["ahead",3,0,[["__tests__/helpers/test-server.js",3,2],["__tests__/rd490-open-access-banner-browser.test.js",22,6],["scripts/verify-expected-counts.json",2,2]]]
+   The ruleset (gate read of rules/branches/main, 01:21): deletion, non_fast_forward, code_scanning (CodeQL: alerts_threshold errors, security_alerts_threshold high_or_higher), required_status_checks with an EMPTY list and strict policy false. No check is required by name; never press "Update branch" (it would move the pin).
+
+1. OPEN THE PULL REQUEST (Tuesday's verb, the seat never)
+   Title: pr-title.txt. Body: pr-body.md (no name, card, seat or build id; the choices named as the coordinator's; the named limits).
+   Base main, head b2175/rd490-portband, NOT a draft. build.yml builds pull requests to main, so the PR's own checks include the hosted `build` job: the FIRST real Linux run of the moved band.
+
+2. WAIT FOR THE CHECKS
+   bash '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/tools/pr_checks_wait.sh' datasecau/Reporting_Dashboard_Au <n> fc5975f631bb1fdd2536345f8eeee9e2e4eec165 60 40 --min-checks 7
+   PR 269's set (gate read: head c02a04c5, check-runs total 8, every one completed/success): seven distinct names, eight runs:
+     CodeQL | Analyze (actions) | Analyze (python) | Analyze (javascript-typescript) | audit-production-deps (twice: push and pull_request) | build | scan.
+     NOTE: one `audit-production-deps` run (push, id 140554456204) ALREADY exists on fc5975f6 from the branch push (completed/success; gate read, total 1). The PR adds the rest. arm-ttk does NOT start (its paths are azure-marketplace/** and its own files; none touched).
+     Exit 0 = all green; exit 1 or 5 = STOP: read the run, never re-run blindly.
+   Read the `build` job log (gh api -X GET repos/datasecau/Reporting_Dashboard_Au/actions/jobs/<id>/logs) for: `VERDICT: PASS` with `6655/6655 tests passed across 421 suites` (match the words, the dash may be an em dash); `PASS __tests__/rd490-open-access-banner-browser.test.js`; counts of `FAIL ` lines 0 and `EADDRINUSE` 0 (print a control for each literal on a line known to hold it).
+     A red on the rd490 file there = NO MERGE, a fix round: read the failure text (a listener-guard message names the port and the pids), send it to a seat; never re-run to a green. Linux premises the file now relies on: the band 20000-32159 sits below the runner's ephemeral range (32768-60999 by default; the rd573 file's cell E2 judges it on the runner) and the listener check uses lsof, else ss (both named failures, never skips).
+   Code scanning: main's baseline (gate read 01:21): javascript-typescript analysis 2262937744 at 826bb7a8 reads 29 results (python 0, actions 0); 22 open alerts (control: state=fixed first page 100). NONE of the 22 sits in a changed file (the three paths above).
+     gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/code-scanning/analyses?ref=refs/pull/<n>/head&per_page=6' --jq '.[]|[.commit_sha[0:8],.results_count,.category]|@tsv'
+       A 0 or "no new alert" read here cannot fail as proof of absence; it is NOT a landing condition. The check that can fail is 3b. If the PR's code-scanning check names any alert as new: NO MERGE, read it; never dismiss.
+
+3. LAND: A MERGE COMMIT PINNED TO THE HEAD. NEVER SQUASH, NEVER REBASE.
+   Rule: C-190 (/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/1_Project_Definition/CLARIFICATIONS.md line 2067, read by the gate with awk NR==2067): "2. Merge path: open a PR from the gated branch, wait for CodeQL (a background wait that EXITS), then land the SAME commit. Never squash, never rebase ([[C-68]])."
+   This head is itself a merge commit. A squash would drop it and A/K; a rebase would rewrite it. Only --merge keeps fc5975f6 on main.
+   gh pr merge <n> --repo datasecau/Reporting_Dashboard_Au --merge --match-head-commit fc5975f631bb1fdd2536345f8eeee9e2e4eec165
+   Then: gh api -X GET repos/datasecau/Reporting_Dashboard_Au/pulls/<n> --jq .merge_commit_sha   (call it M)
+         gh api -X GET repos/datasecau/Reporting_Dashboard_Au/commits/<M> --jq '[.parents[].sha]'
+           -> two parents: 826bb7a89bfe9517f5aa538a110ab0b1dea3317f (or the main before the merge) and fc5975f631bb1fdd2536345f8eeee9e2e4eec165; one parent = squashed or rebased: STOP.
+         gh api -X GET repos/datasecau/Reporting_Dashboard_Au/git/ref/heads/main --jq .object.sha -> M
+         (GitHub may fast-forward nothing here: --merge always writes M. M's tree must equal fc5975f6's tree when main has not moved: gh api -X GET repos/datasecau/Reporting_Dashboard_Au/commits/<M> --jq .commit.tree.sha  vs  .../commits/fc5975f631bb1fdd2536345f8eeee9e2e4eec165 --jq .commit.tree.sha -> equal.)
+   3b. AFTER THE MERGE (the check that can fail): gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/code-scanning/analyses?ref=refs/heads/main&per_page=6' --jq '.[]|[.commit_sha[0:8],.results_count,.category]|@tsv'
+       -> the javascript-typescript analysis at M reads 29 (as main). A higher count is a new round: read each new alert; never dismiss one. Open alerts expected 22.
+   3c. Main's own push `build` at M: read it for `VERDICT: PASS` 6655/421 as in step 2.
+
+4. DEPLOY DEMO: READ ONLY. A RUN WILL START; BOTH JOBS MUST READ SKIPPED; APPROVE NOTHING. THE C-224 HOLD STANDS.
+   .github/workflows/deploy-demo.yml at fc5975f6 (gate read with git show; the branch does not change .github/**): `on: push` to main (lines 26-28) with `paths-ignore: '**.md', 'docs/**', 'tests/**'` (lines 29-32) plus workflow_dispatch (line 33). This merge touches `__tests__/**` and `scripts/**`, which are NOT ignored (`tests/**` is the e2e folder, not `__tests__/`), so the push STARTS a `Deploy demo` run (workflow id 333076536).
+   WHY NOTHING DEPLOYS: both jobs need vars.CI_DEPLOY_ENABLED == 'true' (the `if:` of build, line 53, and of deploy, line 91). The deploy job names environment `demo` (line 95), but that environment DOES NOT EXIST (gate read 01:21: environments total 1, `dev`, 0 protection rules; .../environments/demo -> 404), so there is NO reviewer gate: the unset variable is the ONLY thing that stops a deploy. Gate read 01:21: repo Actions variables total_count 0; organization variables visible to the repo 0; `dev` environment variables 0. Newest Deploy demo runs: 45997366088 at 826bb7a8 push completed/skipped; 45948221672 at d2aeecf8 completed/skipped. Even if it ran, the code deployed would differ from main only in test files and the counts file; the hold is about the act, not the content.
+   BEFORE PRESSING MERGE, Tuesday re-reads and requires all three:
+     gh api -X GET repos/datasecau/Reporting_Dashboard_Au/actions/variables --jq .total_count              -> 0 (or, if not 0, CI_DEPLOY_ENABLED absent from .variables[].name)
+     gh api -X GET repos/datasecau/Reporting_Dashboard_Au/actions/organization-variables --jq .total_count -> 0 (same rule)
+     gh api -X GET repos/datasecau/Reporting_Dashboard_Au/environments --jq '[.environments[].name]'       -> still only `dev`; if a `demo` environment now exists, read its protection rules and its variables (.../environments/demo and .../environments/demo/variables) and say what they hold
+     Any of these reading the switch ON: DO NOT MERGE; card it to the product owner under the C-224 hold (CLARIFICATIONS.md line 2412: no NexusAI demo deploy until RD-876 part 2 lands).
+   AFTER THE MERGE:
+     gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/actions/workflows/333076536/runs?head_sha=<M>' --jq '.workflow_runs[] | [.id,.event,.status,.conclusion] | @tsv'
+       Expect one push run, completed/skipped within about a minute. If none appears after about 5 minutes read runs?per_page=5 and say so. Do not dispatch one.
+     gh api -X GET 'repos/datasecau/Reporting_Dashboard_Au/actions/runs/<run id>/jobs' --jq '.jobs[] | [.name,.status,.conclusion] | @tsv'
+       Expected: build completed skipped, deploy completed skipped. BOTH must read skipped: the landing reads it as NOT DEPLOYING.
+   IF EITHER JOB RUNS (queued, in_progress, waiting, success), THE SWITCH IS ON: approve nothing, and do not cancel, re-run or dispatch (there is no reviewer to stop it). Card it to the product owner at once under the C-224 hold with the run id and job states. Record in the records pass that the switch read ON at <M>. Package (deploy.yml) is workflow_dispatch only: it does not start.
+   Make no HTTP request to the demo site in any case.
+
+5. AFTER THE LANDING
+   a. The candidate lock (RD-1052): install-steps.md, run by a NexusAI seat on Tuesday's commission, ONLY after M is on main and the base reads idle twice. It installs the candidate with `slots-jest` ABSENT, which is one slot: today's behaviour.
+   b. `slots-jest` stays ABSENT after the install. Writing it is a SEPARATE decision, held by VERDICT.md M-1 (a tree from before M still uses the fixed band, and the lock cannot see that) and m-2 (callers that do not declare their tree's slot run alone, so slots buy nothing until the kit wrappers declare it).
+   c. Hand FOR-RECORDS.md to the records pass (RD-1051 comment and move; RD-1052 comment, stays open until the install; the ticket candidates).

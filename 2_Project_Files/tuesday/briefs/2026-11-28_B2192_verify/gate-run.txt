@@ -1,0 +1,92 @@
+B2192 gate-run evidence (copies of scratch logs; scratch root /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s336/g2192)
+
+== pair (live lock, one acquisition)
+[nexusai-lock] jest lock acquired by b2192-gate-pair after 0s
+start 2026-11-28 01:15:55 +1100 label g2192 node v24.22.2
+/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s336/g2192/t/qa slot 0 worker1-band 20000-20039 slot-span 20000-20639
+/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s336/g2192/t/qb slot 11 worker1-band 27040-27079 slot-span 27040-27679
+both started 01:15:55 pids A=87399 B=87401
+jest A rc=0
+jest B rc=0
+listener rows 1501
+A tree /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s336/g2192/t/qa slot-span 20000-20639
+A tests 73 failed 0 listener-guard-messages 0
+A server ports [20000, 20001] | in 38900-38939: 0 | in own slot span: 2 | elsewhere: 0
+B tree /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s336/g2192/t/qb slot-span 27040-27679
+B tests 73 failed 0 listener-guard-messages 0
+B server ports [27040, 27041] | in 38900-38939: 0 | in own slot span: 2 | elsewhere: 0
+ports seen on both sides: []
+PAIRSUM g2192 shape=OWN-SLOTS-DISJOINT result=BOTH-GREEN
+end 2026-11-28 01:17:27 +1100
+[nexusai-lock] jest lock released by b2192-gate-pair
+lock-wrapper rc=0
+
+== candidate-lock arms: full run 011817 (A5 there FAILED as a test artefact: the killed holder was an unreaped zombie of the harness, which still answers kill -0; fixed by reaping and re-run as 012031)
+arms2192 start 2026-11-28 01:18:17 +1100 cand=/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s336/g2192/lock/cand.sh base-root=/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s336/g2192/lock/bases run 011817
+ARM A1     PASS  K=2 wslots 1,2: peak=2 overlap=True rc=[0, 0] owners=['tag=w1 slot=1 wslot=1', 'tag=w2 slot=2 wslot=2']
+ARM A2     PASS  K=2 same wslot 5: peak=1 w2 starts +0.49s after w1 ends; reason-printed=True rc=[0, 0]
+ARM A3     PASS  K=3, slot1 live w1, slot2 dead pid 7078 (ws2), slot3 live foreign (ws3); w4 ws4: stale-moved=True w4 took slot=2 slot3 untouched=True held-mid={'nexusai-jest.lock': ('w1', '1', '1'), 'nexusai-jest.lock.3': ('foreign', '3', '3')} rc=[0, 0]
+ARM A3b    PASS  dead holder on the SAME wslot 6 in slot 1: taken over=True, caller then held slot 1=True rc=[0]
+ARM A3c    PASS  ownerless slot 2 with slot 1 free: head waited 2.2s (grace 3s) then moved it aside (['stale-ownerless-jest-1795789118-7822']) rc=[0]
+ARM A4     PASS  K=2 w1(ws1) w2(ws2) w3(ws1) w4(ws3): start order ['w1', 'w2', 'w3', 'w4']; w3 after w1 end True; w4 never passes w3 True (head-of-line: w4 started +2.4s after w1 end); peak 2; same-ws-together samples 0; rc=[0, 0, 0, 0]
+ARM A4k3   PASS  K=3 five distinct wslots: peak 3; order ['k1', 'k2', 'k3', 'k4', 'k5']; 4th acquired 0.5s after the first release; rc=[0, 0, 0, 0, 0]
+  TIMEOUT pid 24489
+ARM A5     FAIL  kill -9 of holder script pid 18280: w2 (same ws1) waited while it lived=True; took over after pid test=False; ORPHAN: holder child group still alive after takeover=False (pids []); w2 ran while w1 child still ran=False
+ARM A5     FAIL  EXCEPTION PermissionError: [Errno 1] Operation not permitted
+ARM A6     PASS  slots-jest ABSENT, distinct wslots: peak 1, serial True, w1 owner slot=1 (7 lines) rc=[0, 0]
+ARM A6     FAIL  EXCEPTION FileExistsError: [Errno 17] File exists: '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s336/g2192/lock/bases/011817-A6v'
+ARM X1     PASS  (shape, not a property) K=3; new n1 (ws4) holds slot 2; an OLD copy (no wslot) takes slot 1 when n0 leaves: old ran beside n1=True (a same-slot pair the new check cannot see); peak 2; sets [('n0', 'n1'), ('n1',), ('n1', 'oldcopy')]
+ARM X1b    PASS  old holder (no wslot) in slot 1, K=3: new head waits=True reason-printed=True peak 1
+ARM X3     PASS  cwd=qa (slot 0) -> ['wslot=0']; cwd=a folder with no helper -> ['wslot=unknown']; cwd=qa but no node on PATH -> ['wslot=unknown']. The lock never looks at the command, so `npm --prefix <qb>` from cwd qa would record slot 0 while qb runs on slot 11.
+ARM X5     PASS  (shape) slots-jest cut 3->1 with holders in slots 2 and 3: a new head (ws7) took slot 1 while they drained=True; peak 3
+live base entries unchanged by name: True
+arms2192 end 2026-11-28 01:20:16 +1100
+
+== arms re-run 012031
+arms2192 start 2026-11-28 01:20:31 +1100 cand=/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s336/g2192/lock/cand.sh base-root=/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s336/g2192/lock/bases run 012031
+ARM A5     PASS  kill -9 of holder script pid 36280: w2 (same ws1) waited while it lived=True; took over after pid test=True; ORPHAN: holder child group still alive after takeover=True (pids ['36307']); w2 ran while w1 child still ran=True
+ARM A5t    PASS  TERM to slot-2 holder c: rc [143]; remaining holders {'nexusai-jest.lock': ('a', '1', '1')}; released ['done-jest-c-36778-1795789239']
+ARM A6     PASS  slots-jest ABSENT, distinct wslots: peak 1, serial True, w1 owner slot=1 (7 lines) rc=[0, 0]
+ARM A6v    PASS  '3\n'->peak2 ' 3 '->peak2 '03'->peak1 '9'->peak1 ''->peak1 'two'->peak1
+live base entries unchanged by name: True
+arms2192 end 2026-11-28 01:21:02 +1100
+
+== control: the same arms on the live-lock copy (old.sh), 012327
+arms2192 start 2026-11-28 01:23:27 +1100 cand=/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s336/g2192/lock/old.sh base-root=/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s336/g2192/lock/bases run 012327
+ARM A1     FAIL  K=2 wslots 1,2: peak=1 overlap=False rc=[0, 0] owners=['tag=w1', 'tag=w2']
+ARM A2     FAIL  K=2 same wslot 5: peak=1 w2 starts +0.36s after w1 ends; reason-printed=False rc=[0, 0]
+ARM A4     PASS  K=2 w1(ws1) w2(ws2) w3(ws1) w4(ws3): start order ['w1', 'w2', 'w3', 'w4']; w3 after w1 end True; w4 never passes w3 True (head-of-line: w4 started +12.6s after w1 end); peak 1; same-ws-together samples 0; rc=[0, 0, 0, 0]
+ARM A4k3   FAIL  K=3 five distinct wslots: peak 1; order ['k1', 'k2', 'k3', 'k4', 'k5']; 4th acquired 9.5s after the first release; rc=[0, 0, 0, 0, 0]
+ARM A6     FAIL  slots-jest ABSENT, distinct wslots: peak 1, serial True, w1 owner slot=1 (5 lines) rc=[0, 0]
+ARM A6v    FAIL  '3\n'->peak1 ' 3 '->peak1 '03'->peak1 '9'->peak1 ''->peak1 'two'->peak1
+live base entries unchanged by name: True
+arms2192 end 2026-11-28 01:24:45 +1100
+
+== gitleaks
+/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s336/g2192/logs/gitleaks-control.out:1:22AM WRN leaks found: 1
+/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s336/g2192/logs/gitleaks-branch.out:1:22AM INF no leaks found
+/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s336/g2192/logs/gitleaks-firstparent.out:1:22AM INF no leaks found
+
+== full verify (live lock)
+[nexusai-lock] jest lock acquired by b2192-gate-verify after 0s
+start 2026-11-28 01:17:27 +1100 mode plain node v24.22.2 tree /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s336/g2192/t/qc own-TMPDIR [/var/folders/1x/t0xjkhzs2p706m7dr36bgk840000gn/T/]
+verify plain rc=0
+end 2026-11-28 01:40:51 +1100
+[nexusai-lock] jest lock released by b2192-gate-verify
+lock-wrapper rc=0
+verify-suite: repo=/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s336/g2192/t/qc
+verify-suite: expectation — tests=6655 suites=421 (from scripts/verify-expected-counts.json)
+verify-suite: jest exit code (captured before any filter) = 0
+verify-suite: suites=421 tests=6655 passed=6655 failed=0 jest.success=true
+VERDICT: PASS — 6655/6655 tests passed across 421 suites (jest exit 0)
+== mutant (live lock)
+[nexusai-lock] jest lock acquired by b2192-gate-mutant after 790s
+start 2026-11-28 01:40:51 +1100
+planted 1
+ __tests__/rd490-open-access-banner-browser.test.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+jest rc=1
+reverted: blob a92d82b15ca195393d8e2d0e9734b44a36e5e0e1 head-blob a92d82b15ca195393d8e2d0e9734b44a36e5e0e1 porcelain 0
+end 2026-11-28 01:42:26 +1100
+[nexusai-lock] jest lock released by b2192-gate-mutant
+lock-wrapper rc=0
