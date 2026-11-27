@@ -1,0 +1,16 @@
+# SWEEP COMMISSION (in-session, READ-ONLY) -- Datasec: actionable tickets for MPS Calculator, Security Composer and NexusAI lanes, 2026-11-27 evening
+
+Commissioned by Tuesday s335 under the standing order at the top of `/Volumes/Datasec_DEV/TUESDAY/0_Brain/tasks/NEXT-PICKUP-TUESDAY.md` (line 9) and Kam's "try 20 concurrent agents at all time" (pickup line 18). `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/DRAFTER_RULES.md` binds whole. Form: `tuesday/briefs/2026-11-26_SWEEP-0446_datasec-actionable-lanes.md` (read it whole first: it is yesterday's answer; re-check every row it lists, do not copy).
+
+## Scope
+- Projects: Datasec/MPS Calculator (Jira MPSCALC), Datasec/Security Composer (Jira PCOMP), Datasec/NexusAI (Jira RD). OXPd is planned separately (do not sweep it). **SKIP HPSM-POC entirely (Kam's hold to the end of 2026-12-10). Skip myPKI, CypherKey, Lead_Bot.** Find each project's folder under `/Volumes/Datasec_DEV/!CODING/Datasec/` and its own `CLAUDE.md` (who may branch, merge, deploy; tracker access by the project's own `4_Credentials/.env` key, sourced transiently to READ only, never echoed, never written: Kam's read-only tracker grant).
+- **Composer: Kam's hold (pickup line 24): no deploy of a changed content release without his own card.** A Composer ticket whose only end is a deploy, or whose work changes the content release (examples, customer words), is EXCLUDED with that reason.
+- For each project: open tickets agent-actionable NOW (no new word of Kam's, no ruling, no client human, no production touch, no device run, no money, no external message), each with key, title, the files it would touch (read the code, not the title), and size S/M/L. EXCLUDED tickets with the reason in one line. Count with `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/board_count.sh` only (never a capped query as a total).
+- Lanes: group actionable tickets into lanes that share NO file within a project, at most 4 per project, ordered by value; name each lane's files from both sides. NexusAI: one jest lock until B2175's rd490 fix lands, so mark which NexusAI lanes need jest (serial) and which do not (records, docs, text: may run beside).
+- Before calling a ticket actionable, grep the pickup file and today's and yesterday's Tuesday notes (`0_Brain/daily_tuesday/2026-11-26.md`, `2026-11-27.md`) for its key and read every DROPPED, HELD or ruling line; run `bash /Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tools/decision_queue.sh prior --id x --title '<subject>'` (read-only) for any ticket that looks decision-shaped.
+
+## Output
+`/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-27_SWEEP-2055_datasec-actionable-lanes.md`: per project the counts (with their predicate), the actionable list, EXCLUDED list, the lanes, and a WAITING-ON-KAM list (each item with its question and the card that already carries it, or 'no card yet'). Scratch: `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s335/sweep2055/`.
+
+## Fences
+READ-ONLY everywhere but the output and scratch. No write to any board, repo, card or mail. GET only. Never `cd`; never delete; never print a credential. Clocks printed by `date`. Final message: output path + a 6-line BLUF (lanes per project, top three by value).
