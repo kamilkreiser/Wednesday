@@ -324,6 +324,20 @@ mutant F16-conf-read-before-the-hold "T34 a --run under the hold with an UNCONFI
         if mode == "run" and os.path.exists(ctx.hold_file):
             raise Refused("HELD (mutant: the conf was read first)", RC_HELD)
         for label, val'
+# ── G: ROUND 4b (ANSWER-7), the file-level link guards. ──
+mutant G01-no-file-link-check-per-set "T35 a link at the NEXT client's STARTED marker" '                if lk:
+                    raise Refused("REFUSED — %s on the NAS is a SYMLINK (to %s): this tool never writes a file through a "' '                if False:
+                    raise Refused("REFUSED — %s on the NAS is a SYMLINK (to %s): this tool never writes a file through a "'
+mutant G02-readme-written-through-a-link "T35 a dangling link at README.txt: nothing is written outside" '                if lk:
+                    raise Refused("REFUSED — %s on the NAS is a SYMLINK (to %s): this tool never writes a file through a "' '                if False:
+                    raise Refused("REFUSED — %s on the NAS is a SYMLINK (to %s): this tool never writes a file through a "' '                    if not os.path.lexists(readme):' '                    if not os.path.exists(readme):'
+mutant G03-no-file-link-check-before-the-manifest "T35 a link at the COMPLETE marker" '            if lk:
+                escapes.append(' '            if False:
+                escapes.append('
+mutant G04-complete-marker-not-looked-at "T35 a link at the COMPLETE marker" 'os.path.join(croot, "runs", "RUN_%s_COMPLETE.txt" % stamp),' 'os.path.join(croot, "runs", "RUN_%s_COMPLETE.txt.not" % stamp),'
+mutant G05-manifest-not-looked-at "T35 a link at the manifest" 'os.path.join(croot, "manifests", "%s_manifest.json" % stamp)]' 'os.path.join(croot, "manifests", "%s_manifest.json.not" % stamp)]'
+mutant G06-symlink-lists-not-looked-at "T35 a link at the symlink list" ' for n in set_names]' ' for n in ()]'
+mutant G07-readme-not-looked-at "T35 a link at README.txt pointing at an EXISTING outside file: exit 2" 'names = [os.path.join(croot, "README.txt"),' 'names = [os.path.join(croot, "README.txt.not"),'
 wait
 
 echo

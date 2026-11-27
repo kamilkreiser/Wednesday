@@ -1,0 +1,227 @@
+# tests/claims.tsv — every coverage claim STATUS.md (ROUND 3, and ROUND 4: the ids starting r4-) makes, in a form tests/claims_check.py can check against
+# a suite run and a mutant run. Columns, TAB-separated: id, kind, argument, what STATUS says. Kinds: see claims_check.py.
+# A claim that is not in this file is not made in STATUS. Edit both together.
+1a	pass	T21a a source file with mode 000 from the first night: night 1 is NOT exit 0	a source file that cannot be read fails the night from the first night
+1a2	pass	T21a the file is NAMED as not delivered, with the reason	the unreadable file is named with its reason
+1b	pass	T21b ... and the night after is NOT exit 0 either	a changed, then unreadable, file does not age into GOOD
+1c	pass	T21c a folder of 31 files unreadable between the listing and the copy	a folder unreadable between listing and copy fails the night
+1d	pass	T21d every changed file's folder unreadable mid-run	the coordinator's question: every folder unreadable mid-run is not GOOD
+1e	pass	T21e the set's root folder moved away mid-run	a set root that goes away mid-run is not GOOD
+1f	pass	T21f one planned file deleted from the source during the run	a provably deleted file is let go
+1f2	pass	T21f ... it is COUNTED	deleted files are counted
+1f3	pass	T21f ... and NAMED	deleted files are named
+1g	pass	T21g six planned files deleted during the run, above the 5 allowed	more deletions than the limit fail the night
+1g2	pass	T21g NEIGHBOUR five deleted, at the limit	five deletions are within the limit
+1h	pass	T21h a planned file whose parent folder went away	a parent folder that is gone is not a proven deletion
+1i	pass	T21i a planned file that became a folder before its proof	a file that became a folder is NOT DELIVERED
+1j	pass	T21j a destination copy that cannot be read back is NOT proven	an unreadable destination copy is not proven (the checker's K19)
+1k	pass	T21k delivered, then unreadable before the proof	delivered is not proven
+1l	passes	T21l :7	the deletion proof as a function: seven assertions
+1m-R01	mutant	R01	mutant caught: unreadable counted as deleted
+1m-R02	mutant	R02	mutant caught: deleted although still listed
+1m-R03	mutant	R03	mutant caught: unlistable parent means deleted
+1m-R04	mutant	R04	mutant caught: root identity not checked
+1m-R05	mutant	R05	mutant caught: deletion limit off
+1m-R06	mutant	R06	mutant caught: non-regular source hashed
+1m-K19	mutant	K19	mutant caught: unreadable destination counts as proven
+1m-K02	mutant	K02	mutant caught: the final accounting ignored
+1m-Q02	mutant	Q02	mutant caught: arrival check vacuous
+2a	pass	T22 FIRST run of a set holding folders and ZERO files: exit 8	a zero-file plan fails a first run, folders or not
+2b	pass	T22 the ONE exception: a set the conf names in allow_empty=	allow_empty is the one exception
+2c	passes	T22 exclude_name=:5	five emptying patterns each refused on a first run
+2d	pass	T22 the pattern rule as a function: 7 emptying patterns refused, 7 ordinary ones accepted	the pattern rule as a function
+2e	pass	T22 ... the fall is still seen (the baseline is kept a second time, in the index)	a damaged state file does not take the baseline away
+2f	pass	T22 the NIGHTLY job on a set that fell from 25 to 8 files	the nightly job cannot accept a shrink (the checker's K10)
+2g	pass	T22 ... a new file in it did not travel	a set whose scope is broken is not copied (K03)
+2m-K21	mutant	K21	mutant caught: zero files with folders is good
+2m-N05	mutant	N05	mutant caught: empty scope is good
+2m-R26	mutant	R26	mutant caught: emptying patterns accepted
+2m-R27	mutant	R27	mutant caught: baseline only in the state file
+2m-K10	mutant	K10	mutant caught: nightly accepts any shrink
+2m-K03	mutant	K03	mutant caught: broken scope still copied
+3a	pass	T12 a destination copy that changed behind our back (same size) is found by the sample and REPAIRED in the same run	a sample finding is repaired in the same run
+3b	pass	T12 ... and the wrong content it held is kept under versions/	the wrong destination content is kept in versions
+3c	pass	T23 a wrong destination copy that CANNOT be replaced (immutable): the night is NOT exit 0	an unrepairable finding fails the night
+3d	pass	T23 the NEXT night, with the sample switched off so it cannot find the file again: still NOT exit 0	the finding does not depend on being sampled again
+3e	pass	T23 ... and the night after that: still NOT exit 0	a finding never ages out
+3f	pass	T23 a sample of only 3 finds a wrong copy: the SAME run reads back every other file of the set	one wrong copy triggers a full read-back of the set
+3m-R07	mutant	R07	mutant caught: sample finding keeps its index row
+3m-R08	mutant	R08	mutant caught: sample finding not re-sent
+3m-R36	mutant	R36	mutant caught: no read-back after a sample finding
+3m-Q09	mutant	Q09	mutant caught: sample ignored
+3m-K11	mutant	K11	mutant caught: sample empty
+4a	pass	T24 a set= naming the folder that HOLDS the seat trees (the drive root): exit 2	an ancestor of the seat trees is refused
+4b	pass	T24 ... nothing of TUESDAY's, FRIDAY's or the other client's is on the NAS	nothing of the other seats or client travels
+4c	pass	T24 a set= naming the folder that holds the CLIENT folders: exit 2	an ancestor of the other client's folder is refused
+4d	pass	T24 a set= whose folder holds a 'tuesday-handover' folder beside ordinary ones: exit 2	a folder holding a seat-named folder is refused
+4e	pass	T24 ... refused as an ANCESTOR of this seat's own tree	an ancestor of the seat's own tree is refused
+4f	pass	T24 a set INSIDE another set with no exclude_path for it: exit 2	nested sets need the matching exclude
+4g	pass	T24 a FOLDER named exactly as another seat inside a project set does not travel	a folder named exactly as another seat is excluded in every set
+4h	pass	T14 a source under a folder whose name merely CONTAINS the client (Datasec-archive): exit 2	inside a forbidden root is refused (round 2's test, still green)
+4m-R09	mutant	R09	mutant caught: ancestor of a forbidden root allowed
+4m-R10	mutant	R10	mutant caught: ancestor of own tree allowed
+4m-R11	mutant	R11	mutant caught: nested sets allowed
+4m-R12	mutant	R12	mutant caught: seat-named folder travels
+4m-Q16	mutant	Q16	mutant caught: forbid by component off
+4m-N23	mutant	N23	mutant caught: real path not checked
+5a	pass	T25 the NIGHTLY job is the first reader of a damaged state file	the nightly job finding damage says so
+5b	pass	T25 at the next boot doctor fails hard, in its OWN words	doctor reports it at the next boot, not on day 6
+5c	pass	T25 another nightly fire and another boot later: doctor STILL fails hard	the notice is not used up
+5d	pass	T25 ... also while the seat is HELD	reported also while held
+5e	pass	T25 a REAL run with a damaged index: it moves it aside, compares again, and is GOOD	a damaged index is moved aside and the run goes on
+5f	pass	T25 ... the lock is not left behind	a damaged index never leaves the lock
+5g	pass	T25 a state file that is valid JSON with its fields missing: the watch exits 5	valid JSON that is not a valid state is one plain line
+5h	pass	T25 a last_good 400 days in the future is treated as damage	a last_good in the future is damage
+5i	pass	T25 a DRY run with a damaged state file says so	a dry run reports and does not move a damaged state file
+5j	pass	T25 a run that cannot write its manifest: NOT exit 0	an unexpected error is one line, lock released
+5m-R13	mutant	R13	mutant caught: no damage notice for the state
+5m-R14	mutant	R14	mutant caught: damaged index crashes
+5m-R15	mutant	R15	mutant caught: dry run moves damaged state
+5m-R16	mutant	R16	mutant caught: state not validated
+5m-R17	mutant	R17	mutant caught: future times accepted
+5m-R18	mutant	R18	mutant caught: lock left after a run
+5m-K08	mutant	K08	mutant caught: damage notice: the watch says ok
+5m-R33	mutant	R33	mutant caught: notice cleared by a good run
+5m-N11	mutant	N11	mutant caught: damaged state crashes
+6a	pass	T26 SIGTERM mid-copy: the two finished chunks are PROVEN AND SAVED (10 index rows)	proof is saved per chunk
+6b	pass	T26 SIGTERM: the state never says good	an interruption never leaves the state good
+6c	pass	T26 SIGTERM: ... and sends only the 15 files that were not proven	the resume sends only what is not proven
+6d	pass	T26 SIGTERM: ... re-reading nothing that was proven	the resume re-reads nothing that was proven
+6e	pass	T26 a copy stopped by the cap: exit 4	the cap stops a chunked copy and keeps what was proven
+6f	pass	T26 a proof read that blocks past the cap: the WATCHDOG stops the run	the watchdog (the checker's K17)
+6m-R19	mutant	R19	mutant caught: proof saved only at the end
+6m-R20	mutant	R20	mutant caught: no chunks
+6m-K17	mutant	K17	mutant caught: watchdog never armed
+6m-R34	mutant	R34	mutant caught: cap ignored
+6m-R35	mutant	R35	mutant caught: unreached sets not named
+6m-K01	mutant	K01	mutant caught: unproven files enter the index
+7a	names40	-	T28 plants every one of the second checker's 40 conventional names
+7b	pass	T28 NOT ONE of the checker's 40 conventional names is on the NAS	none of the 40 travels
+7c	pass	T28 nor one of 25 more	25 more names of the same kinds stay out, one of them an ordinary-named file inside a .auth folder
+7d	pass	T28 NEIGHBOURS: all 10 ordinary names beside them arrive	ten ordinary neighbours arrive
+7e	pass	T28 CAN-FAIL: the same scan on a list holding the two real files' names: exit 1	the lane's scan catches the two real files' names
+7m-R28	mutant	R28	mutant caught: tfvars travel
+7m-R29	mutant	R29	mutant caught: private-key names travel
+7m-R30	mutant	R30	mutant caught: local.settings.json travels
+7m-R31	mutant	R31	mutant caught: .auth folder travels
+8a	pass	T27 the hold lifted four days after that refusal: NOT overdue	minor 10: the hold does not start the clock
+8b	pass	T27 three days after the lift with no backup: OVERDUE	the clock runs from the lift
+8c	pass	T26 SIGHUP: the lock is released	minor 11: SIGHUP is handled
+8d	pass	T27 the NAS leaves the mount table during the first set	minor 12: the mount is checked before every set
+8e	pass	T22 a key given twice in the conf: exit 2	minor 14: a key given twice is refused
+8f	pass	T25 ... not with the three-day text	minor 15: doctor no longer mislabels damage
+8g	pass	T27 the same group id now held by something that started at ANOTHER time	minor 15: a reused group id is not the engine
+8h	pass	T27 the lane's own state folder (lock, index) is excluded	the tool's own run state is out of the plan
+8m-R21	mutant	R21	mutant caught: hold refusal starts the clock
+8m-R22	mutant	R22	mutant caught: lifting the hold keeps the old clock
+8m-R32	mutant	R32	mutant caught: SIGHUP not handled
+8m-R23	mutant	R23	mutant caught: mount not rechecked per set
+8m-R25	mutant	R25	mutant caught: duplicate key accepted
+8m-R24	mutant	R24	mutant caught: reused group id is an engine
+8m-R37	mutant	R37	mutant caught: own run state in the plan
+9a	k15	-	every one of the second checker's 15 surviving mutants is caught
+9k-K02	mutant	K02	the checker's survivor K02 is caught, by a test in T12 H1
+9k-K03	mutant	K03	the checker's survivor K03 is caught, by a test in T22
+9k-K05	mutant	K05	the checker's survivor K05 is caught, by a test in T22
+9k-K06	mutant	K06	the checker's survivor K06 is caught, by a test in T27
+9k-K10	mutant	K10	the checker's survivor K10 is caught, by a test in T22
+9k-K12	mutant	K12	the checker's survivor K12 is caught, by a test in T27
+9k-K14	mutant	K14	the checker's survivor K14 is caught, by a test in T27
+9k-K16	mutant	K16	the checker's survivor K16 is caught, by a test in T1
+9k-K17	mutant	K17	the checker's survivor K17 is caught, by a test in T26
+9k-K18	mutant	K18	the checker's survivor K18 is caught, by a test in T27
+9k-K19	mutant	K19	the checker's survivor K19 is caught, by a test in T21j
+9k-K21	mutant	K21	the checker's survivor K21 is caught, by a test in T22
+9k-K22	mutant	K22	the checker's survivor K22 is caught, by a test in T27
+9k-K23	mutant	K23	the checker's survivor K23 is caught, by a test in T22
+9k-K25	mutant	K25	the checker's survivor K25 is caught, by a test in T7
+3g	pass	T3 sample off: a same-size change at the source is in the copy list by its stat alone	the stat comparison alone sees a same-size change (sample off)
+3m-M20	mutant	M20	mutant caught: index trusted blindly
+4i	pass	T14 a source inside a datasec-named folder four levels down, where no forbidden root is searched for: exit 2	deeper than the root search, the component rule still refuses
+4j	pass	T14 ... refused by its REAL path's name	the real path's components are checked too
+9t	total	694	the suite: all passed, 0 failed
+9m	mutants	143	the mutant run: all caught
+# ── ROUND 4 (ANSWER-6): the six fixes. Every cell and mutant the ROUND 4 section of STATUS names. ──
+r4-1a	pass	T29 A1: set=General|WEDNESDAY and set=General|WEDNESDAY/docs: exit 2	item 1: the checker's A1 pair is refused at load
+r4-1b	pass	T29 ... refused as NESTING, naming both	item 1: the refusal names both destinations
+r4-1c	pass	T29 ... the fake NAS is unchanged (nothing written)	item 1: nothing is written
+r4-1d	pass	T29 the same pair spelled in another case (wednesday/Docs): exit 2	item 1: the comparison ignores case (this cell is green on round 3 too, for another reason)
+r4-1e	pass	T29 the inner name given FIRST (Deep/A/B before Deep/A): exit 2	item 1: order of the two lines does not matter
+r4-1f	pass	T29 NEIGHBOUR (the checker's control): the inner set named apart, General|Docs2: exit 0	item 1: the Docs2 control stays GOOD
+r4-1g	pass	T29 NEIGHBOUR: a name that only STARTS with the other's letters	item 1: a shared string prefix is not nesting
+r4-1h	pass	T29 NEIGHBOUR: the nested name under ANOTHER client	item 1: nesting across two clients is accepted
+r4-1i	pass	T29 finding 5: ONE destination name under TWO clients	item 1: one name under two clients is refused
+r4-1j	pass	T29 two sets of one client with the SAME destination name	item 1: the checker's surviving mutant X28 now has a test
+r4-1m1	mutant	F01	mutant caught: nested destinations allowed
+r4-1m2	mutant	F02	mutant caught: one name under two clients allowed
+r4-1m3	mutant	F03	mutant caught: destinations compared as strings, not parts
+r4-2a	pass	T30 A4a current/<set> is a symlink to a folder outside the seat's destination: exit 2	item 2: A4a refused
+r4-2a2	pass	T30 A4a ... the outside folder is unchanged by hash	item 2: A4a outside folder unchanged by hash
+r4-2b	pass	T30 A4b the seat folder itself (<NAS>/General/Wednesday) is a symlink to another client's folder: exit 2	item 2: A4b refused
+r4-2b2	pass	T30 A4b ... the outside folder is unchanged by hash	item 2: A4b outside folder unchanged by hash
+r4-2d	pass	T30 A4d versions/ is a symlink to outside and a file changed: exit 2	item 2: A4d refused
+r4-2d2	pass	T30 A4d ... the outside folder is unchanged by hash	item 2: A4d outside folder unchanged by hash
+r4-2e	pass	T30 a DRY run with versions/ leading outside is refused too	item 2: a dry run is held to the containment check
+r4-2f	pass	T30 the CLIENT folder itself (<NAS>/General) is a symlink	item 2: the client folder as a symlink is refused
+r4-2g	pass	T30 manifests/ swapped for a symlink to outside DURING the run: NOT exit 0	item 2: a swap during the run fails the night
+r4-2g2	pass	T30 ... nothing was written through it	item 2: the manifest is not written through the link
+r4-2h	pass	T30 versions/ swapped for a symlink to outside DURING chunk 1 of 3: NOT exit 0	item 2: a swap during a chunk stops the run before the next chunk
+r4-2h2	pass	T30 ... only the chunk in flight wrote through the link	item 2: only the chunk in flight is exposed
+r4-2c	pass	T30 A4c (held in round 3, must still hold)	item 2: A4c still holds
+r4-2c2	pass	T30 A4c ... the outside file is untouched	item 2: A4c outside file untouched
+r4-2u	pass	T30 the containment test as a function: plain folders pass	item 2: the containment function passes plain folders
+r4-2m1	mutant	F04	mutant caught: a symlinked level accepted
+r4-2m2	mutant	F05	mutant caught: a symlinked client folder accepted
+r4-2m3	mutant	F06	mutant caught: no containment check per set
+r4-2m4	mutant	F07	mutant caught: no containment check before the manifest
+r4-2m5	mutant	F17	mutant caught: no containment check before a chunk
+r4-3a	pass	T31 control: no swap: GOOD	item 3: the control without a swap is GOOD
+r4-3b	pass	T31 swap between the hand-over of its chunk and the proof: NOT exit 0	item 3: swap after hand-over fails the night
+r4-3b2	pass	T31 ... the file is NOT DELIVERED, by name	item 3: and the file is named
+r4-3b3	pass	T31 ... a line says the content ALREADY REACHED THE DESTINATION	item 3: the line says the content reached the destination
+r4-3b4	pass	T31 ... and names the path there	item 3: and names the path
+r4-3b5	pass	T31 ... and that is the truth: the marked content IS at that path	item 3: the statement is checked against the fake NAS
+r4-3c	pass	T31 swap BEFORE its chunk: the secret's content is NOT on the fake NAS	item 3: swap before the chunk: not sent
+r4-3c2	pass	T31 ... the night fails: exit 8	item 3: and the night fails
+r4-3c3	pass	T31 ... naming it as NOT SENT	item 3: and it is named
+r4-3m1	mutant	F08	mutant caught: no hard-link check before the chunk
+r4-3m2	mutant	F09	mutant caught: a hard-linked file proven at proof time
+r4-4a	pass	T32 the list for the set exists in the lane's manifests folder ON THE DRIVE	item 4: the list is written on the drive
+r4-4b1	pass	T32 the drive list names 'src/secrets.ts' with its shape	item 4: name 1 of 4 is in the drive list
+r4-4b2	pass	T32 the drive list names 'certs/root-ca.crt' with its shape	item 4: name 2 of 4
+r4-4b3	pass	T32 the drive list names 'ev/post_api_credentials_ok.json' with its shape	item 4: name 3 of 4
+r4-4b4	pass	T32 the drive list names '.env.example' with its shape	item 4: name 4 of 4
+r4-4c	pass	T32 its line count equals the number the run printed for the set	item 4: line count equals the printed count
+r4-4d1	pass	T32 'secrets.ts' is absent from every file on the fake NAS	item 4: name 1 absent from the fake NAS
+r4-4d2	pass	T32 'root-ca.crt' is absent from every file on the fake NAS	item 4: name 2 absent
+r4-4d3	pass	T32 'post_api_credentials_ok.json' is absent from every file on the fake NAS	item 4: name 3 absent
+r4-4d4	pass	T32 '.env.example' is absent from every file on the fake NAS	item 4: name 4 absent
+r4-4e	pass	T32 control: the same two searches DO find things on the fake NAS	item 4: the absence searches have a positive control
+r4-4f	pass	T32 no list of left-out names is on the fake NAS, while the symlink list is (control)	item 4: no left-out list on the fake NAS
+r4-4g	pass	T32 a left-out list lying inside the source tree does NOT travel	item 4: the list never travels as part of the tree
+r4-4h	pass	T32 NEIGHBOUR: an ordinary file beside it (left_out_notes.tsv) arrives	item 4: an ordinary neighbour arrives
+r4-4i	pass	T32 a DRY run writes the list too	item 4: a dry run writes the list
+r4-4j	pass	T32 ... and wrote nothing at all on the fake NAS	item 4: the dry run wrote nothing on the fake NAS
+r4-4m1	mutant	F10	mutant caught: left-out names not recorded
+r4-4m2	mutant	F11	mutant caught: left-out names in the share's manifest
+r4-4m3	mutant	F12	mutant caught: the tool's own left-out list travels
+r4-5a	pass	T33 A3a the parent folder REPLACED by a new one of the same name: NOT exit 0	item 5: A3a fails the night
+r4-5a2	pass	T33 A3a ... the file is NOT DELIVERED, by name	item 5: A3a: NOT DELIVERED
+r4-5a3	pass	T33 A3a ... and is not counted as deleted	item 5: A3a: not counted deleted
+r4-5b	pass	T33 A3b ... and the file is not counted as deleted	item 5: A3b: not counted deleted
+r4-5c	pass	T33 A3c a file renamed to another case and made unreadable: NOT exit 0	item 5: A3c fails the night
+r4-5c2	pass	T33 A3c ... the file is NOT DELIVERED, by name	item 5: A3c: NOT DELIVERED
+r4-5c3	pass	T33 control: this scratch volume folds case	item 5: the A3c fixture really folds case
+r4-5d	pass	T33 NEIGHBOUR: the same rename with the file left readable	item 5: the readable rename is still GOOD
+r4-5e	pass	T33 NEIGHBOUR: a file really deleted	item 5: a real deletion is still let go
+r4-5m1	mutant	F13	mutant caught: deleted although the path resolves
+r4-5m2	mutant	F14	mutant caught: a replaced parent accepted
+r4-5m3	mutant	F15	mutant caught: the parent id not passed
+r4-6a	pass	T34 a --run under the hold with an UNCONFIRMED conf: exit 3 (held), not 2	item 6: held, not refused
+r4-6b	pass	T34 ... recorded as held	item 6: recorded as held
+r4-6c	pass	T34 ... and the three-day clock is NOT started	item 6: the clock is not started
+r4-6d	pass	T34 a --run under the hold with a conf that cannot even be read	item 6: also with an unreadable conf
+r4-6e	pass	T34 the hold lifted four days later, first check: exit 0, not OVERDUE	item 6: lifting the hold four days later is not overdue
+r4-6f	pass	T34 NEIGHBOUR: the same unconfirmed conf with NO hold: exit 2 (refused)	item 6: without the hold it is refused
+r4-6g	pass	T34 ... and that DOES start the clock	item 6: and that starts the clock
+r4-6m1	mutant	F16	mutant caught: the conf read before the hold

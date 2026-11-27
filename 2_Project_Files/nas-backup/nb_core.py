@@ -27,6 +27,8 @@
 #   5. the deletion proof also needs the planned path not to resolve, and the parent folder to be the very
 #      folder that was listed (source_deleted);
 #   6. the HOLD is tested before the conf is read (cmd_backup).
+# ROUND 4b (ANSWER-7): a link at the name of a FILE this tool writes in its destination (README.txt, the run
+# markers, the manifest, the symlink lists) is refused like a linked folder (dest_file_names, linked_file).
 #
 # WED-170, Kam 2026-11-27 12:03: a NIGHTLY, STAGGERED, COPY-ONLY backup of one coordinator seat's folder and its
 # working projects to the DEV-Working NAS, with next-night catch-up and a three-day flag.
@@ -796,6 +798,27 @@ def ensure_dest_chain(root_existing, rel_parts, create):
 
 
 DEST_SUBFOLDERS = ("versions", "manifests", "runs", "_tmp_incoming")
+
+
+def dest_file_names(croot, stamp, set_names=()):
+    """ROUND 4b (ANSWER-7): every FILE this tool itself opens for writing in a client's destination folder, by its
+    full path. `README.txt` has a fixed name; the others carry the run stamp (date, time to the second, pid), which
+    is predictable enough to be planted for. open(..., "w") FOLLOWS a link, so a link at any of these names would
+    carry the write wherever it points."""
+    names = [os.path.join(croot, "README.txt"),
+             os.path.join(croot, "runs", "RUN_%s_STARTED.txt" % stamp),
+             os.path.join(croot, "runs", "RUN_%s_COMPLETE.txt" % stamp),
+             os.path.join(croot, "manifests", "%s_manifest.json" % stamp)]
+    names += [os.path.join(croot, "manifests", "%s_run_%s_symlinks.tsv" % (stamp, n.replace("/", "__"))) for n in set_names]
+    return names
+
+
+def linked_file(paths):
+    """The first of `paths` that is a symlink (dangling or not), or None."""
+    for p in paths:
+        if os.path.islink(p):
+            return p
+    return None
 
 
 def dest_escape(ctx, client, dest=None):
@@ -1829,13 +1852,19 @@ def backup_body(ctx, mode, stamp, lines, say, st0, run_log, scheduled, out_of_se
             if esc:
                 raise Refused("REFUSED — %s; nothing written for set %s" % (esc, s["dest"]))
             if mode == "run":
+                # ROUND 4b (ANSWER-7; the sibling of finding 2): ... and no FILE this run would write for this client
+                # may be a link. Refused like a linked folder: exit 2, nothing written for the set, the link named.
+                lk = linked_file(dest_file_names(croot, stamp, [x["dest"] for x in c["sets"] if x["client"] == s["client"]]))
+                if lk:
+                    raise Refused("REFUSED — %s on the NAS is a SYMLINK (to %s): this tool never writes a file through a "
+                                  "link; nothing written for set %s" % (lk, os.readlink(lk), s["dest"]))
                 for sub in ("current", "versions", "manifests", "runs", "_tmp_incoming"):
                     ensure_dest_chain(croot, [sub], create=True)
                 ensure_dest_chain(croot, ["current"] + s["dest"].split("/"), create=True)
                 if s["client"] not in client_roots:
                     client_roots[s["client"]] = croot
                     readme = os.path.join(croot, "README.txt")
-                    if not os.path.exists(readme):
+                    if not os.path.lexists(readme):          # ROUND 4b: lexists, so a dangling link is "there"
                         with open(readme, "w", encoding="utf-8") as fh:
                             fh.write("NIGHTLY BACKUP of the %s seat (copy only). Written by 2_Project_Files/nas-backup/nas_backup.sh.\n"
                                      "current/   the latest copy of each set\n"
@@ -2358,6 +2387,11 @@ def backup_body(ctx, mode, stamp, lines, say, st0, run_log, scheduled, out_of_se
         # ROUND 4 (finding 2): the manifest and the completion marker are written on the share too, so the same
         # question is asked once more, for every client folder, before either is written.
         escapes = [e for e in (dest_escape(ctx, client) for client in sorted(client_roots)) if e]
+        # ROUND 4b (ANSWER-7): and no file about to be written there may be a link (planted since the set started).
+        for client in sorted(client_roots):
+            lk = linked_file(dest_file_names(client_roots[client], stamp, [m["dest"] for m in manifest["sets"] if m["client"] == client]))
+            if lk:
+                escapes.append("%s is a SYMLINK (to %s) and this tool never writes a file through a link" % (lk, os.readlink(lk)))
         for e in escapes:
             problems.append("the manifest and the completion marker were NOT written on the NAS: %s" % e)
             good = False
