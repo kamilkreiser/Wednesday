@@ -1,0 +1,20 @@
+# B2162 COMMISSION (one in-session READ-ONLY drafter, Opus per OXPd CLAUDE.md line 7) -- Datasec/OXPd: a NARROW revision of kit B2153 (seat X82, owed 137 and 121) for the narrowed one-seat rule
+
+Commissioned by Tuesday (s334). `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/DRAFTER_RULES.md` binds whole.
+
+## Why
+Kit `tuesday/briefs/2026-11-27_B2153_SEAT-X82_oxpd2-lane-c-kit2-part2.md` (UNSTAMPED; Tuesday read it whole at s334) launches only after the records seat of pull request 58 (kit B2146, seat R339) ends READY and refuses while ANY other `OXPd2` pane is live (its line 1, the PRIOR-WORK CHECK (1), CHAIN INPUTS row 1, FACTS 7, Q6, slot S3, the launch line, and REFUSE AT ONCE). Two things changed:
+1. B2146 is SUPERSEDED, never launched: its frozen texts went stale when Kam ruled OXPd cards this evening. Its replacement is drafter B2161's kit (seat R341, `2026-11-27_B2161_SEAT-R341_oxpd2-records-pr58-and-1127-rulings.md`, being drafted now).
+2. Tuesday took the default of lane P's Q3 (`tuesday/briefs/2026-11-27_B2154_OXPD-WORKING-COPY-PLAN.md` section G): records seats need no lock and run beside a builder. Kam's words: "use as many agents as possible", "dont forget this machine can handle multiple agents". The records seat writes only project record files outside the repository; X82 writes only its own clone and branch (five repo paths). They share no file. The one shared input is `BACKLOG.md`'s three owed lines 121, 137 and 138, which no records pass ticks (they stay open, B2146 Q8).
+
+## The revision (ONLY these; every other byte of the kit unchanged)
+Write `2026-11-27_B2162_SEAT-X82_oxpd2-lane-c-kit2-part2-rev1.md` (a copy of B2153 with only these changes) + its `.measured` sidecar (copy B2153's and adjust only the lines the changes touch; `stamp_check.py <kit>` must return rc 0) + a short report listing every changed line, old and new (a unified diff against B2153, printed by `diff -u`, saved beside it as `.diff`):
+- **The one-seat rule narrowed:** X82 refuses while another OXPd BUILD or GATE pane is live (a pane name holding `OXPd2-X` or `OXPd2-G` other than its own), NOT a records pane (`OXPd2-R`). The heavy lock still serialises every dotnet job (unchanged: HEAVY section).
+- **The records precondition removed:** the PRIOR-WORK CHECK (1) keeps the BACKLOG startswith check for 137, 138, 121 open (exactly 1 each) and drops "the STATUS named in Stamp S3 ends with its READY line". Slot S3 then names "the records seats live or not at the stamp" (no READY line required). REFUSE AT ONCE drops the S3 READY clause. CHAIN INPUTS row 1, FACTS 7, Q6 and the launch line say that a records seat may run beside it and what it must not touch (the record files; read `BACKLOG.md` for its three lines only).
+- **Name B2146 as superseded by B2161 (R341)** wherever B2146/R339 is named, and keep `<project>/.tools/b2146` and add `.tools/b2161` (or the seat's actual folder) to the "NOT yours" folders.
+- **The OXPd lock is held by B2157 now** (Tuesday's parallel-build experiment, owner.txt naming B2157, at most about 100 minutes): the HEAVY section's waits already cover it; say in FACTS 7 that a lock held by B2157 at launch is expected, never broken.
+- First line of the new kit: `SUPERSEDES kit B2153 (narrow revision B2162: the one-seat rule narrowed to build and gate panes; the records precondition removed). Every other line is B2153's.`
+Re-measure nothing else unless a changed line needs it (main sha, panes, lock: print them in the report). Do not touch `<src>` seat-tools. B2153 itself is NOT edited.
+
+## Fences
+READ-ONLY everywhere except your outputs under `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/` and scratch under `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s334/d2162/`. No write in the OXPd project, Jira, GitHub, cards or mail. Never read `Source_Documents/`, `4_Credentials/` or key folders. Never type `cd`; never delete. Every clock printed by `date`. Return 10 lines, first `STARTABLE: YES|NO`, then Questions with defaults.

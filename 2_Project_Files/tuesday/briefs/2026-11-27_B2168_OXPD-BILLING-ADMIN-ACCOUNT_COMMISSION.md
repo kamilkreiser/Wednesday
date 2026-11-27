@@ -1,0 +1,15 @@
+# B2168 COMMISSION (one in-session agent, Opus) -- Datasec/OXPd: a member billing-admin account so Kam can buy the test licence
+
+Commissioned by Tuesday (s334).
+
+## Why
+Kam (live board 2026-11-27, stamped 18:18:56, verbatim): "also, following your instructions.  I clicked the right but cannot see billing". His account kamil@datasec-rd.com is a GUEST (`kamil_datasec-rd.com#EXT#`) Global Administrator in tenant ec01829b (kamildatasecrd.onmicrosoft.com), per B2164's REPORT. Earlier (18:11:28): "you have my approval to do so but after the user has been created I can purchase the license if you put the link and preference on the board". Kam's standing rule tonight: "dont ask Kam if you can do it".
+
+## Do
+1. Read-only first, under `AZURE_CONFIG_DIR='/Volumes/Datasec_DEV/!CODING/Datasec/OXPd_2/4_Credentials/.azure'`: confirm the tenant (ec01829b); list existing MEMBER users (userType Member) with a directory role of Global Administrator or Billing Administrator, if any (Kam may already have one; the tenant's original creator is likely a member account). If a member Global or Billing Administrator account that is plainly Kam's exists (e.g. an `@kamildatasecrd.onmicrosoft.com` account in his name), REPORT it and STOP: he can sign in with that (he knows its password; we never reset it).
+2. Otherwise create a MEMBER user `kam.billing@kamildatasecrd.onmicrosoft.com`, display name `Kam Kreiser (billing, OXPd test tenant)`, usage location AU, a generated 24+ character password, forceChangePasswordNextSignIn TRUE (he sets his own on first sign-in), and assign it the directory role **Billing Administrator** only (least privilege for buying, per Microsoft Learn try-or-buy-microsoft-365: "you must be at least a Billing Administrator"). Open the Learn page and cite it.
+3. The temporary password: write it ONLY to `/Volumes/Datasec_DEV/TUESDAY/4_Credentials/.env` as `OXPD_KAM_BILLING_UPN` and `OXPD_KAM_BILLING_TEMP_PASSWORD` (never printed), AND to a one-line text file `/Volumes/Datasec_DEV/TUESDAY/4_Credentials/oxpd_kam_billing_temp.txt` (mode 0600; check `git check-ignore` first) that Tuesday will put in Kam's board drawer and then quarantine (the 11-25 form). Never print the password.
+4. Append to `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s334/d2164/UNDO.md` (the user and the role assignment, with removal commands) and write `fleet/state/s334/d2168/REPORT.md`: what exists, the sign-in steps for Kam (admin.microsoft.com in a private window as kam.billing@..., set a new password, Billing > Purchase services or Add more products, Microsoft 365 Business Premium x1), and the Learn sources.
+
+## Fences
+Only the user, the one role assignment, the .env lines, the 0600 file and the two state files. No change to any other user, role, policy or app. No write in the OXPd project folder, Jira, GitHub, cards or mail. Never print a password. Never type `cd`; never delete. Every clock printed by `date`. An authorisation refusal is a boundary: report it. Return 10 lines, first `DONE`, `FOUND-EXISTING` or `BLOCKED: <reason>`.

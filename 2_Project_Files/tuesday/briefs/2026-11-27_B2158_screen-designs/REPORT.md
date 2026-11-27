@@ -1,0 +1,10 @@
+DONE. B2158, 2026-11-27 17:54 AEDT (from `date`). 52 screens, 54 PDF pages (52 + cover + contents, checked with pdfinfo).
+PDF: `/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tuesday/briefs/2026-11-27_B2158_screen-designs/OXPd_Screen_Designs_v1.pdf`, 4,806,130 bytes. Pages 1, 20 and 43 rendered to PNG and checked by eye, plus contact sheets of all 52.
+Screens: sign-in hub 7, OneDrive 12, SharePoint 6, Teams 5, Mailflow 9, Universal Print 4, shared scan/print/info/error screens 9. Each has a mock in `mocks/<id>.html`; INDEX.md gives the sources, STYLE.md traces every token to its CSS line.
+Panel size: 800 x 600, MEASURED from the M577's own screen capture (OXPd_2 B2068 STATUS line 87). 02 section 4 gives no pixel size. The printer's Home/Back bar height is UNMEASURED (40px is reserved for it).
+What the panel's limits changed: no SVG, alpha or gradients, no flex or grid layout (AppleWebKit on OXPd 1.x). No web font (the panel has HP Simplified only). Touch targets are 44px or more: that is a design choice, because the sources state no minimum.
+Inferred or conditional (amber note on 19 pages): H1 passkey button, H3 step bar (whether the frame is possible is R33, UNMEASURED), H4, S3, T1 and T2 (no screenshot exists), C7 (rests on D19, not ruled), T4 Teams quick access and M4/M5 quick messages (likely behind the dead switch), U1 three-day notice.
+Q1, the look on older printers: 03 WP2.3 (line 296) plans the OXPd 1.x pages on HP's Omni kit. Should the playbook look replace the kit's look? Default: our own CSS on both page templates, with the kit kept only for behaviour.
+Q2: should the conditional screens (T4, M4, M5) be built? Default: no, by 02's rule, unless Kam says yes (W32 shows quick messages in the user guide).
+Q3, swipe to print: OneDrive and SharePoint swipe-to-print is shown as a visible Print button on each file row, because the gesture is untested in both panel browsers (F94). Default: keep the button.
+Nothing was sent, committed or written outside this folder and `fleet/state/s334/d2158/` (scripts: style_extract.py, gen.py, index.py, build.sh).
