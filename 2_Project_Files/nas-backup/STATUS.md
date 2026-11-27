@@ -1,11 +1,204 @@
-WORKING
+READY FOR QA
 
-# ROUND 3 (2026-11-27): in progress, under ANSWER-4.md. Fresh build seat, started 2026-11-27 16:50 AEDT.
+**Both tasks of ANSWER-4 are done. `RESULT-secrets-move-2.md` was written first (first line DONE): all 37 folders moved, counts equal, 0 left under the mirror.** This section is TASK 2, round 3 of the backup job.
 
-Placeholder, updated 2026-11-27 18:47 AEDT. If you read this and the pane is idle, the seat stopped before finishing.
+# ROUND 3 (2026-11-27): one rule, "unproven means failed" (ANSWER-4.md)
 
-- TASK 1 is DONE: `RESULT-secrets-move-2.md` (first line DONE). All 37 folders moved by same-share rename, counts equal for all 37, the second sweep found 0 such folders left under the mirror, the quarantine holds 2 + 37.
-- TASK 2: the round 3 code, tests and README are written and final. The suite passes 568 of 568. The one real dry run is done (1,012,110 files, 68.27 GiB, exit 0, NAS unchanged) and both independent scans read 0 on its lists. A first full mutant pass caught 118 of 126 by name; the other 8 were faults in my tests and mutant list (explained in the draft), are corrected, and all 8 are caught on a re-run. STILL RUNNING: the final full mutant pass on the final files (started 18:47, about an hour). The full ROUND 3 status is drafted in the seat's scratchpad and replaces this placeholder when that pass ends.
+Fresh build seat "nas-backup" (WED-170), Fable 5.2, 2026-11-27 16:43 to 19:36 AEDT. The earlier seat's files were my handover. Read whole before I changed anything: ANSWER-4, BRIEF, ANSWER-1, ANSWER-2, ANSWER-3, RESULT-secrets-move and its three evidence files, STATUS round 2, the second verdict, and of its `scripts/` the files `K_my_mutants.sh`, `lib2.sh`, `N1`, `N1x`, `N3`, `N6`, `N11`, `S_scan_real_lists.py` and `r1_adapted/lib.sh`. Read whole later in the session: `N8_proposals.sh` and `S_over_exclusion.py`. **Not read line by line:** the five `r1_adapted` attack scripts (I read their heads, checked them for real mount paths and ran copies of them) and most of `raw/` (I read `K_my_mutants.out` and `S_scan_real_lists.out` whole and part of the probe output). The brief asked for the folder whole; this is short of that. Round 2's files are kept in `round2/`, round 1's in `round1/`. ROUND 2's status follows this section as that seat wrote it.
+
+**Holds, kept:** nothing written to any NAS mount except TASK 1's 37 licensed renames (and the parent folders for them inside the existing quarantine); nothing armed; no `launchctl` verb that changes anything (`launchctl list` only); the three HOLD files stay; no shared file edited (proposals only); no commit, no push; no mail, board or chat post. Evidence that nothing is armed: `evidence/round3/real_lane_checks.txt` (0 `nasbackup` rows in `launchctl list`, 0 plists in LaunchAgents, 0 templates in `scheduler/jobs`, each beside a control of 1 for `naspush`; `--run` exits 3 under the hold).
+
+## The numbers
+
+| | Round 2 | Round 3 |
+|---|---|---|
+| Suite (`tests/run.sh`, fake NAS only) | 319 passed, 0 failed | **568 passed, 0 failed** |
+| Mutants (`tests/mutants.sh`) | 63 of 63 of the seat's; **15 of the second checker's 24 survived** | **126 of 126 caught, each by the test named for it (final pass, one version of every file)** |
+| The second checker's 15 survivors | survived | **15 of 15 caught, each by a named test** (table under item 9) |
+| The checker's attack scripts N1, N1x, N3, N6, N11, re-run from a copy against round 3 | GOOD while planned files were unreadable (his N1a, N1b, N1c, N1x) | **0 GOOD on any attack night** of N1 and N1x; every GOOD line there is a control or a recovery night (`evidence/round3/checker_attacks_rerun/`) |
+| The first checker's attacks A, B, B7b, C, H (his adapted copies), re-run the same way | held in round 2 | **destruction oracle: 27 of 27 held, 0 contents lost** with the chunked engine; H: 0 GOOD in 17 failing nights; B: 61 marked files kept out, 3 arrive, the same three the second verdict lists as notes (`Agent Mail.md`, `Data sec` with a space, `DS-NexusAI`) |
+| Real dry run | 1,012,092 files, 68.05 GiB | **1,012,110 files, 68.27 GiB**, exit 0, no PROBLEM line |
+| Secret-shaped names in the real dry list, lane's scan | 0 | **0** |
+| The same list, the checker's own scan, tiers A and B | 0 and **344** | **0 and 0** |
+| Coverage claims in this file checked by a program | not done (one claim was wider than the suite) | **140 claims, 0 not supported** |
+
+## Where the brief and the verdict differed, and which I took
+
+ANSWER-4 says the verdict's measurement wins where they differ, and to say so. Three places:
+
+1. **Item 7, how far the name rule goes.** The brief asks for the 23 conventional names and the two real files' patterns, then "0 by each" of the two scans. The verdict's own acceptance step is narrower in words and wider in fact: its scan must read 0 in tier A **and tier B**, and tier B holds whole patterns (anything named `*credentials*.json`, `secrets.<ext>`, `.crt`, "private key" in a name) that matched 344 real paths in round 2, most of which the checker himself judged not secrets. I took the verdict's measure: the rule now covers every tier B pattern, and both scans read 0. **The cost is 373 real paths left out that are mostly not secrets** (table under item 7). That is a decision someone may want to reverse; it is question 1 below.
+2. **Item 3, what happens after a sample finding.** The verdict's smallest fix was "delete the index row, the next plan re-sends". The brief is stricter: repaired in that run or the night fails. I built the brief's, and one step more, because the checker's own attack N3d showed the brief's wording was not enough on its own (below).
+3. **Item 1, when the plan is made.** The brief says "the plan made at the start of the run". The tool plans each set when that set starts, as rounds 1 and 2 did, so the destination listing and the file list are fresh when a 30-hour copy reaches its last set. Nothing leaves a set's plan once made. I kept this and am saying so plainly; if "one plan for all sets at second zero" is wanted, it is a small change and costs memory (a million file records held at once).
+
+## Per item: what changed, and the test that owns it
+
+Every test and mutant named here is a line of `tests/claims.tsv`, and `tests/claims_check.py` checked each against the suite output and the mutant output before this section was written: 140 claims checked, 0 NOT SUPPORTED (`evidence/round3/claims_check.out`).
+
+### 1. A planned file that cannot be read is NOT DELIVERED. There is no "gone" category. Fixed.
+- `prove_arrival` has four verdicts: proven, unstable, differs, **unreadable**. Unreadable is any failure to read the source: permission, I/O error, privacy refusal, no such file, no longer a regular file. It fails the night unless `source_deleted()` then proves a deletion: the set's root is still the folder that was listed (device and inode), the file's parent folder can be listed, and the name is absent from it, twice, 0.2 s apart.
+- Deleted files are counted and named three times: in the set's lines, one `DELETED AT SOURCE: <set>/<path>` line each in the run's last lines, and in the manifest and the state. **The limit: 5 files per set, or 0.1% of the set's plan if that is more** (`max_deleted_files`, `max_deleted_fraction`; the conf cannot raise them above 100 files and 1%). Above it the night fails.
+- **The accounting is one subtraction:** planned, minus proven, minus provably deleted. Nothing else can take a file out of the plan. Wednesday's wider exception in ANSWER-3 is withdrawn in the code as the brief withdrew it by name: no line of round 2's "vanished" logic is left.
+- **A strict reading I took, and what it costs:** the brief says "its parent directory is listable AND the name is absent". A file whose parent folder was itself removed has no listable parent, so it is NOT DELIVERED and the night fails. On a live tree a folder with planned files in it that is removed mid-run fails that run; the next run plans afresh. Question 2.
+- Tests, T21 (12 cases, lifted from the checker's N1, N1x, N2): mode-000 file from night 1 (fails both nights, named with its reason, marker not on the NAS; readable twin GOOD); changed-then-unreadable (fails two nights running, destination still old; readable again GOOD); a 31-file folder unreadable between listing and copy; every folder unreadable mid-run with all 20 files changed (the question of ANSWER-3: NOT PROVEN 20, 20 destination copies still old, not GOOD; readable again GOOD and none stale); the set's root moved away mid-run; one real deletion (GOOD, counted, named); six deletions fail and five pass; parent folder gone; file became a folder; destination copy unreadable; delivered then unreadable; and the deletion proof as a function (7 assertions).
+- Mutants caught: R01 to R06, K19, K02, Q02.
+
+### 2. A set whose plan holds zero files fails the night, first run included. Fixed.
+- Zero files fails with or without folders and with or without an earlier good run. The rule is applied to the plan as it finally stands (after names differing only in case are taken out).
+- `match_everything` refuses a pattern that matches every plain probe name or every dotted one: `*`, `?*`, `**`, `*.*`, `[!~]*`, `*[a-z0-9]*`. What still empties a set at run time is caught by the zero rule.
+- **One real set needs the allowed-empty mark, as the brief asked me to say:** `CODING/Docker - Containers` holds one folder and no file in scope (both dry runs today). `seats/wednesday.conf` now has `allow_empty=CODING/Docker - Containers` with its reason; the END count is 49. Without it every night would fail on that set. Question 3.
+- **The baseline of the fall rule is kept twice** (state file and a `meta` row in the index), so a damaged state file the same night as a mistyped exclusion no longer reads GOOD. A first run with nothing to compare against prints `NO BASELINE` per set.
+- Tests, T22: folders and zero files on a first run (exit 8); one file added (GOOD); `allow_empty` (GOOD, said in the output); five emptying patterns each refused; the pattern rule as a function (7 refused, 7 ordinary accepted); damaged state plus 20 of 25 files excluded the same night (fails, both numbers printed); the nightly job on a set that fell 25 to 8 (fails; it has no way to accept, the checker's K10); a set with a broken scope is not copied (K03). T11: a set whose only files are a case-colliding pair has an empty plan.
+- Mutants caught: K21, N05, R26, R27, K10, K03, R38.
+
+### 3. A sample finding is repaired in the same run, or the night fails and keeps failing. Fixed, and widened.
+- The sample is taken first. A sampled file that is no longer proven loses its index row at once (committed) and joins tonight's copy list; the engine's `--backup` keeps the wrong destination content in `versions/`. If the repair is not proven the file is NOT DELIVERED. With no index row, every later night compares it by content, so it cannot rest on the old proof again.
+- **Widened after re-running the checker's N3d against my first version.** With 30 destination copies altered and a sample of 10, my first version repaired the 10 it had looked at and said GOOD over 20 it had not. That is the brief's wording satisfied and its rule broken. Now **one wrong destination copy withdraws every earlier proof of that set**: the remaining unsent files are all read back in the same run, what agrees is proven again, what does not is re-sent. If the cap passes first the night fails and the next run continues the comparison. N3d re-run: night 1 GOOD with 0 altered copies left (was 13 left after night 2, 4 after night 6).
+- What this does NOT change: the chance that the sample finds a single altered file at all. That is the stated limit (README, with the checker's numbers).
+- Tests: T12 (found, repaired in the same run, wrong content kept in `versions/`, counted); T3 with the sample switched off (a same-size change at the source is still seen, by its stat alone, so the repair cannot hide a tool that trusts its index); T23 (immutable destination copy: fails; next night with the sample switched off still fails and sends it again; the night after still fails; replaceable again: GOOD; ten altered, all sampled: all repaired; 35 altered with a sample of 3: full read-back, all 35 repaired in one night).
+- Mutants caught: R07, R08, R36, Q09, K11, M20.
+
+### 4. A `set=` source is refused in both directions of containment. Fixed.
+- `forbidden_roots()` finds the real folders: other seats' trees (a name containing `tuesday` or `friday` at the top of the drive or beside this seat's tree) and the other client's folders (a name containing `datasec` at the top of the drive or one level below). A source is refused when it is such a root, inside one, or an ANCESTOR of one. A source that is an ancestor of this seat's own tree is refused too. One set inside another is refused unless the outer set carries the matching `exclude_path` (the real conf has exactly one such pair, with its exclude).
+- Also: in every set a FOLDER named exactly `tuesday` or `friday` is excluded (the contained-word rule stays limited to the seat's own tree).
+- On the real drive the roots it finds today are three: `/Volumes/DevMASTER/TUESDAY`, `/Volumes/DevMASTER/Notes (MASTER)/Datasec` and `/Volumes/DevMASTER/_handover/tuesday-seat` (`evidence/round3/forbidden_roots_on_the_real_drive.out`; this drive has no `!CODING/Datasec` folder). The real conf loads and none of its 15 sets is refused.
+- Tests, T24: the drive root (exit 2, "ANCESTOR of the forbidden root", nothing started, 0 copies of TUESDAY's, FRIDAY's or Datasec's markers); the folder that holds the client folders; a folder holding a `tuesday-handover` folder; ordinary folders named one by one arrive; the roots as a function; an ancestor of the seat's own tree where no forbidden root exists; nested sets with and without the exclude; a folder named exactly as a seat. T14 from round 2 still covers "inside a root", and now also a source four levels down, deeper than the root search looks, given by its real path and through a symlinked parent: there the rule on every path component is the only thing that refuses.
+- Mutants caught: R09, R10, R11, R12, Q16, N23.
+
+### 5. Damage reaches a seat whoever finds it; a damaged index never leaves the lock. Fixed.
+- **A damage notice on the drive.** Whoever finds a damaged state file or index appends a line to `state/DAMAGE_NOTICE_<seat>.jsonl` (what, when, who found it, where it was moved). While it exists the watch says so at every call and exits 5, and the doctor block prints its own hard-failure line, `NAS BACKUP STATE WAS FOUND DAMAGED`, held or not, at every boot. Only `nas_backup_watch.sh --ack-damage` clears it (moved into the lane's quarantine). The nightly job can find damage; it cannot use the notice up. This also ends the mislabel of minor 15.
+- **A valid state is checked, not assumed** (`validate_state`): JSON that is not a state, missing fields, and a recorded time more than 5 minutes in the future are all damage: one plain line, the file moved aside.
+- **A damaged index** is moved aside in one plain line and an empty one started; the run goes on and compares by content. Everything after the lock is taken runs inside `try/finally`, so the lock is released after any error, and an unexpected error is one line (`FAILED: the run stopped on an unexpected error`) with the attempt recorded as failed, not left `running`.
+- **A dry run moves nothing:** a damaged state file or index is reported and left where it is (the verdict's note).
+- Tests, T25 and T16: the checker's N6b from "damaged on day 2, nightly job is the next reader" to doctor failing hard on day 3 and day 4, also while held, until `--ack-damage`; damaged index (dry run: said, untouched; real run: GOOD, moved, no lock left, no traceback); dry run with a damaged state; two shapes of valid-JSON-invalid-state (no traceback from watch or nightly); `last_good` 400 days ahead (damage; the nightly job decides RUN, not skip); a run that cannot write its manifest (one line, lock released, next run GOOD).
+- Mutants caught: R13 to R18, K08, R33, N11.
+
+### 6. Proof is saved as it goes. Fixed, by copying in chunks.
+- The engine is called per chunk of 200 files (`chunk_files`) or 2 GiB. After each chunk every file of it is proven and the proofs are committed to the index (`Saver`, at least every 200 files) before the next chunk starts. Files found identical during planning are saved as they are found. The cap is honoured between chunks, between files in the proof loop and in the comparison loop, not left to the watchdog.
+- So an interruption costs at most the one chunk in flight. The checker's N11a re-run: after SIGTERM 200 index rows (was 0); the resume re-read 160 files (was 354) and sent the rest. N11b under the cap: 200 rows, then 574, then done (was 0, 331).
+- **An interruption cannot leave the state saying good:** `good` is written in exactly one place, after the accounting. Tested for SIGTERM, SIGHUP, the cap and the watchdog.
+- One log, one error file and one list per set per run, however many chunks (`logs/<seat>/<stamp>_run_<set>.rsync.log`); the run prints a line per chunk and a running count.
+- Tests, T26: 25 files in chunks of 5, the engine hangs in its third call, SIGTERM (and again with SIGHUP): 10 index rows, state never good, attempt failed, lock released, engine stopped; the resume is GOOD, sends 15 and re-reads nothing proven. The cap: exit 4, rows kept, the unreached set named, next run GOOD. The watchdog with a blocked read (test-mode hooks `NB_TEST_WATCHDOG_MARGIN` and `NB_TEST_HASH_DELAY`, ignored outside test mode, which is also tested).
+- Mutants caught: R19, R20, K17, R34, R35, K01.
+
+### 7. The name rule: wider, and said to be incomplete. Done as best effort.
+- Added (list in README): the 23 names of the checker's table, the two real files' patterns (`local.settings.json`; a `.auth` folder), and every tier B pattern of his scan.
+- **Both scans on the fresh real dry list (stamp `2026-11-27_172323_81704`, 1,109,051 paths): the lane's `tests/scan_dry_lists.py` 0 (controls 52,213, 5,422, 7,060); the checker's `S_scan_real_lists.py` run from where it lies: tier A 0, tier B 0, tier D 0, unit controls 22 of 22, the same three positive controls.** His access check on the same list: 1,012,105 files asked, 0 not readable by this user, 5 gone since the listing (`evidence/round3/scan_*`).
+- README carries the honest paragraph: a name rule cannot be complete; the real protections are the two secrets-folder names in any case, the hard-link rule, the forbidden roots, and the share being private.
+- **What it newly leaves out of the real scope: 373 paths** (`evidence/round3/over_exclusion_of_the_round3_name_rule.out`, names only): 169 files with `credential` in the name and a data extension (test evidence, .json and .txt), 98 `secrets.<ext>` (91 of them `.ts` source files), 68 `.crt`, 24 with private-key, signing-key or mnemonic in the name (18 of them .html documents), 7 by exact name (`auth.json`, `token.json`, `local.settings.json`), 3 paths of the `.auth` folder, 2 `htpasswd*`, 2 `*.tfvars`.
+- The checker's own over-exclusion walk (`S_over_exclusion.py`, a copy with one line added because round 3's rule object reads `state_dir`) on the real scope at 19:37: 2,767 entries excluded as secret-shaped, against 2,697 in the 17:23 dry run. The tree is live and had grown by about 13,600 in-scope files in those two hours by his count (1,025,685 against 1,012,110); 56 of the 70 extra entries are `.env` templates. Its table of names is in `evidence/round3/over_exclusion_checkers_S_over_exclusion_adapted_one_line.out`: by far the most are templates (`.env.example` 1,606), `.npmrc` 132, `secrets.ts` 92 and the certificate and evidence names listed above.
+- Tests, T28: the checker's 40 names (program-checked against his script: all 40 planted), 25 more (one is an ordinary-named file inside a `.auth` folder), 10 ordinary neighbours that must arrive (`secrets.example.yml`, `credentials.ts`, `tokenomics.md` among them); the lane's scan passes a clean list and fails one holding the two real names.
+- Mutants caught: R28 to R31.
+
+### 8. The Minors.
+| Minor | State | Test and mutant |
+|---|---|---|
+| 10 the hold started the three-day clock | **Fixed.** A refusal under the hold is recorded as `held` and never starts the clock; the first run, fire or check after the hold is lifted starts it then, once. Pre-round-3 records of such refusals (the real lane's state has two) are recognised and relabelled at that moment | T27 with the real lane's state shape: lifted four days later, not overdue, doctor quiet; overdue three days after the lift. R21, R22 |
+| 11 SIGHUP | **Fixed.** Handled like SIGTERM | T26 (the HUP half). R32 |
+| 12 the mount checked once | **Fixed.** Checked before every set, before every chunk and before GOOD | T27 (the share leaves the table during set 1: not GOOD, set 2 not started). R23 |
+| 13 valid JSON that is not a state; `last_good` in the future | **Fixed** (item 5) | T25. R16, R17 |
+| 14 duplicate conf keys | **Fixed.** A key given twice is refused by name | T22. R25 |
+| 14 the END marker does not seal content | **Left, with its reason:** a checksum would catch accidental damage, not an edit, and every hand edit of the conf would then need a tool. Stated in README. The checker's N5a still shows it | none |
+| 15 doctor mislabelled damage | **Fixed** (item 5) | T25 |
+| 15 a reused engine group id | **Fixed.** The lock records when the engine's group leader started; a live process with that id and another start time is not the engine. A lock written by round 2 code has no such record and still fails closed, as the checker's N7c shows | T27 (both ways). R24 |
+
+The limits the checker asked to have STATED are in README under "Limits": the sample (0.059% a night; one altered file in the Secuura set expected after 14,678 nights, median 10,174; seat tree 6,630; test material 3,633), the slow shrink, unguarded growth, versions never pruned, `--accept-shrink` by hand only. No machinery was built for them.
+
+### 9. Tests, and the claims program.
+- **Every one of the checker's 15 surviving mutants is caught by a named test:**
+
+| His mutant | Caught by |
+|---|---|
+| K02 unaccounted files ignored | T12 H1 (the accounting is now the only route to "not proven") |
+| K03 broken scope still copied | T22, a new file in a broken set did not travel |
+| K05 wildcards in `exclude_path` | T22, refused as not a literal path |
+| K06 the engine accepts any tree name | T27, the engine called directly |
+| K10 the nightly job accepts a shrink | T22, the nightly job on a set that fell |
+| K12 test-mode fence on `nas_root` | T27, refused by the fence |
+| K14 a missing destination folder ignored | T27, an engine that does not create one planned folder |
+| K16 a dry run opens the index for writing | T1, no index file created |
+| K17 the watchdog never armed | T26, a blocked read past the cap |
+| K18 an engine seen only by its group id | T27, an rsync writing to this seat's folder with no recorded group |
+| K19 an unreadable destination counts as proven | T21j |
+| K21 a sharp fall accepted (zero with folders) | T22, first run with folders and zero files |
+| K22 exit code 12 tolerated | T27, an engine that exits 12 |
+| K23 a source need not be a folder | T22, a source that is a file |
+| K25 the nightly job records no fire | T7, the fire and its decision are in the state |
+
+  Where round 3 rewrote the line his mutant aimed at, the mutant in `tests/mutants.sh` breaks the line that now does that job; his K13, which did not apply in his run, applies here and is caught.
+- `tests/mutants.sh` holds 126 mutants: the seat's 20 from round 1, the first checker's 18, round 2's 25, the second checker's 25, and 38 new on round 3's code. A mutant counts as caught only when the test NAMED for it fails.
+- **The first full pass caught 118 of 126 by name, and the other 8 were my harness and my tests, not the tool** (`evidence/round3/mutants_round3_first_full_pass_118_of_126.txt`). Five were caught, but by another test than the one named, because round 3's new behaviour answers first: M20 (the sample repair hid a tool that trusts its index, and whether the old named test failed depended on the random sample), Q16 (the new root check refused the fixture before the component rule was reached), K17, R36 and R32 (I had named the exit-code line where the telling line was another). One, K07, was not caught at all and only looked caught: its own name, `tuesday-added-to-SEATS`, became a folder in the fixture path and made every source "forbidden"; the second checker's own K07 shows 184 FAIL lines starting at T1, which I take to be the same artefact. Two, N23 and R31, were genuinely untested guards: the real-path component rule (now masked by the root check at two levels) and the `.auth` folder rule (the planted file was also excluded by its own name). I added six test lines that reach those guards directly and one more planted name, renamed K07, corrected five names, re-ran the eight (8 of 8 caught, `mutants_round3_the_eight_corrected_rerun.txt`) and then the whole set again on the final files (the number in the table).
+- **`tests/claims_check.py`** reads the suite output, the mutant output and `tests/claims.tsv` (140 claims: every test and mutant this section names, the checker's survivor list read from his own raw output, his 40 names read from his own script) and exits 1 if any claim is not supported. Two older mutants (M04, M10) were being caught by a different test than the one named, because round 3's new rules refused the same fixture earlier; an early pass that I stopped showed it, and the names were corrected and one fixture changed so the guard is really reached.
+
+## The re-measured real dry run (17:23:22 to 17:37:48, reads only, exit 0)
+
+It ran while a mutant run was loading the machine, so its 14 minutes are not a speed measurement (round 2's took 7).
+
+| | Files | Bytes |
+|---|---|---|
+| WEDNESDAY tree, to `General/Wednesday` | 265,280 | 27.12 GiB |
+| Testing Agent MAIN without Secuura's material, to General | 6,322 | 247 MiB |
+| Eleven smaller general projects, to General (one of them empty and allowed to be) | 8,099 | 0.82 GiB |
+| Secuura client folder, to `Secuura/Wednesday` | 587,130 | 30.95 GiB |
+| Secuura's test material from Testing Agent MAIN, to Secuura | 145,279 | 9.14 GiB |
+| **Would copy** | **1,012,110** | **68.27 GiB** |
+
+- Excluded entries: 7,716. By secret shape 2,697 (env-file 2,128; credential-file 406; key-or-certificate 122; private-key-or-wallet-name 24; credentials-folder-name 14; terraform-variables 2; credential-store 1); another client's name 1,125; other seats' names 356; `.git` 231; quarantine 177; rebuildable 1,864; system 237; by the conf 1,017; hard links 9; the live database folder 2; the tool's own run-state folder 1.
+- 982 symlinks recorded; 14 files left out for case-only name clashes; no PROBLEM line; 15 engine list checks, each with 0 deleting lines.
+- In-scope paths carrying a Datasec project name (reported, not excluded): nexusai 4,558; hpsm 2,666; mps 9; quickquote 6; mypki 2; oxpd 2; cypherkey 1.
+- What it listed on the NAS, read-only: `/Volumes/DEV-Working/General/Wednesday` (1 entry) and `/Volumes/DEV-Working/Secuura` (1 entry); the destination below them does not exist yet. NAS unchanged: listings, folder mtimes and `df` identical before and after (`evidence/round3/nas_diff.txt` is empty, rc 0).
+- **This was the one licensed dry run, and two edits to `nb_core.py` came after it started.** (1) A real run now prints one `DELETED AT SOURCE` line per deleted file in its last lines: no dry-run path. (2) The empty-plan and fall rules now use the file count after case-colliding names are taken out. I found that from this dry run's own output: its `NO BASELINE` note for the Secuura set says 587,140 where the scope line says 587,130. The numbers above are not affected (they come from the scope lines); the notes in the evidence file carry the old count for two sets. The suite (568) and the final mutant pass ran on the final code.
+
+## What I could not make sound, or chose not to
+
+1. **The sample is a sample.** One altered destination file among 587,130 will almost never be looked at. Round 3 makes a finding count for the whole set; it does not make findings likely. Only a periodic full read-back would, and the brief said not to build that this round.
+2. **The strict deletion rule will fail honest nights on a live tree.** A folder removed during a run takes its planned files with it as NOT DELIVERED. I could make it sound the other way (accept a file when the nearest surviving ancestor is listable and lacks the next folder name), but that is wider than the brief's sentence, so I did not.
+3. **The name rule.** It is a list. It reads 0 on two scans today and that is not the same as "no secret travels". A secret in `config.json` or `notes.md` is invisible to it.
+4. **The END marker counts, it does not seal** (minor 14, left).
+5. **The orphan engine after SIGKILL** still finishes the chunk it was given: now at most 200 files, not a whole set.
+6. **The state file has no lock between the watch and a running backup.** Unchanged, read in the code, not reproduced.
+7. **Order at the very end of a good run:** the COMPLETE marker is written on the NAS before the state file records good. If the state write then fails, the NAS says complete and the drive does not; the next night runs again. The safe direction, but two records can disagree.
+8. **A lock written by round 2 code** (no engine start time) beside a reused group id still refuses to clear until that process ends. Fails closed.
+
+## My own slips, this round
+
+- **My first sample repair was the brief's letter and not its rule** (item 3). I only saw it because I re-ran the checker's N3d instead of trusting my own test.
+- **I stopped and restarted the mutant run three times before it ever finished.** First: the harness did not copy `scan_dry_lists.py`, which a new test calls. Second: I decided late that every deleted file must be named in the last lines. Third: the empty-plan count (above), found from the dry run's own output. Each time I stopped the run rather than mix code versions in one result. **Then the first pass that did finish showed 8 mutants not caught by their named tests** (item 9): all eight were faults in my tests or my mutant list, and two of them were guards I had left without a test of their own. The final pass is one version of every file, with the sha256 list taken before and after it in `evidence/round3/`.
+- **Four mistakes in my own new tests, found by their first run:** a `find` whose error line was counted as a marker; a Python check run without the test-mode variable; a helper that waited 60 s on a child's open pipe; a control name my own scan could not match.
+- **The chunk size.** I first set 2,000 files. The checker's N11a showed 0 index rows after an interruption of a 1,500-file copy, so the proof of the first copy would still have been lost in pieces of several minutes. It is 200 now.
+- **A quoting error in `tests/mutants.sh`** (caught by `bash -n` before any run).
+- In TASK 1's first precheck one exit code was read after a pipeline, so it is the filter's, not the command's (a hook said so). The line it sits beside is the mount line itself, which is the evidence; the later process check does not repeat it.
+
+## What is NOT tested in round 3
+
+- **Any write to the real NAS by this tool.** The chunked copy is thousands of engine calls into one `--backup-dir` and one temp folder on an SMB share: first real run is its first test. So is the read-back at scale and the full read-back after a sample finding.
+- **Scale.** A million files: about 5,000 chunks, the per-chunk overhead (an engine start, a mount-table read, two `ps` calls), memory, the index at a million rows. Not measured. The 31.6-hour estimate is the old job's file rate and includes neither the proof nor the chunk overhead.
+- **launchd.** No job loaded. The privacy prompt for `python3` and `rsync` under launchd is exactly a "cannot read" case: under round 3 it fails the night and names files, it cannot read GOOD. That path is reasoned, not run.
+- **The doctor block inside the real `doctor.sh`**, and the launcher carrying its lines into a boot prompt. The block was run with doctor's three helpers copied, as in round 2.
+- **The real code path outside test mode** (`nas_root` fixed, the real mount table, `statvfs`), beyond the dry run and the refused `--run`.
+- **A case-sensitive source.** The scratch volume folds case; collisions are supplied as a listing (T11).
+- **`forbidden_roots` on any drive but this one and the fixtures.** It looks two levels deep; a client folder kept three levels down would be missed by it (the name exclusion inside every set still applies to `datasec`, and exact seat-named folders are excluded in every set).
+- **Python 3.9** beyond T10 (one real run under `/usr/bin/python3`, still green).
+- **The checker's N8 (proposals and install order) was not re-run**; the template and the install proposal are unchanged since round 2, and T20 still passes.
+- **The claims program checks that a named test passed and a named mutant was caught.** It does not judge whether a test is a good test.
+
+## QUESTIONS (none blocks QA)
+
+1. **The 373 paths.** Keep the name rule as wide as the checker's tier B (two scans read 0; test evidence, `secrets.ts` sources and public certificates are left out), or narrow it to the 23 names and the two real patterns (his tier B then reads about 340 on the real list)?
+2. **Deleted folders.** Keep the brief's strict sentence (a planned file whose folder was removed mid-run fails the night), or accept a deletion proven one level up?
+3. **`allow_empty=CODING/Docker - Containers`:** keep the mark, or drop the set from the conf (it is then reported as not backed up at every run)?
+4. Round 2's open questions stand: `0_Brain/reference/` stays out; the token counts are reported to Kam.
+
+## For the checker: where to look first
+
+- `nb_core.py`: `prove_arrival`, `source_deleted`, `deleted_allowed`, the accounting near "THE ACCOUNTING" in `backup_body`, `plan_set` (the empty-plan block), `forbidden_roots`, `validate_state`, `note_damage`, `Index`, `Saver`, `make_chunks`, `hold_lifted`.
+- Re-run: `bash tests/run.sh /private/tmp/<dir>` (about three minutes); `bash tests/mutants.sh /private/tmp/<dir> 8` (126 suite runs: about an hour; a third argument such as `'M20|Q16'` runs only those); `python3 tests/claims_check.py <suite output> <mutants output>`; `bash nas_backup.sh --dry` (reads only); both scans on its stamp.
+- **If you copy the lane the way `K_my_mutants.sh` does, copy `tests/scan_dry_lists.py` too**: T28 calls it, and without it the control fails. **And do not put a seat's or the other client's name in a mutant's folder name:** the fixture lives under it, and the tool then refuses every source for that reason alone (your K07 in round 2, mine in this round's first pass).
+- Your earlier instruments that no longer apply as written: `S_over_exclusion.py` builds a bare context object, and `Rules` now reads `ctx.state_dir` from it, so it needs one more attribute (my adapted copy is in `evidence/round3/`); the N11c patch looks for `signal.alarm(int(cap) + 900)`, which is now `signal.alarm(int(cap) + margin)`; the test-mode variables `NB_TEST_WATCHDOG_MARGIN` and `NB_TEST_HASH_DELAY` do what that patch did. N7c's owner record needs `engine_started` to exercise the reused-group fix. The output line that said "gone from the source during the run" now says "deleted at the source and confirmed absent". Engine lines read `chunk N of M, engine pass P`.
+- Evidence: `evidence/round3/`: the suite output (the control of the final mutant pass, 568), the final mutant output (126 of 126) with the sha256 of every file before and after that pass (identical), the first full pass (118 of 126) and the re-run of its eight, the claims check, the dry run with the NAS before and after, both scans, both over-exclusion counts, the re-runs of both checkers' attack scripts, the forbidden roots found on the real drive, the lane checks. **No file of the tool or its tests changed after the final mutant pass ended at 19:35.**
+
+## What I built or changed (sizes in bytes)
+
+`nb_core.py` 145,042 (was 100,803) · `tests/run.sh` 114,480 (was 63,242) · `tests/mutants.sh` 29,499 (was 15,729) · `tests/claims_check.py` 5,306 (new) · `tests/claims.tsv` 12,552 (new) · `tests/scan_dry_lists.py` 5,433 (was 3,478) · `README.md` 22,736 (rewritten) · `seats/wednesday.conf` 7,856 (one `allow_empty` line, END count 49) · `nas_backup_watch.sh` 3,142 (`--ack-damage`) · `proposed/doctor_nasbackup_block.sh` 4,015 (the damage line) · `proposed/doctor.proposed.md`, `INSTRUCTIONS-for-other-seats.md`, `PORTABILITY.proposed.md` (round 3 notes) · `RESULT-secrets-move-2.md` 15,828 (new) · `evidence/secrets-move-2/`, `evidence/round3/`, `round2/` (new). Unchanged: `nas_backup.sh`, `nas_backup_nightly.sh`, `nb_common.sh`, `jobs/nasbackup.plist.template`, `proposed/install_all_jobs.proposed.md`, `proposed/launcher.proposed.md`, the HOLD files, `CENSUS.md`.
 
 ---
 

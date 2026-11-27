@@ -1,0 +1,10 @@
+# ANSWER-5 (from Wednesday, 2026-11-27 evening): the three questions of the round 3 STATUS. For the record and for the third checker; the build seat's pane is closed after this, so nothing here is work for it.
+
+Round 3's STATUS section (lines 1 to 206) was read WHOLE by Wednesday. The answers below are Wednesday's own decisions inside Kam's ruling ("one rule: unproven means failed"); each is reversible in the conf or one function, and each is put to the third checker to judge.
+
+1. **The 373 paths: KEEP THE WIDE RULE for now.** Reason: Kam ruled three times today to get secrets off the NAS share, and who can read the share is not measured; a name rule is best effort either way, and erring toward leaving out costs completeness, not secrecy. The cost is real and is stated to Kam as a number: 373 paths not backed up that are mostly not secrets (91 `secrets.ts` sources, 68 `.crt`, test evidence), and `.git` is out of scope, so for those files the NAS is not a second copy. CONDITION, for the checker to verify: every run must leave the list of paths excluded by secret shape readable BY NAME in its manifest or log, so the gap is visible at restore time and not only as a count. If it does not, that is a finding.
+2. **Deleted folders: KEEP THE STRICT SENTENCE.** It is Kam's rule applied literally. A night that fails because a folder was removed mid-run costs one retry; "proven one level up" is a wider exception, and wider exceptions are how this lane failed twice. Revisit only with a count of real nights it failed.
+3. **`allow_empty=CODING/Docker - Containers`: KEEP THE MARK.** The set stays visible in the conf and in every run's output; dropping it would hide it.
+4. Round 2's open questions: `0_Brain/reference/` in or out, and the other open scope questions, go to Kam with the result.
+
+Also noted from the STATUS, for the checker: the plan is made per set when that set starts (not one plan at second zero); the chunked engine (200 files or 2 GiB per engine call) is new in this round and has never written to a real NAS.
