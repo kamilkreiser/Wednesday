@@ -1,4 +1,110 @@
-READY FOR QA
+WORKING
+
+**INTERIM, 2026-11-27 19:10 AEDT: round 4b below is final EXCEPT the mutant figures; the pane is waiting on its own mutant re-run (about 50 minutes) and will finish this file by itself. Not a stop.**
+
+# ROUND 4b (answer to `ANSWER-7.md`: the client-name test is removed from clause (d))
+
+Same seat, 2026-11-27, 18:58 to (still running) AEDT (from `date`). All HOLDS kept. The drive cluster ran once more, for one rebuild and the ten questions, and is STOPPED. Round 4's report is kept whole below; where the two differ, this section stands.
+
+**In one paragraph.** The name test is gone and nothing else in the qualify rule changed. On the real tree 255 lessons are indexed (round 4: 199; round 3: 264) and 38 are left out, all named. Questions 2 and 9 find their lesson first again; the right lesson is in the first five for 8 of 10, as in round 3. The suite is 692 passed, 0 failed, under Python 3.14.10 and 3.9.6. **The mutant re-run on this code is still going as this is written.** The checker's `f1_new.py` still has 0 of its 58 shapes entering: **no shape entered because the name test was removed.**
+
+## What changed (and nothing else)
+
+| Item | Change |
+|---|---|
+| Clause (d) | Now: no `<!--` or `-->` anywhere; no line that starts with the word tier or assigns one, outside the one frontmatter line; no numeric character reference. The test for a client's name in the text, the file name and the rule line is deleted, with a comment in the code saying why and not to put it back. |
+| The numeric-reference test | KEPT, with its reason reworded. I had justified it by the name test. It still closes a marker spelling: `&#116;ier: P-Other/X` renders as a tier line and the line test cannot see it. That is "no tier marker in any spelling". Cost on the real tree: 0 lessons. If you want it gone it is one line (mutant `Qd_entity_ok`). |
+| `deny_clients` | It served only the name test. It now serves NOTHING, so it is removed: from `scope/wednesday.scope`, from `proposed/scope/tuesday.scope` (Friday's never had one), and as a directive. A scope file that still carries the line is REFUSED (rc 2) with the reason, so no file can promise a protection the tool does not give. `own_clients` is unchanged and is what clause (c) reads. |
+| Fixtures | The 11 planted name cases are now must-succeed lessons (`xneighbour741` to `751`): the name plain, in capitals, in a domain, split by emphasis, accented, full-width, in a heading, in the FILE NAME, in the rule line, in a frontmatter value, in an own-client project name. Section 6c asserts each is in the index and that every marker and tier-like case is still out. Fixture totals: 45 lessons must qualify, 117 must be left out (a=31, b=5, c=45, d=15, t=17, f=4). |
+| Mutants | `Qd_name_ok`, `Qd_name_not_squeezed`, `Qd_name_not_folded`, `Qd_only_body_tested` removed (the first is now the code). New: `Qd_name_test_put_back`, which restores a name test and must go red on the must-succeed lessons. `Qd_comment_ok`, `Qd_tierlike_line_ok`, `Qd_entity_ok` kept. |
+| `DESIGN.md`, `INSTRUCTIONS-for-other-seats.md` | The paragraph asked for, in both: what keeps another client's material out is the row, the tier and the marker, each declared by a person; nothing reads meaning; a lesson about another client's work tagged W with no marker WILL be indexed; the remedy is to tag or mark it. The instructions' table loses its `deny_clients` row (a seat now confirms two lines) and step 4 carries the new figures. |
+
+## The checker's `f1_new.py` on the final code
+
+| Run | Result |
+|---|---|
+| Unmodified, 58 must-be-absent shapes | **0 entered** (`evidence/checker_f1_new_round4b_unmodified.txt`); left out under a=47, b=4, t=15 |
+| Its 20 whole-index variants | 0 leak: 15 refused, 5 built with neither token present |
+| With one good row added to each case that had none (`tests/f1_new_adapted.py`) | **0 entered** (`evidence/checker_f1_new_round4b_every_case_has_a_good_row.txt`); left out under a=10, b=4, c=35, t=15 |
+| **Shapes that entered only because the name test is gone** | **none, so there is no case number to list.** Every one of its shapes that names Datasec does so in a `tier:` value or a marker, and falls to (c), (t) or the row. |
+
+Its "want present" cases are as in round 4: 7 absent unmodified, 5 absent adapted, each the stricter rule working as ruled (untagged, no row, two rows with one key, a commented-out row, a marked section, a look-alike letter). `P-General/DS-NexusAI` is IN, as before.
+
+What the name test did catch, and now does not, is in my own fixtures, not the checker's: the 11 must-succeed lessons above. They are in on purpose.
+
+## The real tree
+
+One rebuild, 2026-11-27 19:02 AEDT (`evidence/real_rebuild_round4b.txt`). `uptime` printed load averages 11.21 13.65 16.53 before it and 11.10 13.54 16.46 after.
+
+| Measure | Round 3 | Round 4 | Round 4b |
+|---|---|---|---|
+| Lesson files matching the allow line | 292 | 292 | **293** (one lesson was added to the brain between my two runs: `2026-11-27_check-our-own-identities-before-handing-kam-a-step`; it qualifies) |
+| Lessons indexed | 264 | 199 | **255** |
+| Lessons left out | 28 | 93 | **38**: b=28, c=8, d=2 |
+| Files indexed | 419 | 354 | 410 |
+| Rule lines | 345 | 242 | 322 |
+| Search rows | 22,267 | 22,096 | 22,255 |
+| `at` against `rules_card.py --at`, 22 triggers | 802 and 802 | 559 and 802 | 740 and 805; none only in the index (`evidence/at_crosscheck_round4b.txt`) |
+| Rebuild | 4.7 to 4.9 s | 19.2 s at load 24 | **9.4 s at load 11** (parse 1.9 s, load 7.4 s) |
+| `check` | 0.48 s | 3.9 s | 1.6 s |
+| Search latency, ten questions | 121 to 230 ms | 124 to 373 ms | 200 to 795 ms |
+| Size on the drive | 174 MB | 174 MB | 174 MB, database 117 MB |
+
+The times fall as the load falls; I still have no figure from a quiet machine. The search figures were taken while my own mutant run was starting.
+
+Against round 3, the stricter rule now costs the Wednesday index **10 lessons**: the 5 `MIXED`, the 3 untagged, and 2 with a tier-like line. The other 28 were already out by seat or tier.
+
+**Every real lesson left out, by clause** (`evidence/left_out_lessons_round4b.txt`):
+
+- (b) 28, the row is scoped to other seats: the same 28 as in round 4, listed by name in the round 4 section below.
+- (c) 8. Tier `MIXED` (5): 2026-08-07_a-check-that-cannot-fail; 2026-08-13_headline-must-match-the-operative-case; 2026-08-14_i-read-representations-they-read-sources; 2026-08-16_a-recorded-blocker-is-not-a-boundary; 2026-08-16_an-overstated-record-gets-discounted-wholesale. No tier line (3): 2026-10-12_be-more-careful-with-coding-files-and-deploys; 2026-10-12_clear-fleet-activity-once-answered-as-a-rule; 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.
+- (d) 2, a body line that is tier-like: 2026-09-05_three-tier-learnings-wednesday-management-agents-project (line 26); 2026-10-26_spark-gate-pilot-if-it-works-put-it-into-practice (line 19, "Tier 2 stays on Sonnet"). Neither is a marker. They are what "no tier-like line anywhere in the body" costs.
+
+## The ten questions (`evidence/ten_questions_round4b_raw.txt`)
+
+| # | Question | Round 3, first five | Round 4b, first five |
+|---|---|---|---|
+| 1 | close a pane | #1 `a-pane-close-is-a-session-kill` | #1 the same; the same five lessons, #3 and #4 swapped |
+| 2 | telling Kam something is absent | #1 `a-false-absence-is-usually-my-own-instrument` | **#1 the same (back)**; #5 was `a-check-that-cannot-fail`, left out (MIXED); the lesson added today is now #4 |
+| 3 | typed clock times | #1 a section of `i-read-representations-they-read-sources`; #2 `read-the-clock-at-boot` | the first is left out (MIXED); `read-the-clock-at-boot` is #1 |
+| 4 | provenance of a fact in a brief | #1 `brief-provenance-enforcement`; #2 `classification-is-the-field-that-grants-authority` | identical five |
+| 5 | an agent has gone quiet | #1, #2 right | identical five |
+| 6 | instead of deleting | #3 `never-delete-cleanup-means-quarantine` | identical five |
+| 7 | a deploy failed | nothing right | identical five (still wrong) |
+| 8 | usage gauge | #1 to #3 right | identical five |
+| 9 | wording a decision card | #1 `decisions-go-on-the-fleet-activity-panel` | **#1 the same (back)**; #5 was the MIXED lesson, left out |
+| 10 | before merging after the QA gate | #4 a related lesson only | #1 to #4 the same; #5 was the spark-gate lesson, left out (d) |
+
+Right lesson in the first five: **8 of 10**, as in rounds 2 and 3 (round 4: 6). What is lost against round 3 is one of question 3's two answers, the section inside a `MIXED` lesson.
+
+## Suite and mutants
+
+- Suite, final code: **692 passed, 0 failed**, Python 3.14.10 (`evidence/test_run_round4b.log`) and 3.9.6 (`evidence/test_run_round4b_python39.log`).
+- Mutants: RE-RUN IN PROGRESS; the figure goes here.
+
+## What I could not make sound (replaces round 4's items 1 and 2; items 3 to 6 there stand)
+
+1. **Nothing reads meaning, by ruling.** A lesson about another client's work that is tagged `W` or `M`, scoped to this seat, with no marker, is indexed. So is `tier: P-Secuura/<the other client's project>`. The three declared mechanisms are all there is; `DESIGN.md` and the instructions say so.
+2. **A tier-like line is found by its first word or by `tier` followed by `:` or `=`.** A marker written as a sentence ("the next part belongs to the other tier") is not one.
+
+## Slips of mine in round 4b
+
+1. A test line (`own_clients secuura general Datasec`) had only ever been refused because of the overlap with `deny_clients`. With that check gone the line was accepted and two assertions failed in my first run. I replaced it with a line that is malformed in itself. That line being accepted is correct: `own_clients` is the seat's to state.
+2. My first run of the adapted attack wrote an EMPTY evidence file with exit code 0, although its work directory holds a complete result. I do not know why. I re-ran it from the scratch copy of the same script (byte-identical) and that output is the evidence file.
+
+## Not tested in round 4b
+
+Everything in round 4's list, unchanged. In addition: no timing on a quiet machine; the proposed Tuesday and Friday scopes without their `deny_clients` line ran on fixtures only.
+
+**End state of the drive cluster** (`evidence/measurements_round4b.txt`, 19:02:56): `stop` rc 0 (pid 54882), second `stop` rc 0, `server: STOPPED`, no `postmaster.pid`, socket directory empty, 0 processes whose executable is postgres with a data directory in this lane (1 postgres on this Mac, another project's, not touched; control: 32 bash). 
+
+## For the next reader (the coordinator's seat may have rotated)
+
+- The lane is at READY FOR QA for the third check. `ANSWER-6.md` is the brief, `ANSWER-7.md` the ruling on its one open question; there is no open question now.
+- Two things in this section are my choices and are cheap to reverse: the numeric-reference test is kept, and a scope file carrying `deny_clients` is refused rather than ignored.
+- The pickup-file table (round 4 section) is still my reading and still unconfirmed.
+
+---
 
 # ROUND 4 (answer to `ANSWER-6.md`: qualify or stay out; the right database inside the same session)
 
