@@ -1,0 +1,220 @@
+PROBE B2208 a | macOS 27.2.1 | .NET 10.0.15
+== (a) CHANNEL RULE: id -> IsChannelId | sent? | request AbsolutePath | Query | Fragment | intended?
+  ch %2F                          rule=False | NOT SENT (ArgumentException)
+  ch 19:a%2F                      rule=False | NOT SENT (ArgumentException)
+  ch %2f                          rule=False | NOT SENT (ArgumentException)
+  ch 19:a%2f                      rule=False | NOT SENT (ArgumentException)
+  ch %2E%2E                       rule=False | NOT SENT (ArgumentException)
+  ch 19:a%2E%2E                   rule=False | NOT SENT (ArgumentException)
+  ch %3F                          rule=False | NOT SENT (ArgumentException)
+  ch 19:a%3F                      rule=False | NOT SENT (ArgumentException)
+  ch %23                          rule=False | NOT SENT (ArgumentException)
+  ch 19:a%23                      rule=False | NOT SENT (ArgumentException)
+  ch .                            rule=False | NOT SENT (ArgumentException)
+  ch 19:a.                        rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/19:a./filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=True | segments=7
+  ch ..                           rule=False | NOT SENT (ArgumentException)
+  ch 19:a..                       rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/19:a../filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=True | segments=7
+  ch ...                          rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/.../filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=True | segments=7
+  ch 19:a...                      rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/19:a.../filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=True | segments=7
+  ch ....                         rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/..../filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=True | segments=7
+  ch 19:a....                     rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/19:a..../filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=True | segments=7
+  ch                              rule=False | NOT SENT (ArgumentException)
+  ch \u0020                       rule=False | NOT SENT (ArgumentException)
+  ch 19:a\u0020                   rule=False | NOT SENT (ArgumentException)
+  ch \u0009                       rule=False | NOT SENT (ArgumentException)
+  ch 19:a\u0009                   rule=False | NOT SENT (ArgumentException)
+  ch a.                           rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/a./filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=True | segments=7
+  ch 19:aa.                       rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/19:aa./filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=True | segments=7
+  ch a..                          rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/a../filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=True | segments=7
+  ch 19:aa..                      rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/19:aa../filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=True | segments=7
+  ch a\u0020                      rule=False | NOT SENT (ArgumentException)
+  ch 19:aa\u0020                  rule=False | NOT SENT (ArgumentException)
+  ch a\u0009                      rule=False | NOT SENT (ArgumentException)
+  ch 19:aa\u0009                  rule=False | NOT SENT (ArgumentException)
+  ch a\u000A                      rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/a%0A/filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=False | segments=7
+  ch 19:aa\u000A                  rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/19:aa%0A/filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=False | segments=7
+  ch a\u000D\u000A                rule=False | NOT SENT (ArgumentException)
+  ch 19:aa\u000D\u000A            rule=False | NOT SENT (ArgumentException)
+  ch \u000A                       rule=False | NOT SENT (ArgumentException)
+  ch 19:a\u000A                   rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/19:a%0A/filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=False | segments=7
+  ch .\u000A                      rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/.%0A/filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=False | segments=7
+  ch 19:a.\u000A                  rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/19:a.%0A/filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=False | segments=7
+  ch ..\u000A                     rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/..%0A/filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=False | segments=7
+  ch 19:a..\u000A                 rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/19:a..%0A/filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=False | segments=7
+  ch ...\u000A                    rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/...%0A/filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=False | segments=7
+  ch 19:a...\u000A                rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/19:a...%0A/filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=False | segments=7
+  ch %2E%2E\u000A                 rule=False | NOT SENT (ArgumentException)
+  ch 19:a%2E%2E\u000A             rule=False | NOT SENT (ArgumentException)
+  ch \uFF0F                       rule=False | NOT SENT (ArgumentException)
+  ch 19:a\uFF0F                   rule=False | NOT SENT (ArgumentException)
+  ch \uFF0E                       rule=False | NOT SENT (ArgumentException)
+  ch 19:a\uFF0E                   rule=False | NOT SENT (ArgumentException)
+  ch \uFF0E\uFF0E                 rule=False | NOT SENT (ArgumentException)
+  ch 19:a\uFF0E\uFF0E             rule=False | NOT SENT (ArgumentException)
+  ch \u2215                       rule=False | NOT SENT (ArgumentException)
+  ch 19:a\u2215                   rule=False | NOT SENT (ArgumentException)
+  ch \u2044                       rule=False | NOT SENT (ArgumentException)
+  ch 19:a\u2044                   rule=False | NOT SENT (ArgumentException)
+  ch \u2024                       rule=False | NOT SENT (ArgumentException)
+  ch 19:a\u2024                   rule=False | NOT SENT (ArgumentException)
+  ch \u2025                       rule=False | NOT SENT (ArgumentException)
+  ch 19:a\u2025                   rule=False | NOT SENT (ArgumentException)
+  ch \uFE52                       rule=False | NOT SENT (ArgumentException)
+  ch 19:a\uFE52                   rule=False | NOT SENT (ArgumentException)
+  ch \u2026                       rule=False | NOT SENT (ArgumentException)
+  ch 19:a\u2026                   rule=False | NOT SENT (ArgumentException)
+  ch \u00B7                       rule=False | NOT SENT (ArgumentException)
+  ch 19:a\u00B7                   rule=False | NOT SENT (ArgumentException)
+  ch 19:x@thread.                 rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/19:x@thread./filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=True | segments=7
+  ch 19:x@thread.tacv2.           rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/19:x@thread.tacv2./filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=True | segments=7
+  ch 19:x@thread.tacv2\u000A      rule=True | SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/19:x@thread.tacv2%0A/filesFolder | q= | f= | auth=Bearer <redacted> | intended(exact)=False | segments=7
+  ch 19:x@thread.tacv2%2F..       rule=False | NOT SENT (ArgumentException)
+  ch 19:x/..@thread.tacv2         rule=False | NOT SENT (ArgumentException)
+== (a) TEAM RULE: id -> IsTeamId | ListChannels sent? | GetFilesFolder sent?
+  team                                              rule=False | channels NOT SENT (ArgumentException) | folder NOT SENT (ArgumentException)
+  team ...                                          rule=False | channels NOT SENT (ArgumentException) | folder NOT SENT (ArgumentException)
+  team 00000000-0000-4000-8000-00000000000.         rule=False | channels NOT SENT (ArgumentException) | folder NOT SENT (ArgumentException)
+  team 00000000-0000-4000-8000-00000000000\u0020    rule=False | channels NOT SENT (ArgumentException) | folder NOT SENT (ArgumentException)
+  team 00000000-0000-4000-8000-00000000000\u0009    rule=False | channels NOT SENT (ArgumentException) | folder NOT SENT (ArgumentException)
+  team 00000000-0000-4000-8000-00000000000\u000A    rule=False | channels NOT SENT (ArgumentException) | folder NOT SENT (ArgumentException)
+  team \u000A0000000-0000-4000-8000-000000000001    rule=False | channels NOT SENT (ArgumentException) | folder NOT SENT (ArgumentException)
+  team 00000000-0000-4000-8000-0000000%2F001        rule=False | channels NOT SENT (ArgumentException) | folder NOT SENT (ArgumentException)
+  team 00000000-0000-4000-8000-000000%2E%2E1        rule=False | channels NOT SENT (ArgumentException) | folder NOT SENT (ArgumentException)
+  team 00000000-0000-4000-8000-0000000000%3F        rule=False | channels NOT SENT (ArgumentException) | folder NOT SENT (ArgumentException)
+  team 00000000-0000-4000-8000-0000000000%23        rule=False | channels NOT SENT (ArgumentException) | folder NOT SENT (ArgumentException)
+  team 00000000-0000-4000-8000-0000000000\uFF0F1    rule=False | channels NOT SENT (ArgumentException) | folder NOT SENT (ArgumentException)
+  team 00000000-0000-4000-8000-0000000000\uFF0E1    rule=False | channels NOT SENT (ArgumentException) | folder NOT SENT (ArgumentException)
+  team 0x000000-0000-4000-8000-000000000001         rule=True | channels SENT /v1.0/teams/0x000000-0000-4000-8000-000000000001/channels?$select=id,displayName | folder SENT /v1.0/teams/0x000000-0000-4000-8000-000000000001/channels/19:synthetic0001@thread.tacv2/filesFolder
+  team +0000000-0000-4000-8000-000000000001         rule=True | channels SENT /v1.0/teams/+0000000-0000-4000-8000-000000000001/channels?$select=id,displayName | folder SENT /v1.0/teams/+0000000-0000-4000-8000-000000000001/channels/19:synthetic0001@thread.tacv2/filesFolder
+  team 00000000-0000-4000-8000-00000000000\uFF11    rule=False | channels NOT SENT (ArgumentException) | folder NOT SENT (ArgumentException)
+  team 00000000-0000-4000-8000-00000000000\u0661    rule=False | channels NOT SENT (ArgumentException) | folder NOT SENT (ArgumentException)
+  team 00000000-0000-4000-8000-000000000001         rule=True | channels SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels?$select=id,displayName | folder SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/19:synthetic0001@thread.tacv2/filesFolder
+  team 00000000-0000-4000-8000-000000000001         rule=True | channels SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels?$select=id,displayName | folder SENT /v1.0/teams/00000000-0000-4000-8000-000000000001/channels/19:synthetic0001@thread.tacv2/filesFolder
+== (a) DRIVE RULE (returned, not sent in this slice): segment -> IsDriveSegment | what new Uri(base, "drives/<seg>/items") makes of it
+  drv %2F                          rule=False | /v1.0/drives/%2F/items q= f=
+  drv b!a%2F                       rule=False | /v1.0/drives/b!a%2F/items q= f=
+  drv %2f                          rule=False | /v1.0/drives/%2f/items q= f=
+  drv b!a%2f                       rule=False | /v1.0/drives/b!a%2f/items q= f=
+  drv %2E%2E                       rule=False | /v1.0/items q= f=
+  drv b!a%2E%2E                    rule=False | /v1.0/drives/b!a../items q= f=
+  drv %3F                          rule=False | /v1.0/drives/%3F/items q= f=
+  drv b!a%3F                       rule=False | /v1.0/drives/b!a%3F/items q= f=
+  drv %23                          rule=False | /v1.0/drives/%23/items q= f=
+  drv b!a%23                       rule=False | /v1.0/drives/b!a%23/items q= f=
+  drv .                            rule=False | /v1.0/drives/items q= f=
+  drv b!a.                         rule=True | /v1.0/drives/b!a./items q= f=
+  drv ..                           rule=False | /v1.0/items q= f=
+  drv b!a..                        rule=True | /v1.0/drives/b!a../items q= f=
+  drv ...                          rule=True | /v1.0/drives/.../items q= f=
+  drv b!a...                       rule=True | /v1.0/drives/b!a.../items q= f=
+  drv ....                         rule=True | /v1.0/drives/..../items q= f=
+  drv b!a....                      rule=True | /v1.0/drives/b!a..../items q= f=
+  drv                              rule=False | /v1.0/drives//items q= f=
+  drv \u0020                       rule=False | /v1.0/drives/%20/items q= f=
+  drv b!a\u0020                    rule=False | /v1.0/drives/b!a%20/items q= f=
+  drv \u0009                       rule=False | /v1.0/drives/%09/items q= f=
+  drv b!a\u0009                    rule=False | /v1.0/drives/b!a%09/items q= f=
+  drv a.                           rule=True | /v1.0/drives/a./items q= f=
+  drv b!aa.                        rule=True | /v1.0/drives/b!aa./items q= f=
+  drv a..                          rule=True | /v1.0/drives/a../items q= f=
+  drv b!aa..                       rule=True | /v1.0/drives/b!aa../items q= f=
+  drv a\u0020                      rule=False | /v1.0/drives/a%20/items q= f=
+  drv b!aa\u0020                   rule=False | /v1.0/drives/b!aa%20/items q= f=
+  drv a\u0009                      rule=False | /v1.0/drives/a%09/items q= f=
+  drv b!aa\u0009                   rule=False | /v1.0/drives/b!aa%09/items q= f=
+  drv a\u000A                      rule=True | /v1.0/drives/a%0A/items q= f=
+  drv b!aa\u000A                   rule=True | /v1.0/drives/b!aa%0A/items q= f=
+  drv a\u000D\u000A                rule=False | /v1.0/drives/a%0D%0A/items q= f=
+  drv b!aa\u000D\u000A             rule=False | /v1.0/drives/b!aa%0D%0A/items q= f=
+  drv \u000A                       rule=False | /v1.0/drives/%0A/items q= f=
+  drv b!a\u000A                    rule=True | /v1.0/drives/b!a%0A/items q= f=
+  drv .\u000A                      rule=True | /v1.0/drives/.%0A/items q= f=
+  drv b!a.\u000A                   rule=True | /v1.0/drives/b!a.%0A/items q= f=
+  drv ..\u000A                     rule=True | /v1.0/drives/..%0A/items q= f=
+  drv b!a..\u000A                  rule=True | /v1.0/drives/b!a..%0A/items q= f=
+  drv ...\u000A                    rule=True | /v1.0/drives/...%0A/items q= f=
+  drv b!a...\u000A                 rule=True | /v1.0/drives/b!a...%0A/items q= f=
+  drv %2E%2E\u000A                 rule=False | /v1.0/drives/..%0A/items q= f=
+  drv b!a%2E%2E\u000A              rule=False | /v1.0/drives/b!a..%0A/items q= f=
+  drv \uFF0F                       rule=False | /v1.0/drives/%EF%BC%8F/items q= f=
+  drv b!a\uFF0F                    rule=False | /v1.0/drives/b!a%EF%BC%8F/items q= f=
+  drv \uFF0E                       rule=False | /v1.0/drives/%EF%BC%8E/items q= f=
+  drv b!a\uFF0E                    rule=False | /v1.0/drives/b!a%EF%BC%8E/items q= f=
+  drv \uFF0E\uFF0E                 rule=False | /v1.0/drives/%EF%BC%8E%EF%BC%8E/items q= f=
+  drv b!a\uFF0E\uFF0E              rule=False | /v1.0/drives/b!a%EF%BC%8E%EF%BC%8E/items q= f=
+  drv \u2215                       rule=False | /v1.0/drives/%E2%88%95/items q= f=
+  drv b!a\u2215                    rule=False | /v1.0/drives/b!a%E2%88%95/items q= f=
+  drv \u2044                       rule=False | /v1.0/drives/%E2%81%84/items q= f=
+  drv b!a\u2044                    rule=False | /v1.0/drives/b!a%E2%81%84/items q= f=
+  drv \u2024                       rule=False | /v1.0/drives/%E2%80%A4/items q= f=
+  drv b!a\u2024                    rule=False | /v1.0/drives/b!a%E2%80%A4/items q= f=
+  drv \u2025                       rule=False | /v1.0/drives/%E2%80%A5/items q= f=
+  drv b!a\u2025                    rule=False | /v1.0/drives/b!a%E2%80%A5/items q= f=
+  drv \uFE52                       rule=False | /v1.0/drives/%EF%B9%92/items q= f=
+  drv b!a\uFE52                    rule=False | /v1.0/drives/b!a%EF%B9%92/items q= f=
+  drv \u2026                       rule=False | /v1.0/drives/%E2%80%A6/items q= f=
+  drv b!a\u2026                    rule=False | /v1.0/drives/b!a%E2%80%A6/items q= f=
+  drv \u00B7                       rule=False | /v1.0/drives/%C2%B7/items q= f=
+  drv b!a\u00B7                    rule=False | /v1.0/drives/b!a%C2%B7/items q= f=
+  drv 19:x@thread.                 rule=False | /v1.0/drives/19:x@thread./items q= f=
+  drv b!a19:x@thread.              rule=False | /v1.0/drives/b!a19:x@thread./items q= f=
+  drv 19:x@thread.tacv2.           rule=False | /v1.0/drives/19:x@thread.tacv2./items q= f=
+  drv b!a19:x@thread.tacv2.        rule=False | /v1.0/drives/b!a19:x@thread.tacv2./items q= f=
+  drv 19:x@thread.tacv2\u000A      rule=False | /v1.0/drives/19:x@thread.tacv2%0A/items q= f=
+  drv b!a19:x@thread.tacv2\u000A   rule=False | /v1.0/drives/b!a19:x@thread.tacv2%0A/items q= f=
+  drv 19:x@thread.tacv2%2F..       rule=False | /v1.0/drives/19:x@thread.tacv2%2F../items q= f=
+  drv b!a19:x@thread.tacv2%2F..    rule=False | /v1.0/drives/b!a19:x@thread.tacv2%2F../items q= f=
+  drv 19:x/..@thread.tacv2         rule=False | /v1.0/drives/19:x/..@thread.tacv2/items q= f=
+  drv b!a19:x/..@thread.tacv2      rule=False | /v1.0/drives/b!a19:x/..@thread.tacv2/items q= f=
+== (a) FOLDER ANSWER with a drive id / item id ending in a newline
+  answer id=ITEM0001\u000A driveId=b!drive_0001 -> RETURNED ItemId=ITEM0001\u000A DriveId=b!drive_0001
+  answer id=ITEM0001 driveId=b!drive_0001\u000A -> RETURNED ItemId=ITEM0001 DriveId=b!drive_0001\u000A
+  answer id=ITEM0001 driveId=b!drive_0001. -> RETURNED ItemId=ITEM0001 DriveId=b!drive_0001.
+  answer id=... driveId=b!drive_0001 -> RETURNED ItemId=... DriveId=b!drive_0001
+== (a) CHANNEL LISTING item ids ending in a newline (and a duplicate differing only by it)
+  -> RETURNED 19:a@thread.tacv2, 19:a@thread.tacv2\u000A
+CONTROL positive: a good channel id sends 1 request(s), folder returned True
+CONTROL negative: a slash channel id sends 0 request(s), ArgumentException
+PROBE B2208 fuzz | macOS 27.2.1 | .NET 10.0.15
+FUZZ: single-unit team substitutions accepted 719 (of 36 x 65536), outside [0-9A-Fa-f-] 11; pair substitutions tried 182070
+FUZZ: accepted ids holding a character outside the stated class: 458
+  channel abc\u000A
+  drive abc\u000A
+  team +0000000-0000-4000-8000-000000000001
+  team 0X000000-0000-4000-8000-000000000001
+  team 0x000000-0000-4000-8000-000000000001
+  team 00000000-+000-4000-8000-000000000001
+  team 00000000-0X00-4000-8000-000000000001
+  team 00000000-0x00-4000-8000-000000000001
+  team 00000000-0000-+000-8000-000000000001
+  team 00000000-0000-4000-+000-000000000001
+  team 00000000-0000-4000-8000-+00000000001
+  team 00000000-0000-4000-8000-0X0000000001
+  team 00000000-0000-4000-8000-0x0000000001
+  team-pair 0x000000-0000-4000-8000-000000000001
+  team-pair 0X000000-0000-4000-8000-000000000001
+  team-pair +0000000-0000-4000-8000-000000000001
+  team-pair +0x00000-0000-4000-8000-000000000001
+  team-pair +0X00000-0000-4000-8000-000000000001
+  team-pair 00000000-+000-4000-8000-000000000001
+  team-pair +0000000-+000-4000-8000-000000000001
+  team-pair 00000000-0x00-4000-8000-000000000001
+  team-pair 00000000-0X00-4000-8000-000000000001
+  team-pair +0000000-0x00-4000-8000-000000000001
+  team-pair +0000000-0X00-4000-8000-000000000001
+  team-pair 00000000-0000-+000-8000-000000000001
+  team-pair +0000000-0000-0000-8000-000000000001
+  team-pair +0000000-0000-+000-8000-000000000001
+  team-pair 00000000-0000-4000-+000-000000000001
+  team-pair +0000000-0000-4000-0000-000000000001
+  team-pair +0000000-0000-4000-+000-000000000001
+  team-pair 00000000-0000-4000-8000-+00000000001
+  team-pair +0000000-0000-4000-8000-+00000000001
+  team-pair 00000000-0000-4000-8000-0x0000000001
+  team-pair 00000000-0000-4000-8000-0X0000000001
+  team-pair +0000000-0000-4000-8000-0x0000000001
+  team-pair +0000000-0000-4000-8000-0X0000000001
+  team-pair +0000000-0000-4000-8000-000000000000
+  team-pair 0x000000-+000-4000-8000-000000000001
+  team-pair 0X000000-+000-4000-8000-000000000001
+  team-pair 0x000000-0x00-4000-8000-000000000001

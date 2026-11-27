@@ -1,0 +1,33 @@
+Oxpd1AuthenticationAgentEndpoint.AnswerAsync reads one SOAP 1.2 request
+of the three operations of HP's committed OXPd 1.x authentication agent
+description (GetPrePromptResult, GetPostPromptResult,
+SignOutNotification) from a stream and a content type, and returns an
+HTTP status, a content type and bytes. It holds no transport: the host
+maps a route to it. The request is refused unless its media type is
+application/soap+xml, it is at most 64 KiB, it parses with no DTD, no
+resolver and no element deeper than 64 levels, its body holds exactly
+one element of the agent's namespace, its addressing headers are of one
+WS-Addressing version, its action (when sent) names the body's
+operation, no header block it does not understand is marked
+mustUnderstand, and every value is of HP's schema (the context id 32 to
+128 ASCII letters or digits, the language code, a server context id of 1
+to 256 characters, in HP's order and nothing else). Only then is the
+handler asked, once. Its answer is Continued, Canceled or Failed (with
+an optional failure message of 1 to 1024 characters), written as HP's
+response element in the request's addressing version. Every refusal is
+a SOAP 1.2 fault with a fixed text (Sender 400, Receiver and
+MustUnderstand 500); a handler that throws or answers nothing is a
+Receiver fault; no fault and no ToString carries the context id, the
+server context id or an exception's text (the answer and the faults
+echo only the request's message id, as RelatesTo). No answer is
+Succeeded: that waits for the user's information.
+
+Cells G01 to G09 (43 cases) call the endpoint in memory and validate
+every request and answer body against the committed schema. How a
+device frames these calls is not measured; every request a cell builds
+is that cell's assumption. Not built: Succeeded, the context reserve
+and release calls, the HID calls, the route, TLS, the caller's
+credential and a time bound on the handler. Nothing ran against a
+device, a printer, a tenant or Azure. Nothing is deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

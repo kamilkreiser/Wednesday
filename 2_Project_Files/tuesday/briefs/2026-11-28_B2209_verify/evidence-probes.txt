@@ -1,0 +1,128 @@
+GD list twoname => THREW SharePointException AmbiguousList p1 i0
+GD list namecase => null
+GD list webslash => null
+GD list webspace => null
+GD list emptyweb-lib-and-list => list a
+GD list nullweb-lib => list a
+GD list web1-name1-differ => list b
+GD list dupid => THREW SharePointException MalformedItem p1 i2
+GD list idbraces => list a
+GD list idN => list a
+GD list zero => null
+GD column hiddenprop => offered 1 kind Text
+GD column readonlystring => THREW SharePointException MalformedItem p1 i1
+GD column groupcase => offered 1 kind Text
+GD column facetnull => offered 0
+GD column facettrue => THREW SharePointException MalformedItem p1 i1
+GD column unicode-name => THREW SharePointException MalformedItem p1 i1
+GD column readOnly-dup-false-true => offered 0
+GD column readOnly-dup-true-false => offered 1 kind Text
+GD column hidden-then-offered-same-name => offered 1 kind Text
+GD column calculated-with-text => offered 1 kind Text
+GD column number-and-text => THREW SharePointException MalformedItem p1 i1
+GD item dup-id-property => THREW SharePointException MalformedItem p1 i1
+GD item etag-no-braces => items 1 id A key none
+GD item etag-zero-guid => items 1 id A key EMPTY-GUID
+GD item etag-N-form => items 1 id A key none
+GD item etag-two-guids => items 1 id A key none
+GD item id-dotdot => THREW SharePointException MalformedItem p1 i1
+GD item childcount-on-file => items 1 id A key none
+GD item date-garbage => THREW SharePointException MalformedItem p1 i1
+GB file size 10 => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2
+GB file size 10, 200 => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2
+GB file size 11 => THREW SharePointException MalformedItem p1 i1 | requests 2
+GB file size 9 => THREW SharePointException MalformedItem p1 i1 | requests 2
+GB file size 0 => THREW SharePointException MalformedItem p1 i1 | requests 2
+GB file NO size => RETURNED kind File size none key synthetic nameEqualsSent True | requests 2
+GB file size null => RETURNED kind File size none key none nameEqualsSent True | requests 2
+GB file size 10.0 => THREW SharePointException MalformedItem p1 i1 | requests 2
+GB file size "10" => THREW SharePointException MalformedItem p1 i1 | requests 2
+GB folder size 10 => THREW SharePointException MalformedItem p1 i1 | requests 2
+GB no facet size 10 => THREW SharePointException MalformedItem p1 i1 | requests 2
+GB file facet null size 10 => THREW SharePointException MalformedItem p1 i1 | requests 2
+GB file facet + folder null => RETURNED kind File size 10 key none nameEqualsSent True | requests 2
+GB file other name => RETURNED kind File size 10 key synthetic nameEqualsSent False | requests 2
+GB file other key => RETURNED kind File size 10 key other nameEqualsSent True | requests 2
+GB file dup size 10 then 99 => THREW SharePointException MalformedItem p1 i1 | requests 2
+GB file dup size 99 then 10 => RETURNED kind File size 10 key none nameEqualsSent True | requests 2
+GB array body => THREW GraphCallException MalformedResponse 201 | requests 2
+GB 202 then nothing => THREW GraphCallException MalformedResponse 202 | requests 2
+GE query "*" => sent /v1.0/sites?search=%2A&$top=500
+GE query "a b" => sent /v1.0/sites?search=a%20b&$top=500
+GE query "qqq..len255" => sent /v1.0/sites?search=qqqqqqqqqqqqqqqqqqqqq...len283
+GE query "qqq..len256" => THREW ArgumentException requests 0
+GE query "a\u0085b" => sent /v1.0/sites?search=a%C2%85b&$top=500
+GE query "a\u2028b" => sent /v1.0/sites?search=a%E2%80%A8b&$top=500
+GE query "\uFFFD" => sent /v1.0/sites?search=%EF%BF%BD&$top=500
+GE query "a/b?c#d" => sent /v1.0/sites?search=a%2Fb%3Fc%23d&$top=500
+GE query "%2F" => sent /v1.0/sites?search=%252F&$top=500
+GE query "\u00E9" => sent /v1.0/sites?search=%C3%A9&$top=500
+GE site "," => sent 20 chars path, ends /drives True segments 5
+GE site "." => THREW ArgumentException requests 0
+GE site ".." => THREW ArgumentException requests 0
+GE site "..." => sent 22 chars path, ends /drives True segments 5
+GE site "a..b" => sent 23 chars path, ends /drives True segments 5
+GE site "sss..len512" => sent 531 chars path, ends /drives True segments 5
+GE site "sss..len513" => THREW ArgumentException requests 0
+GE site "a%2Fb" => THREW ArgumentException requests 0
+GE site "a:b" => THREW ArgumentException requests 0
+GE site "a b" => THREW ArgumentException requests 0
+GE site "a\u0131b" => THREW ArgumentException requests 0
+GE site "a\u212Ab" => THREW ArgumentException requests 0
+GE text "a\u0085b" => written body {"Title":"a\u0085b"}
+GE text "a\u2028b" => written body {"Title":"a\u2028b"}
+GE text "a\uFFFDb" => written body {"Title":"a\uFFFDb"}
+GE text "\u00E9" => written body {"Title":"\u00E9"}
+GE write emptykey => THREW ArgumentException requests 0
+GE write emptylist => THREW ArgumentException requests 0
+GE write otherlist => WRITTEN requests 1
+GE refusal messages 5, holding a synthetic value: 0, requests 0
+GE ColumnValue bad-name message holds name: False
+GC 401-then-200 => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 3 | bodies POST SessionBody auth Bearer <synthetic> ; POST SessionBody auth Bearer <synthetic> ; PUT 10 bytes auth null
+GC default-auth-header-on-client => RETURNED kind File size 10 key synthetic nameEqualsSent True | POST graph.example.test auth Bearer <synthetic> ; PUT upload.example.test auth THE CLIENT DEFAULT
+GC 409 => THREW GraphCallException HttpStatus 409 | requests 1 | POST /v1.0/sites/site.example.test,00000000-0000-4000-8000-000000000011,00000000-0000-4000-8000-000000000012/drives/b!SYNTHETICDRIVE0001/root:/scan-0001.pdf:/createUploadSession
+GC 307 => THREW GraphCallException HttpStatus 307 | requests 1
+GC name "SCAN-0001.PDF" IsFileName True => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2 path <site>/drives/b!SYNTHETICDRIVE0001/root:/SCAN-0001.PDF:/createUploadSession
+GC name "scan-0001.pdf." IsFileName False => THREW ArgumentException | requests 0
+GC name "scan-0001.pdf " IsFileName False => THREW ArgumentException | requests 0
+GC name " scan-0001.pdf" IsFileName False => THREW ArgumentException | requests 0
+GC name "scan-0001..pdf" IsFileName True => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2 path <site>/drives/b!SYNTHETICDRIVE0001/root:/scan-0001..pdf:/createUploadSession
+GC name "caf\u00E9.pdf" IsFileName False => THREW ArgumentException | requests 0
+GC name "cafe\u0301.pdf" IsFileName False => THREW ArgumentException | requests 0
+GC name "scan\uFF0Epdf" IsFileName False => THREW ArgumentException | requests 0
+GC name "scan-0001.pdf\u200B" IsFileName False => THREW ArgumentException | requests 0
+GC name "CON" IsFileName True => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2 path <site>/drives/b!SYNTHETICDRIVE0001/root:/CON:/createUploadSession
+GC name "-" IsFileName True => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2 path <site>/drives/b!SYNTHETICDRIVE0001/root:/-:/createUploadSession
+GC name "_" IsFileName True => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2 path <site>/drives/b!SYNTHETICDRIVE0001/root:/_:/createUploadSession
+GC name "a." IsFileName False => THREW ArgumentException | requests 0
+GC name ".a" IsFileName False => THREW ArgumentException | requests 0
+GC name "~$a.pdf" IsFileName False => THREW ArgumentException | requests 0
+GC name "abbbbbbbbb...len128" IsFileName True => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2 path <site>/drives/b!SYNTHETICDRIVE0001/root:/abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb:/createUploadSession
+GC name "abbbbbbbbb...len129" IsFileName False => THREW ArgumentException | requests 0
+GA https://upload.example.test/session/synthetic0001 => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2 PUT to https://upload.example.test auth null
+GA http://upload.example.test/session/synthetic0001 => THREW SharePointException MalformedSession p1 i0 | requests 1 no piece
+GA HTTPS://UPLOAD.EXAMPLE.TEST/session/synthetic0001 => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2 PUT to https://upload.example.test auth null
+GA https://user:pw@upload.example.test/s => THREW SharePointException MalformedSession p1 i0 | requests 1 no piece
+GA https://@upload.example.test/s => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2 PUT to https://upload.example.test auth null
+GA /session/synthetic0001 => THREW SharePointException MalformedSession p1 i0 | requests 1 no piece
+GA //upload.example.test/s => THREW SharePointException MalformedSession p1 i0 | requests 1 no piece
+GA ftp://upload.example.test/s => THREW SharePointException MalformedSession p1 i0 | requests 1 no piece
+GA file:///tmp/x => THREW SharePointException MalformedSession p1 i0 | requests 1 no piece
+GA https://[::1]/s => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2 PUT to https://[::1] auth null
+GA https://127.0.0.1:8443/s => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2 PUT to https://127.0.0.1:8443 auth null
+GA https://graph.example.test/v1.0/me/drive => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2 PUT to https://graph.example.test auth null
+GA https://elsewhere.example.test/s => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2 PUT to https://elsewhere.example.test auth null
+GA https://upload.example.test/s#frag => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2 PUT to https://upload.example.test auth null
+GA https://upload.example.test/%2e%2e/s => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2 PUT to https://upload.example.test auth null
+GA  https://upload.example.test/s => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2 PUT to https://upload.example.test auth null
+GA https://upload.example.test/s\0 => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2 PUT to https://upload.example.test auth null
+GA https://xn--80ak6aa92e.example.test/s => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2 PUT to https://xn--80ak6aa92e.example.test auth null
+GA https://upload.example.test/aaaaaaaaaaaa...(len 8220) => THREW SharePointException MalformedSession p1 i0 | requests 1 no piece
+GA body {"uploadUrl":42} => THREW SharePointException MalformedSession p1 i0 | requests 1
+GA body {"uploadUrl":null} => THREW SharePointException MalformedSession p1 i0 | requests 1
+GA body [] => THREW SharePointException MalformedSession p1 i0 | requests 1
+GA body {"uploadUrl":"https://upload.example.test/a","uploadUrl":"http://evil.example.test/b"} => THREW SharePointException MalformedSession p1 i0 | requests 1
+GA body {"uploadUrl":"http://evil.example.test/b","uploadUrl":"https://upload.example.test/a"} => RETURNED kind File size 10 key synthetic nameEqualsSent True | requests 2 PUT host upload.example.test
+GF 32 concurrent searches on one browser: each 1 site True, requests 32
+GF fields: SharePointBrowser._graph readonly, SharePointBrowser._maxPages readonly, SharePointBrowser.Facets static readonly, SharePointBrowser.AllSites static readonly, SharePointBrowser.FolderQuery static readonly, SharePointBrowser.MaxQueryLength static readonly, SharePointFiles._graph readonly, SharePointFiles.SessionBody static readonly, SharePointFiles.MaxAddressLength static readonly, SharePointFiles.UploadUrlProperty static readonly
+GF pre-cancelled token => THREW TaskCanceledException requests 1

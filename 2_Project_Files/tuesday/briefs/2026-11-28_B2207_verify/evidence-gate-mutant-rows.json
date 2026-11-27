@@ -1,0 +1,126 @@
+{
+ "suites": {
+  "agents": {
+   "project": "tests/Datasec.Suite.Adapters.Oxpd1.Agents.Tests/Datasec.Suite.Adapters.Oxpd1.Agents.Tests.csproj",
+   "exe": "tests/Datasec.Suite.Adapters.Oxpd1.Agents.Tests/bin/Release/net10.0/Datasec.Suite.Adapters.Oxpd1.Agents.Tests",
+   "prefix": "src/Datasec.Suite.Adapters.Oxpd1.Agents/",
+   "cells": [
+    "AuthenticationAgentTests.G01",
+    "AuthenticationAgentTests.G02",
+    "AuthenticationAgentTests.G03",
+    "AuthenticationAgentTests.G04",
+    "AuthenticationAgentTests.G05",
+    "AuthenticationAgentTests.G06",
+    "AuthenticationAgentTests.G07",
+    "AuthenticationAgentTests.G08",
+    "AuthenticationAgentTests.G09"
+   ]
+  }
+ },
+ "rows": [
+  [
+   "gDepthLost",
+   "agents",
+   "src/Datasec.Suite.Adapters.Oxpd1.Agents/Oxpd1AuthenticationAgent.cs",
+   "scan.NodeType == XmlNodeType.Element && scan.Depth > MaxElementDepth",
+   "scan.NodeType == XmlNodeType.Element && scan.Depth < 0",
+   "AuthenticationAgentTests.G05"
+  ],
+  [
+   "gBodyTextLost",
+   "agents",
+   "src/Datasec.Suite.Adapters.Oxpd1.Agents/Oxpd1AuthenticationAgent.cs",
+   "if (parts.Count != 1 || bodies[0].Nodes().OfType<XText>().Any(t => !Oxpd1AgentCatalogue.IsXmlWhiteSpace(t.Value)))",
+   "if (parts.Count != 1 || bodies[0].Nodes().OfType<XText>().Any(t => t.Value.Length < 0))",
+   "AuthenticationAgentTests.G05"
+  ],
+  [
+   "gMuOneOnly",
+   "agents",
+   "src/Datasec.Suite.Adapters.Oxpd1.Agents/Oxpd1AuthenticationAgent.cs",
+   "(mustUnderstand is \"true\" or \"1\")",
+   "(mustUnderstand is \"true\" or \"true \")",
+   "AuthenticationAgentTests.G05"
+  ],
+  [
+   "gMessageIdBound",
+   "agents",
+   "src/Datasec.Suite.Adapters.Oxpd1.Agents/Oxpd1AuthenticationAgent.cs",
+   "messageId.Length is 0 or > Oxpd1AgentCatalogue.MaxMessageId",
+   "messageId.Length is 0 or < 0",
+   "AuthenticationAgentTests.G05"
+  ],
+  [
+   "gServerBound",
+   "agents",
+   "src/Datasec.Suite.Adapters.Oxpd1.Agents/Oxpd1AuthenticationAgent.cs",
+   "server is { Length: >= 1 and <= Oxpd1AgentCatalogue.MaxServerContextId }",
+   "server is { Length: >= 1 }",
+   "AuthenticationAgentTests.G06"
+  ],
+  [
+   "gMixedAllowed",
+   "agents",
+   "src/Datasec.Suite.Adapters.Oxpd1.Agents/Oxpd1AuthenticationAgent.cs",
+   "if (has2005 && has2004)",
+   "if (has2005 && has2004 && blocks.Count < 0)",
+   "AuthenticationAgentTests.G05"
+  ],
+  [
+   "gCancelCaught",
+   "agents",
+   "src/Datasec.Suite.Adapters.Oxpd1.Agents/Oxpd1AuthenticationAgent.cs",
+   "catch (Exception ex) when (ex is not OperationCanceledException)",
+   "catch (Exception ex) when (ex is not null)",
+   "AuthenticationAgentTests.G07"
+  ],
+  [
+   "gContentTypeLost",
+   "agents",
+   "src/Datasec.Suite.Adapters.Oxpd1.Agents/Oxpd1AuthenticationAgent.cs",
+   "if (!string.Equals(mediaType, \"application/soap+xml\", StringComparison.OrdinalIgnoreCase))",
+   "if (mediaType.Length < 0)",
+   "AuthenticationAgentTests.G05"
+  ],
+  [
+   "gTextBesideLost",
+   "agents",
+   "src/Datasec.Suite.Adapters.Oxpd1.Agents/Oxpd1AuthenticationAgent.cs",
+   "if (element.Nodes().OfType<XText>().Any(t => !Oxpd1AgentCatalogue.IsXmlWhiteSpace(t.Value)))",
+   "if (element.Nodes().OfType<XText>().Any(t => t.Value.Length < 0))",
+   "AuthenticationAgentTests.G06"
+  ],
+  [
+   "gLeafChildAllowed",
+   "agents",
+   "src/Datasec.Suite.Adapters.Oxpd1.Agents/Oxpd1AuthenticationAgent.cs",
+   "&& !e.HasElements ? e.Value : null",
+   "&& e.Value.Length >= 0 ? e.Value : null",
+   "AuthenticationAgentTests.G06"
+  ],
+  [
+   "gServerCarriedLost",
+   "agents",
+   "src/Datasec.Suite.Adapters.Oxpd1.Agents/Oxpd1AuthenticationAgent.cs",
+   "&& Oxpd1AgentCatalogue.IsCarriedText(server));",
+   "&& server.Length >= 0);",
+   "AuthenticationAgentTests.G06"
+  ],
+  [
+   "gEnvelopeNameOnly",
+   "agents",
+   "src/Datasec.Suite.Adapters.Oxpd1.Agents/Oxpd1AuthenticationAgent.cs",
+   "root.Name != XName.Get(\"Envelope\", Oxpd1AgentCatalogue.Soap12)",
+   "root.Name.LocalName != \"Envelope\"",
+   "AuthenticationAgentTests.G05"
+  ],
+  [
+   "gOrderLost",
+   "agents",
+   "src/Datasec.Suite.Adapters.Oxpd1.Agents/Oxpd1AuthenticationAgent.cs",
+   "string? context = Leaf(children[0], \"authenticationContextId\");",
+   "string? context = children.Select(c => Leaf(c, \"authenticationContextId\")).FirstOrDefault(v => v is not null);",
+   "AuthenticationAgentTests.G06"
+  ]
+ ]
+}

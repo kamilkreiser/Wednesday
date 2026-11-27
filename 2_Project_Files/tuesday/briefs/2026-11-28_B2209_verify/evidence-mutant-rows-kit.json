@@ -1,0 +1,109 @@
+{
+ "suites": {
+  "sharepoint": {
+   "project": "tests/Datasec.Suite.SharePoint.Tests/Datasec.Suite.SharePoint.Tests.csproj",
+   "exe": "tests/Datasec.Suite.SharePoint.Tests/bin/Release/net10.0/Datasec.Suite.SharePoint.Tests",
+   "prefix": "src/Datasec.Suite.SharePoint/",
+   "cells": [
+    "SharePointTests.S01",
+    "SharePointTests.S02",
+    "SharePointTests.S03",
+    "SharePointTests.S04",
+    "SharePointTests.S05",
+    "SharePointTests.S06",
+    "SharePointTests.S07",
+    "SharePointTests.S08",
+    "SharePointTests.S09",
+    "SharePointTests.S10",
+    "SharePointTests.S11",
+    "SharePointTests.S12",
+    "SharePointTests.S13",
+    "SharePointTests.S14",
+    "SharePointTests.S15",
+    "SharePointTests.S16"
+   ]
+  }
+ },
+ "rows": [
+  [
+   "mSiteIdUnchecked",
+   "sharepoint",
+   "src/Datasec.Suite.SharePoint/SharePointIds.cs",
+   "\"^[A-Za-z0-9.,_-]+\\\\z\"",
+   "\"^[A-Za-z0-9.,_/?-]+\\\\z\"",
+   "SharePointTests.S03 SharePointTests.S04"
+  ],
+  [
+   "mDuplicateKept",
+   "sharepoint",
+   "src/Datasec.Suite.SharePoint/SharePointBrowser.cs",
+   "if (!ids.Add(id))",
+   "if (!ids.Add(id + ids.Count.ToString(CultureInfo.InvariantCulture)))",
+   "SharePointTests.S04 SharePointTests.S09"
+  ],
+  [
+   "mListByWebSkipped",
+   "sharepoint",
+   "src/Datasec.Suite.SharePoint/SharePointBrowser.cs",
+   "string.Equals(list.WebUrl, library.WebUrl, StringComparison.OrdinalIgnoreCase)",
+   "string.Equals(list.WebUrl, string.Empty, StringComparison.OrdinalIgnoreCase)",
+   "SharePointTests.S06"
+  ],
+  [
+   "mReadOnlyKept",
+   "sharepoint",
+   "src/Datasec.Suite.SharePoint/SharePointBrowser.cs",
+   "readOnlyValue.ValueKind == JsonValueKind.True;",
+   "readOnlyValue.ValueKind == JsonValueKind.Undefined;",
+   "SharePointTests.S07"
+  ],
+  [
+   "mHiddenKept",
+   "sharepoint",
+   "src/Datasec.Suite.SharePoint/SharePointBrowser.cs",
+   "string.Equals(group, \"_Hidden\", StringComparison.Ordinal)",
+   "string.Equals(group, \"_Shown\", StringComparison.Ordinal)",
+   "SharePointTests.S07"
+  ],
+  [
+   "mTopChanged",
+   "sharepoint",
+   "src/Datasec.Suite.SharePoint/SharePointBrowser.cs",
+   "\"$top=20&",
+   "\"$top=200&",
+   "SharePointTests.S08"
+  ],
+  [
+   "mConflictReplace",
+   "sharepoint",
+   "src/Datasec.Suite.SharePoint/SharePointFiles.cs",
+   "conflictBehavior\\\":\\\"fail\\\"",
+   "conflictBehavior\\\":\\\"replace\\\"",
+   "SharePointTests.S10"
+  ],
+  [
+   "mStoredSizeUnchecked",
+   "sharepoint",
+   "src/Datasec.Suite.SharePoint/SharePointFiles.cs",
+   "size != length",
+   "size < 0",
+   "SharePointTests.S11"
+  ],
+  [
+   "mKindUnchecked",
+   "sharepoint",
+   "src/Datasec.Suite.SharePoint/SharePointFiles.cs",
+   "if (value.Kind != column.Kind)",
+   "if (value.Kind == (ColumnKind)(-1))",
+   "SharePointTests.S13"
+  ],
+  [
+   "mUnknownColumnKept",
+   "sharepoint",
+   "src/Datasec.Suite.SharePoint/SharePointFiles.cs",
+   "if (string.Equals(column.Name, name, StringComparison.Ordinal))",
+   "if (string.Equals(column.Name, name, StringComparison.Ordinal) || column.Name.Length > 0)",
+   "SharePointTests.S13"
+  ]
+ ]
+}

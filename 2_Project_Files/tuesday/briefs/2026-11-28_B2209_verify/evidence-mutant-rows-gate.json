@@ -1,0 +1,85 @@
+{
+ "suites": {
+  "sharepoint": {
+   "project": "tests/Datasec.Suite.SharePoint.Tests/Datasec.Suite.SharePoint.Tests.csproj",
+   "exe": "tests/Datasec.Suite.SharePoint.Tests/bin/Release/net10.0/Datasec.Suite.SharePoint.Tests",
+   "prefix": "src/Datasec.Suite.SharePoint/",
+   "cells": [
+    "SharePointTests.S01",
+    "SharePointTests.S02",
+    "SharePointTests.S03",
+    "SharePointTests.S04",
+    "SharePointTests.S05",
+    "SharePointTests.S06",
+    "SharePointTests.S07",
+    "SharePointTests.S08",
+    "SharePointTests.S09",
+    "SharePointTests.S10",
+    "SharePointTests.S11",
+    "SharePointTests.S12",
+    "SharePointTests.S13",
+    "SharePointTests.S14",
+    "SharePointTests.S15",
+    "SharePointTests.S16"
+   ]
+  }
+ },
+ "rows": [
+  [
+   "gFolderStored",
+   "sharepoint",
+   "src/Datasec.Suite.SharePoint/SharePointFiles.cs",
+   "ReadStored(done.Body) is { Kind: LibraryItemKind.File } file",
+   "ReadStored(done.Body) is { } file",
+   "SharePointTests.S11"
+  ],
+  [
+   "gByNameAmbiguous",
+   "sharepoint",
+   "src/Datasec.Suite.SharePoint/SharePointBrowser.cs",
+   "if (byName.Count > 1)",
+   "if (byName.Count > 99)",
+   "SharePointTests.S06"
+  ],
+  [
+   "gSchemeUnchecked",
+   "sharepoint",
+   "src/Datasec.Suite.SharePoint/SharePointFiles.cs",
+   "string.Equals(address.Scheme, Uri.UriSchemeHttps, StringComparison.Ordinal)",
+   "address.Scheme.Length > 0",
+   "SharePointTests.S11"
+  ],
+  [
+   "gQueryControl",
+   "sharepoint",
+   "src/Datasec.Suite.SharePoint/SharePointBrowser.cs",
+   "query.Any(c => c < ' ' || c == '\\x7F')",
+   "query.Any(c => c == '\\uFFFF')",
+   "SharePointTests.S03"
+  ],
+  [
+   "gTwiceKept",
+   "sharepoint",
+   "src/Datasec.Suite.SharePoint/SharePointFiles.cs",
+   "if (!seen.Add(value.Name))",
+   "if (seen.Add(value.Name) && value.Name.Length < 0)",
+   "SharePointTests.S13"
+  ],
+  [
+   "gTextBound",
+   "sharepoint",
+   "src/Datasec.Suite.SharePoint/ColumnValue.cs",
+   "value.Length > MaxTextLength",
+   "value.Length > MaxTextLength + 1",
+   "SharePointTests.S13"
+  ],
+  [
+   "gEtagKeyAnyForm",
+   "sharepoint",
+   "src/Datasec.Suite.SharePoint/SharePointBrowser.cs",
+   "Guid.TryParseExact(eTag.AsSpan(open + 1, close - open - 1), \"D\", out Guid key)",
+   "Guid.TryParse(eTag.AsSpan(open + 1, close - open - 1), out Guid key)",
+   "SharePointTests.S08"
+  ]
+ ]
+}

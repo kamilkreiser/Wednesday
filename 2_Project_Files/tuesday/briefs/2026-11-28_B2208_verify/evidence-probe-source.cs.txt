@@ -1,0 +1,215 @@
+// Gate B2208 probe (scratch only, never committed). Synthetic values only; every host under example.test; no socket.
+using System.Net;
+using System.Text;
+using Datasec.Suite.Graph;
+using Datasec.Suite.Teams;
+
+const string BaseText = "https://graph.example.test/v1.0/";
+const string Team = "00000000-0000-4000-8000-000000000001";
+const string Channel = "19:synthetic0001@thread.tacv2";
+Uri baseUri = new(BaseText);
+
+static string Show(string? s)
+{
+    if (s is null) return "<null>";
+    StringBuilder b = new();
+    foreach (char c in s)
+    {
+        if (c >= 0x21 && c < 0x7f && c != '\\') b.Append(c);
+        else b.Append("\\u").Append(((int)c).ToString("X4"));
+    }
+    return b.ToString();
+}
+
+string FolderJson(string id, string drive) =>
+    "{\"id\":" + System.Text.Json.JsonSerializer.Serialize(id) + ",\"folder\":{\"childCount\":1},\"parentReference\":{\"driveId\":" + System.Text.Json.JsonSerializer.Serialize(drive) + "}}";
+
+async Task<(List<Uri> seen, List<string?> auth, Exception? error, ChannelFolder? folder)> Folder(string teamId, string channelId, string? body = null)
+{
+    Rec rec = new((_, _) => Json(body ?? FolderJson("SYNTHETICFOLDER0001", "b!synthetic-drive_0001")));
+    using HttpClient http = new(rec);
+    TeamsBrowser browser = new(new GraphClient(http, new GraphOptions(baseUri)));
+    try
+    {
+        ChannelFolder f = await browser.GetFilesFolderAsync(teamId, channelId, new Tok(), CancellationToken.None);
+        return (rec.Seen, rec.Auth, null, f);
+    }
+    catch (Exception e)
+    {
+        return (rec.Seen, rec.Auth, e, null);
+    }
+}
+
+async Task<(List<Uri> seen, Exception? error, IReadOnlyList<ChannelEntry>? list)> Channels(string teamId, string? body = null)
+{
+    Rec rec = new((_, _) => Json(body ?? "{\"value\":[]}"));
+    using HttpClient http = new(rec);
+    TeamsBrowser browser = new(new GraphClient(http, new GraphOptions(baseUri)));
+    try
+    {
+        var l = await browser.ListChannelsAsync(teamId, new Tok(), CancellationToken.None);
+        return (rec.Seen, null, l);
+    }
+    catch (Exception e)
+    {
+        return (rec.Seen, e, null);
+    }
+}
+
+static HttpResponseMessage Json(string body) => new(HttpStatusCode.OK) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
+
+string mode = args.Length > 0 ? args[0] : "all";
+Console.WriteLine("PROBE B2208 " + mode + " | " + System.Runtime.InteropServices.RuntimeInformation.OSDescription + " | " + System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
+
+// ---- (a) Tuesday's shapes through each rule and the real request builder.
+string[] shapes =
+[
+    "%2F", "%2f", "%2E%2E", "%3F", "%23", ".", "..", "...", "....", "", " ", "\t",
+    "a.", "a..", "a ", "a\t", "a\n", "a\r\n", "\n", ".\n", "..\n", "...\n", "%2E%2E\n",
+    "／", "．", "．．", "∕", "⁄", "․", "‥", "﹒", "…", "·",
+    "19:x@thread.", "19:x@thread.tacv2.", "19:x@thread.tacv2\n", "19:x@thread.tacv2%2F..", "19:x/..@thread.tacv2",
+];
+if (mode is "all" or "a")
+{
+    Console.WriteLine("== (a) CHANNEL RULE: id -> IsChannelId | sent? | request AbsolutePath | Query | Fragment | intended?");
+    foreach (string raw in shapes)
+    {
+        string id = raw.StartsWith("19:", StringComparison.Ordinal) || raw.Length == 0 ? raw : "19:a" + raw;
+        foreach (string candidate in id == raw ? new[] { raw } : new[] { raw, id })
+        {
+            bool rule = TeamsBrowser.IsChannelId(candidate);
+            var (seen, auth, error, _) = await Folder(Team, candidate);
+            string intended = "/v1.0/teams/" + Team + "/channels/" + candidate + "/filesFolder";
+            string line = seen.Count == 0
+                ? "NOT SENT (" + error?.GetType().Name + ")"
+                : "SENT " + Show(seen[0].AbsolutePath) + " | q=" + Show(seen[0].Query) + " | f=" + Show(seen[0].Fragment) + " | auth=" + (auth[0] is null ? "none" : "Bearer <redacted>") + " | intended(exact)=" + (seen[0].AbsolutePath == intended && seen[0].Query.Length == 0 && seen[0].Fragment.Length == 0) + " | segments=" + seen[0].Segments.Length;
+            Console.WriteLine("  ch " + Show(candidate).PadRight(28) + " rule=" + rule + " | " + line);
+        }
+    }
+
+    Console.WriteLine("== (a) TEAM RULE: id -> IsTeamId | ListChannels sent? | GetFilesFolder sent?");
+    string[] teamShapes =
+    [
+        "", "...", "00000000-0000-4000-8000-00000000000.", "00000000-0000-4000-8000-00000000000 ", "00000000-0000-4000-8000-00000000000\t",
+        "00000000-0000-4000-8000-00000000000\n", "\n0000000-0000-4000-8000-000000000001", "00000000-0000-4000-8000-0000000%2F001",
+        "00000000-0000-4000-8000-000000%2E%2E1", "00000000-0000-4000-8000-0000000000%3F", "00000000-0000-4000-8000-0000000000%23",
+        "00000000-0000-4000-8000-0000000000／1", "00000000-0000-4000-8000-0000000000．1", "0x000000-0000-4000-8000-000000000001",
+        "+0000000-0000-4000-8000-000000000001", "00000000-0000-4000-8000-00000000000１", "00000000-0000-4000-8000-00000000000١",
+        Team.ToUpperInvariant(), "00000000-0000-4000-8000-000000000001",
+    ];
+    foreach (string t in teamShapes)
+    {
+        bool rule = TeamsBrowser.IsTeamId(t);
+        var (s1, e1, _) = await Channels(t);
+        var (s2, _, e2, _) = await Folder(t, Channel);
+        Console.WriteLine("  team " + Show(t).PadRight(44) + " rule=" + rule
+            + " | channels " + (s1.Count == 0 ? "NOT SENT (" + e1?.GetType().Name + ")" : "SENT " + Show(s1[0].PathAndQuery))
+            + " | folder " + (s2.Count == 0 ? "NOT SENT (" + e2?.GetType().Name + ")" : "SENT " + Show(s2[0].AbsolutePath)));
+    }
+
+    Console.WriteLine("== (a) DRIVE RULE (returned, not sent in this slice): segment -> IsDriveSegment | what new Uri(base, \"drives/<seg>/items\") makes of it");
+    foreach (string raw in shapes)
+    {
+        string seg = raw.Length == 0 ? raw : "b!a" + raw;
+        foreach (string candidate in new[] { raw, seg }.Distinct())
+        {
+            bool rule = TeamsBrowser.IsDriveSegment(candidate);
+            string made = Uri.TryCreate(baseUri, "drives/" + candidate + "/items", out Uri? u) ? Show(u.AbsolutePath) + " q=" + Show(u.Query) + " f=" + Show(u.Fragment) : "<no uri>";
+            Console.WriteLine("  drv " + Show(candidate).PadRight(28) + " rule=" + rule + " | " + made);
+        }
+    }
+
+    Console.WriteLine("== (a) FOLDER ANSWER with a drive id / item id ending in a newline");
+    foreach ((string id, string drive) in new[] { ("ITEM0001\n", "b!drive_0001"), ("ITEM0001", "b!drive_0001\n"), ("ITEM0001", "b!drive_0001."), ("...", "b!drive_0001") })
+    {
+        var (_, _, error, folder) = await Folder(Team, Channel, FolderJson(id, drive));
+        Console.WriteLine("  answer id=" + Show(id) + " driveId=" + Show(drive) + " -> " + (folder is null ? "REFUSED " + error?.GetType().Name : "RETURNED ItemId=" + Show(folder.ItemId) + " DriveId=" + Show(folder.DriveId)));
+    }
+
+    Console.WriteLine("== (a) CHANNEL LISTING item ids ending in a newline (and a duplicate differing only by it)");
+    var (_, le, list) = await Channels(Team, "{\"value\":[{\"id\":\"19:a@thread.tacv2\",\"displayName\":\"a\"},{\"id\":\"19:a@thread.tacv2\\n\",\"displayName\":\"b\"}]}");
+    Console.WriteLine("  -> " + (list is null ? "REFUSED " + le?.GetType().Name + " " + le?.Message : "RETURNED " + string.Join(", ", list.Select(c => Show(c.Id)))));
+}
+
+// ---- (b) Fuzz: every UTF-16 code unit in every position class against each rule; report accepted characters outside the stated classes.
+if (mode is "all" or "fuzz")
+{
+    static bool StatedChannel(char c) => c is (>= 'A' and <= 'Z') or (>= 'a' and <= 'z') or (>= '0' and <= '9') or ':' or '@' or '.' or '_' or '-';
+    static bool StatedDrive(char c) => c is (>= 'A' and <= 'Z') or (>= 'a' and <= 'z') or (>= '0' and <= '9') or '!' or '.' or '_' or '-';
+    static bool StatedTeam(char c) => c is (>= 'A' and <= 'F') or (>= 'a' and <= 'f') or (>= '0' and <= '9') or '-';
+    List<string> odd = [];
+    for (int i = 0; i <= 0xFFFF; i++)
+    {
+        char c = (char)i;
+        foreach (string s in new[] { c + "abc", "ab" + c + "c", "abc" + c, c.ToString() })
+        {
+            if (TeamsBrowser.IsChannelId(s) && s.Any(x => !StatedChannel(x))) odd.Add("channel " + Show(s));
+            if (TeamsBrowser.IsDriveSegment(s) && s.Any(x => !StatedDrive(x))) odd.Add("drive " + Show(s));
+        }
+    }
+
+    int teamAccepted = 0, teamOdd = 0;
+    for (int pos = 0; pos < 36; pos++)
+    {
+        for (int i = 0; i <= 0xFFFF; i++)
+        {
+            char[] t = Team.ToCharArray();
+            t[pos] = (char)i;
+            string s = new(t);
+            if (TeamsBrowser.IsTeamId(s))
+            {
+                teamAccepted++;
+                if (s.Any(x => !StatedTeam(x))) { teamOdd++; odd.Add("team " + Show(s)); }
+            }
+        }
+    }
+
+    // pairs of positions over a small hostile set (prefixes like 0x, signs, white space)
+    char[] set = ['0', 'x', 'X', '+', '-', ' ', '\t', '\n', '{', '}', '(', ')', '.', '/', 'g', '０', '٠'];
+    int pairs = 0;
+    for (int p = 0; p < 36; p++)
+    for (int q = p + 1; q < 36; q++)
+    foreach (char a in set)
+    foreach (char b in set)
+    {
+        char[] t = Team.ToCharArray();
+        t[p] = a; t[q] = b;
+        string s = new(t);
+        pairs++;
+        if (TeamsBrowser.IsTeamId(s) && s.Any(x => !StatedTeam(x))) odd.Add("team-pair " + Show(s));
+    }
+
+    Console.WriteLine("FUZZ: single-unit team substitutions accepted " + teamAccepted + " (of 36 x 65536), outside [0-9A-Fa-f-] " + teamOdd + "; pair substitutions tried " + pairs);
+    Console.WriteLine("FUZZ: accepted ids holding a character outside the stated class: " + odd.Count);
+    foreach (string o in odd.Distinct().Take(40)) Console.WriteLine("  " + o);
+}
+
+// ---- (c) Positive and negative controls of the probe itself.
+if (mode is "all" or "a")
+{
+    var (seen, _, _, f) = await Folder(Team, Channel);
+    Console.WriteLine("CONTROL positive: a good channel id sends " + seen.Count + " request(s), folder returned " + (f is not null));
+    var (seen2, _, e2, _) = await Folder(Team, "19:a/b@thread.tacv2");
+    Console.WriteLine("CONTROL negative: a slash channel id sends " + seen2.Count + " request(s), " + e2?.GetType().Name);
+}
+
+sealed class Rec(Func<int, Uri, HttpResponseMessage> answer) : HttpMessageHandler
+{
+    public List<Uri> Seen { get; } = [];
+    public List<string?> Auth { get; } = [];
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        lock (Seen)
+        {
+            Seen.Add(request.RequestUri!);
+            Auth.Add(request.Headers.Authorization?.Scheme);
+        }
+        return Task.FromResult(answer(Seen.Count - 1, request.RequestUri!));
+    }
+}
+
+sealed class Tok : IGraphTokenSource
+{
+    public ValueTask<GraphToken> GetTokenAsync(CancellationToken cancellationToken) => ValueTask.FromResult(new GraphToken("synthetic-access-0001"));
+    public ValueTask<GraphToken?> GetNewTokenAsync(CancellationToken cancellationToken) => ValueTask.FromResult<GraphToken?>(null);
+}

@@ -1,0 +1,31 @@
+The SharePoint module's first slice, every call through the shared
+Graph client by its public API. SharePointBrowser searches sites (every
+page, 500 a page, * as written when nothing is typed, a typed query
+escaped whole), reads a site's libraries, its lists and a list's
+columns (the first page of each), finds the list behind a library (web
+address, then display name, else the only list; two matches by one
+rule is AmbiguousList, never a guess), offers only columns that are not
+read-only, not in the _Hidden group and of one of five kinds, and lists
+a library folder (20 a page, every page, the list-item key from the
+GUID inside each item's eTag). SharePointFiles uploads into a library
+folder through ONE upload session whose conflict rule is fail (the
+pieces carry no Authorization header; a session address must be
+absolute https with no user info; the stored item must be a file of the
+length sent when the answer gives a size) and writes column values to
+the file's list item in ONE fields write, after each value is checked
+against the offered columns (known name, same kind, each once).
+
+Every argument is checked before any request. An item outside its rule
+ends the call with its page and item number; nothing is left out
+silently. Messages and ToString hold kinds and numbers only. The module
+keeps no token, sets no header and makes no HTTP client.
+
+Cells S01 to S16 (46 cases) against a fake handler; ten mutants turn
+them red. Against fakes only: how Microsoft Graph answers each call is
+not measured. Not built: the print path, column values per listed item,
+the write-permission read, search inside a library, create, rename and
+delete, the simple upload, recent sites, thumbnails, the panel pages and
+the host wiring. Nothing ran against a device, a tenant or a Microsoft
+host. Nothing is deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

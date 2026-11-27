@@ -1,0 +1,513 @@
+using System.Net;
+using System.Net.Sockets;
+using System.Reflection;
+using System.Text;
+using System.Xml;
+using System.Xml.Linq;
+using Xunit;
+
+namespace Datasec.Suite.Adapters.Oxpd1.Agents.Tests;
+
+// GATE B2207 PROBE ONLY: never committed. Copied into the gate's scratch clone, run, and moved out after the run.
+// Every cell records what it saw into the gate's results file and asserts nothing (the record is the evidence).
+// Every value is synthetic and made here; the only socket is a listener on 127.0.0.1 inside this process.
+public class GateProbeTests
+{
+    private const string Out = "/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s338/g2207/probe-results.txt";
+    private const string Ns = "http://www.hp.com/schemas/imaging/OXPd/service/authenticationagent/2013/03/01";
+    private const string Soap = "http://www.w3.org/2003/05/soap-envelope";
+    private const string Wsa = "http://www.w3.org/2005/08/addressing";
+    private const string SoapType = "application/soap+xml; charset=utf-8";
+    private const string Ctx = "GATEPROBEcontext0000000000000001";
+    private const string Srv = "gate-probe-server-context-0001";
+    private const string Mid = "urn:uuid:9a7e0000-0000-4000-8000-00000000b001";
+    private const string Detail = "GATEPROBE-detail-0001";
+    private static readonly Lock Sync = new();
+    private static int succeededSeen;
+    private static int replies;
+
+    private static void Note(string line)
+    {
+        lock (Sync)
+        {
+            File.AppendAllText(Out, line + "\n");
+        }
+    }
+
+    private sealed class Probe : IOxpd1AuthenticationAgentHandler
+    {
+        internal Func<Oxpd1AgentRequest, CancellationToken, Task<Oxpd1PrePromptAnswer>>? Pre { get; init; }
+
+        internal List<Oxpd1AgentRequest> Seen { get; } = [];
+
+        public Task<Oxpd1PrePromptAnswer> PrePromptAsync(Oxpd1AgentRequest request, CancellationToken cancellationToken)
+        {
+            lock (Seen)
+            {
+                Seen.Add(request);
+            }
+
+            return Pre is null ? Task.FromResult(Oxpd1PrePromptAnswer.Continued()) : Pre(request, cancellationToken);
+        }
+
+        public Task<Oxpd1PostPromptAnswer> PostPromptAsync(Oxpd1AgentRequest request, CancellationToken cancellationToken)
+        {
+            lock (Seen)
+            {
+                Seen.Add(request);
+            }
+
+            return Task.FromResult(Oxpd1PostPromptAnswer.Canceled());
+        }
+
+        public Task SignedOutAsync(Oxpd1AgentRequest request, CancellationToken cancellationToken)
+        {
+            lock (Seen)
+            {
+                Seen.Add(request);
+            }
+
+            return Task.CompletedTask;
+        }
+    }
+
+    private static string Call(string context = Ctx, string language = "en-US", string? server = Srv, string op = "GetPrePromptResult", string prefix = "h:", string decl = "xmlns:h=\"" + Ns + "\"")
+    {
+        string s = server is null ? string.Empty : "<" + prefix + "serverContextId>" + server + "</" + prefix + "serverContextId>";
+        return "<" + prefix + op + " " + decl + "><" + prefix + "authenticationContextId>" + context + "</" + prefix + "authenticationContextId><" + prefix + "languageCode>" + language + "</" + prefix + "languageCode>" + s + "</" + prefix + op + ">";
+    }
+
+    private static string Env(string call, string header = "", string? action = null, string messageId = Mid, string bodyExtra = "", string envExtra = "")
+    {
+        string a = action ?? Ns + "/IAuthenticationAgentService/GetPrePromptResult";
+        return "<s:Envelope xmlns:s=\"" + Soap + "\"><s:Header><a:Action xmlns:a=\"" + Wsa + "\">" + a + "</a:Action><a:MessageID xmlns:a=\"" + Wsa + "\">" + messageId + "</a:MessageID>" + header + "</s:Header><s:Body>" + call + bodyExtra + "</s:Body>" + envExtra + "</s:Envelope>";
+    }
+
+    private static async Task<string> Run(string label, byte[] bytes, string? contentType = SoapType, Probe? handler = null, Stream? stream = null)
+    {
+        handler ??= new Probe();
+        Oxpd1AuthenticationAgentEndpoint endpoint = new(handler);
+        string outcome;
+        try
+        {
+            using Stream body = stream ?? new MemoryStream(bytes);
+            Oxpd1AgentReply reply = await endpoint.AnswerAsync(body, contentType, TestContext.Current.CancellationToken);
+            string text = Encoding.UTF8.GetString(reply.Body);
+            Interlocked.Increment(ref replies);
+            lock (Sync)
+            {
+                File.AppendAllText(Out + ".bodies", label + "\t" + text.Replace("\n", "\\n", StringComparison.Ordinal) + "\n");
+            }
+
+            if (text.Contains("Succeeded", StringComparison.OrdinalIgnoreCase))
+            {
+                Interlocked.Increment(ref succeededSeen);
+            }
+
+            string reason = string.Empty;
+            string relates = "none";
+            try
+            {
+                XDocument d = XDocument.Parse(text);
+                reason = d.Descendants(XName.Get("Text", Soap)).FirstOrDefault()?.Value ?? string.Empty;
+                XElement? rel = d.Root!.Element(XName.Get("Header", Soap))?.Elements().FirstOrDefault(e => e.Name.LocalName == "RelatesTo");
+                relates = rel is null ? "none" : rel.Name.NamespaceName + (rel.Value == Mid ? " = the request's MessageID" : " (other value, length " + rel.Value.Length + ")");
+            }
+            catch (XmlException)
+            {
+                reason = "REPLY NOT XML";
+            }
+
+            bool leak = text.Contains(Ctx, StringComparison.OrdinalIgnoreCase) || text.Contains(Srv, StringComparison.OrdinalIgnoreCase) || text.Contains(Detail, StringComparison.OrdinalIgnoreCase);
+            bool tsLeak = reply.ToString().Contains(Ctx, StringComparison.OrdinalIgnoreCase) || reply.ToString().Contains(Mid, StringComparison.OrdinalIgnoreCase);
+            string seen;
+            lock (handler.Seen)
+            {
+                seen = handler.Seen.Count.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                if (handler.Seen.Count > 0)
+                {
+                    Oxpd1AgentRequest r = handler.Seen[0];
+                    seen += " (context equal " + (r.AuthenticationContextId == Ctx) + ", language " + (r.LanguageCode ?? "null") + ", server equal " + (r.ServerContextId == Srv) + (r.ServerContextId is null ? " (null)" : " (length " + r.ServerContextId.Length + ")") + ", ToString '" + r + "')";
+                }
+            }
+
+            outcome = "status " + reply.Status + " fault " + (reply.FaultCode ?? "none") + " | '" + reason + "' | RelatesTo " + relates + " | handler saw " + seen + " | body holds context/server/detail " + leak + " | reply.ToString '" + reply + "' holds id " + tsLeak;
+        }
+        catch (Exception e)
+        {
+            int n;
+            lock (handler.Seen)
+            {
+                n = handler.Seen.Count;
+            }
+
+            outcome = "THREW " + e.GetType().Name + " | message holds detail " + e.Message.Contains(Detail, StringComparison.Ordinal) + " | handler saw " + n;
+        }
+
+        Note(label + ": " + outcome);
+        return outcome;
+    }
+
+    private static byte[] U8(string s) => Encoding.UTF8.GetBytes(s);
+
+    private sealed class ChunkStream(byte[] data, int chunk, bool endless) : Stream
+    {
+        private int pos;
+
+        internal long Served { get; private set; }
+
+        internal int Reads { get; private set; }
+
+        public override bool CanRead => true;
+
+        public override bool CanSeek => false;
+
+        public override bool CanWrite => false;
+
+        public override long Length => throw new NotSupportedException();
+
+        public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+
+        public override void Flush()
+        {
+        }
+
+        public override int Read(byte[] buffer, int offset, int count) => Fill(buffer.AsSpan(offset, count));
+
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default) => ValueTask.FromResult(Fill(buffer.Span));
+
+        private int Fill(Span<byte> dest)
+        {
+            Reads++;
+            int n = Math.Min(chunk, dest.Length);
+            if (!endless)
+            {
+                n = Math.Min(n, data.Length - pos);
+            }
+
+            for (int i = 0; i < n; i++)
+            {
+                dest[i] = endless ? (byte)' ' : data[pos + i];
+            }
+
+            pos += n;
+            Served += n;
+            return n;
+        }
+
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+
+        public override void SetLength(long value) => throw new NotSupportedException();
+
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+    }
+
+    private static byte[] Padded(int total)
+    {
+        string head = Env(Call()).Replace("<s:Body>", "<s:Body>" + "\u0001PAD", StringComparison.Ordinal);
+        int pad = total - U8(head).Length + 4;
+        return U8(head.Replace("\u0001PAD", new string(' ', pad), StringComparison.Ordinal));
+    }
+
+    private static string Nested(int levels) => string.Concat(Enumerable.Repeat("<x:n>", levels)) + string.Concat(Enumerable.Repeat("</x:n>", levels));
+
+    [Fact]
+    public async Task P1_bounds_size_depth_and_streams()
+    {
+        Note("==== P1 bounds " + DateTime.Now.ToString("HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture));
+        foreach (int size in new[] { 65535, 65536, 65537, 70000 })
+        {
+            byte[] b = Padded(size);
+            await Run("size " + b.Length + " bytes (whitespace in the Body)", b);
+        }
+
+        byte[] bom = [0xEF, 0xBB, 0xBF, .. Padded(65533)];
+        await Run("size " + bom.Length + " bytes = UTF-8 BOM + 65533", bom);
+        byte[] bom2 = [0xEF, 0xBB, 0xBF, .. Padded(65534)];
+        await Run("size " + bom2.Length + " bytes = UTF-8 BOM + 65534", bom2);
+
+        // depth: Envelope 0, Header 1, the block 2; a block holding k nested elements reaches depth 2 + k.
+        foreach (int deepest in new[] { 63, 64, 65 })
+        {
+            int k = deepest - 2;
+            string block = "<x:b xmlns:x=\"urn:example:deep\">" + Nested(k) + "</x:b>";
+            await Run("depth: deepest element at XmlReader.Depth " + deepest + " (in a header block)", U8(Env(Call(), header: block)));
+        }
+
+        foreach (int deepest in new[] { 64, 65 })
+        {
+            // inside the operation element: Envelope 0, Body 1, op 2, a child 3
+            int k = deepest - 2;
+            string call = Call().Replace("</h:GetPrePromptResult>", Nested(k).Replace("x:n", "h:n", StringComparison.Ordinal) + "</h:GetPrePromptResult>", StringComparison.Ordinal);
+            await Run("depth: deepest at " + deepest + " inside the operation element", U8(Env(call)));
+        }
+
+        byte[] good = U8(Env(Call()));
+        ChunkStream one = new(good, 1, false);
+        await Run("chunked stream, 1 byte per read (" + good.Length + " bytes)", [], stream: one);
+        Note("   chunked: reads " + one.Reads + ", served " + one.Served);
+        ChunkStream seven = new(good, 7, false);
+        await Run("chunked stream, 7 bytes per read", [], stream: seven);
+        ChunkStream endless = new([], 4096, true);
+        await Run("endless stream of spaces, 4096 per read", [], stream: endless);
+        Note("   endless: bytes served " + endless.Served + " (bound+1 = 65537), reads " + endless.Reads);
+    }
+
+    [Fact]
+    public async Task P2_dtd_entities_resolver_and_encodings()
+    {
+        Note("==== P2 dtd/entities/resolver/encoding");
+        using TcpListener listener = new(IPAddress.Loopback, 0);
+        listener.Start();
+        int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        string url = "http://127.0.0.1:" + port.ToString(System.Globalization.CultureInfo.InvariantCulture) + "/x";
+        string env = Env(Call());
+        await Run("DOCTYPE SYSTEM to a loopback listener", U8("<!DOCTYPE s:Envelope SYSTEM \"" + url + "\">" + env));
+        await Run("DOCTYPE internal subset, entity used in the context id", U8("<!DOCTYPE s:Envelope [<!ENTITY e \"GATEPROBEcontext\">]>" + env.Replace(Ctx, "&e;0000000000000001", StringComparison.Ordinal)));
+        await Run("billion laughs (10 levels)", U8("<!DOCTYPE s:Envelope [<!ENTITY l0 \"lol\">" + string.Concat(Enumerable.Range(1, 9).Select(i => "<!ENTITY l" + i + " \"" + string.Concat(Enumerable.Repeat("&l" + (i - 1) + ";", 10)) + "\">")) + "]>" + env.Replace(Srv, "&l9;", StringComparison.Ordinal)));
+        await Run("undeclared entity, no DTD", U8(env.Replace(Srv, "&undeclared;", StringComparison.Ordinal)));
+        await Run("character references in the context id (&#x47;&#65;...)", U8(env.Replace(Ctx, "&#x47;&#65;" + Ctx[2..], StringComparison.Ordinal)));
+        await Run("xml-stylesheet PI to the listener before the root", U8("<?xml-stylesheet type=\"text/xsl\" href=\"" + url + "\"?>" + env));
+        await Run("xi:include to the listener inside the operation", U8(Env(Call().Replace("</h:GetPrePromptResult>", "<xi:include xmlns:xi=\"http://www.w3.org/2001/XInclude\" href=\"" + url + "\"/></h:GetPrePromptResult>", StringComparison.Ordinal))));
+        await Run("xi:include as the body element", U8(Env("<xi:include xmlns:xi=\"http://www.w3.org/2001/XInclude\" href=\"" + url + "\"/>")));
+        await Run("xml:base and xsi:schemaLocation on the operation", U8(Env(Call(decl: "xmlns:h=\"" + Ns + "\" xml:base=\"" + url + "/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"" + Ns + " " + url + "\""))));
+        await Task.Delay(500, TestContext.Current.CancellationToken);
+        int connections = 0;
+        while (listener.Pending())
+        {
+            using TcpClient c = await listener.AcceptTcpClientAsync(TestContext.Current.CancellationToken);
+            connections++;
+        }
+
+        Note("   loopback listener connections after the five reference shapes: " + connections);
+
+        // encodings
+        await Run("UTF-8 BOM, utf-8 declaration", [0xEF, 0xBB, 0xBF, .. U8("<?xml version=\"1.0\" encoding=\"utf-8\"?>" + env)]);
+        await Run("UTF-8 BOM, encoding=\"utf-16\" declaration", [0xEF, 0xBB, 0xBF, .. U8("<?xml version=\"1.0\" encoding=\"utf-16\"?>" + env)]);
+        await Run("no BOM, UTF-8 bytes, encoding=\"utf-16\" declaration", U8("<?xml version=\"1.0\" encoding=\"utf-16\"?>" + env));
+        await Run("UTF-16LE BOM and bytes, encoding=\"utf-8\" declaration", [0xFF, 0xFE, .. Encoding.Unicode.GetBytes("<?xml version=\"1.0\" encoding=\"utf-8\"?>" + env)]);
+        await Run("UTF-16LE BOM and bytes, utf-16 declaration", [0xFF, 0xFE, .. Encoding.Unicode.GetBytes("<?xml version=\"1.0\" encoding=\"utf-16\"?>" + env)]);
+        await Run("UTF-16LE bytes, no BOM, no declaration", Encoding.Unicode.GetBytes(env));
+        await Run("UTF-16BE BOM and bytes, content type charset=utf-8", [0xFE, 0xFF, .. Encoding.BigEndianUnicode.GetBytes(env)]);
+        string latin = env.Replace(Srv, "gate-probe-server-éé", StringComparison.Ordinal);
+        await Run("encoding=\"iso-8859-1\" declared, UTF-8 bytes holding U+00E9 in the server context id", U8("<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>" + latin));
+        await Run("encoding=\"x-unknown-gate\" declared", U8("<?xml version=\"1.0\" encoding=\"x-unknown-gate\"?>" + env));
+        await Run("UTF-32LE BOM and bytes", [.. new UTF32Encoding(false, true).GetPreamble(), .. new UTF32Encoding(false, false).GetBytes(env)]);
+        await Run("invalid UTF-8 byte 0xFF inside the server context id", [.. U8(env[..env.IndexOf(Srv, StringComparison.Ordinal)]), 0xFF, .. U8(env[env.IndexOf(Srv, StringComparison.Ordinal)..])]);
+
+        // MaxCharactersFromEntities = 0 is "no limit" in .NET (the instrument: the same billion-laughs under Parse settings with the DTD let through)
+        string lol = "<!DOCTYPE r [<!ENTITY l0 \"" + new string('a', 2000) + "\">" + string.Concat(Enumerable.Range(1, 4).Select(i => "<!ENTITY l" + i + " \"" + string.Concat(Enumerable.Repeat("&l" + (i - 1) + ";", 10)) + "\">")) + "]><r>&l4;</r>";
+        foreach ((string name, long max) in new[] { ("MaxCharactersFromEntities=0", 0L), ("MaxCharactersFromEntities=default", -1L) })
+        {
+            XmlReaderSettings s = new() { DtdProcessing = DtdProcessing.Parse, XmlResolver = null };
+            if (max >= 0)
+            {
+                s.MaxCharactersFromEntities = max;
+            }
+
+            try
+            {
+                using XmlReader r = XmlReader.Create(new StringReader(lol), s);
+                XDocument d = XDocument.Load(r);
+                Note("   instrument (DTD let through on purpose, NOT the endpoint) " + name + " (setting " + s.MaxCharactersFromEntities + "): expanded to " + d.Root!.Value.Length + " characters");
+            }
+            catch (XmlException e)
+            {
+                Note("   instrument (DTD let through on purpose, NOT the endpoint) " + name + " (setting " + s.MaxCharactersFromEntities + "): XmlException '" + e.Message[..Math.Min(80, e.Message.Length)] + "'");
+            }
+        }
+    }
+
+    [Fact]
+    public async Task P3_comments_pis_cdata_lookalikes_and_headers()
+    {
+        Note("==== P3 markup and lookalikes");
+        string env = Env(Call());
+        await Run("control: the good request", U8(env));
+        await Run("comment inside the context id", U8(env.Replace(Ctx, Ctx[..10] + "<!-- c -->" + Ctx[10..], StringComparison.Ordinal)));
+        await Run("PI inside the context id", U8(env.Replace(Ctx, Ctx[..10] + "<?p q?>" + Ctx[10..], StringComparison.Ordinal)));
+        await Run("CDATA holding the context id", U8(env.Replace(Ctx, "<![CDATA[" + Ctx + "]]>", StringComparison.Ordinal)));
+        await Run("CDATA holding part of the context id", U8(env.Replace(Ctx, Ctx[..10] + "<![CDATA[" + Ctx[10..] + "]]>", StringComparison.Ordinal)));
+        await Run("comment and PI between the children and in the Body", U8(env.Replace("<h:languageCode>", "<!-- c --><?p q?><h:languageCode>", StringComparison.Ordinal).Replace("<s:Body>", "<s:Body><!-- c --><?p q?>", StringComparison.Ordinal)));
+        await Run("CDATA of white space beside the children", U8(env.Replace("<h:languageCode>", "<![CDATA[  ]]><h:languageCode>", StringComparison.Ordinal)));
+        await Run("CDATA of text beside the children", U8(env.Replace("<h:languageCode>", "<![CDATA[x]]><h:languageCode>", StringComparison.Ordinal)));
+        await Run("text beside the operation in the Body", U8(Env(Call(), bodyExtra: "x")));
+        await Run("context id with surrounding white space", U8(env.Replace(Ctx, " " + Ctx + " ", StringComparison.Ordinal)));
+        await Run("server context id with a surrogate pair", U8(env.Replace(Srv, Srv + "\U0001F600", StringComparison.Ordinal)));
+        await Run("server context id of 256", U8(env.Replace(Srv, new string('s', 256), StringComparison.Ordinal)));
+        await Run("server context id of 257", U8(env.Replace(Srv, new string('s', 257), StringComparison.Ordinal)));
+        await Run("context id of 32 (letters/digits)", U8(env.Replace(Ctx, new string('A', 32), StringComparison.Ordinal)));
+        await Run("context id of 128", U8(env.Replace(Ctx, new string('A', 128), StringComparison.Ordinal)));
+        await Run("context id of 33 with a non-ASCII digit U+0663", U8(env.Replace(Ctx, Ctx + "٣", StringComparison.Ordinal)));
+        await Run("language en-GB", U8(Env(Call(language: "en-GB"))));
+        await Run("language with fullwidth letters", U8(Env(Call(language: "ｅn-US"))));
+        await Run("unprefixed operation, default namespace = the agent's", U8(Env(Call(prefix: string.Empty, decl: "xmlns=\"" + Ns + "\""))));
+        await Run("operation in NO namespace (lookalike)", U8(Env(Call(prefix: string.Empty, decl: string.Empty))));
+        await Run("operation in the agent namespace + trailing slash (lookalike)", U8(Env(Call(decl: "xmlns:h=\"" + Ns + "/\""))));
+        await Run("operation name lower-case first letter (lookalike)", U8(Env(Call(op: "getPrePromptResult"))));
+        await Run("children in no namespace under the agent's operation", U8(Env("<h:GetPrePromptResult xmlns:h=\"" + Ns + "\"><authenticationContextId>" + Ctx + "</authenticationContextId><languageCode>en-US</languageCode></h:GetPrePromptResult>")));
+        await Run("children with xsi:type and a foreign attribute", U8(env.Replace("<h:languageCode>", "<h:languageCode xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"xs:int\" foo=\"bar\">", StringComparison.Ordinal)));
+        await Run("serverContextId xsi:nil=true", U8(env.Replace("<h:serverContextId>" + Srv + "</h:serverContextId>", "<h:serverContextId xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:nil=\"true\"/>", StringComparison.Ordinal)));
+        await Run("MessageID lookalike namespace (wsa + trailing slash) with mustUnderstand", U8(Env(Call(), header: "<z:MessageID xmlns:z=\"" + Wsa + "/\" xmlns:s=\"" + Soap + "\" s:mustUnderstand=\"true\">urn:example:m</z:MessageID>")));
+        await Run("unprefixed MessageID in no namespace, no mustUnderstand", U8(Env(Call(), header: "<MessageID>urn:example:m</MessageID>")));
+        await Run("unknown block mustUnderstand=\"1\"", U8(Env(Call(), header: "<p:P xmlns:p=\"urn:example:p\" s:mustUnderstand=\"1\"/>")));
+        await Run("unknown block mustUnderstand=\" true \"", U8(Env(Call(), header: "<p:P xmlns:p=\"urn:example:p\" s:mustUnderstand=\" true \"/>")));
+        await Run("unknown block mustUnderstand=\"TRUE\" (not an xs:boolean)", U8(Env(Call(), header: "<p:P xmlns:p=\"urn:example:p\" s:mustUnderstand=\"TRUE\"/>")));
+        await Run("unknown block mustUnderstand in the SOAP 1.1 namespace", U8(Env(Call(), header: "<p:P xmlns:p=\"urn:example:p\" xmlns:e=\"http://schemas.xmlsoap.org/soap/envelope/\" e:mustUnderstand=\"1\"/>")));
+        await Run("Action with white space around it", U8(Env(Call(), action: " " + Ns + "/IAuthenticationAgentService/GetPrePromptResult\n")));
+        await Run("Action split by a child element (Value concatenates)", U8(Env(Call(), action: Ns + "/IAuthenticationAgentService/<x:i xmlns:x=\"urn:example:i\"/>GetPrePromptResult")));
+        await Run("two Action blocks, the first right, the second wrong", U8(Env(Call(), header: "<a:Action xmlns:a=\"" + Wsa + "\">urn:example:wrong</a:Action>")));
+        await Run("two Action blocks, the first wrong", U8(Env(Call(), action: "urn:example:wrong", header: "<a:Action xmlns:a=\"" + Wsa + "\">" + Ns + "/IAuthenticationAgentService/GetPrePromptResult</a:Action>")));
+        await Run("MessageID of 256", U8(Env(Call(), messageId: new string('m', 256))));
+        await Run("MessageID of 257", U8(Env(Call(), messageId: new string('m', 257))));
+        await Run("MessageID empty", U8(Env(Call(), messageId: string.Empty)));
+        await Run("an element after the Body (s:Trailer)", U8(Env(Call(), envExtra: "<s:Trailer/>")));
+        await Run("a second Header after the Body with an unknown mustUnderstand block", U8(Env(Call(), envExtra: "<s:Header><p:P xmlns:p=\"urn:example:p\" s:mustUnderstand=\"true\"/></s:Header>")));
+        await Run("Body element twice (two s:Body)", U8(Env(Call(), envExtra: "<s:Body>" + Call() + "</s:Body>")));
+        await Run("SignOutNotification carrying a languageCode", U8(Env(Call(op: "SignOutNotification"), action: Ns + "/IAuthenticationAgentService/SignOutNotification")));
+        await Run("content type Application/SOAP+XML", U8(env), "Application/SOAP+XML");
+        await Run("content type application/soap+xml with action= of ANOTHER operation", U8(env), "application/soap+xml; charset=utf-8; action=\"" + Ns + "/IAuthenticationAgentService/SignOutNotification\"");
+        await Run("content type application/soap+xml-evil", U8(env), "application/soap+xml-evil");
+        await Run("content type null", U8(env), null);
+        await Run("content type text/xml", U8(env), "text/xml");
+    }
+
+    [Fact]
+    public async Task P4_no_succeeded_and_handler_failures()
+    {
+        Note("==== P4 handler failures and Succeeded");
+        byte[] good = U8(Env(Call()));
+        await Run("handler throws ArgumentException(detail)", good, handler: new Probe { Pre = (_, _) => throw new ArgumentException(Detail) });
+        await Run("handler returns a faulted task (InvalidOperation(detail))", good, handler: new Probe { Pre = (_, _) => Task.FromException<Oxpd1PrePromptAnswer>(new InvalidOperationException(Detail)) });
+        await Run("handler returns a null Task", good, handler: new Probe { Pre = (_, _) => null! });
+        await Run("handler returns Task of null", good, handler: new Probe { Pre = (_, _) => Task.FromResult<Oxpd1PrePromptAnswer>(null!) });
+        await Run("handler throws TaskCanceledException (its own HTTP time-out; the request's token NOT cancelled)", good, handler: new Probe { Pre = (_, _) => throw new TaskCanceledException(Detail) });
+        await Run("handler throws OperationCanceledException of an unrelated token", good, handler: new Probe { Pre = (_, _) => throw new OperationCanceledException(Detail, new CancellationToken(true)) });
+        await Run("handler throws an AggregateException wrapping a cancellation", good, handler: new Probe { Pre = (_, _) => throw new AggregateException(new OperationCanceledException(Detail)) });
+        await Run("handler answers Failed(message)", good, handler: new Probe { Pre = (_, _) => Task.FromResult(Oxpd1PrePromptAnswer.Failed("GATEPROBE-message-0001")) });
+        try
+        {
+            Oxpd1PrePromptAnswer.Failed(new string('q', 1025));
+        }
+        catch (ArgumentException e)
+        {
+            Note("Failed(1025 chars) ArgumentException message holds the value: " + e.Message.Contains("qqqq", StringComparison.Ordinal) + " | message '" + e.Message + "'");
+        }
+
+        foreach (Type t in new[] { typeof(Oxpd1PrePromptAnswer), typeof(Oxpd1PostPromptAnswer) })
+        {
+            string pub = string.Join(",", t.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly).Select(m => m.Name));
+            string ctors = string.Join(",", t.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Select(c => (c.IsPublic ? "public" : c.IsAssembly ? "internal" : c.IsPrivate ? "private" : "other") + "(" + c.GetParameters().Length + ")"));
+            Note("type " + t.Name + ": public static methods [" + pub + "], constructors [" + ctors + "], sealed " + t.IsSealed);
+        }
+
+        string asm = File.ReadAllText(typeof(Oxpd1AuthenticationAgentEndpoint).Assembly.Location, Encoding.Latin1);
+        Note("the Agents assembly bytes hold 'Succeeded' (ASCII or UTF-16): " + (asm.Contains("Succeeded", StringComparison.Ordinal) || asm.Contains("S\0u\0c\0c\0e\0e\0d\0e\0d", StringComparison.Ordinal)));
+
+        Oxpd1AuthenticationAgentEndpoint endpoint = new(new Probe());
+        using CancellationTokenSource cts = new();
+        await cts.CancelAsync();
+        try
+        {
+            using MemoryStream s = new(good);
+            await endpoint.AnswerAsync(s, SoapType, cts.Token);
+            Note("request token cancelled before the call: RETURNED");
+        }
+        catch (OperationCanceledException e)
+        {
+            Note("request token cancelled before the call: " + e.GetType().Name);
+        }
+    }
+
+    [Fact]
+    public async Task P5_two_and_sixty_four_concurrent_requests_on_one_endpoint()
+    {
+        Note("==== P5 concurrency");
+        TaskCompletionSource gate = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        int arrived = 0;
+        Probe handler = new()
+        {
+            Pre = async (r, ct) =>
+            {
+                if (Interlocked.Increment(ref arrived) == 2)
+                {
+                    gate.SetResult();
+                }
+
+                await gate.Task.WaitAsync(TimeSpan.FromSeconds(10), ct);
+                return r.AuthenticationContextId.EndsWith('1') ? Oxpd1PrePromptAnswer.Continued() : Oxpd1PrePromptAnswer.Failed("second");
+            },
+        };
+        Oxpd1AuthenticationAgentEndpoint endpoint = new(handler);
+        string c1 = new string('A', 31) + "1";
+        string c2 = new string('B', 31) + "2";
+        Task<Oxpd1AgentReply> t1 = Answer(endpoint, Env(Call(context: c1), messageId: "urn:example:first"));
+        Task<Oxpd1AgentReply> t2 = Answer(endpoint, Env(Call(context: c2, language: "fr-FR"), messageId: "urn:example:second"));
+        Oxpd1AgentReply[] both = await Task.WhenAll(t1, t2);
+        foreach ((Oxpd1AgentReply rep, string want, string code) in new[] { (both[0], "urn:example:first", "Continued"), (both[1], "urn:example:second", "Failed") })
+        {
+            XDocument d = XDocument.Parse(Encoding.UTF8.GetString(rep.Body));
+            string rel = d.Root!.Element(XName.Get("Header", Soap))!.Element(XName.Get("RelatesTo", Wsa))!.Value;
+            string got = d.Descendants(XName.Get("resultCode", Ns)).Single().Value;
+            Note("two interleaved (both inside the handler at once): RelatesTo own " + (rel == want) + ", code own " + (got == code) + ", status " + rep.Status);
+        }
+
+        Note("two interleaved: handler saw " + handler.Seen.Count + ", languages " + string.Join(",", handler.Seen.Select(s => s.LanguageCode).Order()));
+
+        Probe many = new()
+        {
+            Pre = async (r, ct) =>
+            {
+                await Task.Delay(Random.Shared.Next(0, 20), ct);
+                return r.ServerContextId == r.AuthenticationContextId[..8] ? Oxpd1PrePromptAnswer.Continued() : Oxpd1PrePromptAnswer.Canceled();
+            },
+        };
+        Oxpd1AuthenticationAgentEndpoint shared = new(many);
+        List<Task<(int I, Oxpd1AgentReply R)>> tasks = [];
+        for (int i = 0; i < 64; i++)
+        {
+            int k = i;
+            string ctx = "C" + k.ToString("D31", System.Globalization.CultureInfo.InvariantCulture);
+            string env = Env(Call(context: ctx, server: ctx[..8]), messageId: "urn:example:m" + k.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            tasks.Add(Task.Run(async () => (k, await Answer(shared, env)), TestContext.Current.CancellationToken));
+        }
+
+        int ownRel = 0;
+        int continued = 0;
+        foreach ((int i, Oxpd1AgentReply r) in await Task.WhenAll(tasks))
+        {
+            XDocument d = XDocument.Parse(Encoding.UTF8.GetString(r.Body));
+            if (d.Root!.Element(XName.Get("Header", Soap))!.Element(XName.Get("RelatesTo", Wsa))!.Value == "urn:example:m" + i.ToString(System.Globalization.CultureInfo.InvariantCulture))
+            {
+                ownRel++;
+            }
+
+            if (d.Descendants(XName.Get("resultCode", Ns)).Single().Value == "Continued")
+            {
+                continued++;
+            }
+        }
+
+        Note("64 concurrent on one endpoint: RelatesTo own " + ownRel + " of 64, each request's own values reached the handler (Continued) " + continued + " of 64, handler saw " + many.Seen.Count);
+        FieldInfo[] fields = typeof(Oxpd1AuthenticationAgentEndpoint).GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+        Note("endpoint fields: " + string.Join(", ", fields.Select(f => (f.IsStatic ? "static " : string.Empty) + (f.IsInitOnly ? "readonly " : f.IsLiteral ? "const " : "MUTABLE ") + f.FieldType.Name + " " + f.Name)));
+        foreach (Type t in typeof(Oxpd1AuthenticationAgentEndpoint).Assembly.GetTypes())
+        {
+            foreach (FieldInfo f in t.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
+            {
+                if (!f.IsLiteral)
+                {
+                    Note("static field in the assembly: " + t.Name + "." + f.Name + " " + f.FieldType.Name + (f.IsInitOnly ? " readonly" : " MUTABLE"));
+                }
+            }
+        }
+
+        Note("TOTAL replies " + Volatile.Read(ref replies) + " (of the probe's Run calls), any reply body holding 'Succeeded': " + Volatile.Read(ref succeededSeen));
+    }
+
+    private static async Task<Oxpd1AgentReply> Answer(Oxpd1AuthenticationAgentEndpoint e, string text)
+    {
+        using MemoryStream s = new(U8(text));
+        return await e.AnswerAsync(s, SoapType, TestContext.Current.CancellationToken);
+    }
+}

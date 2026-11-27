@@ -1,0 +1,419 @@
+using System.Net;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
+using Datasec.Suite.Graph;
+using Xunit;
+
+namespace Datasec.Suite.SharePoint.Tests;
+
+/// <summary>Gate B2209 probes (scratch only, never committed). Each probe PRINTS what it saw to a file; none asserts.</summary>
+public class GateProbes
+{
+    private static readonly string Out = Environment.GetEnvironmentVariable("G2209_OUT") ?? "/dev/null";
+    private static readonly object Gate = new();
+
+    private static void P(string line)
+    {
+        lock (Gate)
+        {
+            File.AppendAllText(Out, line + "\n");
+        }
+    }
+
+    private static string Auth(string? a) => a is null ? "null" : (a == "Bearer " + Synthetic.Access ? "Bearer <synthetic>" : "OTHER");
+
+    private static string Ex(Exception e) => e switch
+    {
+        SharePointException s => "SharePointException " + s.Kind + " p" + s.Page + " i" + s.Item,
+        GraphCallException g => "GraphCallException " + g.Kind + " " + (g.StatusCode is null ? "-" : ((int)g.StatusCode).ToString(System.Globalization.CultureInfo.InvariantCulture)),
+        _ => e.GetType().Name,
+    };
+
+    private sealed class RefreshingTokens : IGraphTokenSource
+    {
+        public ValueTask<GraphToken> GetTokenAsync(CancellationToken cancellationToken) => ValueTask.FromResult(new GraphToken(Synthetic.Access));
+
+        public ValueTask<GraphToken?> GetNewTokenAsync(CancellationToken cancellationToken) => ValueTask.FromResult<GraphToken?>(new GraphToken(Synthetic.Access));
+    }
+
+    private static async Task<(string Outcome, List<Recorded> Seen)> Upload(Func<int, Recorded, HttpResponseMessage> answer, string name = Synthetic.FileName, Action<HttpClient>? setup = null, IGraphTokenSource? tokens = null)
+    {
+        using CancellationTokenSource guard = Guard.TenSeconds();
+        using Rig rig = new(answer);
+        setup?.Invoke(rig.Http);
+        using MemoryStream content = new(Synthetic.Bytes(10));
+        string outcome;
+        try
+        {
+            LibraryItem item = await rig.Files.UploadAsync(Synthetic.SiteId, Synthetic.DriveId, null, name, content, 10, tokens ?? rig.Tokens, guard.Token);
+            outcome = "RETURNED kind " + item.Kind + " size " + (item.Size?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "none") + " key " + (item.ListItemKey is null ? "none" : (item.ListItemKey == Synthetic.ListItemKey ? "synthetic" : "other")) + " nameEqualsSent " + (item.Name == name);
+        }
+        catch (Exception e)
+        {
+            outcome = "THREW " + Ex(e);
+        }
+
+        return (outcome, rig.Graph.Seen);
+    }
+
+    private static Func<int, Recorded, HttpResponseMessage> Session(string sessionJson, string storedJson, HttpStatusCode stored = HttpStatusCode.Created) =>
+        (index, _) => index == 0 ? Synthetic.Json(sessionJson) : Synthetic.Json(storedJson, stored);
+
+    [Fact]
+    public async Task GA_session_address_shapes()
+    {
+        string file = Synthetic.File("SYNTHETICFILE0001", Synthetic.FileName, 10, Synthetic.ETag);
+        string[] urls =
+        [
+            "https://upload.example.test/session/synthetic0001",
+            "http://upload.example.test/session/synthetic0001",
+            "HTTPS://UPLOAD.EXAMPLE.TEST/session/synthetic0001",
+            "https://user:pw@upload.example.test/s",
+            "https://@upload.example.test/s",
+            "/session/synthetic0001",
+            "//upload.example.test/s",
+            "ftp://upload.example.test/s",
+            "file:///tmp/x",
+            "https://[::1]/s",
+            "https://127.0.0.1:8443/s",
+            "https://graph.example.test/v1.0/me/drive",
+            "https://elsewhere.example.test/s",
+            "https://upload.example.test/s#frag",
+            "https://upload.example.test/%2e%2e/s",
+            " https://upload.example.test/s",
+            "https://upload.example.test/s\u0000",
+            "https://xn--80ak6aa92e.example.test/s",
+            "https://upload.example.test/" + new string('a', 8192),
+        ];
+        foreach (string url in urls)
+        {
+            string session = JsonSerializer.Serialize(new Dictionary<string, string> { ["uploadUrl"] = url });
+            (string outcome, List<Recorded> seen) = await Upload(Session(session, file));
+            string piece = seen.Count > 1 ? " PUT to " + (seen[1].Address.Host.Length > 40 ? "<long>" : seen[1].Address.Scheme + "://" + seen[1].Address.Authority) + " auth " + Auth(seen[1].Authorization) : " no piece";
+            P("GA " + (url.Length > 60 ? url[..40] + "...(len " + url.Length + ")" : url.Replace("\u0000", "\\0", StringComparison.Ordinal)) + " => " + outcome + " | requests " + seen.Count + piece);
+        }
+
+        foreach (string body in new[] { "{\"uploadUrl\":42}", "{\"uploadUrl\":null}", "[]", "{\"uploadUrl\":\"https://upload.example.test/a\",\"uploadUrl\":\"http://evil.example.test/b\"}", "{\"uploadUrl\":\"http://evil.example.test/b\",\"uploadUrl\":\"https://upload.example.test/a\"}" })
+        {
+            (string outcome, List<Recorded> seen) = await Upload(Session(body, file));
+            P("GA body " + body + " => " + outcome + " | requests " + seen.Count + (seen.Count > 1 ? " PUT host " + seen[1].Address.Host : string.Empty));
+        }
+    }
+
+    [Fact]
+    public async Task GB_stored_item_shapes()
+    {
+        string session = "{\"uploadUrl\":\"" + Synthetic.SessionAddress + "\"}";
+        (string, string, HttpStatusCode)[] cases =
+        [
+            ("file size 10", Synthetic.File("SYNTHETICFILE0001", Synthetic.FileName, 10, Synthetic.ETag), HttpStatusCode.Created),
+            ("file size 10, 200", Synthetic.File("SYNTHETICFILE0001", Synthetic.FileName, 10, Synthetic.ETag), HttpStatusCode.OK),
+            ("file size 11", Synthetic.File("SYNTHETICFILE0001", Synthetic.FileName, 11, Synthetic.ETag), HttpStatusCode.Created),
+            ("file size 9", Synthetic.File("SYNTHETICFILE0001", Synthetic.FileName, 9, Synthetic.ETag), HttpStatusCode.Created),
+            ("file size 0", Synthetic.File("SYNTHETICFILE0001", Synthetic.FileName, 0, Synthetic.ETag), HttpStatusCode.Created),
+            ("file NO size", "{\"id\":\"SYNTHETICFILE0001\",\"name\":\"scan-0001.pdf\",\"file\":{},\"eTag\":" + JsonSerializer.Serialize(Synthetic.ETag) + "}", HttpStatusCode.Created),
+            ("file size null", "{\"id\":\"SYNTHETICFILE0001\",\"name\":\"scan-0001.pdf\",\"size\":null,\"file\":{}}", HttpStatusCode.Created),
+            ("file size 10.0", "{\"id\":\"SYNTHETICFILE0001\",\"name\":\"scan-0001.pdf\",\"size\":10.0,\"file\":{}}", HttpStatusCode.Created),
+            ("file size \"10\"", "{\"id\":\"SYNTHETICFILE0001\",\"name\":\"scan-0001.pdf\",\"size\":\"10\",\"file\":{}}", HttpStatusCode.Created),
+            ("folder size 10", "{\"id\":\"SYNTHETICFILE0001\",\"name\":\"scan-0001.pdf\",\"size\":10,\"folder\":{\"childCount\":0}}", HttpStatusCode.Created),
+            ("no facet size 10", "{\"id\":\"SYNTHETICFILE0001\",\"name\":\"scan-0001.pdf\",\"size\":10}", HttpStatusCode.Created),
+            ("file facet null size 10", "{\"id\":\"SYNTHETICFILE0001\",\"name\":\"scan-0001.pdf\",\"size\":10,\"file\":null}", HttpStatusCode.Created),
+            ("file facet + folder null", "{\"id\":\"SYNTHETICFILE0001\",\"name\":\"scan-0001.pdf\",\"size\":10,\"file\":{},\"folder\":null}", HttpStatusCode.Created),
+            ("file other name", Synthetic.File("SYNTHETICFILE0001", "scan-0001 1.pdf", 10, Synthetic.ETag), HttpStatusCode.Created),
+            ("file other key", Synthetic.File("SYNTHETICFILE0001", Synthetic.FileName, 10, "\"{00000000-0000-4000-8000-0000000000ff},3\""), HttpStatusCode.Created),
+            ("file dup size 10 then 99", "{\"id\":\"SYNTHETICFILE0001\",\"name\":\"scan-0001.pdf\",\"size\":10,\"size\":99,\"file\":{}}", HttpStatusCode.Created),
+            ("file dup size 99 then 10", "{\"id\":\"SYNTHETICFILE0001\",\"name\":\"scan-0001.pdf\",\"size\":99,\"size\":10,\"file\":{}}", HttpStatusCode.Created),
+            ("array body", "[]", HttpStatusCode.Created),
+            ("202 then nothing", "{\"nextExpectedRanges\":[\"10-\"]}", HttpStatusCode.Accepted),
+        ];
+        foreach ((string label, string body, HttpStatusCode status) in cases)
+        {
+            (string outcome, List<Recorded> seen) = await Upload(Session(session, body, status));
+            P("GB " + label + " => " + outcome + " | requests " + seen.Count);
+        }
+    }
+
+    [Fact]
+    public async Task GC_token_and_conflict_paths()
+    {
+        string file = Synthetic.File("SYNTHETICFILE0001", Synthetic.FileName, 10, Synthetic.ETag);
+        string session = "{\"uploadUrl\":\"" + Synthetic.SessionAddress + "\"}";
+
+        // A 401 on the session call, then a refreshed token: is the conflict body sent again, unchanged?
+        (string o1, List<Recorded> s1) = await Upload(
+            (index, _) => index == 0 ? Synthetic.Json("{}", HttpStatusCode.Unauthorized) : index == 1 ? Synthetic.Json(session) : Synthetic.Json(file, HttpStatusCode.Created),
+            tokens: new RefreshingTokens());
+        P("GC 401-then-200 => " + o1 + " | requests " + s1.Count + " | bodies " + string.Join(" ; ", s1.Select(r => r.Method + " " + (r.Body.Length == 0 ? "(empty)" : (Encoding.UTF8.GetString(r.Body) == SharePointFiles.SessionBody ? "SessionBody" : (r.Body.Length == 10 ? "10 bytes" : "OTHER"))) + " auth " + Auth(r.Authorization))));
+
+        // The host's client carries a DEFAULT Authorization header: does the piece carry it?
+        (string o2, List<Recorded> s2) = await Upload(Session(session, file), setup: http => http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "synthetic-default-0002"));
+        P("GC default-auth-header-on-client => " + o2 + " | " + string.Join(" ; ", s2.Select(r => r.Method + " " + r.Address.Host + " auth " + (r.Authorization is null ? "null" : r.Authorization.Contains("synthetic-default-0002", StringComparison.Ordinal) ? "THE CLIENT DEFAULT" : Auth(r.Authorization)))));
+
+        // A 409 on the session call: is any second request made (a retry with another rule)?
+        (string o3, List<Recorded> s3) = await Upload((_, _) => Synthetic.Json("{\"error\":{\"code\":\"nameAlreadyExists\"}}", HttpStatusCode.Conflict));
+        P("GC 409 => " + o3 + " | requests " + s3.Count + " | " + string.Join(" ; ", s3.Select(r => r.Method + " " + r.Address.PathAndQuery)));
+
+        // A 307 redirect answer on the session call (the fake's own answer; the handler is the fake, so no follow).
+        (string o4, List<Recorded> s4) = await Upload((_, _) => { HttpResponseMessage m = new(HttpStatusCode.TemporaryRedirect); m.Headers.Location = new Uri("https://evil.example.test/x"); return m; });
+        P("GC 307 => " + o4 + " | requests " + s4.Count);
+
+        // Names: case variants, ASCII lookalikes, Unicode forms, trailing dot or space.
+        string[] names = ["SCAN-0001.PDF", "scan-0001.pdf.", "scan-0001.pdf ", " scan-0001.pdf", "scan-0001..pdf", "caf\u00e9.pdf", "cafe\u0301.pdf", "scan\uff0epdf", "scan-0001.pdf\u200b", "CON", "-", "_", "a.", ".a", "~$a.pdf", "a" + new string('b', 127), "a" + new string('b', 128)];
+        foreach (string name in names)
+        {
+            (string o, List<Recorded> s) = await Upload(Session(session, Synthetic.File("SYNTHETICFILE0001", name.Length > 0 && SharePointIds.IsFileName(name) ? name : Synthetic.FileName, 10, Synthetic.ETag)), name);
+            P("GC name " + JsonSerializer.Serialize(name.Length > 30 ? name[..10] + "...len" + name.Length : name) + " IsFileName " + SharePointIds.IsFileName(name) + " => " + o + " | requests " + s.Count + (s.Count > 0 ? " path " + s[0].Address.AbsolutePath.Replace("/v1.0/sites/" + Synthetic.SiteId, "<site>", StringComparison.Ordinal) : string.Empty));
+        }
+    }
+
+    [Fact]
+    public async Task GD_listing_and_list_shapes()
+    {
+        using CancellationTokenSource guard = Guard.TenSeconds();
+        LibraryEntry library = new(Synthetic.DriveId, "Documents", Synthetic.LibraryWeb);
+        const string a = "00000000-0000-4000-8000-0000000000a1";
+        const string b = "00000000-0000-4000-8000-0000000000b1";
+        (string, string[], LibraryEntry)[] lists =
+        [
+            ("twoname", [Synthetic.List(a, "Documents", "https://site.example.test/x"), Synthetic.List(b, "Documents", "https://site.example.test/y")], library),
+            ("namecase", [Synthetic.List(a, "documents", "https://site.example.test/x"), Synthetic.List(b, "Other", "https://site.example.test/y")], library),
+            ("webslash", [Synthetic.List(a, "A", Synthetic.LibraryWeb + "/"), Synthetic.List(b, "B", "https://site.example.test/y")], library),
+            ("webspace", [Synthetic.List(a, "A", "https://site.example.test/Shared Documents"), Synthetic.List(b, "B", "https://site.example.test/y")], library),
+            ("emptyweb-lib-and-list", [Synthetic.List(a, "A", string.Empty), Synthetic.List(b, "B", "https://site.example.test/y")], new LibraryEntry(Synthetic.DriveId, "Documents", string.Empty)),
+            ("nullweb-lib", [Synthetic.List(a, "A", "https://site.example.test/x")], new LibraryEntry(Synthetic.DriveId, "Documents", null)),
+            ("web1-name1-differ", [Synthetic.List(a, "Documents", "https://site.example.test/x"), Synthetic.List(b, "B", Synthetic.LibraryWeb)], library),
+            ("dupid", [Synthetic.List(a, "A", "https://site.example.test/x"), Synthetic.List(a.ToUpperInvariant(), "B", "https://site.example.test/y")], library),
+            ("idbraces", ["{\"id\":\"{" + a + "}\",\"displayName\":\"Documents\"}"], library),
+            ("idN", ["{\"id\":\"" + a.Replace("-", string.Empty, StringComparison.Ordinal) + "\",\"displayName\":\"Documents\"}"], library),
+            ("zero", [], library),
+        ];
+        foreach ((string label, string[] listItems, LibraryEntry lib) in lists)
+        {
+            using Rig rig = new((_, _) => Synthetic.Json(Synthetic.Page(listItems)));
+            string outcome;
+            try
+            {
+                LibraryList? found = await rig.Browser.FindLibraryListAsync(Synthetic.SiteId, lib, rig.Tokens, guard.Token);
+                outcome = found is null ? "null" : (found.Id == Guid.Parse(a) ? "list a" : found.Id == Guid.Parse(b) ? "list b" : "other");
+            }
+            catch (Exception e)
+            {
+                outcome = "THREW " + Ex(e);
+            }
+
+            P("GD list " + label + " => " + outcome);
+        }
+
+        (string, string)[] columns =
+        [
+            ("hiddenprop", "{\"name\":\"T\",\"hidden\":true,\"text\":{}}"),
+            ("readonlystring", "{\"name\":\"T\",\"readOnly\":\"true\",\"text\":{}}"),
+            ("groupcase", "{\"name\":\"T\",\"columnGroup\":\"_hidden\",\"text\":{}}"),
+            ("facetnull", "{\"name\":\"T\",\"text\":null}"),
+            ("facettrue", "{\"name\":\"T\",\"text\":true}"),
+            ("unicode-name", "{\"name\":\"T\u00e9\",\"text\":{}}"),
+            ("readOnly-dup-false-true", "{\"name\":\"T\",\"readOnly\":false,\"readOnly\":true,\"text\":{}}"),
+            ("readOnly-dup-true-false", "{\"name\":\"T\",\"readOnly\":true,\"readOnly\":false,\"text\":{}}"),
+            ("hidden-then-offered-same-name", "{\"name\":\"T\",\"columnGroup\":\"_Hidden\",\"text\":{}}|{\"name\":\"T\",\"text\":{}}"),
+            ("calculated-with-text", "{\"name\":\"T\",\"calculated\":{},\"text\":{}}"),
+            ("number-and-text", "{\"name\":\"T\",\"number\":{},\"text\":{}}"),
+        ];
+        foreach ((string label, string defs) in columns)
+        {
+            using Rig rig = new((_, _) => Synthetic.Json(Synthetic.Page(defs.Split('|'))));
+            string outcome;
+            try
+            {
+                IReadOnlyList<LibraryColumn> got = await rig.Browser.ListColumnsAsync(Synthetic.SiteId, Synthetic.ListId, rig.Tokens, guard.Token);
+                outcome = "offered " + got.Count + (got.Count > 0 ? " kind " + got[0].Kind : string.Empty);
+            }
+            catch (Exception e)
+            {
+                outcome = "THREW " + Ex(e);
+            }
+
+            P("GD column " + label + " => " + outcome);
+        }
+
+        (string, string)[] folderItems =
+        [
+            ("dup-id-property", "{\"id\":\"SYNTHETICA0001\",\"id\":\"../x\",\"name\":\"n\",\"file\":{}}"),
+            ("etag-no-braces", "{\"id\":\"SYNTHETICA0001\",\"name\":\"n\",\"file\":{},\"eTag\":\"00000000-0000-4000-8000-000000000014,1\"}"),
+            ("etag-zero-guid", "{\"id\":\"SYNTHETICA0001\",\"name\":\"n\",\"file\":{},\"eTag\":\"{00000000-0000-0000-0000-000000000000},1\"}"),
+            ("etag-N-form", "{\"id\":\"SYNTHETICA0001\",\"name\":\"n\",\"file\":{},\"eTag\":\"{00000000000040008000000000000014},1\"}"),
+            ("etag-two-guids", "{\"id\":\"SYNTHETICA0001\",\"name\":\"n\",\"file\":{},\"eTag\":\"{bad}{00000000-0000-4000-8000-000000000014}\"}"),
+            ("id-dotdot", "{\"id\":\"..\",\"name\":\"n\",\"file\":{}}"),
+            ("childcount-on-file", "{\"id\":\"SYNTHETICA0001\",\"name\":\"n\",\"file\":{\"childCount\":-5}}"),
+            ("date-garbage", "{\"id\":\"SYNTHETICA0001\",\"name\":\"n\",\"file\":{},\"lastModifiedDateTime\":\"yesterday\"}"),
+        ];
+        foreach ((string label, string item) in folderItems)
+        {
+            using Rig rig = new((_, _) => Synthetic.Json(Synthetic.Page([item])));
+            string outcome;
+            try
+            {
+                IReadOnlyList<LibraryItem> got = await rig.Browser.ListFolderAsync(Synthetic.SiteId, Synthetic.DriveId, null, rig.Tokens, guard.Token);
+                outcome = "items " + got.Count + " id " + (got[0].Id == "SYNTHETICA0001" ? "A" : "OTHER") + " key " + (got[0].ListItemKey is null ? "none" : got[0].ListItemKey == Guid.Empty ? "EMPTY-GUID" : "guid");
+            }
+            catch (Exception e)
+            {
+                outcome = "THREW " + Ex(e);
+            }
+
+            P("GD item " + label + " => " + outcome);
+        }
+    }
+
+    [Fact]
+    public async Task GE_arguments_and_values()
+    {
+        using CancellationTokenSource guard = Guard.TenSeconds();
+        string[] queries = ["*", "a b", new string('q', 255), new string('q', 256), "a\u0085b", "a\u2028b", "\ud800", "a/b?c#d", "%2F", "\u00e9"];
+        foreach (string q in queries)
+        {
+            using Rig rig = new((_, _) => Synthetic.Json("{\"value\":[]}"));
+            string outcome;
+            try
+            {
+                await rig.Browser.SearchSitesAsync(q, rig.Tokens, guard.Token);
+                string pq = rig.Graph.Seen[0].Address.PathAndQuery;
+                outcome = "sent " + (pq.Length > 80 ? pq[..40] + "...len" + pq.Length : pq);
+            }
+            catch (Exception e)
+            {
+                outcome = "THREW " + Ex(e) + " requests " + rig.Graph.Seen.Count;
+            }
+
+            P("GE query " + JsonSerializer.Serialize(q.Length > 20 ? q[..3] + "..len" + q.Length : q) + " => " + outcome);
+        }
+
+        string[] sites = [",", ".", "..", "...", "a..b", new string('s', 512), new string('s', 513), "a%2Fb", "a:b", "a b", "a\u0131b", "a\u212ab"];
+        foreach (string s in sites)
+        {
+            using Rig rig = new((_, _) => Synthetic.Json("{\"value\":[]}"));
+            string outcome;
+            try
+            {
+                await rig.Browser.ListLibrariesAsync(s, rig.Tokens, guard.Token);
+                outcome = "sent " + rig.Graph.Seen[0].Address.AbsolutePath.Length + " chars path, ends /drives " + rig.Graph.Seen[0].Address.AbsolutePath.EndsWith("/drives", StringComparison.Ordinal) + " segments " + rig.Graph.Seen[0].Address.Segments.Length;
+            }
+            catch (Exception e)
+            {
+                outcome = "THREW " + Ex(e) + " requests " + rig.Graph.Seen.Count;
+            }
+
+            P("GE site " + JsonSerializer.Serialize(s.Length > 20 ? s[..3] + "..len" + s.Length : s) + " => " + outcome);
+        }
+
+        // Values: a C1 control, a line separator, an unpaired surrogate in a text value; a negative zero; the write's body.
+        string[] texts = ["a\u0085b", "a\u2028b", "a\ud800b", "\u00e9"];
+        foreach (string t in texts)
+        {
+            using Rig rig = new((index, _) => index == 0 ? Synthetic.Json(Synthetic.Columns()) : Synthetic.Json("{}"));
+            IReadOnlyList<LibraryColumn> cols = await rig.Browser.ListColumnsAsync(Synthetic.SiteId, Synthetic.ListId, rig.Tokens, guard.Token);
+            string outcome;
+            try
+            {
+                ColumnValue v = ColumnValue.Text("Title", t);
+                await rig.Files.SetColumnValuesAsync(Synthetic.SiteId, Synthetic.ListId, Synthetic.ListItemKey, cols, [v], rig.Tokens, guard.Token);
+                outcome = "written body " + Encoding.UTF8.GetString(rig.Graph.Seen[1].Body);
+            }
+            catch (Exception e)
+            {
+                outcome = "THREW " + Ex(e) + " write requests " + (rig.Graph.Seen.Count - 1);
+            }
+
+            P("GE text " + JsonSerializer.Serialize(t) + " => " + outcome);
+        }
+
+        // An empty listItemKey, an empty list id, a columns list holding a column of another list (any key is taken).
+        using (Rig rig = new((index, _) => index == 0 ? Synthetic.Json(Synthetic.Columns()) : Synthetic.Json("{}")))
+        {
+            IReadOnlyList<LibraryColumn> cols = await rig.Browser.ListColumnsAsync(Synthetic.SiteId, Synthetic.ListId, rig.Tokens, guard.Token);
+            foreach ((string label, Guid list, Guid key) in new[] { ("emptykey", Synthetic.ListId, Guid.Empty), ("emptylist", Guid.Empty, Synthetic.ListItemKey), ("otherlist", Guid.Parse("00000000-0000-4000-8000-0000000000cc"), Synthetic.ListItemKey) })
+            {
+                int before = rig.Graph.Seen.Count;
+                string outcome;
+                try
+                {
+                    await rig.Files.SetColumnValuesAsync(Synthetic.SiteId, list, key, cols, [ColumnValue.Boolean("Checked", false)], rig.Tokens, guard.Token);
+                    outcome = "WRITTEN";
+                }
+                catch (Exception e)
+                {
+                    outcome = "THREW " + Ex(e);
+                }
+
+                P("GE write " + label + " => " + outcome + " requests " + (rig.Graph.Seen.Count - before));
+            }
+        }
+
+        // Messages of every argument refusal: do they hold any synthetic value?
+        List<string> messages = [];
+        using (Rig rig = new((_, _) => Synthetic.Json("{\"value\":[]}")))
+        {
+            using MemoryStream content = new(Synthetic.Bytes(10));
+            Func<Task>[] acts =
+            [
+                () => rig.Browser.ListLibrariesAsync("site/" + Synthetic.SiteId, rig.Tokens, guard.Token),
+                () => rig.Browser.ListFolderAsync(Synthetic.SiteId, Synthetic.DriveId + "/", null, rig.Tokens, guard.Token),
+                () => rig.Files.UploadAsync(Synthetic.SiteId, Synthetic.DriveId, null, Synthetic.FileName + "/", content, 10, rig.Tokens, guard.Token),
+                () => rig.Files.UploadAsync(Synthetic.SiteId, Synthetic.DriveId, null, Synthetic.FileName, content, 11, rig.Tokens, guard.Token),
+                () => rig.Browser.SearchSitesAsync("synthetic title 0001\u0001", rig.Tokens, guard.Token),
+            ];
+            foreach (Func<Task> act in acts)
+            {
+                try
+                {
+                    await act();
+                }
+                catch (Exception e)
+                {
+                    messages.Add(e.ToString());
+                }
+            }
+
+            string[] secrets = [Synthetic.Access, Synthetic.SiteId, Synthetic.DriveId, Synthetic.FileName, "synthetic title 0001"];
+            P("GE refusal messages " + messages.Count + ", holding a synthetic value: " + messages.Count(m => secrets.Any(s => m.Contains(s, StringComparison.OrdinalIgnoreCase))) + ", requests " + rig.Graph.Seen.Count);
+        }
+
+        try
+        {
+            ColumnValue.Text("Name\u0001", "x");
+        }
+        catch (ArgumentException e)
+        {
+            P("GE ColumnValue bad-name message holds name: " + e.Message.Contains("Name", StringComparison.Ordinal));
+        }
+    }
+
+    [Fact]
+    public async Task GF_concurrency_and_state()
+    {
+        using CancellationTokenSource guard = Guard.TenSeconds();
+        using Rig rig = new((_, r) => Synthetic.Json(Synthetic.Page([Synthetic.Site("site" + r.Address.Query.Length.ToString(System.Globalization.CultureInfo.InvariantCulture) + ".example.test", "S", "s")])));
+        Task<IReadOnlyList<SiteEntry>>[] runs = [.. Enumerable.Range(0, 32).Select(i => rig.Browser.SearchSitesAsync("q" + i.ToString(System.Globalization.CultureInfo.InvariantCulture), rig.Tokens, guard.Token))];
+        IReadOnlyList<SiteEntry>[] all = await Task.WhenAll(runs);
+        P("GF 32 concurrent searches on one browser: each 1 site " + all.All(x => x.Count == 1) + ", requests " + rig.Graph.Seen.Count);
+        var fields = typeof(SharePointBrowser).GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public)
+            .Concat(typeof(SharePointFiles).GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public))
+            .Select(f => f.DeclaringType!.Name + "." + f.Name + (f.IsStatic ? " static" : string.Empty) + (f.IsInitOnly || f.IsLiteral ? " readonly" : " MUTABLE"));
+        P("GF fields: " + string.Join(", ", fields));
+        using CancellationTokenSource cancelled = new();
+        await cancelled.CancelAsync();
+        int before = rig.Graph.Seen.Count;
+        string outcome;
+        try
+        {
+            await rig.Browser.ListLibrariesAsync(Synthetic.SiteId, rig.Tokens, cancelled.Token);
+            outcome = "returned";
+        }
+        catch (Exception e)
+        {
+            outcome = "THREW " + Ex(e);
+        }
+
+        P("GF pre-cancelled token => " + outcome + " requests " + (rig.Graph.Seen.Count - before));
+    }
+}

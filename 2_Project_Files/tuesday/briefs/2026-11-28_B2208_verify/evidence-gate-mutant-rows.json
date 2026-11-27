@@ -1,0 +1,106 @@
+{
+ "suites": {
+  "teams": {
+   "project": "tests/Datasec.Suite.Teams.Tests/Datasec.Suite.Teams.Tests.csproj",
+   "exe": "tests/Datasec.Suite.Teams.Tests/bin/Release/net10.0/Datasec.Suite.Teams.Tests",
+   "prefix": "src/Datasec.Suite.Teams/",
+   "cells": [
+    "TeamsTests.T01",
+    "TeamsTests.T02",
+    "TeamsTests.T03",
+    "TeamsTests.T04",
+    "TeamsTests.T05",
+    "TeamsTests.T06",
+    "TeamsTests.T07",
+    "TeamsTests.T08",
+    "TeamsTests.T09",
+    "TeamsTests.T10",
+    "TeamsTests.T11",
+    "TeamsTests.T12",
+    "TeamsTests.T13"
+   ]
+  }
+ },
+ "rows": [
+  [
+   "gTeamLengthDropped",
+   "teams",
+   "src/Datasec.Suite.Teams/TeamsBrowser.cs",
+   "teamId is not null && teamId.Length == 36 && Guid",
+   "teamId is not null && Guid",
+   "TeamsTests.T04"
+  ],
+  [
+   "gChannelLengthDropped",
+   "teams",
+   "src/Datasec.Suite.Teams/TeamsBrowser.cs",
+   "channelId is not null && channelId.Length <= MaxIdLength && ",
+   "channelId is not null && ",
+   "TeamsTests.T06"
+  ],
+  [
+   "gChannelCheckDropped",
+   "teams",
+   "src/Datasec.Suite.Teams/TeamsBrowser.cs",
+   "if (!IsChannelId(channelId))",
+   "if (!IsChannelId(channelId) && channelId.Length < 0)",
+   "TeamsTests.T06"
+  ],
+  [
+   "gEntryIdUnchecked",
+   "teams",
+   "src/Datasec.Suite.Teams/TeamsBrowser.cs",
+   " || !idRule(id.GetString())",
+   " || (!idRule(id.GetString()) && id.ValueKind < 0)",
+   "TeamsTests.T07 TeamsTests.T08"
+  ],
+  [
+   "gFolderIdUnchecked",
+   "teams",
+   "src/Datasec.Suite.Teams/TeamsBrowser.cs",
+   " || !IsDriveSegment(id.GetString()))",
+   " || (!IsDriveSegment(id.GetString()) && id.ValueKind < 0))",
+   "TeamsTests.T09"
+  ],
+  [
+   "gDriveDotsDropped",
+   "teams",
+   "src/Datasec.Suite.Teams/TeamsBrowser.cs",
+   " && segment is not (\".\" or \"..\")",
+   "",
+   "TeamsTests.T09"
+  ],
+  [
+   "gSelectWidened",
+   "teams",
+   "src/Datasec.Suite.Teams/TeamsBrowser.cs",
+   "\"id,displayName\";",
+   "\"id,displayName,email\";",
+   "TeamsTests.T03"
+  ],
+  [
+   "gTeamEntryLeaks",
+   "teams",
+   "src/Datasec.Suite.Teams/TeamEntry.cs",
+   "{DisplayName.Length} characters",
+   "{DisplayName} characters",
+   "TeamsTests.T12"
+  ],
+  [
+   "gChannelEntryLeaks",
+   "teams",
+   "src/Datasec.Suite.Teams/ChannelEntry.cs",
+   "{DisplayName.Length} characters",
+   "{DisplayName} characters",
+   "TeamsTests.T12"
+  ],
+  [
+   "gFolderLeaks",
+   "teams",
+   "src/Datasec.Suite.Teams/ChannelFolder.cs",
+   "{DriveId.Length} characters",
+   "{DriveId} characters",
+   "TeamsTests.T12"
+  ]
+ ]
+}

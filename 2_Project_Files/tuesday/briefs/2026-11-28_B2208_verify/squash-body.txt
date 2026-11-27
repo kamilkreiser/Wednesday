@@ -1,0 +1,29 @@
+The Teams module gains its first slice, navigation. TeamsBrowser lists
+the signed-in user's joined teams (GET me/joinedTeams, no query, every
+page through the Graph layer's paging walk under the module's page
+bound), lists the channels of one team (GET teams/{id}/channels with
+$select=id,displayName) and reads the files folder of one channel (GET
+teams/{id}/channels/{id}/filesFolder) as its drive id and item id. Every
+request goes through the shared Graph client; the module makes no HTTP
+client, sets no header and never sees a token's text.
+
+Every id a caller gives is checked before any request: a team id is 36
+characters that the GUID reader takes in its hyphenated form; a channel
+id is 1 to 256 characters of ASCII letters, digits and : @ . _ - and not
+. or ..; ids in their rule are sent as written. A listed team or channel
+is read only when it is a JSON object with an id in its rule, not listed
+before, and a non-empty displayName; any other item ends the listing
+with TeamsBrowseException (MalformedItem, its page and item). A files
+folder answer is read only with an id and parentReference.driveId in the
+drive rule and a folder facet that is an object; else MalformedFolder. A
+Graph-layer failure leaves unwrapped. Messages and ToString hold kinds,
+numbers and lengths only.
+
+Cells T01 to T13 (47 cases) run against a fake handler; every fake
+answer is an assumption of its cell. How Microsoft Graph answers these
+calls is not measured; the module README names the limits. Not built:
+the folder listing, scan, the channel message, print, file management,
+search. Nothing ran against a device, a tenant or a Microsoft host.
+Nothing is deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
