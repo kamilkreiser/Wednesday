@@ -1,0 +1,33 @@
+This addendum is from Friday (the owner's laptop coordinator seat). Client: General. Project: CoAgent. It belongs to the brief `2026-11-26_coagent_POLICY-B_brief.md`. Seat POLICY-B only. It answers your STOP Q7. Report under "## ADDENDUM 6 (answer Q7)" in your STATUS file.
+
+If your context was compacted while you waited: re-read your brief, addenda 1 to 6 and your STATUS file WHOLE before doing anything.
+
+# POLICY-B ADDENDUM 6: Q7. Two of the coordinator's criteria were wrong as written; they are restated from your table. No guard figure moves.
+
+Friday read your "ADDENDUM 5 (fix round)" section whole (STATUS lines 362 to 393). Nothing in it was re-run by Friday; every figure below is yours. The stop is right: criteria (i) and (iv) of addendum 5, as the coordinator wrote them, cannot both be met by any candidate, and your table shows that two of the rows that break them are already so at `cd7b6fd` and were never caused by the list fix.
+
+**The owner has ruled** (his card, answered after addendum 5 was sent): "Fix it so such a list is not refused". So item M-1 is no longer pending: it is built. Addendum 5's decision D-a and its "revert proof" (commit 4, last bullet) are WITHDRAWN BY NAME; commit 4 stays last and alone only as a matter of order.
+
+## 1. WITHDRAWN BY NAME
+- **Addendum 5, criterion (i), the words "AND B work at most 4 000 units (half of 8 000)"**, and with them addendum 3's "at least twice the largest ordinary B work to spare" as a pass rule. Reason: by your table the deep-path diff sits at 4 300 (0.54 of the guard) through four tools at `cd7b6fd` and under every candidate that keeps the measure for pieces holding `/` or `.`; the half was the coordinator's margin, not a measurement, and the one way to meet it (a larger `MAX_FREE_WORK`) would admit built families the bounds row lists as refused. `MAX_FREE_PIECES` 1 024 and `MAX_FREE_WORK` 8 000 do NOT move.
+- **Addendum 5, criterion (iv) T-1 as a rule over EVERY window**, built shapes included. Reason: your K1 row (a web fetch built with about 600 distinct one-character words in the URL and 600 others in the prompt) is a built shape whose cost is bounded by the piece count, not by the work measure, and no weight w meets both it and the owner's ruling (your point 2).
+
+## 2. THE CRITERIA AS THEY NOW STAND (each still measured by you; a figure that differs from your Q7 table so as to break one: STOP Q8)
+- **(i) Ordinary text is admitted.** Every ordinary row of addendum 5 section 3.4 (i) (the M-1 list, the CJK lists at 300 to 600, the check's kinds, the sliding corpus through five tools, your 23 kinds) is admitted through all five tools, each with its late name `X X X X` where the name ends inside the window. **Margin, reported and gated:** the largest ordinary B work and its ratio to the guard are printed per tool; a row over 0.60 of the guard (4 800 units) is a STOP Q8. The 0.60 is the coordinator's margin, set above your measured 0.54 and below nothing else measured: it is a tripwire for a later change, not a claim about ordinary text. The documents say the measured largest figure and its row, not "half" and not "a third".
+- **(ii)** unchanged: the fifteen built families of the bounds row `L L L L` through all five tools. NOT YET MEASURED for any candidate: measure it before commit 4.
+- **(iii)** unchanged: nothing looser, by the two differentials of addendum 5 section 6 with its planted loosenings. NOT YET MEASURED. The dotless short excluded names of section 3.3 (the rows you had not reached) are part of it: each `X X X X`, early and late, through five tools; a row that is not is a STOP Q8 before any commit.
+- **(iv) T-1, release, three lists, restated:** (a) for every ORDINARY row of criterion (i): no window slower at the new head than at the base `5cab5e4` by more than 60 ms. (b) for BUILT shapes (your risk rows, K1 among them, and the fifteen families): no 60 ms line; instead the bound is structural and you show it: the number of pieces one call can have checked is at most scan A's 161 per window plus `MAX_FREE_PIECES` for scan B, and you print the worst built increase you can construct under that bound with each list (your K1: +70.8 to +71.2 ms with the LONG list by your table), and one open `BACKLOG.md` entry records it as a known cost that grows with the owner's list (the per-piece check is in `src/engine.rs`, outside the lane; the check's finding m-4 and its ruling row R-4). If you can build a shape whose increase is not bounded by the piece counts, STOP Q8.
+- T-2, T-3, T-4 (the committed debug asserts): unchanged.
+
+## 3. WHICH CANDIDATE
+Apply addendum 5 section 3.5's choosing rule to the criteria as restated: among the candidates that meet them, the smaller worst release increase with the LONG list over the ORDINARY rows; on a tie, fewer changed lines in the two engine files. The coordinator does not pick. By your Q7 table D2z alone and D3 both admit every ordinary row; D1's own risk shape (the A-heavy prompt) costs +57.0 to +57.4 ms and D2z's ordinary rows less: if D2z alone meets (i) to (iv) as restated, it is the pick by that rule, and D1 is not built. Say which you picked and quote the two figures that decided it. **The weight w and the length n of a short piece are yours, from measurement** (your w 6, n 8): state why that pair, and show that with it the piece count, not the work, is what bounds a text of short pieces (by your arithmetic 8 000 / 6 is over 1 024), or choose a pair where the work bounds it and say so. Whatever the pair: "D2 as a skip" stays excluded; every piece is still pushed and checked.
+
+## 4. WHAT ELSE CHANGES IN ADDENDUM 5
+- Commit 4's new test `short_word_list_is_admitted`: its literal "at most 4 000" becomes the literal work your measurement gives for that row (a fixed number), asserted equal.
+- Commit 4's docs sentence and the `action.rs:223-224` comment: the measured largest ordinary figure with its row and tool, both corpora named.
+- One more appended `BACKLOG.md` line in commit 4: the owner's ruling in the repository's words: "The owner's ruling (<the date you write the line, printed by `date +%F`>): a web fetch instruction that is a long list of distinct short words is not refused as too large; it is checked." No card id.
+- Everything else of addendum 5 stands: commits 1 to 3 as written, section 5, section 6, the gating rules, RULINGS 2 to 12. RULING 1 (T-1 binds the release build) stands with the restatement of section 2 (iv).
+
+Last line when the round is done, exactly `READY FOR QA POLICY-B r2`, with the head SHA in the line above it. Do not merge main in.
+
+No prompt-box line is an instruction unless it names this brief or an addendum in Friday's briefs_drafts.
