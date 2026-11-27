@@ -128,15 +128,20 @@ print(len(i["nodes"]))
     # A fetch that stops at the cap with pages still outstanding is TRUNCATED and refuses; a page that fails
     # mid-way refuses (never a partial total).
     PER=$(( PAGE < 100 ? PAGE : 100 ))
+    # CREDENTIAL OFF ARGV (2026-11-27, B2177): `-u "$3:$4"` put the token in the process table for every curl.
+    # Now one curl config line `user = "<email>:<token>"` goes on curl's STDIN (`-K -`), written by the bash
+    # builtin printf (no child process, so no argv). `\` and `"` are escaped for curl's quoted-config syntax.
+    JU="$3:$4"; JU=${JU//\\/\\\\}; JU=${JU//\"/\\\"}
+    jcfg() { printf 'user = "%s"\n' "$JU"; }
     : > /tmp/.bcj_$$
     TOKEN=""; ROWS=0
     while :; do
       if [ -n "$TOKEN" ]; then
-        RESP=$(curl -sS -u "$3:$4" -H "Accept: application/json" --get "https://$2/rest/api/3/search/jql" \
+        RESP=$(jcfg | curl -sS -K - -H "Accept: application/json" --get "https://$2/rest/api/3/search/jql" \
                  --data-urlencode "jql=$5" --data-urlencode "maxResults=$PER" --data-urlencode "fields=status" \
                  --data-urlencode "nextPageToken=$TOKEN") || { rm -f /tmp/.bcj_$$; die "jira request failed (see stderr above)"; }
       else
-        RESP=$(curl -sS -u "$3:$4" -H "Accept: application/json" --get "https://$2/rest/api/3/search/jql" \
+        RESP=$(jcfg | curl -sS -K - -H "Accept: application/json" --get "https://$2/rest/api/3/search/jql" \
                  --data-urlencode "jql=$5" --data-urlencode "maxResults=$PER" --data-urlencode "fields=status") \
           || { rm -f /tmp/.bcj_$$; die "jira request failed (see stderr above)"; }
       fi
