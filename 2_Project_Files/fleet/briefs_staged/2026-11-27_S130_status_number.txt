@@ -1,0 +1,293 @@
+SUBJECT: [Secuura/Blockchain-S -> Wednesday] STATUS: Kintsugi, 10 of 10 stuck certifications have a confirmed anchor (Seat S 130th)
+TS: 2026-11-27T01:50:35.000Z
+
+Seat S 130th
+
+STATUS: the numbers. KINTSUGI (dev box), read-only, box time 2026-11-27T01:48:45Z to 2026-11-27T01:48:46Z. Sent 2026-11-27T01:50:34Z.
+
+BLUF: 10 of the 10 stuck certifications have a confirmed anchor in Kintsugi's own anchor_store table (status confirmed, simulated not true, 64-hex transaction hash). 0 do not. This is the table's word, not a chain lookup, and Kintsugi anchors to the Cardano preview test network.
+
+THE COLUMNS, in S 129th's order
+stuck certifications total ............ 10 (10 expected)
+carry an anchorId key ................. present 10, non-empty 10
+createAttempts present ................ 0
+matched by anchor id .................. 10
+matched by document id ................ 10
+matched by both keys .................. 10, on the same row 10
+anchor id only ........................ 0
+document id only ...................... 0
+unmatched by either ................... 0
+more than one row for a document id ... 0 ; anchor rows reached: 10 by anchor id, 10 by document id
+
+matched rows (status | simulated | n | with_tx | with_tx_64hex | with_fabricated_prefix)
+QC1, by anchor id
+    confirmed | f | 10 | 10 | 10 | 0
+QC2, by document id
+    confirmed | f | 10 | 10 | 10 | 0
+
+CONFIRMED ON CHAIN (per the table): by anchor id 10, by document id 10, by both 10, by either 10
+not confirmed by either ............... 0
+oldest day 2026-09-17, newest day 2026-11-16, created_after_s127_count 0
+R9: the headline rests on both keys; they agree.
+
+ALL-TENANT: yes. The 3a row reads on|secuura|t|t|f = transaction_read_only on, current_database secuura, rolsuper t, rolbypassrls t, tenant setting in force f. A superuser that bypasses row security reads every tenant; read-only was a session default, not a permission barrier. Database name secuura is the first printed reading on this box (W1).
+3b refused: ERROR:  cannot execute CREATE TABLE in a read-only transaction (exit 1). 3c errored as wanted: ERROR:  relation "no_such_table_s130" does not exist (exit 1).
+
+CONTROLS (19 statements, 32 check lines ok, 0 FAIL, 0 STOP; the same two counts read 1 FAIL and 1 STOP on a failing local dry run)
+Schema guards: names 12 of 12, types 10 of 10.
+Positive control (document rows): 105 rows (floor 105), matched by external id 105 (R8 wants above 0), matched by anchor id 105, confirmed by anchor id 103 (last two reported only). Note: the census below has 2 rows confirmed with simulated t, the count the project notes give for KS-1751. That these are the 2 rows short in the 103 is my inference; I read no row.
+Made-up keys: anchor id 0, document id 0, status 0, state 0.
+Sums: QA1 to QA8, QB1 to QB5, QC1 and QC2 sums and both 64hex equalities ok (lines below).
+
+CERTIFICATION CENSUS (new statement)
+    failed | failed | f | 1 | 0 | 2026-10-21 | 2026-10-21
+    submitted | - | f | 10 | 0 | 2026-09-17 | 2026-11-16
+certification census: rows=2 total=11 submitted=10 failed=1 confirmed=0
+Both rows read exactly as the BRIEF expected. Off the box: QA stuck_n 10 against the CERTS submitted row n 10: equal.
+
+IDENTITY (2026-11-27T01:48:35Z): I1 hostname secuura02-kintsugi-vm. I2 revision=4764b2cfbc28768ef9c7b684e2af2e0f2f1438e5 (lines 2 to 6 of the head are in evidence/R2_id.out). I3 as reported: name=/secuura-originate image12=ca145807416e status=running startedAt=2026-11-27T00:59:44.4398908Z; D 88th read image ca145807416e. I4 names ending -postgres: count=1 value=[secuura-postgres]. "Kintsugi, not demo or production" rests on the hostname, the revision head and the certification counts; I hold no production address to compare against.
+
+BEFORE AND AFTER: documents 151, aggregate 7355fe593504e3345842979f2ae5cb7a, equal before and after (first reading of the aggregate on this box). anchor_store census, FIRST READING on this box (status, simulated, rows): confirmed f 161; confirmed t 2; failed f 3; equal before and after.
+census report: bucket_rows=3 anchor_rows=166 ; first reading on this box, no expected values; D 88th read 166 anchor rows in total, 0 outside confirmed and failed (nonfinal_d88.sh lines 88-90; STATUS B lines 12 and 17), no split by simulated
+
+MEASURED ON KINTSUGI FOR THE FIRST TIME (the BRIEF's UNMEASURED list): box up and the host key still the pin; revision head still 4764b2cfbc28; database name; document_id and simulated present with the wanted types; the stuck blobs carry anchorId (10 of 10); both keys reach the same anchor row (10 of 10); external id reaches 105 document rows; the stuck total is still 10 with none created after S 127th's count. Not read: the k46 sources.
+
+WHAT THIS CANNOT SHOW (section 7)
+a. anchor_store holds ONE row per (document_id, network) and a re-anchor overwrites it, so confirmed means this certification's anchor row confirmed, not that the original create did. Only the anchor id ties a row to the blob written at issue; it agrees with the document id on all 10. No createAttempts, so no timestamp check.
+b. Stored table and stored blobs only: no chain, Blockfrost or anchoring API read. A preview-network confirmation is not a mainnet claim.
+c. The 1 failed certification is outside the stuck class and its anchor row was not read. The document-class rows that also read submitted (lineage copies, S 127th) are outside. Demo is not measured here. Nothing here says a repair is right.
+d. The k46 certification poller was deployed after S 127th's count; this read cannot say whether it ever touched an old row beyond what the counts show.
+
+REACH AND HOLDS: 1 keyscan and 4 ssh connections (two runner runs, each a hostname check then the tool) to 20.198.226.148 only; my tools wrote no file on the box; the only write-shaped statement was 3b and it was refused; no HTTP to a stack host, no az, no Linear or GitHub write, no message to a human, no repair, no proposal. No local ssh process left (close check 2026-11-27T01:50:33Z: processes=827 own-python control=1 ssh-family=0 naming the box=0). Privacy check on the 7 box evidence files: at-sign 0, uuid-shaped 0, 64-hex 0; planted controls 1, 1, 1. No new deviation since the plan mail.
+
+I WAIT for your word before the wrap.
+
+Below: argv, the runner lines, then the measurement output with each SQL statement echoed before its result.
+
+===== argv (evidence/argv_s130.txt)
+keyscan 2026-11-27T01:48:03Z: /bin/bash <REC>/tools/kint_hostkey_s130.sh > <REC>/evidence/R1_hostkey.out  (ssh-keyscan -T 15 -t ed25519 20.198.226.148)
+run 1 2026-11-27T01:48:32Z: /bin/bash <REC>/tools/kint_run_s130.sh <REC>/tools/kint_id_s130.sh <REC>/evidence/R2_id.out > <REC>/evidence/R2_id.runner.out
+run 2 2026-11-27T01:48:42Z: /bin/bash <REC>/tools/kint_run_s130.sh <REC>/tools/kint_anc_s130.sh <REC>/evidence/R3_anc.out > <REC>/evidence/R3_anc.runner.out
+ssh options, as in the runner: -F /dev/null, ControlMaster no, ControlPath none, IdentitiesOnly yes, BatchMode yes, StrictHostKeyChecking yes, pinned known_hosts file, ConnectTimeout 20, ServerAliveInterval 30; user secuura, address 20.198.226.148, key file named by path in the runner.
+remote rc=0 lines=      17 tool=kint_id_s130.sh sha16=56a071ffd82b6c59 at 2026-11-27T01:48:35Z
+remote rc=0 lines=     218 tool=kint_anc_s130.sh sha16=f6ef86698d1db746 at 2026-11-27T01:48:46Z
+
+===== evidence/R3_anc.out, whole
+ANC 2026-11-27T01:48:45Z host=secuura02-kintsugi-vm
+--- 3a session proof  2026-11-27T01:48:45Z
+SQL:
+select current_setting('transaction_read_only'), current_database(), (select rolsuper from pg_roles where rolname = current_user), (select rolbypassrls from pg_roles where rolname = current_user), coalesce(nullif(current_setting('app.current_tenant_id', true), ''), 'unset') <> 'unset'
+OUTPUT:
+on|secuura|t|t|f
+exit: 0
+3a ok
+--- 3b refused-write control, MUST be refused  2026-11-27T01:48:45Z
+SQL:
+create temp table zz_s130_probe(a int)
+OUTPUT:
+ERROR:  cannot execute CREATE TABLE in a read-only transaction
+exit: 1
+3b ok: refused as read-only
+--- 3c negative control, must error  2026-11-27T01:48:45Z
+SQL:
+select count(*) from no_such_table_s130
+OUTPUT:
+ERROR:  relation "no_such_table_s130" does not exist
+LINE 1: select count(*) from no_such_table_s130
+                             ^
+exit: 1
+3c ok
+--- 4.1 identity census, anchor_store  2026-11-27T01:48:45Z
+SQL:
+select status, simulated, count(*) from anchor_store group by 1,2 order by 1,2
+OUTPUT:
+confirmed|f|161
+confirmed|t|2
+failed|f|3
+exit: 0
+census report: bucket_rows=3 anchor_rows=166 ; first reading on this box, no expected values; D 88th read 166 anchor rows in total, 0 outside confirmed and failed (nonfinal_d88.sh lines 88-90; STATUS B lines 12 and 17), no split by simulated
+--- 4.1 documents before  2026-11-27T01:48:45Z
+SQL:
+select count(*), md5(string_agg(md5(d::text), ',' order by d.id)) from documents d
+OUTPUT:
+151|7355fe593504e3345842979f2ae5cb7a
+exit: 0
+--- 5.1a schema guard, column names, want 12  2026-11-27T01:48:45Z
+SQL:
+select count(*) from information_schema.columns where table_schema='public' and ((table_name='documents' and column_name in ('id','tenant_id','external_id','certification_metadata','metadata','created_at')) or (table_name='anchor_store' and column_name in ('id','document_id','status','transaction_hash','simulated','created_at')))
+OUTPUT:
+12
+exit: 0
+check 5.1a names: 12 = 12 ok
+--- 5.1b schema guard, column types, want 10  2026-11-27T01:48:45Z
+SQL:
+select count(*) from information_schema.columns where table_schema='public' and ((table_name='documents' and column_name='id' and data_type='uuid') or (table_name='documents' and column_name in ('certification_metadata','metadata') and data_type='jsonb') or (table_name='documents' and column_name='created_at' and data_type='timestamp with time zone') or (table_name='anchor_store' and column_name in ('id','document_id','status','transaction_hash') and data_type='text') or (table_name='anchor_store' and column_name='simulated' and data_type='boolean') or (table_name='anchor_store' and column_name='created_at' and data_type='timestamp with time zone'))
+OUTPUT:
+10
+exit: 0
+check 5.1b types: 10 = 10 ok
+--- 5.2 certification census, report only  2026-11-27T01:48:45Z
+SQL:
+select coalesce(left(b.blob->>'anchoringStatus', 24), '-') as anchoring_status, coalesce(left(b.blob->>'status', 24), '-') as blob_status, (b.blob->>'txHash' is not null) as has_tx, count(*) as n, count(*) filter (where d.created_at > timestamptz '2026-11-25 23:06:36+00') as created_after_s127_count, (min(d.created_at) at time zone 'utc')::date::text as oldest_day, (max(d.created_at) at time zone 'utc')::date::text as newest_day from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null group by 1,2,3 order by 1,2,3
+OUTPUT:
+failed|failed|f|1|0|2026-10-21|2026-10-21
+submitted|-|f|10|0|2026-09-17|2026-11-16
+exit: 0
+check CERTS shape: rows=2 odd=0 ok
+certification census: rows=2 total=11 submitted=10 failed=1 confirmed=0
+--- 5.3 QA the link  2026-11-27T01:48:45Z
+SQL:
+with stuck as (select d.id, d.tenant_id, d.created_at, b.blob from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null and b.blob->>'anchoringStatus' = 'submitted' and b.blob->>'status' is null and b.blob->>'txHash' is null),
+j as (select s.id, s.blob,
+       (select count(*) from anchor_store a where a.id = s.blob->>'anchorId') as n_id,
+       (select count(*) from anchor_store a where a.document_id = s.id::text) as n_doc,
+       exists (select 1 from anchor_store a where a.id = s.blob->>'anchorId' and a.document_id = s.id::text) as same_row,
+       s.created_at
+  from stuck s)
+select count(*) as stuck_n,
+       count(*) filter (where blob ? 'anchorId') as key_anchorid_present,
+       count(*) filter (where jsonb_typeof(blob->'anchorId') = 'string' and blob->>'anchorId' <> '') as key_anchorid_nonempty,
+       count(*) filter (where blob ? 'createAttempts') as key_createattempts_present,
+       count(*) filter (where n_id > 0) as match_by_anchorid,
+       count(*) filter (where n_doc > 0) as match_by_docid,
+       count(*) filter (where n_id > 0 and n_doc > 0) as match_both_keys,
+       count(*) filter (where same_row) as both_keys_same_row,
+       count(*) filter (where n_id > 0 and n_doc = 0) as anchorid_only,
+       count(*) filter (where n_id = 0 and n_doc > 0) as docid_only,
+       count(*) filter (where n_id = 0 and n_doc = 0) as unmatched_either,
+       count(*) filter (where n_doc > 1) as docid_more_than_one_row,
+       coalesce(sum(n_id), 0) as anchor_rows_by_anchorid,
+       coalesce(sum(n_doc), 0) as anchor_rows_by_docid,
+       count(*) filter (where created_at > timestamptz '2026-11-25 23:06:36+00') as created_after_s127_count,
+       (min(created_at) at time zone 'utc')::date::text as oldest_day,
+       (max(created_at) at time zone 'utc')::date::text as newest_day
+  from j
+OUTPUT:
+10|10|10|0|10|10|10|10|0|0|0|0|10|10|0|2026-09-17|2026-11-16
+exit: 0
+check QA shape: rows=1 fields=17 ok
+check QA1 by_anchorid = both + anchorid_only: 10 = 10 + 0 ok
+check QA2 by_docid = both + docid_only: 10 = 10 + 0 ok
+check QA3 stuck = by_anchorid + docid_only + unmatched: 10 = 10 + 0 + 0 ok
+check QA4 nonempty <= present <= stuck: 10 <= 10 <= 10 ok
+check QA5 by_anchorid <= nonempty: 10 <= 10 ok
+check QA6 same_row <= both: 10 <= 10 ok
+check QA7 rows_by_anchorid >= by_anchorid: 10 >= 10 ok
+check QA8 rows_by_docid >= by_docid: 10 >= 10 ok
+check stuck total: 10 = 10, created_after_s127_count=0 ok
+--- 5.4 QB confirmed on chain  2026-11-27T01:48:45Z
+SQL:
+with stuck as (select d.id, d.tenant_id, d.created_at, b.blob from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null and b.blob->>'anchoringStatus' = 'submitted' and b.blob->>'status' is null and b.blob->>'txHash' is null),
+c as (select s.id,
+       exists (select 1 from anchor_store a where a.id = s.blob->>'anchorId' and a.status = 'confirmed' and a.simulated is not true and a.transaction_hash ~ '^[0-9a-fA-F]{64}$') as conf_id,
+       exists (select 1 from anchor_store a where a.document_id = s.id::text and a.status = 'confirmed' and a.simulated is not true and a.transaction_hash ~ '^[0-9a-fA-F]{64}$') as conf_doc
+  from stuck s)
+select count(*) as stuck_n,
+       count(*) filter (where conf_id) as confirmed_on_chain_by_anchorid,
+       count(*) filter (where conf_doc) as confirmed_on_chain_by_docid,
+       count(*) filter (where conf_id and conf_doc) as confirmed_by_both,
+       count(*) filter (where conf_id or conf_doc) as confirmed_by_either,
+       count(*) filter (where not conf_id and not conf_doc) as not_confirmed_by_either
+  from c
+OUTPUT:
+10|10|10|10|10|0
+exit: 0
+check QB shape: rows=1 fields=6 ok
+check QB1 stuck equals QA: 10 = 10 ok
+check QB2 either + neither = stuck: 10 + 0 = 10 ok
+check QB3 confirmed_by_anchorid <= matched_by_anchorid: 10 <= 10 ok
+check QB4 confirmed_by_docid <= matched_by_docid: 10 <= 10 ok
+check QB5 confirmed_by_both <= min of the two: 10 <= min(10, 10) ok
+--- 5.5 QC1 matched rows by anchor id  2026-11-27T01:48:46Z
+SQL:
+with stuck as (select d.id, d.tenant_id, d.created_at, b.blob from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null and b.blob->>'anchoringStatus' = 'submitted' and b.blob->>'status' is null and b.blob->>'txHash' is null)
+select a.status, a.simulated, count(*) as n,
+       count(*) filter (where a.transaction_hash is not null) as with_tx,
+       count(*) filter (where a.transaction_hash ~ '^[0-9a-fA-F]{64}$') as with_tx_64hex,
+       count(*) filter (where a.transaction_hash ~ '^(tx_sim_|mock_tx_|mock_batch_tx_|tx_)') as with_fabricated_prefix
+  from stuck s join anchor_store a on a.id = s.blob->>'anchorId'
+ group by 1,2 order by 1,2
+OUTPUT:
+confirmed|f|10|10|10|0
+exit: 0
+check QC1 shape: bad_lines=0 ok
+check QC1 n sums to matched anchor rows: 10 = 10 ok
+check QC1 confirmed f 64hex equals QB: 10 = 10 ok
+--- 5.5 QC2 matched rows by document id  2026-11-27T01:48:46Z
+SQL:
+with stuck as (select d.id, d.tenant_id, d.created_at, b.blob from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null and b.blob->>'anchoringStatus' = 'submitted' and b.blob->>'status' is null and b.blob->>'txHash' is null)
+select a.status, a.simulated, count(*) as n,
+       count(*) filter (where a.transaction_hash is not null) as with_tx,
+       count(*) filter (where a.transaction_hash ~ '^[0-9a-fA-F]{64}$') as with_tx_64hex,
+       count(*) filter (where a.transaction_hash ~ '^(tx_sim_|mock_tx_|mock_batch_tx_|tx_)') as with_fabricated_prefix
+  from stuck s join anchor_store a on a.document_id = s.id::text
+ group by 1,2 order by 1,2
+OUTPUT:
+confirmed|f|10|10|10|0
+exit: 0
+check QC2 shape: bad_lines=0 ok
+check QC2 n sums to matched anchor rows: 10 = 10 ok
+check QC2 confirmed f 64hex equals QB: 10 = 10 ok
+--- 5.6 positive control, document rows known to confirm  2026-11-27T01:48:46Z
+SQL:
+with doc as (select d.id, d.external_id, b.blob from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b
+              where d.certification_metadata->>'certificationType' is null and d.external_id is not null and b.blob->>'status' = 'confirmed' and b.blob->>'txHash' is not null)
+select count(*) as doc_rows,
+       count(*) filter (where exists (select 1 from anchor_store a where a.id = doc.blob->>'anchorId')) as match_by_anchorid,
+       count(*) filter (where exists (select 1 from anchor_store a where a.document_id = doc.external_id)) as match_by_external_id,
+       count(*) filter (where exists (select 1 from anchor_store a where a.id = doc.blob->>'anchorId' and a.status = 'confirmed' and a.simulated is not true and a.transaction_hash ~ '^[0-9a-fA-F]{64}$')) as confirmed_on_chain_by_anchorid
+  from doc
+OUTPUT:
+105|105|105|103
+exit: 0
+check POS shape: rows=1 fields=4 ok
+check POS1 doc_rows at least 105: 105 >= 105 ok
+check POS2 match_by_external_id above 0: 105 > 0 ok
+reported only: match_by_anchorid=105 confirmed_on_chain_by_anchorid=103
+--- 5.6 made-up key M1-anchor-id, must read 0  2026-11-27T01:48:46Z
+SQL:
+with stuck as (select d.id, d.tenant_id, d.created_at, b.blob from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null and b.blob->>'anchoringStatus' = 'submitted' and b.blob->>'status' is null and b.blob->>'txHash' is null) select count(*) from stuck s join anchor_store a on a.id = 'zz-s130-no-such-anchor-4c1e'
+OUTPUT:
+0
+exit: 0
+check M1-anchor-id: 0 = 0 ok
+--- 5.6 made-up key M2-document-id, must read 0  2026-11-27T01:48:46Z
+SQL:
+select count(*) from anchor_store where document_id = 'zz-s130-no-such-document-9a3f'
+OUTPUT:
+0
+exit: 0
+check M2-document-id: 0 = 0 ok
+--- 5.6 made-up key M3-status, must read 0  2026-11-27T01:48:46Z
+SQL:
+select count(*) from anchor_store where status = 'zz-s130-no-such-status-2b8d'
+OUTPUT:
+0
+exit: 0
+check M3-status: 0 = 0 ok
+--- 5.6 made-up key M4-state, must read 0  2026-11-27T01:48:46Z
+SQL:
+with stuck as (select d.id, d.tenant_id, d.created_at, b.blob from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null and b.blob->>'anchoringStatus' = 'zz-s130-no-such-state-3f9a' and b.blob->>'status' is null and b.blob->>'txHash' is null) select count(*) from stuck
+OUTPUT:
+0
+exit: 0
+check M4-state: 0 = 0 ok
+--- 5.7 documents after  2026-11-27T01:48:46Z
+SQL:
+select count(*), md5(string_agg(md5(d::text), ',' order by d.id)) from documents d
+OUTPUT:
+151|7355fe593504e3345842979f2ae5cb7a
+exit: 0
+--- 5.7 census after  2026-11-27T01:48:46Z
+SQL:
+select status, simulated, count(*) from anchor_store group by 1,2 order by 1,2
+OUTPUT:
+confirmed|f|161
+confirmed|t|2
+failed|f|3
+exit: 0
+after-state documents: equal [151|7355fe593504e3345842979f2ae5cb7a]
+after-state census: equal
+SUMMARY branch=measure stuck=10 confirmed_on_chain_either=10 by_anchorid=10 by_docid=10 both=10 not_confirmed_either=0
+SUMMARY link anchorid_present=10 anchorid_nonempty=10 createattempts_present=0 by_anchorid=10 by_docid=10 both_keys=10 same_row=10 anchorid_only=0 docid_only=0 unmatched=0 docid_multi=0 rows_by_anchorid=10 rows_by_docid=10 created_after_s127_count=0 oldest=2026-09-17 newest=2026-11-16
+END 2026-11-27T01:48:46Z
