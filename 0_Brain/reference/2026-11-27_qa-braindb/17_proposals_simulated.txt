@@ -1,0 +1,51 @@
+/bin/bash is: GNU bash, version 3.2.57(1)-release (arm64-apple-darwin26)
+bash -n doctor_block.sh rc=0
+bash -n launcher_block.sh rc=0
+bash -n braindb.sh rc=0
+bash -n tests/run.sh rc=0
+bash-4-only constructs in braindb.sh / run.sh / the two blocks (want 0; control: 'local ' count in braindb.sh = 5):
+(grep rc=0; 1 means none)
+
+---- D1 doctor, no cluster yet
+  WARN brain-db: no cluster yet           run 2_Project_Files/brain-db/braindb.sh up (PORTABILITY 32)
+[doctor continues: yes]
+processes: 0
+---- L1 launcher block, first boot (no cluster): creates, starts, builds
+check: GREEN, 22 files on disk match the index (built 2026-11-27T12:51:14+11:00)
+[launcher continues after the block: yes]
+took 2 s ; processes: 1
+---- D2 doctor, server running, index current
+  OK   brain-db index current (GREEN, 22 files on disk match the index (built 2026-11-27T12:51:14+11:00))
+[doctor continues: yes]
+---- D3 doctor, a file changed
+  WARN brain-db: index stale              check: RED, 1 path(s) differ (run: braindb.sh rebuild) -> braindb.sh rebuild
+[doctor continues: yes]
+---- L2 launcher block, second boot, a file changed: rebuild
+check: GREEN, 22 files on disk match the index (built 2026-11-27T12:51:15+11:00)
+[launcher continues after the block: yes]
+---- stop (the proposed wrap line), then D4 doctor with the server stopped
+stop: stopped pid 42716 (/private/tmp/claude-501/-Volumes-De
+  OK   brain-db: server stopped (on demand; the next search starts it)
+[doctor continues: yes]
+processes after doctor: 0
+---- L3 launcher block with a cluster from another major version (marker 14)
+⚠ brain-db up FAILED (the brain files are unaffected; search is unavailable this boot):
+braindb: REFUSED: the cluster at WEDNESDAY/2_Project_Files/brain-
+[launcher continues after the block: yes]
+processes: 0
+-- D5 doctor in the same state
+  WARN brain-db: cluster version differs  cluster 14 vs binaries 15.19: quarantine pgdata-wednesday and run braindb.sh up
+[doctor continues: yes]
+---- L4 launcher block with Postgres ABSENT (a copy of the tool whose two keg paths do not exist, PATH=/usr/bin:/bin)
+⚠ brain-db up FAILED (the brain files are unaffected; search is unavailable this boot):
+braindb: Postgres binaries not found (looked in $BRAINDB_PGBIN, /nonexistent/pg15/bin, /nonexistent/pg15b/bin, PATH). See PORTABILITY.md.
+[launcher continues after the block: yes]
+processes: 0
+---- L5 launcher block with python3 ABSENT from PATH (PATH=/nonexistent)
+⚠ brain-db up FAILED (the brain files are unaffected; search is unavailable this boot):
+/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-braindb/prop/launcher_block.sh: line 9: tail: command not found
+[launcher continues after the block: yes]
+---- L6 launcher block when the lane or the scope file is missing (another seat that has not adopted)
+[silent skip, launcher continues: yes]
+stop: not running (no pid file in /private/tmp/claude-501/-V
+processes with -D under /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-braindb/prop/r125113: 0

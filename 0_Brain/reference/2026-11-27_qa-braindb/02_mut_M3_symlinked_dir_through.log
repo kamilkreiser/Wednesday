@@ -1,0 +1,390 @@
+brain-db tests: run directory /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-braindb/mut/M3_symlinked_dir_through-123802/scr/braindb-test-20261127-123803-18461
+started 2026-11-27 12:38:03 AEDT
+
+== 0. fixtures
+fixtures written under /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-braindb/mut/M3_symlinked_dir_through-123802/scr/braindb-test-20261127-123803-18461/tree
+
+== 1. guards before any cluster exists
+  PASS  BRAINDB_ROOT without BRAINDB_PGDATA is refused (a fixture tree can never reach the drive cluster) (rc 1)
+  PASS    and says why
+  PASS  status on a cluster that does not exist reports STOPPED (rc 3)
+  PASS  start with no cluster is refused (rc 1)
+
+== 2. init
+  PASS  init creates the cluster (rc 0)
+  PASS  data directory is mode 700
+  PASS  postgresql.conf carries listen_addresses = ''
+  PASS  a second init is refused (rc 1)
+  PASS    and says REFUSED
+  PASS  (can fail) init refusal: the first init did not report REFUSED
+  PASS  stop on a never-started cluster is a clean no-op (rc 0)
+
+== 3. start, socket only
+  PASS  start (rc 0)
+  PASS  exactly one process runs with -D <scratch data directory> (pid 18624)
+  PASS  the server holds no network socket (lsof -i: nothing, rc 1)
+  PASS  (control) the same lsof does see the Unix socket
+  PASS  a second start is a no-op (rc 0)
+  PASS    and says already running
+  PASS  status reports RUNNING (rc 0)
+
+== 4. check before any rebuild is RED, rebuild makes it GREEN
+  PASS  check with no index is red (rc 1)
+  PASS  rebuild (rc 0)
+        NOTICE:  schema "brain" does not exist, skipping
+        rebuild: seat wednesday, tree /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-braindb/mut/M3_symlinked_dir_through-123802/scr/braindb-test-20261127-123803-18461/tree
+          kind            files     rows
+          rules               2        7
+          lesson             10       22
+          rules_index         1       10   (rule lines)
+          ledger              2        5
+          daily               1        3
+          skill               2        2
+          identity            1        1
+          people              1        1
+          architecture        2        2
+          total              22       43   (search rows)
+          rules index: 14 well-formed rows, 10 joined to an indexed lesson, 4 dropped (their lesson is excluded or missing)
+          lesson sections dropped by their project-tier marker: 1
+          matched an allow line but NOT indexed: 9
+              2  every rules-index row for it names only other seats  (2026-01-03_what-friday-does.md, 2026-01-17_other-seat-only.md)
+              2  path contains '(conflict_on_'  (2026-01-05_beta (conflict_on_2026-01-06).md, 2026-01-20 (conflict_on_2026-01-21).md)
+              1  path contains '.pre-'  (2026-01-06_gamma.pre-0101.md)
+              1  project tier 'P-Acme/Thing' names none of this seat's clients  (2026-01-13_unknown-project.md)
+              1  symlink  (2026-01-15_link.md)
+              2  tier names datasec  (2026-01-08_project-case-one.md, 2026-01-09_project-case-two.md)
+          time: 0.15 s (read and parse 0.00 s, load and index 0.14 s)
+  PASS  check after rebuild is green (rc 0)
+
+== 5. the indexed path set is exactly the expected set
+  PASS  22 paths, exactly the expected ones
+  PASS  no indexed path is another seat's record, a sync leftover or a hard-excluded folder
+  PASS  (can fail) that path assertion: with 'learnings' added to the same pattern it is red
+  PASS  a lesson, a skill and an architecture file with another seat's word in the NAME are indexed (ANSWER-1 item 2)
+
+== 6. every exclusion: the planted file is absent, its neighbour is present (whole-index dump)
+  PASS  absent  xcanary03  lesson whose only rules-index row is scoped to another seat (friday)
+  PASS  absent  xcanary03rule  its rules-index line
+  PASS  absent  xcanary17  lesson whose only rules-index row is scoped to another seat (tuesday)
+  PASS  absent  xcanary17rule  its rules-index line
+  PASS  absent  xcanary05  lesson, a (conflict_on_ copy
+  PASS  absent  xcanary06  lesson, .pre- inside a name that still ends .md
+  PASS  absent  xcanary07  lesson backup ending .md.pre-0101
+  PASS  absent  xcanary08  lesson, tier P-Datasec/HPSM-POC
+  PASS  absent  xcanary08rule  its rules-index line
+  PASS  absent  xcanary09  lesson, tier P (Datasec/OXPd)
+  PASS  absent  xcanary13  lesson, project tier naming no client of this seat
+  PASS  absent  xcanary14  section marked tier P-Datasec inside a MIXED lesson
+  PASS  absent  xcanary15  4_Credentials file, reached through a symlink in learnings/
+  PASS  absent  xcanary22  the friday ledger and its archive
+  PASS  absent  xcanary23  the laptop_datasec ledger and its archive
+  PASS  absent  xcanary24  ledger (conflict_on_ copy
+  PASS  absent  xcanary25  ledger .pre- backup
+  PASS  absent  xcanary26  _ledger_fleet_insights.md (not on the allow-list)
+  PASS  absent  xcanary33  daily/_template.md
+  PASS  absent  xcanary34  daily/.spoken.log
+  PASS  absent  xcanary35  daily (conflict_on_ copy
+  PASS  absent  xcanary36  daily .pre- backup
+  PASS  absent  xcanary37  daily_tuesday/
+  PASS  absent  xcanary38  daily_friday/
+  PASS  absent  xcanary41  skill .pre- backup
+  PASS  absent  xcanary76  a CLAUDE.md that is not one of the two allowed
+  PASS  absent  xcanary77  2_Project_Files/tuesday/ (another seat's folder, not on the allow-list)
+  PASS  absent  xcanary78  a (conflict_on_ copy of the root rules file
+  PASS  absent  xcanary47  chat store under 0_Brain/dashboard/
+  PASS  absent  xcanary48  markdown under 0_Brain/dashboard/
+  PASS  absent  xcanary49  0_Brain/reference/
+  PASS  absent  xcanary50  3_Access_Keys/
+  PASS  absent  xcanary51  0_Brain/tasks/ (not on the allow-list)
+  PASS  absent  xcanary52  learnings/families/ (no recursion)
+  PASS  absent  xcanary53rule  rules-index row whose lesson file does not exist
+  PASS  absent  xcanary  ANY canary token at all
+  PASS  present xneighbour01  lesson, tier W
+  PASS  present xneighbour02  lesson with 'tuesday' in its NAME whose rules-index row is scoped all
+  PASS  present xneighbour02rule  its rules-index line
+  PASS  present xneighbour04  lesson with 'laptop_datasec' in its NAME, no rules-index row, tier W
+  PASS  present xneighbour19  lesson with one row for another seat and one row naming this seat
+  PASS  present xneighbour19ruleb  the row that names this seat
+  PASS  present xneighbour42  skill with 'tuesday' in its name
+  PASS  present xneighbour46  architecture file with 'tuesday' in its name
+  PASS  present xneighbour70  rules file at the tree root: text before the first heading
+  PASS  present xneighbour70b  a section's own text before its numbered rules
+  PASS  present xneighbour71  numbered rule 0
+  PASS  present xneighbour71b  its continuation line
+  PASS  present xneighbour72  numbered rule 0a
+  PASS  present xneighbour73  numbered rule 3b-i
+  PASS  present xneighbour74  a numbered rule under a second heading
+  PASS  present xneighbour75  0_Brain/CLAUDE.md
+  PASS  present xneighbour01apply  its second section
+  PASS  present xneighbour01rule  its rules-index line
+  PASS  present xneighbour01ruletwo  its #2 rules-index line
+  PASS  present xneighbour10  lesson, tier P-Secuura/Blockchain
+  PASS  present xneighbour11  lesson, tier M
+  PASS  present xneighbour12  lesson with no tier
+  PASS  present xneighbour14  MIXED lesson, unmarked text
+  PASS  present xneighbour14b  section marked tier P-Secuura inside it
+  PASS  present xneighbour14c  the section after the dropped one
+  PASS  present xneighbour16  superseded lesson
+  PASS  present xneighbour20  this seat's ledger
+  PASS  present xneighbour20rule  a ledger row's rule sentence
+  PASS  present xneighbour21  this seat's ledger archive
+  PASS  present xneighbour30  daily bullet
+  PASS  present xneighbour30b  its continuation line
+  PASS  present xneighbour30c  daily bullet with no time
+  PASS  present xneighbour30d  daily plain paragraph
+  PASS  present xneighbour40  skill
+  PASS  present xneighbour43  identity
+  PASS  present xneighbour44  people
+  PASS  present xneighbour45  architecture
+  PASS  (can fail) absence assertion: pointed at a neighbour token it is red
+  PASS  (can fail) presence assertion: pointed at a canary token it is red
+  PASS  the two rules files give 7 rows (1 intro, 1 section text, 3 numbered rules, 1 rule under a second heading, 1 section of the brain file)
+  PASS  one row headed: CLAUDE.md > Rules > rule 0
+  PASS  one row headed: CLAUDE.md > Rules > rule 0a
+  PASS  one row headed: CLAUDE.md > Rules > rule 3b-i
+  PASS  one row headed: CLAUDE.md > Session end > rule 1
+  PASS  one row headed: 0_Brain/CLAUDE.md > Folders
+
+== 7. the exclusions are load-bearing
+  PASS  rebuild with the allow-list widened onto other seats' records (rc 0)
+  PASS  seat words still exclude xcanary37 (folder name, or file name of a ledger or daily note)
+  PASS  seat words still exclude xcanary38 (folder name, or file name of a ledger or daily note)
+  PASS  seat words still exclude xcanary22 (folder name, or file name of a ledger or daily note)
+  PASS  seat words still exclude xcanary23 (folder name, or file name of a ledger or daily note)
+  PASS  seat words still exclude xcanary77 (folder name, or file name of a ledger or daily note)
+  PASS    and the rebuild output says why
+  PASS  (control) a lesson named for another seat is still indexed under the same scope
+  PASS  rebuild under the permissive scope (rc 0)
+  PASS  (can fail) without the deny lines xcanary05 DOES enter the index
+  PASS  (can fail) without the deny lines xcanary06 DOES enter the index
+  PASS  (can fail) without the deny lines xcanary08 DOES enter the index
+  PASS  (can fail) without the deny lines xcanary09 DOES enter the index
+  PASS  (can fail) without the deny lines xcanary13 DOES enter the index
+  PASS  (can fail) without the deny lines xcanary14 DOES enter the index
+  PASS  (can fail) without the deny lines xcanary22 DOES enter the index
+  PASS  (can fail) without the deny lines xcanary23 DOES enter the index
+  PASS  (can fail) without the deny lines xcanary37 DOES enter the index
+  PASS  (can fail) without the deny lines xcanary38 DOES enter the index
+  PASS  (can fail) without the deny lines xcanary77 DOES enter the index
+  PASS  even then: a lesson whose every rules-index row names another seat stays out (the seats column is not a scope-file setting)
+  PASS  even then: backups ending .md.pre-*, the symlink, credentials, keys, dashboard, reference stay out
+  PASS  check under the real scope is red after a permissive rebuild (scope hash differs) (rc 1)
+  PASS  rebuild under the real scope (rc 0)
+  PASS  and every canary is gone again
+
+== 8. hard exclusions: a scope file that names them is refused, and the index is untouched
+  PASS  refused: allow skill 4_Credentials/*.md
+  PASS  refused: allow skill 3_Access_Keys/*.md
+  PASS  refused: allow skill 0_Brain/dashboard/*.md
+  PASS  refused: allow skill 0_Brain/dashboard/data/chat_*.json
+  PASS  refused: allow skill 0_Brain/reference/2026-01-01_x/*.md
+  PASS  refused: allow skill 0_Brain/../4_Credentials/*.md
+  PASS  refused: allow skill /etc/*.md
+  PASS  refused: allow skill 0_Brain/*/notes.md
+  PASS  refused: allow skill 0_Brain/skills/*
+  PASS  refused: allow nonsense 0_Brain/skills/*.md
+  PASS  refused: allow rules ../CLAUDE.md
+  PASS  refused: allow rules *.md
+  PASS  refused: allow lesson CLAUDE.md
+  PASS  refused: deny_seat_word two words
+  PASS  the index is unchanged by the refused rebuilds (check green) (rc 0)
+  PASS  a scope naming a SYMLINKED directory still rebuilds (rc 0)
+  FAIL    but nothing behind the symlink is indexed ('xcanary' found 2 time(s) in dump-S.sql)
+  PASS    and the rebuild output names the skipped directory
+  PASS  back to the real scope (rc 0)
+
+== 9. check: red on a changed, added or removed fixture; green after rebuild
+  PASS  (control) green before any change (rc 0)
+  PASS  red after one indexed file and one excluded file changed (rc 1)
+  PASS    and names the changed path
+  PASS    the changed EXCLUDED file is not named
+  PASS    and exactly one path differs
+  PASS  green after rebuild (rc 0)
+  PASS  red after a file was added (rc 1)
+  PASS    and names it
+  PASS  red after a file was removed (rc 1)
+  PASS    and names it
+  PASS  red with 26 differing paths (rc 1)
+  PASS    names exactly 20 paths
+  PASS    and counts the rest
+  PASS  green after rebuild (rc 0)
+
+== 10. rebuild is idempotent
+  PASS  two rebuilds give byte-identical data (built_at aside), 447 dump lines
+  PASS  (can fail) idempotence comparison: the permissive dump, filtered the same way, does differ
+
+== 11. search and at
+  PASS  search (rc 0)
+  PASS  search finds the lesson by a body word
+  PASS    and prints its rule line
+  PASS  search --kind daily finds the bullet with its time stamp
+  PASS  --kind filters (the daily word is not a ledger row)
+  PASS  search for an excluded file's word finds nothing
+  PASS    and says NO MATCH, pointing at the trigger form
+  PASS  (can fail) NO MATCH line: a search that finds something does not print it
+  PASS  (can fail) zero-result assertion: a neighbour word does not give zero results
+  PASS  --limit 2 gives two results
+  PASS  an unknown --kind is refused (rc 2)
+  PASS  a query of stop words gives zero results, not an error
+  -- round 2: what a result is, lessons first, rules files, weak matches
+  PASS  search yakword (in five ledger headlines and one lesson body) (rc 0)
+        search: "yakword"  rules and lessons first
+         1. 0.0124  [lesson, live, ×3]  0_Brain/learnings/2026-01-01_alpha-keeps-panes-open.md:13
+            heading: Lesson about alpha keeps panes open > How to apply
+            rule:    When closing a pane: xneighbour01rule keep it open until the wrap is read. / When wrapping: xneighbour01ruletwo write the note.
+            snippet: Apply xneighbour01apply every time. A [[yakword]] in the body only. an appended line
+          also, incident rows from the ledger and daily notes (what happened, not the rule):
+         2. 0.1205  [ledger, 2026-01-22]  0_Brain/learnings/_ledger.md:15
+            heading: THE SEAT DID A YAKWORD THING xneighbour20
+            snippet: 🟡 **THE SEAT DID A [[YAKWORD]] THING xneighbour20** [W] detail. 🔑 [[2026-01-11_fleet-rule]] Rule: say xneighbour20rule first. | correction | 1 | [[2026-01-11_fleet-rule]] | done
+         3. 0.1205  [ledger, 2026-01-23]  0_Brain/learnings/_ledger.md:17
+            heading: THE SEAT DID A YAKWORD THING xneighbour20
+            snippet: 🟡 **THE SEAT DID A [[YAKWORD]] THING xneighbour20** [W] detail. 🔑 [[2026-01-16_old-rule]] Rule: say xneighbour20rule first. | correction | 1 | [[2026-01-16_old-rule]] | done
+        WEAK MATCH: the best result scores 0.0124, below 0.035. It may be a near neighbour, not the rule you want. Reword with the rule's own words, or if you know the moment try: braindb.sh at <trigger>
+        (3 results, 17 ms)
+  PASS  default order says so in its header
+  PASS  default: the lesson is result 1 although ledger rows score higher
+  PASS  default: incident rows follow under their own heading
+  PASS  (can fail) --all: the same search puts a ledger row first (the old mixed order)
+  PASS  --kind with --all is refused (rc 2)
+  PASS  every result line carries its kind (3 of 3)
+        search: "zebraword"  rules and lessons first
+         1. 0.1310  [rules]  CLAUDE.md:9
+            heading: Zebraword first. > CLAUDE.md > Rules > rule 0
+            snippet: [[Zebraword]] first.** Everything lives on the drive, xneighbour71, and a good many more plain words follow here so that this row is of ordinary length. A continuation line of rule 0, xneighbour71b
+         2. 0.2365  [lesson, live]  0_Brain/learnings/2026-01-21_zebraword-zebraword.md:9
+            heading: Lesson about zebraword zebraword
+            rule:    When testing: xneighbour21zrule say zebraword.
+            snippet: **The lesson:** the word is xneighbour21z here.
+        (2 results, 19 ms)
+  PASS  a rules-file row that matches well is result 1, ahead of the lesson
+  PASS    its heading names the file, section and rule
+  PASS    a good match prints no WEAK MATCH line
+  PASS  (can fail) with the threshold set above every score, the same rules row is not promoted: the lesson is result 1
+  PASS  (can fail) and the same search now prints WEAK MATCH
+  PASS  a query where one word of four matches is called a WEAK MATCH
+  PASS    and points at the trigger form
+  PASS  --kind rules finds numbered rule 0a
+  PASS  at pane (rc 0)
+        Rules for: pane (3)  [weights counted from this seat's indexed ledgers only]
+        • [×3] When closing a pane: xneighbour01rule keep it open until the wrap is read.  (2026-01-01_alpha-keeps-panes-open.md)
+        • [×2] When merging: xneighbour11rule read the gate.  (2026-01-11_fleet-rule.md)
+        • [new] When booting: xneighbour02rule sweep the projects.  (2026-01-02_tuesday-sweeps.md)
+  PASS  at pane lists three rules (the lesson named for tuesday but scoped all is now among them)
+  PASS  third: the never-cited rule of the lesson with 'tuesday' in its name
+  PASS  most reinforced first: the lesson cited 3 times in this seat's ledgers
+  PASS  second: cited once plus one passed on by the superseded lesson (the laptop_datasec ledger's 3 citations are NOT counted)
+  PASS  another seat's rule, a superseded rule and excluded lessons' rules are not listed
+  PASS  a trigger that is not one plain word is refused (rc 2)
+  PASS    and the index is intact (rc 0)
+
+== 12. other seats: refused without their own scope file; the PROPOSED scopes on the fixtures
+  PASS  seat tuesday with no scope/tuesday.scope is refused (rc 2)
+  PASS    and says why
+  PASS  the wednesday seat cannot use the tuesday scope file (rc 2)
+  PASS  proposed tuesday scope rebuilds on the fixtures (rc 0)
+  PASS  tuesday scope: present xcanary23
+  PASS  tuesday scope: present xcanary37
+  PASS  tuesday scope: present xcanary08
+  PASS  tuesday scope: present xcanary14
+  PASS  tuesday scope: present xcanary17
+  PASS  tuesday scope: present xneighbour02
+  PASS  tuesday scope: present xneighbour01
+  PASS  tuesday scope: present xneighbour19
+  PASS  tuesday scope: present xneighbour46
+  PASS  tuesday scope: present xneighbour71
+  PASS  tuesday scope: absent  xneighbour20
+  PASS  tuesday scope: absent  xneighbour30
+  PASS  tuesday scope: absent  xneighbour10
+  PASS  tuesday scope: absent  xneighbour14b
+  PASS  tuesday scope: absent  xcanary38
+  PASS  tuesday scope: absent  xcanary22
+  PASS  tuesday scope: absent  xcanary03
+  PASS  tuesday scope: absent  xcanary15
+  PASS  tuesday scope: absent  xcanary47
+  PASS  tuesday scope: absent  xcanary77
+  PASS  proposed friday scope rebuilds on the fixtures (rc 0)
+  PASS  friday scope: present xcanary22
+  PASS  friday scope: present xcanary38
+  PASS  friday scope: present xcanary03
+  PASS  friday scope: present xcanary08
+  PASS  friday scope: present xneighbour10
+  PASS  friday scope: present xneighbour01
+  PASS  friday scope: present xneighbour02
+  PASS  friday scope: present xneighbour04
+  PASS  friday scope: present xneighbour19
+  PASS  friday scope: absent  xneighbour20
+  PASS  friday scope: absent  xneighbour30
+  PASS  friday scope: absent  xcanary37
+  PASS  friday scope: absent  xcanary23
+  PASS  friday scope: absent  xcanary17
+  PASS  friday scope: absent  xcanary15
+  PASS  friday scope: absent  xcanary47
+  PASS  friday scope: absent  xcanary77
+  PASS  the wednesday seat sees another seat's index as stale (rc 1)
+  PASS  wednesday scope restored, green (rc 0)
+
+== 13. stop
+  PASS  (control) one server process before stop
+  PASS  stop (rc 0)
+  PASS  no process is left with -D <scratch data directory>
+  PASS  pid 18624 is gone
+  PASS  a second stop is a clean no-op (rc 0)
+  PASS    and says not running
+  PASS  status reports STOPPED (rc 3)
+  PASS  with BRAINDB_NO_AUTOSTART=1 (doctor's mode) check on a stopped server is rc 3, and starts nothing (rc 3)
+  PASS    nothing was started
+  PASS  search on a stopped server brings it up itself (rc 0)
+  PASS    and answers
+  PASS    one server is now running
+  PASS  stop again (rc 0)
+  PASS  check on a stopped server brings it up itself and is green (rc 0)
+  PASS  at on a stopped server brings it up itself (rc 0)
+  PASS  stop again (rc 0)
+  PASS  no server is left
+
+== 14. stop never touches a process that is not this cluster's server
+  PASS  a pid file naming a live foreign process is refused (rc 1)
+  PASS    and says REFUSED
+  PASS    and the foreign process is still alive
+  PASS  a pid file naming another data directory is refused (rc 1)
+  PASS    and the foreign process is still alive
+  PASS  a stale pid file (dead pid) is a clean no-op (rc 0)
+
+== 15. socket directory guards
+  PASS  a socket path over the macOS limit is refused (rc 1)
+  PASS    and says why
+  PASS  a socket directory that is not mode 700 is refused (rc 1)
+  PASS    and nothing was started
+  PASS    and the over-long directory was never created
+
+== 16. version marker
+  PASS  start on a mismatched version marker is refused (rc 1)
+  PASS    and says rebuild
+  PASS  search (which would start the server itself) is refused the same way (rc 1)
+  PASS    and says rebuild
+  PASS    and nothing was started
+  PASS  (can fail) with the real marker back, the same start succeeds (rc 0)
+  PASS  the index survived a clean stop and start (green) (rc 0)
+
+== 17. an unclean stop empties the index; check says so; rebuild restores it
+  PASS  start after an unclean stop (rc 0)
+  PASS  check is red (rc 1)
+  PASS    and says the index is empty
+  PASS  search on the emptied index rebuilds it itself (rc 0)
+  PASS    says it is building
+  PASS    and answers
+  PASS  green afterwards (rc 0)
+
+== 18. up, and leave it stopped
+  PASS  up starts a stopped cluster and ends green (rc 0)
+  PASS  stop (rc 0)
+  PASS  search with NO cluster at all creates one, starts it, builds the index and answers (rc 0)
+  PASS    the answer
+  PASS    the new cluster exists
+  PASS  final stop of that cluster (rc 0)
+  PASS  no test server process is left (either cluster)
+  PASS  the socket directory is empty
+
+finished 2026-11-27 12:38:20 AEDT
+RESULT: 294 passed, 1 failed  (run directory /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-braindb/mut/M3_symlinked_dir_through-123802/scr/braindb-test-20261127-123803-18461)

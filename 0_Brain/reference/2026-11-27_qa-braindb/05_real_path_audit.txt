@@ -1,0 +1,93 @@
+Fri 27 Nov 2026 12:37:27 AEDT
+total paths: 419
+(positive control) lower(path) like '%learnings/2026-%' : 264
+files.path like %4_credentials% : 0   chunks distinct path: 0
+files.path like %3_access_keys% : 0   chunks distinct path: 0
+files.path like %0_brain/dashboard% : 0   chunks distinct path: 0
+files.path like %0_brain/reference% : 0   chunks distinct path: 0
+files.path like %tuesday% : 3   chunks distinct path: 3
+files.path like %friday% : 0   chunks distinct path: 0
+files.path like %laptop_datasec% : 0   chunks distinct path: 0
+files.path like %daily_tuesday% : 0   chunks distinct path: 0
+files.path like %daily_friday% : 0   chunks distinct path: 0
+files.path like %pickup% : 0   chunks distinct path: 0
+files.path like %week% : 8   chunks distinct path: 8
+files.path like %conflict_on_% : 0   chunks distinct path: 0
+files.path like %.pre-% : 0   chunks distinct path: 0
+files.path like %chat_% : 1   chunks distinct path: 1
+files.path like %.env% : 0   chunks distinct path: 0
+files.path like %/.% : 0   chunks distinct path: 0
+files.path like %..% : 0   chunks distinct path: 0
+---- the paths that DO match tuesday/friday/laptop_datasec/week/pickup (kind and path only)
+architecture|1_Project_Definition/Architecture/2026-09-16_tuesday-vs-wednesday-structure.md
+architecture|1_Project_Definition/Architecture/2026-09-16_unattended-week-loop.md
+lesson|0_Brain/learnings/2026-09-07_production-ban-lifted-for-the-week.md
+lesson|0_Brain/learnings/2026-09-10_a-weekday-and-a-date-are-two-claims.md
+lesson|0_Brain/learnings/2026-09-10_claim-a-task-with-tuesday-before-starting-it.md
+lesson|0_Brain/learnings/2026-09-14_at-90pct-weekly-usage-no-new-agents-wednesday-plus-local-model.md
+lesson|0_Brain/learnings/2026-09-15_ornith-q4-only-volume-week-qa-sunday-merge-once.md
+lesson|0_Brain/learnings/2026-10-23_tuesday-never-wait-on-kam-cards-morning-card-48h-email-priorities.md
+lesson|0_Brain/learnings/2026-11-06_clear-the-secuura-board-over-one-to-two-weeks.md
+skill|0_Brain/skills/weekly-consolidation.md
+skill|0_Brain/skills/weekly-industry-scan.md
+---- kinds and directories of every indexed path
+architecture|1_Project_Definition/Architecture/|22
+daily|0_Brain/daily/|115
+identity|0_Brain/identity/|2
+ledger|0_Brain/learnings/|2
+lesson|0_Brain/learnings/|264
+people|0_Brain/people/|2
+rules||1
+rules|0_Brain/|1
+rules_index|0_Brain/learnings/|1
+skill|0_Brain/skills/|9
+---- tables holding a path not in brain.files (want all 0)
+lessons|0
+ledger_rows|0
+chunks|0
+daily_rows|0
+---- rules rows whose lesson file is not an indexed lesson (want 0)
+0
+---- rules seats distribution (indexed rule lines)
+{all}|293
+{wednesday}|30
+{wednesday,friday}|21
+{tuesday,wednesday}|1
+---- lessons tier distribution
+W|214
+M|42
+MIXED|5
+(none)|3
+---- ledger/daily file names indexed
+ledger|0_Brain/learnings/_ledger.md
+ledger|0_Brain/learnings/_ledger_archive.md
+rules|0_Brain/CLAUDE.md
+rules|CLAUDE.md
+rules_index|0_Brain/learnings/_rules_index.tsv
+daily min/max|0_Brain/daily/2026-07-31.md|0_Brain/daily/2026-11-27.md
+---- lsof on the server pid (network sockets; want nothing)
+pid 10649: /opt/homebrew/Cellar/postgresql@15/15.19_1/bin/postgres -D /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/brain-db/pgdata-wednesday -c listen_addresses= -c unix_socket_directories=/tmp/wed-braindb-501-wednesday -c unix_socket_permissions=0700 -c port=5432
+lsof -i rc=1
+(control) unix sockets of the same pid:
+COMMAND    PID  USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+postgres 10649 kamil    5u  unix 0xf6bfe1a9128268ea      0t0      /tmp/wed-braindb-501-wednesday/.s.PGSQL.5432
+lsof -U rc=0
+---- all children of the postmaster holding any network socket
+(children checked: 5)
+---- socket dir
+drwx------ kamil /tmp/wed-braindb-501-wednesday
+srwx------ kamil /tmp/wed-braindb-501-wednesday/.s.PGSQL.5432
+---- server settings
+data_directory|/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/brain-db/pgdata-wednesday
+listen_addresses|
+max_connections|10
+port|5432
+unix_socket_directories|/tmp/wed-braindb-501-wednesday
+unix_socket_permissions|0700
+---- hba (non-comment lines)
+local   all             all                                     peer
+host    all             all             127.0.0.1/32            reject
+host    all             all             ::1/128                 reject
+local   replication     all                                     peer
+host    replication     all             127.0.0.1/32            reject
+host    replication     all             ::1/128                 reject

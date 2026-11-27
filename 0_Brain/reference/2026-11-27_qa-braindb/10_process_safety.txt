@@ -1,0 +1,155 @@
+proc run dir /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-braindb/proc-124555 ; 2026-11-27 12:45:55 AEDT
+
+######## P1 two starts at once (cluster exists, stopped)
+init rc=0
+start A rc=0 : start: running (pid 3510, socket /tmp/qa-bdb-501/.s.PGSQL.5432, no TCP listener)
+start B rc=1 : 2026-11-27 12:45:56.690 AEDT [3510] LOG:  database system is ready to accept connections
+FATAL lines seen by A: 0  by B: 1
+2026-11-27 12:45:56.679 AEDT [3509] FATAL:  lock file "postmaster.pid" already exists
+server processes with -D c1: 1
+  index: no database yet (run: braindb.sh rebuild)
+rebuild rc=0 ; 59 files, built 2026-11-27T12:45:57+11:00, root …/qa-braindb/atk/r124006/tree
+
+######## P2 two self-starting searches at once on a STOPPED cluster
+waiting for server to shut down.... done
+server stopped
+stop: stopped pid 3510 (/private/tmp/claude-501/-Volumes-Dev
+processes: 0
+search A rc=1 : 2026-11-27 12:45:57.977 AEDT [3680] LOG:  database system is ready to accept connections
+search B rc=0 : (1 result, 23 ms)
+2026-11-27 12:45:57.969 AEDT [3681] FATAL:  lock file "postmaster.pid" already exists
+braindb: the server did not start; last lines of /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-braindb/proc-1245
+server processes with -D c1: 1
+waiting for server to shut down.... done
+server stopped
+stop: stopped pid 3680 (/private/tmp/claude-501/-Volumes-Dev
+after stop: 0 process(es)
+
+######## P2b two self-starting searches at once with NO cluster at all (double init), 4 trials, socket dir /tmp/qa-bdb-501-b
+trial 1: A rc=1 (braindb: initdb failed for /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b) | B rc=1 (braindb: initdb failed for /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b)
+   1 initdb: error: could not create directory "n1/pg_wal": File exists
+   1 initdb: error: failed to remove data directory
+   2 initdb: removing data directory "n1"
+   1 initdb: warning: could not remove file or directory "n1": Directory not empty
+   1 running bootstrap script ... 2026-11-27 12:45:58.708 AEDT [3846] FATAL:  could not create file "pg_wal/xlogtemp.3846": No such file or directory
+   data dir after the race: 1 entries, PG_VERSION MISSING
+   a third search, alone, afterwards: rc=0 ((1 result, 25 ms))
+stop: stopped pid 3977 (/private/tmp/claude-501/-V
+   processes left for n1: 0
+trial 2: A rc=1 (braindb: initdb failed for /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b) | B rc=1 (braindb: initdb failed for /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b)
+   1 initdb: error: could not create directory "n2/pg_wal": File exists
+   1 initdb: error: failed to remove data directory
+   2 initdb: removing data directory "n2"
+   1 initdb: warning: could not remove file or directory "n2": Directory not empty
+   1 running bootstrap script ... 2026-11-27 12:46:00.594 AEDT [4167] FATAL:  could not create file "pg_wal/xlogtemp.4167": No such file or directory
+   data dir after the race: 1 entries, PG_VERSION MISSING
+   a third search, alone, afterwards: rc=0 ((1 result, 24 ms))
+stop: stopped pid 4305 (/private/tmp/claude-501/-V
+   processes left for n2: 0
+trial 3: A rc=1 (braindb: initdb failed for /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b) | B rc=1 (braindb: initdb failed for /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b)
+   1 initdb: error: could not create directory "n3/pg_wal": File exists
+   1 initdb: error: failed to remove data directory
+   2 initdb: removing data directory "n3"
+   1 initdb: warning: could not remove file or directory "n3": Directory not empty
+   1 initdb: warning: could not remove file or directory "n3/pg_wal": Directory not empty
+   data dir after the race: 1 entries, PG_VERSION MISSING
+   a third search, alone, afterwards: rc=0 ((1 result, 24 ms))
+stop: stopped pid 4571 (/private/tmp/claude-501/-V
+   processes left for n3: 0
+trial 4: A rc=1 (braindb: initdb failed for /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b) | B rc=1 (braindb: initdb failed for /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b)
+   1 initdb: error: could not create directory "n4/pg_wal": File exists
+   1 initdb: error: failed to remove data directory
+   2 initdb: removing data directory "n4"
+   1 initdb: warning: could not remove file or directory "n4": Directory not empty
+   1 running bootstrap script ... 2026-11-27 12:46:04.594 AEDT [4745] FATAL:  could not create file "pg_wal/xlogtemp.4745": No such file or directory
+   data dir after the race: 1 entries, PG_VERSION MISSING
+   a third search, alone, afterwards: rc=0 ((1 result, 22 ms))
+stop: stopped pid 4843 (/private/tmp/claude-501/-V
+   processes left for n4: 0
+
+######## P4 stale pid file whose pid belongs to an unrelated LIVE process (a python sleeper that DIES on SIGINT or SIGTERM)
+sleeper pid 4959: alive ; c1 processes: 0
+server: STOPPED
+braindb: REFUSED: pid 4959 is alive but was not started with -D /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d
+stop rc=1 ; sleeper alive
+start rc=1 ; sleeper alive
+2026-11-27 12:45:57.969 AEDT [3681] HINT:  Is another postmaster (PID 3680) running in data directory "c1"?
+2026-11-27 12:46:07.548 AEDT [5034] FATAL:  lock file "postmaster.pid" already exists
+2026-11-27 12:46:07.548 AEDT [5034] HINT:  Is another postmaster (PID 4959) running in data directory "c1"?
+search rc=1 ; sleeper alive
+up rc=1 ; sleeper alive
+server processes with -D c1: 0 ; pid file line 1 still: 4959
+-- recovery by hand: move the stale pid file aside (mv -n), then start
+start: running (pid 5137, socket /tmp/qa-bdb-501/.s.PGSQL.5432, no TCP listener)
+sleeper alive ; c1 processes: 1
+
+######## P5 pid file pointing at ANOTHER Postgres server (c1 RUNNING; c2 a second cluster, stopped, own socket dir)
+c1 server pid 5137 alive
+c2 init rc=0 ; c2 processes: 0
+-- 5a: c2's pid file is a byte copy of c1's (c1's pid AND c1's data directory)
+server: STOPPED
+braindb: REFUSED: c2/postmaster.pid names data directory 'c1', not 'c2'; nothing stopped
+c2 stop rc=1 ; c1 server alive
+c2 start rc=1 ; c1 server alive ; c2 processes: 0
+braindb: the server did not start; last lines of c2/braindb-server.log follow
+2026-11-27 12:46:09.269 AEDT [5245] FATAL:  lock file "postmaster.pid" already exists
+2026-11-27 12:46:09.269 AEDT [5245] HINT:  Is another postmaster (PID 5137) running in data directory "c2"?
+-- 5b: c2's pid file names c1's pid but c2's OWN data directory
+server: STOPPED
+braindb: REFUSED: pid 5137 is alive but was not started with -D c2; it is not this index's server and was not touched
+c2 stop rc=1 ; c1 server alive
+c2 start rc=1 ; c1 server alive ; c2 processes: 0
+c1 still answers: check: GREEN, 59 files on disk match the index (built 2026-1 ; c1 pid alive
+
+######## P6 one socket directory, two data directories: can a command addressed to c2 (STOPPED) act on c1's server?
+c1 index before: 59 files, built 2026-11-27T12:45:57+11:00, root …/qa-braindb/atk/r124006/tree ; c2 processes: 0
+-- 6a default (self-start on): PGDATA=c2, SOCKDIR=c1's, a different tree; rebuild
+rc=1
+2026-11-27 12:46:09.714 AEDT [5359] HINT:  Is another postmaster (PID 5137) running in data directory "c2"?
+2026-11-27 12:46:10.400 AEDT [5436] FATAL:  lock file "/tmp/qa-bdb-501/.s.PGSQL.5432.lock" already exists
+2026-11-27 12:46:10.400 AEDT [5436] HINT:  Is another postmaster (PID 5137) using socket file "/tmp/qa-bdb-501/.s.PGSQL.5432"?
+c1 index after 6a: 59 files, built 2026-11-27T12:45:57+11:00, root …/qa-braindb/atk/r124006/tree ; c2 processes: 0
+-- 6b BRAINDB_NO_AUTOSTART=1 (the mode doctor.sh is proposed to use): same call
+rc=0
+  total               1        1   (search rows)
+  time: 0.08 s (read and parse 0.00 s, load and index 0.08 s)
+c1 index after 6b: 1 files, built 2026-11-27T12:46:10+11:00, root …/qa-braindb/proc-124555/tiny
+-- 6c BRAINDB_NO_AUTOSTART=1 check, addressed to c2 (stopped)
+check: GREEN, 1 files on disk match the index (built 2026-11-27T12:46:10+11:00)
+check rc=0 (the proposed doctor block prints rc 0 as 'index current')
+server: STOPPED
+c1 restored rc=0 : 59 files, built 2026-11-27T12:46:11+11:00, root …/qa-braindb/atk/r124006/tree
+
+######## P7 command substitution (the launcher's form) returns: out=$(braindb.sh up 2>&1)
+stop: stopped pid 5137 (/private/tmp/cla
+up rc=0 in 1 s ; last line: check: GREEN, 59 files on disk match the index (built 2026-11-27T12:46:11+11:00) ; c1 processes 1
+
+######## P3 search during a rebuild; two rebuilds at once; stop during a rebuild (scratch cluster c3 over the REAL tree, read-only)
+start: running (pid 5641, socket /tmp/qa-bdb-501-b/.s.PGSQL.5432, no TCP listener)
+first full rebuild rc=0 :   total             419    22255   (search rows) ; 419 files, built 2026-11-27T12:46:13+11:00, root …/Volumes/DevMASTER/WEDNESDAY
+-- 3a search DURING a rebuild
+rebuild rc=0 ; search rc=0 after 6 s :  1. 0.1127  [lesson, live, ×14]  0_Brain/learnings/2026-09-03_a-pane-close-is-a-session-kill.md:9 / (2 results, 178 ms)
+-- 3b two rebuilds at once
+rebuild A rc=0 (  time: 13.70 s (read and parse 0.86 s, load and index 12.84 s)) | rebuild B rc=0 (  time: 13.91 s (read and parse 0.86 s, load and index 13.05 s))
+check: GREEN, 419 files on disk match the index (built 2026-11-27T12:46:29+11:00)
+-- 3c stop DURING a rebuild (before: 419 files, built 2026-11-27T12:46:29+11:00, root …/Volumes/DevMASTER/WEDNESDAY)
+stop: stopped pid 5641 (/private/tmp/claude-501/-Volumes-Dev
+stop rc=0
+interrupted rebuild rc=1 : braindb: REBUILD FAILED (psql rc 2). The transaction was rolled back; the previous index, if any, is unchanged. Exception ignored while finalizing file <_io.BufferedWriter name=4>: BrokenPipeError: [Errno 32] Broken pipe 
+processes with -D c3 after stop: 0
+start: running (pid 13629, socket /tmp/qa-bdb-501-b/.s.PGSQL.5432, no TCP listener)
+after restart: 419 files, built 2026-11-27T12:46:29+11:00, root …/Volumes/DevMASTER/WEDNESDAY ; chunks 22255
+check: GREEN, 419 files on disk match the index (built 2026-11-27T12:46:29+11:00)
+
+######## END: stop everything of mine, each with its own socket directory, and count by data directory
+sleeper GONE
+stop: stopped pid 5568 (/private/tmp/claude-501/-Volumes-Dev
+stop: not running (no pid file in /private/tmp/claude-501/-V
+stop: stopped pid 13629 (/private/tmp/claude-501/-Volumes-De
+stop: not running (no pid file in /private/tmp/claude-501/-V
+stop: not running (no pid file in /private/tmp/claude-501/-V
+stop: not running (no pid file in /private/tmp/claude-501/-V
+stop: not running (no pid file in /private/tmp/claude-501/-V
+processes with a data directory under /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-braindb/proc-124555: 0
+socket dirs: [] []
+2026-11-27 12:46:46 AEDT

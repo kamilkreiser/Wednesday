@@ -1,0 +1,28 @@
+baseline rebuild rc=0 ; check: GREEN, 22 files on disk match the index (built 2026-11-27T12:48:00+11:00)
+---- K1 an indexed lesson made unreadable (mode 000)
+rebuild rc=1 ; traceback lines: 1 ; last: PermissionError: [Errno 13] Permission denied: '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-braindb/crash-124759/tree/0_Brain/learnings/2026-06-01_locked.md'
+check rc=1 ; traceback lines: 1 ; last: PermissionError: [Errno 13] Permission denied: '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-braindb/crash-124759/tree/0_Brain/learnings/2026-06-01_locked.md'
+search (old index) rc=0 ; (1 result, 24 ms)
+---- K2 one lesson section with 300,000 DIFFERENT words (a tsvector over 1 MB)
+awk: syntax error at source line 1
+ context is
+	{print >>>  \ <<< $5, "bytes"}
+awk: illegal statement at source line 1
+rebuild rc=1 ; ERROR:  string is too long for tsvector (4200008 bytes, max 1048575 bytes)
+braindb: REBUILD FAILED (psql rc 3). The transaction was rolled back; the previous index, if any, is unchanged.
+check: RED, 1 path(s) differ (run: braindb.sh rebuild)
+  on disk, not in the index: 0_Brain/learnings/2026-06-02_big.md
+(the whole rebuild is lost, not just the one file: every later rebuild fails the same way until the file changes)
+---- K3 a 30 MB daily note (one bullet)
+rebuild rc=0 ;   time: 3.79 s (read and parse 0.08 s, load and index 3.71 s) ; 
+---- K4 rules index removed (missing), then a rules index that is a directory
+rebuild without a rules index rc=0 ;   lesson             12       26
+   lessons scoped ONLY to other seats now indexed (no row -> tier alone): xcanary03=5 xcanary17=5 (control xneighbour01=5)
+---- K5 BRAINDB_WEAK not a number; search word starting with a dash; empty query
+rc=1 ; traceback: 1 ; ValueError: could not convert string to float: 'abc'
+search '-what do I do' rc=0 ; (0 results, 20 ms)
+search '' rc=2 ; braindb: search needs words
+search (no words) rc=2 ; braindb_index.py search: error: the following arguments are required: words
+check: GREEN, 22 files on disk match the index (built 2026-1
+stop: stopped pid 22385 (/private/tmp/claude-501/-
+processes with -D under /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/23d4d320-ba8d-40d8-b71d-f351bda82b71/scratchpad/qa-braindb/crash-124759: 0
