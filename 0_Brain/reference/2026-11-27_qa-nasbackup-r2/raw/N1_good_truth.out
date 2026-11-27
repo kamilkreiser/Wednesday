@@ -1,0 +1,54 @@
+### N1a a source file that is UNREADABLE (mode 000) from the first night on. Expected: the run is NOT GOOD (an in-scope file is not at the destination).
+night 0: rc=0 GOOD=1 | marker on NAS=0 | proven at the destination: 2 of 2 source files (2 compared by sha256 tonight, 0 re-sent because the source changed meanwhile); gone from the source during the run: 1; previous copies kept: 0; sample of unsent files 0/0 agree; NOT PROVEN: 0
+night 1: rc=0 GOOD=1 | marker on NAS=0 | proven at the destination: 2 of 2 source files (0 compared by sha256 tonight, 0 re-sent because the source changed meanwhile); gone from the source during the run: 1; previous copies kept: 0; sample of unsent files 2/2 agree; NOT PROVEN: 0
+night 2: rc=0 GOOD=1 | marker on NAS=0 | proven at the destination: 2 of 2 source files (0 compared by sha256 tonight, 0 re-sent because the source changed meanwhile); gone from the source during the run: 1; previous copies kept: 0; sample of unsent files 2/2 agree; NOT PROVEN: 0
+state: last_attempt=good last_good.counts.src_files=4 vanished=1 ; file exists at destination: NO
+engine stderr night 0: engine pass 1: ok rc=23; its log lists 2 new + 0 replaced files; deleting lines: 0; stderr (2 lines), first: rsync: [sender] send_files failed to open "/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-nasbackup-r2/r1/fx/N1a_74840/vol/WEDNESDAY/ledger.db"
+CONTROL the same file readable: rc=0 GOOD=1 marker on NAS=1
+
+### N1b a file that was backed up, then CHANGES and becomes unreadable. Expected: NOT GOOD; destination holds the OLD content.
+night 0: rc=0 GOOD=1
+night 1: rc=0 GOOD=1 | destination=[LEDGER-v1] | proven at the destination: 2 of 2 source files (0 compared by sha256 tonight, 0 re-sent because the source changed meanwhile); gone from the source during the run: 1; previous copies kept: 0; sample of unsent files 2/2 agree; NOT PROVEN: 0
+night 2: rc=0 GOOD=1 | destination=[LEDGER-v1] | proven at the destination: 2 of 2 source files (0 compared by sha256 tonight, 0 re-sent because the source changed meanwhile); gone from the source during the run: 1; previous copies kept: 0; sample of unsent files 2/2 agree; NOT PROVEN: 0
+source (after restoring the mode, to show it): [LEDGER-v2-newer-content]
+
+### N1c a source FOLDER becomes unreadable (mode 000) between the listing and the copy (stub does it before calling the real engine). 50 files inside.
+rc=0 GOOD=1 | files of sub/ at destination: 0 of 51 | proven at the destination: 1 of 1 source files (1 compared by sha256 tonight, 0 re-sent because the source changed meanwhile); gone from the source during the run: 51; previous copies kept: 0; sample of unsent files 0/0 agree; NOT PROVEN: 0
+state: last_attempt=good recorded src_files=53 set_counts={'Secuura': 1, 'WEDNESDAY': 52}
+
+### N1d the WHOLE source folder of a set goes away mid-run (stub moves it aside before the real engine: a sub-volume unmounted, a folder renamed). 2 sets; it happens during the first.
+rc=5 GOOD=0 | files at destination under current/WEDNESDAY: 0 of 32 | proven at the destination: 0 of 0 source files (0 compared by sha256 tonight, 0 re-sent because the source changed meanwhile); gone from the source during the run: 32; previous copies kept: 0; sample of unsent files 0/0 agree; NOT PROVEN: 0
+engine line: engine pass 1: ok rc=3; its log lists 0 new + 0 replaced files; deleting lines: 0; stderr (3 lines), first: rsync: [sender] change_dir "/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-nasbackup-r2/r1/fx/N1d_74840/vol/WEDNESDAY/" failed: No 
+last line: FAILED (the exit code of the engine is never success; the proof is):
+state: last_attempt=failed last_good.counts.src_files=None vanished=None
+COMPLETE markers on the NAS: 0
+
+### N2a a file appended to after EVERY pass (stub appends after the real engine). Expected: FAIL, file named; last night's kept copy not overwritten by a re-send.
+night 0 rc=0 GOOD=1
+night 1 rc=8 GOOD=0 | 1 NOT DELIVERED line(s) for live.log | engine passes: 3
+versions folders: 2026-12-02_010000_79326 2026-12-02_010000_79326_pass2 2026-12-02_010000_79326_pass3 
+copies of live.log under versions/: 3 ; the night-0 copy (LIVE-v1-night0) kept: 1
+
+### N2b the DESTINATION copy is altered between the copy and the proof (stub rewrites it, same size). Expected: FAIL.
+rc=8 GOOD=0 | NOT DELIVERED: WEDNESDAY/a.txt
+
+### N2c a source file is replaced by a FOLDER between the copy and the proof.
+night 0 rc=0 GOOD=1 | proven at the destination: 1 of 1 source files (1 compared by sha256 tonight, 0 re-sent because the source changed meanwhile); gone from the source during the run: 1; previous copies kept: 0; sample of unsent files 0/0 agree; NOT PROVEN: 0
+night 1 rc=0 GOOD=1 | TYPE CHANGE: a.txt (file at the destination, folder at the source): the old destination entry is MOVED into versions/2026-12-02_010000_81381/, then the new one is copied | old file content under versions: 1 | inner.txt at destination: yes
+
+### N2d a source file is replaced by a SYMLINK into a secrets folder between the copy and the proof. Expected: FAIL or out of scope; the secret never on the NAS.
+rc=8 GOOD=0 | secret marker on NAS=0 | engine passes: 3 | NOT DELIVERED: WEDNESDAY/a.txt
+
+### N2f a file that WAS delivered becomes unreadable before the proof (stub: chmod 000 after the real engine).
+rc=0 GOOD=1 | a.txt at destination identical to source: yes | proven at the destination: 1 of 1 source files (1 compared by sha256 tonight, 0 re-sent because the source changed meanwhile); gone from the source during the run: 1; previous copies kept: 0; sample of unsent files 0/0 agree; NOT PROVEN: 0
+
+### N10 the NAS leaves the mount table after the preflight (stub rewrites the fake mount table on its first call). Expected: the run does not say GOOD without re-checking.
+rc=0 GOOD=1 | smbfs lines left in the mount table: 0 | sets processed after the unmount: 2
+CONTROL the next run with the table as left: rc=2 (REFUSED — /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b8)
+
+### N2e a 2.2 GiB sparse file (size above 2^31): copy and proof.
+/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-27_qa-nasbackup-r2/scripts/N1_good_truth.sh: line 72: /usr/bin/mkfile: No such file or directory
+stat: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-nasbackup-r2/r1/fx/N2e_74840/vol/WEDNESDAY/big.bin: stat: No such file or directory
+rc=0 GOOD=1 in 0 s | destination size stat: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-nasbackup-r2/r1/fx/N2e_74840/nas/General/Wednesday/nightly-backup/current/WEDNESDAY/big.bin: stat: No such file or directory vs source 
+mv: rename /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-nasbackup-r2/r1/fx/N2e_74840/nas/General/Wednesday/nightly-backup/current/WEDNESDAY/big.bin to /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-nasbackup-r2/r1/held/big_74840.dst: No such file or directory
+mv: rename /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-nasbackup-r2/r1/fx/N2e_74840/vol/WEDNESDAY/big.bin to /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-nasbackup-r2/r1/held/big_74840.src: No such file or directory

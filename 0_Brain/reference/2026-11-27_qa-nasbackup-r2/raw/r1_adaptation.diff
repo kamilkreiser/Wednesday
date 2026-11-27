@@ -1,0 +1,14 @@
+4,5c4,5
+< S=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-nasbackup
+< LANE="${QA_LANE:-$S/copy/WEDNESDAY/2_Project_Files/nas-backup}"
+---
+> S=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-nasbackup-r2/r1
+> LANE="${QA_LANE:-/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-nasbackup-r2/copy/WEDNESDAY/2_Project_Files/nas-backup}"
+18a19
+>   seal_conf "$T/lane/seats/wednesday.conf"   # R2-ADAPT: round 2 requires the END lines=<N> marker
+19a21
+> seal_conf() { local f="$1"; local n; n="$(/usr/bin/grep -v -E '^[[:space:]]*(#|$)' "$f" | /usr/bin/grep -c -v -E '^END ')"; /usr/bin/grep -v -E '^END ' "$f" > "$f.tmp"; mv "$f.tmp" "$f"; echo "END lines=$n" >> "$f"; }
+28c28
+<     for l in "$@"; do echo "$l"; done; } > "$T/lane/seats/$seat.conf"; }
+---
+>     for l in "$@"; do echo "$l"; done; } > "$T/lane/seats/$seat.conf"; seal_conf "$T/lane/seats/$seat.conf"; }

@@ -1,0 +1,84 @@
+### E1 every ORDER of the one change, seat held (HOLD_wednesday present) — is anything loaded, is it valid, and does what it calls honour the hold?
+-- template-only(installer-not-yet-edited):   installed nasbackup        (com.wednesday.nasbackup)~jobs for seat 'wednesday': 2 installed/refreshed, 0 already current, 0 failed~
+   plist written: lint=[/Library/LaunchAgents/com.wednesday.nasbackup.plist: OK] ; placeholders left: 0 ; load calls: 2
+   what launchd would call: o_orig_yes/WEDNESDAY/2_Project_Files/nas-backup/nas_backup_nightly.sh ; it exists: yes ; fires per day: 24 ; RunAtLoad: false
+-- installer-lines-only(no-template): jobs for seat 'wednesday': 1 installed/refreshed, 0 already current, 0 failed~
+   no plist written for nasbackup
+-- both: skip nasbackup — HELD (2_Project_Files/nas-backup/HOLD_wednesday)~jobs for seat 'wednesday': 1 installed/refreshed, 0 already current, 0 failed~
+   no plist written for nasbackup
+   (the hold itself, on the script launchd calls, under a HOLD: proven in test mode below, since outside test mode the copy would look at the real NAS path, which I never run)
+   nightly script under HOLD: rc=3 ; nightly[wednesday]: HELD: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/1 ; STARTED markers on the fake NAS: 0
+   1    --run --out-of-sequence under HOLD at 0 31: rc=3
+   1    --run --out-of-sequence under HOLD at 1 30: rc=3
+   1    --run --out-of-sequence under HOLD at 14 30: rc=3
+   1    --run --out-of-sequence under HOLD at 2 30: rc=3
+   --run --accept-shrink under HOLD: rc=3
+   HOLD spelled in another case (hold_wednesday / HOLD_WEDNESDAY) on this case-insensitive scratch volume: rc=3 (the real drive is case-SENSITIVE: there a differently-cased hold file would NOT hold; not testable here)
+
+### E2 the same on a TUESDAY tree (no scope in the lane) with the template present
+-- installer orig:   installed nasbackup        (com.tuesday.nasbackup)~jobs for seat 'tuesday': 1 installed/refreshed, 0 already current, 0 failed~ | plist: WRITTEN
+-- installer edited: skip nasbackup — HELD (2_Project_Files/nas-backup/HOLD_tuesday)~jobs for seat 'tuesday': 0 installed/refreshed, 0 already current, 0 failed~ | plist: none
+   what that job would do each hour on her machine: rc=2 (nas-backup: REFUSED — seat 'tuesday' has no confirmed scope in this lane: only wednesday can run. Tu)
+
+### E3 hold lifted and conf confirmed, both parts in: installed, valid, re-run is idempotent, --check agrees
+install:   installed nasbackup        (com.wednesday.nasbackup)~jobs for seat 'wednesday': 2 installed/refreshed, 0 already current, 0 failed~
+again:     unchanged nasbackup       ~jobs for seat 'wednesday': 0 installed/refreshed, 2 already current, 0 failed~
+--check:   ok       nasbackup        loaded and matching the template~jobs for seat 'wednesday': 2 current, 0 missing~
+lint: /Library/LaunchAgents/com.wednesday.nasbackup.plist: OK ; hours: 24 [30] [0, 1, 2] ...
+naspush still renders beside it: /Library/LaunchAgents/com.wednesday.naspush.plist: OK
+
+### E4 the schedule: 24 fires a day at minute 30; which fires can START a backup, per seat window (from the conf; Tuesday's and Friday's are proposals)
+   window of wednesday (00:30 for 5 h): fires that would start a backup when none is on record: 0:30 1:30 2:30 3:30 4:30
+   window of tuesday (02:30 for 3 h): fires that would start a backup when none is on record: 2:30 3:30 4:30
+   window of friday (04:30 for 5 h): fires that would start a backup when none is on record: 4:30 5:30 6:30 7:30 8:30
+   after sleep: launchd runs ONE coalesced fire on wake. Decision for a wake at 07:10 with last night missed (Wednesday window): nightly[wednesday]: SKIP: fired outside the nightly window (2026-12-01 00:30 to 2026-12-01 05:30); it never runs outside its window on its own. The mi
+   daylight saving, Australia/Sydney: spring forward 2027-10-03 (02:00 -> 03:00), fall back 2027-04-04 (03:00 -> 02:00), fire 00:30 for 5 h:
+      2027-10-03 02:30 wall -> window opens 2027-10-03 00:30, closes 2027-10-03 05:30 (local wall time), in window now: True
+      2027-10-03 05:29 wall -> window opens 2027-10-03 00:30, closes 2027-10-03 05:30 (local wall time), in window now: True
+      2027-10-03 05:31 wall -> window opens 2027-10-03 00:30, closes 2027-10-03 05:30 (local wall time), in window now: False
+      2027-04-04 02:30 wall -> window opens 2027-04-04 00:30, closes 2027-04-04 05:30 (local wall time), in window now: True
+      2027-04-04 05:29 wall -> window opens 2027-04-04 00:30, closes 2027-04-04 05:30 (local wall time), in window now: True
+      2027-04-04 05:31 wall -> window opens 2027-04-04 00:30, closes 2027-04-04 05:30 (local wall time), in window now: False
+
+### E5 doctor.sh: the proposed line applied to a scratch COPY of the real doctor.sh (not run whole: it probes this machine); syntax, placement, name clashes
+inserted before line 550: # --- Executable bits on on-drive scripts (added 2026-08-06) ---
+bash -n on the patched copy: rc=0
+names the block and the two files it sources define, that doctor.sh ALSO uses (a clash would change doctor's behaviour after the block):
+   SEAT                   uses in the real doctor.sh: 0
+   TREE_SEAT              uses in the real doctor.sh: 0
+   NB_DIR                 uses in the real doctor.sh: 0
+   COORD_LEGACY_NAME      uses in the real doctor.sh: 0
+   SEAT_NOTE_SEAT         uses in the real doctor.sh: 0
+   SEAT_NOTE_REL          uses in the real doctor.sh: 0
+   SEAT_NOTE_DIR          uses in the real doctor.sh: 0
+   SEAT_NOTE_ERR          uses in the real doctor.sh: 0
+   _nb_seat               uses in the real doctor.sh: 0
+   _nb_lane               uses in the real doctor.sh: 0
+   _nb_now                uses in the real doctor.sh: 0
+   _nb_mark               uses in the real doctor.sh: 0
+   _nb_out                uses in the real doctor.sh: 0
+   _nb_rc                 uses in the real doctor.sh: 0
+   _nb_line               uses in the real doctor.sh: 0
+   seat_resolve           uses in the real doctor.sh: 1
+   seat_from_tree_name    uses in the real doctor.sh: 0
+   coord_pane_id          uses in the real doctor.sh: 0
+   seat_note_dir          uses in the real doctor.sh: 0
+   control for that count: uses of HARD_FAIL in the real doctor.sh: 3
+the launcher: lines that make a HARD preflight failure NOT stop a rotation (read-only grep of the real launcher):
+   395:# wednesday_rotate.sh launches this (SEAT_ROTATION=--self|--dead), a HARD failure is NOT a
+   399:PREFLIGHT_HARD=""
+   404:  if [ "$_PF_RC" -ne 0 ] && [ -n "${SEAT_ROTATION:-}" ]; then
+   405:    PREFLIGHT_HARD="$(/usr/bin/grep -i '✗' "$_PF_OUT" | cut -c1-400)"
+   406:    [ -n "$PREFLIGHT_HARD" ] || PREFLIGHT_HARD="doctor.sh exited $_PF_RC with no ✗ line — run it and read the whole output"
+   408:    echo "ROTATION ($SEAT_ROTATION): preflight HARD failures do NOT stop a rotation (Kam 2026-11-16) — continuing; the new seat fixes them first."
+   410:    { printf '%s [launcher] ROTATION %s: preflight HARD failures carried into the boot prompt, not gated:\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$SEAT
+   412:    _PF_RC=0
+   908:🔴 PREFLIGHT HARD FAILURES AT THIS ROTATION LAUNCH ($SEAT_ROTATION) — NOT GATED.
+   every unattended caller sets it: 72:LAUNCH_CMD="${ROTATE_LAUNCH_CMD:-SEAT_ROTATION=$MODE bash \"$SEAT_LAUNCHER\"}"
+
+### E6 PORTABILITY: the proposal says NN; the real file's last numbered sections
+   547:## 28. Nightly stale-ticket screen - launchd job + Spark tunnel, Wednesday seat only, machine-local (2026-
+   553:## 29. CodeQL CLI bundle — DRIVE-LOCAL, Tuesday seat (2026-11-15)
+   559:## 30. CoAgent Windows build cache — MACHINE-LOCAL, outside the project (Friday seat, 2026-11-21)
+   566:## 31. Monday Stuart-meeting list - launchd job + headless claude + Chrome, Wednesday seat only, machine-l
+   'NN' placeholders in the proposal: 1 ; hard-coded section numbers proposed: 0

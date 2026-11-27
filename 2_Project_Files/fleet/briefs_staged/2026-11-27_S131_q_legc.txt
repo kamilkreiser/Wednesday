@@ -1,0 +1,23 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261127T052236Z.txt)
+     1	[QUESTION] 2026-11-27T05:22 | Secuura/Blockchain-S | [Secuura/Blockchain-S -> Wednesday] QUESTION: leg C positive control failed, ten not sent 
+=========== [QUESTION] 2026-11-27T05:22 | Secuura/Blockchain-S | [Secuura/Blockchain-S -> Wednesday] QUESTION: leg C positive control failed, ten not sent 
+[Secuura/Blockchain-S -> Wednesday] QUESTION: leg C positive control failed, ten not sent (Seat S 131st)
+Seat S 131st
+QUESTION (one): may I run leg C a second time, same host, with the two tx_info bodies carrying "_inputs":true (and tx_status as the fallback)?
+
+CONTEXT
+- S131-CHAIN ran 05:20:56Z to 05:21:11Z as licensed. Network control ok (magic 2, Testnet); tip block 4899300; control block 4899199 (block time 04:40:14Z, about 40 minutes old, 1 transaction); block_txs returned that transaction.
+- POSITIVE CONTROL FAILED: tx_info on it answered HTTP 200 [] (request 5) and [] again on the one retry (request 7). The made-up hash also answered [] (request 6), so that negative control proves nothing in this run.
+- STOP. THE TEN HASHES WERE NOT SENT: 0 of the 18 request and response files holds any of them (checked by program). 7 of the 8 requests used.
+- Cause not established. Earlier seats' notes on this endpoint: Seat AA 6th: a bare _tx_hashes body answers [], it needs "_inputs":true. Seat AA 8th: tx_info answered [] for a known landed transaction on 2 of 3 runs and used tx_status instead. Your brief's drafter saw the bare body work (04:47Z).
+- Legs A and B are complete, no R8 flag, no STOP on the box, box work finished. A: DEMO_MODE now false; boot log demo lines 0, Integration ready 1, container start 2026-11-15T22:47:15Z; env file key reads false but the file's mtime 2026-11-19T08:55:12Z is after that start. B: 10 of 10 with block and slot; mock-pattern 0, at or above 10500000 0; blocks 4670511 to 4862077; network preview; confirmed minus created 29.2 to 144.4 s. (Per W-1, that 0 is not evidence against a mock.)
+
+THE QUESTION: do you license these, exactly? Nothing else changes: only the ten hashes leave, plus one public control hash and one random one.
+- S131-CHAIN2: requests 1 to 4 and the order as before, fresh budget of 8; positive control, negative control and the ten are POST /tx_info {"_tx_hashes":[...],"_inputs":true}. The ten go in ONE POST and only after the positive control passes (1 element, its block height equal to the block read). Output as before: per ordinal block_height, tx_timestamp, absolute_slot against the box's values.
+- S131-CHAIN2B, only if that positive control also fails: POST /tx_status {"_tx_hashes":[...]}: positive control = the same control transaction with a positive num_confirmations; negative control = a random hash with no row or a null count; then the ten in ONE POST; at most 3 requests plus the 60 s rule once. It answers found or not found only: no block, slot or time comparison.
+My recommendation: license both. The first keeps your per-row comparison, the second is the instrument a seat here has relied on.
+
+MEANWHILE: leg C is BLOCKED. I build and replay-test the second tool locally (no network) and run the privacy pass.
+NEEDED BY: no outside deadline. Without your ANSWER nothing more is sent to the explorer.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 36  SEEN:       47  BATCH: /private/tmp/wed_newmail/batch_20261127T052236Z.txt

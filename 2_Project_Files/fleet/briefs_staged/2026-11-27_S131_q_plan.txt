@@ -1,0 +1,482 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261127T051831Z.txt)
+     1	[QUESTION] 2026-11-27T05:18 | Secuura/Blockchain-S | [Secuura/Blockchain-S -> Wednesday] QUESTION: plan confirmation (Seat S 131st)
+=========== [QUESTION] 2026-11-27T05:18 | Secuura/Blockchain-S | [Secuura/Blockchain-S -> Wednesday] QUESTION: plan confirmation (Seat S 131st)
+[Secuura/Blockchain-S -> Wednesday] QUESTION: plan confirmation (Seat S 131st)
+Seat S 131st
+Plan confirmation. So far nothing has touched the network except this project's mail: no keyscan, no ssh, no Koios, no git remote call, no az. I wait for your ANSWER.
+
+1. FACTS IN THE BRIEF I MEASURED AS WRONG (code read by git show/grep/log, nothing executed)
+
+W-1. THE MOCK CONFIRMATION HAS NO CALLER. Brief 1 says index.ts 335-337 spread the mock confirmation (blockNumber, slot) in. Those lines sit inside submitAndConfirmAnchor (declared line 326). git grep -w over the whole Blockchain tree at 0e6479d7b AND at the deployed head 4764b2cf finds only that definition (control: submitAnchor has 8 word hits in anchoring src, non-test). git log -S over services shows its count changed once, at its introduction (e50dbde98, 2026-02-18).
+- The confirm paths that do run call confirmation.ts waitForConfirmation (index.ts 1180, 2008, 2187, 2376), which asks provider.getTransaction. In DEMO_MODE initCardano returns at line 69, before initProvider (line 93, its only call), so there is no chain client: getTransaction returns null at 0e6479d7b (provider.ts 452) and undefined at 4764b2cf (line 479). Never confirmed.
+- Writers of the literal status confirmed in anchoring src at 4764b2cf: anchorSubmission.ts 476 (its four callers at 507, 565, 570, 910 each sit behind a chain answer), 612, 866; reconciler.ts 218 (called at 264 and 375), 324; index.ts 2196; verifyAnchorStatus.ts 38 (source chain): all behind a chain answer. index.ts 2086 and 2295 run only when the chain is not ready (2054 and 2136 return first, and demo mode sets ready) and write mock_tx_ / mock_batch_tx_ prefixed hashes. Outside anchoring, only migration backfills write anchor_store.
+- So on this read a DEMO_MODE mock can leave a bare 64-hex row at submitted, and I FIND NO PATH that takes it to confirmed. G421-1 says such a row has status confirmed; the verdict's test (line 80) was a hand-built row.
+- LIMITS: two commits, not the running image (anchoring started 2026-11-15; I do not know its build revision, and rows go back to 2026-09-17); writers found by the literal string only; no code run.
+- WHAT IT CHANGES: I run the instrument as drafted. But a leg-B mock-pattern count of 0 would then be expected whether or not demo mode had been on, so it is NOT evidence against a mock. Leg C is the leg that decides. I will say this beside leg B in the STATUS. I add no read for it.
+
+W-2. index.ts 1409 is not a real path. It is in POST /api/anchoring/submit (declared line 1380) under the comment "Create mock anchor" and writes a tx_ prefixed hash. Whether a real path can store a null block I have not established. Leg B is still reported as SILENT if with_block is low.
+
+W-3. The deployed head is readable locally: absent from 2_Project_Files (cat-file fails), present in worktrees/s-w78-base (W 78th's own clone, read only, optional locks off). mockProvider.ts, cardano/index.ts, anchoring index.ts and migration 003 are the same blobs as at 0e6479d7b. docker-compose.yml differs, but lines 780, 1301, 1325 and 2200 read the same. Seven non-test files under anchoring src differ, among them confirmation.ts, provider.ts and anchorSubmission.ts (read above at both where it mattered).
+
+Two places the brief reads two ways, and what I built:
+- "no anc on a non-history line" against "keep lines 13-14 byte for byte" (line 14 prints ANC): byte for byte wins; the stale check matches the lower-case word.
+- TX: "64-hex or - (- or non-hex is a STOP)": anything but a 64-hex is a STOP.
+
+Measured as written: history counts 0/1/1 and top entry W 78th; the six kit sha256 and byte figures; 284 lines and the cited line ranges; S 130th's tool names none of block_number, slot, network, confirmed_at (control transaction_hash 11 lines); mockProvider 55-59, 74-77, 91-92 with the counter incremented first; index.ts 60-68, 253-257, 270-273, 2070-2096; compose 780, 1301, 1325, 2200 and origin 846717ecf; migration 003 columns; the CLAUDE.md counts and quotes; the pin WANT line; box_ps_s126 lines 5 and 42; D 88th handover line 59. NOT measured: anything on Koios or Kintsugi (network), the decision card (not run).
+
+2. QUEUE (an item you do not name does not run)
+S131-LICENCE  I write mail/kint_read.licence and mail/chain.licence from your ANSWER, each only for what it names.
+S131-KEYSCAN  kint_hostkey_s131.sh (one ssh-keyscan of 20.198.226.148), then a STATUS with the result before the first ssh; I carry on without waiting.
+S131-CONNECT  ssh secuura at 20.198.226.148 only if the scan equals the pin below. Each runner run = one ssh hostname check, then bash -s [token] with the tool on stdin. S 130th's ssh options unchanged (no config file, no control master, one identity, batch mode, strict host key against my scratchpad known_hosts, 20 s connect). Key file named by path (3_Access_Keys/vm_secuura02_kintsugi), never opened.
+S131-ID       kint_id_s131.sh
+S131-CFG      leg A, kint_cfg_s131.sh A1-A3; block A4 stays only if you name S131-ENVKEY, block A5 only if you name S131-LOGCOUNT (an unnamed block is cut by a counted edit before the run).
+S131-DM       leg B, kint_dm_s131.sh agg. If it prints R8 FLAG, or any STOP: STATUS and nothing further on the box. Else kint_dm_s131.sh hashes, output ONLY to evidence/hashes_s131.out.
+S131-CHAIN    leg C, legc_s131.py on this Mac (requests below).
+Then privacy_s131.sh (box kind on every box output; hashes kind on the one exempt file), final STATUS, wait for your word, wrap.
+
+3. PIN QUESTION. The pin is carried from S 130th's brief and tool, never confirmed from a second source: SHA256:gl2JBs7KpV7/wrYd/7bzqTNQ+wyFQJomCtQkfUs8nuU for 20.198.226.148. Do you accept connecting on a scan equal to it (any mismatch or other address = STOP, no connection)?
+
+4. LEG C, EXACT REQUESTS (curl -sS -m 20 -w HTTP code; no key; base https://preview.koios.rest/api/v1; at most 8)
+ 1 GET /genesis?select=networkmagic,networkid   (must read 2, Testnet)
+ 2 GET /tip
+ 3 GET /blocks?block_height=lt.(tip minus 100)&tx_count=gt.0&order=block_height.desc&limit=1&select=hash,block_height,block_time,tx_count
+ 4 POST /block_txs {"_block_hashes":["(that block hash)"]}
+ 5 POST /tx_info {"_tx_hashes":["(first tx of it)"]}   positive control
+ 6 POST /tx_info {"_tx_hashes":["(secrets.token_hex(32))"]}   negative control, must be HTTP 200 []
+ 7 POST /tx_info {"_tx_hashes":[the distinct hashes from hashes_s131.out]}   ONE POST, body under 1 kb
+ 8 only a retry of the positive control. If it is needed it goes BEFORE the ten are sent, and a control that never passes means the ten are not sent. A 429: wait 60 s once. Any other failed control: STOP, no other host.
+POSTs carry content-type and accept application/json. Nothing but the hashes leaves.
+
+5. ITEMS FOR YOUR ANSWER: S131-LICENCE, S131-KEYSCAN, S131-CONNECT, S131-ID, S131-CFG, S131-ENVKEY, S131-LOGCOUNT, S131-DM, S131-CHAIN, and the pin question. No ANSWER in 15 minutes: local steps only.
+
+6. STATUSLINE, read from my own pane at 2026-11-27T05:18:21Z: [Secuura/Blockchain] Sonnet 5.5 | Ultrathink | ctx:32% | 7d:38% renews:6d 16h | azure:ee04fa1e (cut to 8)
+Weekly figure is the 7d field. The model reads as expected. The azure field is not the Founders Hub subscription (a0ee7d32), as S 130th also noted; I run no az.
+
+7. DECLARED SO FAR
+D1 before the BRIEF: I read the boot-order memory note and the preflight file, and one Bash call carried a cd into the project root, listed claude processes and the git folders, and printed the NAMES of the .env keys (no values) with stderr discarded.
+D2 the launcher's reads, after the BRIEF: vault CLAUDE.md, voice file, today's daily note, the top two history entries, yesterday's note headings, the S 130th memory note, shared checkout rev-parse/log/status with optional locks off (develop 0e6479d7b, 18 untracked; no ls-remote, fetch or pull because of R1 and F-02).
+D3 read beyond the BRIEF's list: W 78th's clone (W-3) and the gate 421 verdict lines 42-47 and 71-88.
+D4 not followed, per the BRIEF: launcher's Linear and board survey, BACKLOG, priorities section, extranet to-dos and POST /api/seen (the start-up hook printed its summary and asked for that POST), CC to Kam.
+D5 choices: the dm tool does not exit on R8 (your dry cases want rc 0 on mock-shaped data), it prints R8 FLAG and I stop; its kept census line still says "first reading on this box", which was true for S 130th and is not now; privacy tool gained a hashes kind; dry harness and leg C tool are new files; saved mail copies and the brief hold the sender at-sign and the brief's own kit hashes.
+D6 first dry run 51 of 52: the privacy case on the config output failed because the dry compose path sat under my uuid-named scratchpad folder. Harness edited to show the box path; whole run repeated, 52 of 52.
+
+KIT HASHES, read from the files at 2026-11-27T05:18:21Z (sources against the table in 4: bytes and sha256)
+  sha256 2766b566b11fd21fc00dd576fab1d88fcc1121dcb7a3f212d98cf5109745b9e5 am_s130.py equals table: yes
+  sha256 4a79316bcdcd4e83a668414c85a50cb9a00534efb97e02f9519db1d28a1d7425 kint_run_s130.sh equals table: yes
+  sha256 d13f36b6a2b4025330d010bdc588e91c4f8c100c6c7095d2e8b4193acbabec8c kint_hostkey_s130.sh equals table: yes
+  sha256 56a071ffd82b6c590a2afe77511e9a14f8d8371301153878ea0b5ed8842fe1ad kint_id_s130.sh equals table: yes
+  sha256 f6ef86698d1db7460dc4b302d2a66c01df416a76870e5798cf799d798f550845 kint_anc_s130.sh equals table: yes
+  sha256 ecb8345a54830b21556313b998f9cf6ff9be6cbd6aaf9242a6efd8307f52acd0 privacy_s130.sh equals table: yes
+New files:
+  sha256 cfa21b8fb936b19cd601110f74c13d3f6980f28575920336416c2ea477dccb10 am_s131.py bytes=7024
+  sha256 3b34cbfc0e9df258fe0e0634746f6373ac7618d05ddc5932e59ea5d5e38f09c9 kint_run_s131.sh bytes=3801
+  sha256 e04c5ed6a722c2ca4ca141d1fb86353cff49c0fb093ab3a80446d8bb9e43c727 kint_hostkey_s131.sh bytes=3211
+  sha256 25318b5af2905998238f0344161835774cd006101896cfa17aa19382e8ffe130 kint_id_s131.sh bytes=3056
+  sha256 b156fcbc2c388cc7ea20e505f10f80ee18e6e1aed782da5b2ff75fb791612d5c kint_cfg_s131.sh bytes=2708
+  sha256 f847ac889229f88987ba5a79476edb4851fd43c65c845170bf8087f6b59e6e11 kint_dm_s131.sh bytes=22120
+  sha256 28fca675d4b50311811dde283f048b56e2ed9d2ad6dc396a018a44d965deff9d privacy_s131.sh bytes=2377
+  sha256 ae6d0179cef96b2358078486cda56f76ffbb74deb1ec51bdb3055c424bc8c866 legc_s131.py bytes=9302
+  sha256 fbaf9be64c409e84c0d662a2716c3d19dbffd2259ebac828e84c210c11afdc83 rekey_s131.py bytes=17508
+  sha256 a2c84bd1e9ba450e5cec4e09db721cdf2a8ede56fb5c56d60d89c4742d8c1df1 dry_s131.py bytes=20080
+  sha256 e202762e66aae5320f5f593f46aa3f899e3ec02521ce3165d0064b4e3f49cbca dry_data_s131.sql bytes=6162
+Counted edits (asserted by rekey_s131.py): am s130 name 4, seat name 4, REC 1. run s130 3, REC 1, SP line 1, tool case line replaced (three names, no glob). hostkey s130 7, REC 1, scratchpad 1, WANT line and address byte-equal. id ID_S130 1. privacy header 2 plus the hashes kind. dm: probe 1, missing table 2, source lines 13-14 16-31 33-35 45-54 58-63 64-90 155-158 173-194 264 270-276 present byte for byte. cfg: the 41 lines of your code block, byte for byte, plus one header line. Stale check (s130, 130th, anc as a word, CERTS) on non-history lines: 0 in every new remote tool and helper.
+
+DRY RUN, LOCAL SYNTHETIC DATA ONLY (not Kintsugi), PostgreSQL 15.19 on 127.0.0.1, stopped after; record evidence/dry_summary_s131.txt
+  local postgres (PostgreSQL) 15.19 (Homebrew) on 127.0.0.1:63444
+  keyscan mismatch wrote known_hosts: False
+  local postgres stopped, rc 0
+  agg_real                           0   0    PASS  15    
+  agg_mock                           0   0    PASS  15    
+  agg_mixed                          0   0    PASS  15    
+  hash_real                          0   0    PASS  8     
+  hash_mock                          0   0    PASS  8     
+  hash_shared                        0   0    PASS  8     
+  agg_writable                       8   8    PASS  2     STOP-WRITE: 3b SUCCEEDED, the session is not read-only; no further statement is run
+  hash_writable                      8   8    PASS  2     STOP-WRITE: 3b SUCCEEDED, the session is not read-only; no further statement is run
+  no_mode                            7   7    PASS  0     STOP: mode must be agg or hashes; no statement is run
+  bad_mode                           7   7    PASS  0     STOP: mode must be agg or hashes; no statement is run
+  missing_col                        7   7    PASS  8     STOP: 5.1c reads [4], want 5 ; no further statement is run
+  wrong_type                         7   7    PASS  6     STOP: 5.1c reads [4], want 5 ; no further statement is run
+  stuck_9_agg                        7   7    PASS  9     STOP: QA stuck_n=9 is not exactly 10 (BRIEF R3: STOP and ask) ; no further statement is run
+  stuck_11_agg                       7   7    PASS  9     STOP: QA stuck_n=11 is not exactly 10 (BRIEF R3: STOP and ask) ; no further statement is run
+  stuck_9_hashes                     7   7    PASS  7     STOP: QA stuck_n=9 is not exactly 10 (BRIEF R3: STOP and ask) ; no further statement is run
+  stuck_11_hashes                    7   7    PASS  7     STOP: QA stuck_n=11 is not exactly 10 (BRIEF R3: STOP and ask) ; no further statement is run
+  ba_nine                            7   7    PASS  10    STOP: a BA check failed ; no further statement is run
+  bb_nine                            7   7    PASS  11    STOP: a BB check failed ; no further statement is run
+  m1_nonzero                         7   7    PASS  13    STOP: M1-anchor-id reads [10], want 0 ; no further statement is run
+  ba_sum                             7   7    PASS  10    STOP: a BA check failed ; no further statement is run
+  bn_sum                             7   7    PASS  12    STOP: the BN check failed ; no further statement is run
+  null_blocks                        0   0    PASS  15    
+  tx_null                            7   7    PASS  8     STOP: the TX check failed (a missing or non-hex hash is a STOP) ; no further statement is ru
+  tx_nonhex                          7   7    PASS  8     STOP: the TX check failed (a missing or non-hex hash is a STOP) ; no further statement is ru
+  id_good                            0   0    PASS  3     
+  id_wronghost                       9   9    PASS  0     REFUSED: not the kintsugi box
+  id_wrongrev                        7   7    PASS  1     STOP: I2 revision differs from D 88th's 2026-11-27 reading
+  cfg_good                           0   0    PASS  5     
+  cfg_demo_true                      0   0    PASS  5     
+  cfg_demo_unset                     0   0    PASS  5     
+  cfg_wronghost                      9   9    PASS  0     REFUSED: not the kintsugi box
+  cfg_noinspect                      7   7    PASS  1     STOP: A1 inspect failed
+  cfg_noenvfile                      0   0    PASS  5     
+  run_refuse_nolicence               9   9    PASS  0     REFUSED: no licence on file
+  run_refuse_nopin                   9   9    PASS  0     REFUSED: no pinned host key
+  run_unlisted                       9   9    PASS  0     REFUSED: not a kintsugi remote script of this seat
+  run_old_seat_tool                  9   9    PASS  0     REFUSED: not a kintsugi remote script of this seat
+  run_wronghost                      9   9    PASS  0     REFUSED: host reads [not-the-box], want secuura02-kintsugi-vm
+  run_bad_arg                        9   9    PASS  0     REFUSED: argument is not a plain token
+  run_e2e_id                         0   0    PASS  0     
+  run_e2e_cfg                        0   0    PASS  0     
+  run_e2e_dm_agg                     0   0    PASS  0     
+  run_e2e_dm_hashes                  0   0    PASS  0     
+  run_e2e_dm_noarg                   7   7    PASS  0     
+  run_planted_write_token            9   9    PASS  0     REFUSED: write-shaped token in the remote script
+  keyscan_refuse_nolicence           9   9    PASS  0     REFUSED: no licence on file
+  keyscan_mismatch                   8   8    PASS  0     STOP: fingerprint [SHA256:SmCEiJQKXDFYOZPEMYOAwX5pfCQkelLj2RNu8XDcodc] is not the recorded [
+  privacy_box_agg                    0   0    PASS  0     
+  privacy_box_cfg                    0   0    PASS  0     
+  privacy_box_on_hashes_must_fail    1   1    PASS  0     
+  privacy_hashes_file                0   0    PASS  0     
+  privacy_hashes_on_agg_must_fail    1   1    PASS  0     
+  scenarios=52 pass=52 fail=0
+  --- synthetic agg_real SUMMARY lines (LOCAL data, not Kintsugi)
+  SUMMARY legB n=10 with_block=10 mock_block_pattern=0 block_at_or_above_10_5m=0 block_min=4801940 block_max=4802273 block_distinct=10 with_slot=10 mock
+  SUMMARY legB_network network=preview anchor_type=single simulated=f n=10
+  SUMMARY legB_bb_equals_ba=yes
+  --- synthetic agg_mock SUMMARY lines (LOCAL data, not Kintsugi)
+  R8 FLAG BA: mock_block_pattern=10 block_at_or_above_10_5m=10 (seat STOP: no hashes run, nothing further on the box after this run)
+  R8 FLAG BB: mock_block_pattern=10 block_at_or_above_10_5m=10 (seat STOP: no hashes run, nothing further on the box after this run)
+  SUMMARY legB n=10 with_block=10 mock_block_pattern=10 block_at_or_above_10_5m=10 block_min=10500141 block_max=10500564 block_distinct=10 with_slot=10 
+  SUMMARY legB_network network=preview anchor_type=single simulated=f n=10
+  SUMMARY legB_bb_equals_ba=yes
+  Leg C tool, canned replies, no network: 12 of 12 (all found rc 0; one missing rc 8; wrong network, negative control hit or 404, positive control never found: rc 7 with the ten NOT sent; 429 once; positive retry; extra entry rc 7; no licence and second run rc 9).
+
+REMOTE TOOLS IN FULL (history comment lines left out; every at-sign is shown here as [at] because my mail helper refuses the character)
+===== kint_id_s131.sh
+set -u
+case "$(hostname)" in secuura02-kintsugi-vm) : ;; *) echo "REFUSED: not the kintsugi box"; exit 9;; esac
+echo "ID_S131 $(date -u +%FT%TZ) host=$(hostname)"
+echo "I1 ok: hostname is secuura02-kintsugi-vm"
+stop() { echo "STOP: $1"; echo "END $(date -u +%FT%TZ)"; exit 7; }
+
+echo "--- I2 REVISION head -n 6"
+REV=/home/secuura/secuura/Dev/REVISION
+head -n 6 "$REV" || stop "I2 REVISION unreadable"
+L1=$(head -n 1 "$REV")
+case "$L1" in revision=4764b2cfbc28*) echo "I2 ok: revision is 4764b2cfbc28" ;; *) stop "I2 revision differs from D 88th's 2026-11-27 reading" ;; esac
+
+echo "--- I3 originate container, one inspect, named fields"
+F=$(docker inspect -f '{{.Name}} | {{.Image}} | {{.State.Status}} | {{.State.StartedAt}}' secuura-originate) || stop "I3 inspect failed"
+IFS='|' read -r NAME IMG STATE STARTED <<< "$F"
+IMG=${IMG// /}; IMG=${IMG#sha256:}; IMG=${IMG:0:12}
+echo "name=${NAME// /} image12=$IMG status=${STATE// /} startedAt=${STARTED// /}"
+echo "I3 reported (not a STOP): originate image12=$IMG; D 88th read ca145807416e"
+
+echo "--- I4 postgres container name"
+M=$(docker ps --format '{{.Names}}' | /usr/bin/grep -E -- '-postgres$')
+N=$(printf '%s\n' "$M" | /usr/bin/grep -c .)
+echo "names ending -postgres: count=$N value=[$M]"
+[ "$N" = 1 ] && [ "$M" = secuura-postgres ] || stop "I4 want exactly one name, secuura-postgres"
+echo "I4 ok"
+echo "END $(date -u +%FT%TZ)"
+
+===== kint_cfg_s131.sh
+set -u
+case "$(hostname)" in secuura02-kintsugi-vm) : ;; *) echo "REFUSED: not the kintsugi box"; exit 9;; esac
+echo "CFG $(date -u +%FT%TZ) host=$(hostname)"
+stop() { echo "STOP: $1"; echo "END $(date -u +%FT%TZ)"; exit 7; }
+C=secuura-anchoring
+echo "--- A1 container, one inspect, named fields"
+F=$(docker inspect -f '{{.Name}} | {{.Image}} | {{.State.Status}} | {{.State.StartedAt}} | {{index .Config.Labels "com.docker.compose.project.working_dir"}} | {{index .Config.Labels "com.docker.compose.project.config_files"}}' "$C") || stop "A1 inspect failed"
+IFS='|' read -r NAME IMG STATE STARTED WD CF <<< "$F"
+IMG=${IMG// /}; IMG=${IMG#sha256:}; IMG=${IMG:0:12}; NAME=${NAME// /}; STATE=${STATE// /}; STARTED=${STARTED// /}; WD=${WD// /}; CF=${CF// /}
+echo "name=$NAME image12=$IMG status=$STATE startedAt=$STARTED"
+echo "compose working_dir=$WD config_files=$CF"
+echo "--- A2 container env, named keys only"
+for k in DEMO_MODE ANCHORING_DEMO_MODE NODE_ENV CARDANO_NETWORK ZZ_S131_NO_SUCH_VAR; do
+  v=$(docker exec "$C" printenv "$k" 2>&1); rc=$?; echo "A2 $k rc=$rc value=[$v]"
+done
+echo "--- A3 compose line, matched lines only"
+IFS=',' read -r -a FILES <<< "$CF"
+for f in "${FILES[[at]]}"; do
+  [ -r "$f" ] || { echo "A3 unreadable"; continue; }
+  echo "A3 control: container_name lines=$(/usr/bin/grep -c -F 'container_name' "$f") ; made-up token lines=$(/usr/bin/grep -c -F 'zz_s131_none' "$f")"
+  /usr/bin/grep -n -F 'ANCHORING_DEMO_MODE' "$f"; echo "A3 matched-line count=$(/usr/bin/grep -c -F 'ANCHORING_DEMO_MODE' "$f")"
+done
+# GATE S131-ENVKEY begin
+echo "--- A4 env file, ONE key, value only"
+E="$WD/.env"
+if [ -r "$E" ]; then
+  echo "A4 lines naming the key anywhere=$(/usr/bin/grep -c -F 'ANCHORING_DEMO_MODE' "$E") ; lines starting with the key and =$(/usr/bin/grep -c '^ANCHORING_DEMO_MODE=' "$E")"
+  echo "A4 value(s), at most 3:"; sed -n 's/^ANCHORING_DEMO_MODE=//p' "$E" | head -n 3
+  echo "A4 file mtime epoch=$(stat -c %Y "$E") ; container start epoch=$(date -d "$STARTED" +%s)"
+else echo "A4 env file not readable by this login"; fi
+# GATE S131-ENVKEY end
+# GATE S131-LOGCOUNT begin
+echo "--- A5 boot-log counts only"
+n_all=$(docker logs "$C" 2>&1 | /usr/bin/grep -c .)
+n_demo=$(docker logs "$C" 2>&1 | /usr/bin/grep -c -F 'DEMO_MODE active')
+n_ready=$(docker logs "$C" 2>&1 | /usr/bin/grep -c -F 'Integration ready')
+n_none=$(docker logs "$C" 2>&1 | /usr/bin/grep -c -F 'zz_s131_none')
+echo "A5 log_lines=$n_all demo_active=$n_demo integration_ready=$n_ready made_up=$n_none"
+# GATE S131-LOGCOUNT end
+echo "END $(date -u +%FT%TZ)"
+
+===== kint_dm_s131.sh
+set -u
+case "$(hostname)" in secuura02-kintsugi-vm) : ;; *) echo "REFUSED: not the kintsugi box"; exit 9;; esac
+echo "ANC $(date -u +%FT%TZ) host=$(hostname)"
+MODE="${1:-}"
+case "$MODE" in agg|hashes) : ;; *) echo "STOP: mode must be agg or hashes; no statement is run"; echo "END $(date -u +%FT%TZ)"; exit 7 ;; esac
+echo "mode=$MODE"
+
+q() {
+  docker exec -e SQLQ="$1" secuura-postgres sh -c 'PGOPTIONS="-c default_transaction_read_only=on" PGPASSWORD="$POSTGRES_PASSWORD" psql -X -q -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tA -F"|" -v ON_ERROR_STOP=1 -c "$SQLQ"' 2>&1
+}
+run() {
+  echo "--- $1  $(date -u +%FT%TZ)"
+  echo "SQL:"
+  printf '%s\n' "$2"
+  echo "OUTPUT:"
+  OUT=$(q "$2"); RC=$?
+  OUT=$(printf '%s' "$OUT" | tr -d '\r')
+  printf '%s\n' "$OUT"
+  echo "exit: $RC"
+}
+stop() { echo "STOP: $1 ; no further statement is run"; echo "END $(date -u +%FT%TZ)"; exit 7; }
+must() { [ "$RC" = 0 ] || stop "$1 returned exit $RC"; }
+isnum() { case "$1" in ''|*[!0-9]*) return 1 ;; *) return 0 ;; esac; }
+
+run "3a session proof" "select current_setting('transaction_read_only'), current_database(), (select rolsuper from pg_roles where rolname = current_user), (select rolbypassrls from pg_roles where rolname = current_user), coalesce(nullif(current_setting('app.current_tenant_id', true), ''), 'unset') <> 'unset'"
+must 3a
+case "$OUT" in "on|"?*"|"[tf]"|"[tf]"|"[tf]) echo "3a ok" ;; *) stop "3a does not read on|<database>|bool|bool|bool" ;; esac
+
+run "3b refused-write control, MUST be refused" "create temp table zz_s131_probe(a int)"
+if [ "$RC" = 0 ]; then echo "STOP-WRITE: 3b SUCCEEDED, the session is not read-only; no further statement is run"; echo "END $(date -u +%FT%TZ)"; exit 8; fi
+case "$OUT" in *"read-only transaction"*) echo "3b ok: refused as read-only" ;; *) stop "3b failed for a reason other than read-only" ;; esac
+
+run "3c negative control, must error" "select count(*) from no_such_table_s131"
+[ "$RC" != 0 ] || stop "3c did not error"
+case "$OUT" in *'"no_such_table_s131" does not exist'*) echo "3c ok" ;; *) stop "3c error is not the missing-table error" ;; esac
+
+if [ "$MODE" = agg ]; then
+CENSUS="select status, simulated, count(*) from anchor_store group by 1,2 order by 1,2"
+run "4.1 identity census, anchor_store" "$CENSUS"; must "4.1 census"; CENSUS_BEFORE="$OUT"
+printf '%s\n' "$OUT" | awk -F'|' '
+  NF == 0 { next }
+  { rows++; if (NF != 3 || $3 !~ /^[0-9]+$/) bad++; else sum += $3 }
+  END { if (rows+0 == 0 || bad+0 > 0) { printf "census report: unreadable, bucket_rows=%d bad_rows=%d\n", rows+0, bad+0; exit 1 }
+    printf "census report: bucket_rows=%d anchor_rows=%d ; first reading on this box, no expected values; D 88th read 166 anchor rows in total, 0 outside confirmed and failed (nonfinal_d88.sh lines 88-90; STATUS B lines 12 and 17), no split by simulated\n", rows, sum }' || stop "4.1 census has zero rows or a non-numeric count (a blind read certifies nothing)"
+
+DOCSUM="select count(*), md5(string_agg(md5(d::text), ',' order by d.id)) from documents d"
+run "4.1 documents before" "$DOCSUM"; must "4.1 documents"; DOC_BEFORE="$OUT"
+fi
+
+# ---- Seat S 131st, BRIEF 4.1: guards G1, G2, G3 and the link QA; then leg B (agg) or the ten hashes (hashes). ----
+read -r -d '' G1 <<'SQL'
+select count(*) from information_schema.columns where table_schema='public' and ((table_name='documents' and column_name in ('id','tenant_id','external_id','certification_metadata','metadata','created_at')) or (table_name='anchor_store' and column_name in ('id','document_id','status','transaction_hash','simulated','created_at')))
+SQL
+read -r -d '' G2 <<'SQL'
+select count(*) from information_schema.columns where table_schema='public' and ((table_name='documents' and column_name='id' and data_type='uuid') or (table_name='documents' and column_name in ('certification_metadata','metadata') and data_type='jsonb') or (table_name='documents' and column_name='created_at' and data_type='timestamp with time zone') or (table_name='anchor_store' and column_name in ('id','document_id','status','transaction_hash') and data_type='text') or (table_name='anchor_store' and column_name='simulated' and data_type='boolean') or (table_name='anchor_store' and column_name='created_at' and data_type='timestamp with time zone'))
+SQL
+read -r -d '' G3 <<'SQL'
+select count(*) from information_schema.columns where table_schema='public' and table_name='anchor_store' and ((column_name in ('block_number','slot') and data_type='bigint') or (column_name in ('network','anchor_type') and data_type='text') or (column_name='confirmed_at' and data_type='timestamp with time zone'))
+SQL
+read -r -d '' QA <<'SQL'
+with stuck as (select d.id, d.tenant_id, d.created_at, b.blob from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null and b.blob->>'anchoringStatus' = 'submitted' and b.blob->>'status' is null and b.blob->>'txHash' is null),
+j as (select s.id, s.blob,
+       (select count(*) from anchor_store a where a.id = s.blob->>'anchorId') as n_id,
+       (select count(*) from anchor_store a where a.document_id = s.id::text) as n_doc,
+       exists (select 1 from anchor_store a where a.id = s.blob->>'anchorId' and a.document_id = s.id::text) as same_row,
+       s.created_at
+  from stuck s)
+select count(*) as stuck_n,
+       count(*) filter (where blob ? 'anchorId') as key_anchorid_present,
+       count(*) filter (where jsonb_typeof(blob->'anchorId') = 'string' and blob->>'anchorId' <> '') as key_anchorid_nonempty,
+       count(*) filter (where blob ? 'createAttempts') as key_createattempts_present,
+       count(*) filter (where n_id > 0) as match_by_anchorid,
+       count(*) filter (where n_doc > 0) as match_by_docid,
+       count(*) filter (where n_id > 0 and n_doc > 0) as match_both_keys,
+       count(*) filter (where same_row) as both_keys_same_row,
+       count(*) filter (where n_id > 0 and n_doc = 0) as anchorid_only,
+       count(*) filter (where n_id = 0 and n_doc > 0) as docid_only,
+       count(*) filter (where n_id = 0 and n_doc = 0) as unmatched_either,
+       count(*) filter (where n_doc > 1) as docid_more_than_one_row,
+       coalesce(sum(n_id), 0) as anchor_rows_by_anchorid,
+       coalesce(sum(n_doc), 0) as anchor_rows_by_docid,
+       count(*) filter (where created_at > timestamptz '2026-11-25 23:06:36+00') as created_after_s127_count,
+       (min(created_at) at time zone 'utc')::date::text as oldest_day,
+       (max(created_at) at time zone 'utc')::date::text as newest_day
+  from j
+SQL
+read -r -d '' BA <<'SQL'
+with stuck as (select d.id, d.tenant_id, d.created_at, b.blob from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null and b.blob->>'anchoringStatus' = 'submitted' and b.blob->>'status' is null and b.blob->>'txHash' is null)
+, r as (select a.* from stuck s join anchor_store a on a.id = s.blob->>'anchorId')
+select count(*) as n,
+       count(*) filter (where block_number is not null) as with_block,
+       count(*) filter (where block_number >= 10500047 and (block_number - 10500000) % 47 = 0) as mock_block_pattern,
+       count(*) filter (where block_number >= 10500000) as block_at_or_above_10_5m,
+       coalesce(min(block_number)::text, '-') as block_min,
+       coalesce(max(block_number)::text, '-') as block_max,
+       count(distinct block_number) as block_distinct,
+       count(*) filter (where slot is not null) as with_slot,
+       count(*) filter (where slot >= 131000020 and (slot - 131000000) % 20 = 0) as mock_slot_pattern,
+       count(*) filter (where block_number >= 10500047 and (block_number - 10500000) % 47 = 0 and slot = 131000000 + 20 * ((block_number - 10500000) / 47)) as mock_pair_same_n,
+       coalesce(min(slot)::text, '-') as slot_min,
+       coalesce(max(slot)::text, '-') as slot_max,
+       count(distinct slot) as slot_distinct,
+       count(*) filter (where confirmed_at is not null) as with_confirmed_at,
+       coalesce(round(min(extract(epoch from (confirmed_at - created_at)))::numeric, 3)::text, '-') as secs_min,
+       coalesce(round((percentile_cont(0.5) within group (order by extract(epoch from (confirmed_at - created_at))))::numeric, 3)::text, '-') as secs_median,
+       coalesce(round(max(extract(epoch from (confirmed_at - created_at)))::numeric, 3)::text, '-') as secs_max,
+       count(*) filter (where transaction_hash ~ '^[0-9a-fA-F]{64}$') as hex64,
+       count(distinct transaction_hash) as tx_distinct
+  from r
+SQL
+read -r -d '' BB <<'SQL'
+with stuck as (select d.id, d.tenant_id, d.created_at, b.blob from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null and b.blob->>'anchoringStatus' = 'submitted' and b.blob->>'status' is null and b.blob->>'txHash' is null)
+, r as (select a.* from stuck s join anchor_store a on a.document_id = s.id::text)
+select count(*) as n,
+       count(*) filter (where block_number is not null) as with_block,
+       count(*) filter (where block_number >= 10500047 and (block_number - 10500000) % 47 = 0) as mock_block_pattern,
+       count(*) filter (where block_number >= 10500000) as block_at_or_above_10_5m,
+       coalesce(min(block_number)::text, '-') as block_min,
+       coalesce(max(block_number)::text, '-') as block_max,
+       count(distinct block_number) as block_distinct,
+       count(*) filter (where slot is not null) as with_slot,
+       count(*) filter (where slot >= 131000020 and (slot - 131000000) % 20 = 0) as mock_slot_pattern,
+       count(*) filter (where block_number >= 10500047 and (block_number - 10500000) % 47 = 0 and slot = 131000000 + 20 * ((block_number - 10500000) / 47)) as mock_pair_same_n,
+       coalesce(min(slot)::text, '-') as slot_min,
+       coalesce(max(slot)::text, '-') as slot_max,
+       count(distinct slot) as slot_distinct,
+       count(*) filter (where confirmed_at is not null) as with_confirmed_at,
+       coalesce(round(min(extract(epoch from (confirmed_at - created_at)))::numeric, 3)::text, '-') as secs_min,
+       coalesce(round((percentile_cont(0.5) within group (order by extract(epoch from (confirmed_at - created_at))))::numeric, 3)::text, '-') as secs_median,
+       coalesce(round(max(extract(epoch from (confirmed_at - created_at)))::numeric, 3)::text, '-') as secs_max,
+       count(*) filter (where transaction_hash ~ '^[0-9a-fA-F]{64}$') as hex64,
+       count(distinct transaction_hash) as tx_distinct
+  from r
+SQL
+read -r -d '' BN <<'SQL'
+with stuck as (select d.id, d.tenant_id, d.created_at, b.blob from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null and b.blob->>'anchoringStatus' = 'submitted' and b.blob->>'status' is null and b.blob->>'txHash' is null)
+select a.network, a.anchor_type, a.simulated, count(*) as n
+  from stuck s join anchor_store a on a.id = s.blob->>'anchorId'
+ group by 1,2,3 order by 1,2,3
+SQL
+read -r -d '' M1 <<'SQL'
+with stuck as (select d.id, d.tenant_id, d.created_at, b.blob from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null and b.blob->>'anchoringStatus' = 'submitted' and b.blob->>'status' is null and b.blob->>'txHash' is null) select count(*) from stuck s join anchor_store a on a.id = 'zz-s131-no-such-anchor-7d2e'
+SQL
+read -r -d '' TX <<'SQL'
+with stuck as (select d.id, d.tenant_id, d.created_at, b.blob from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null and b.blob->>'anchoringStatus' = 'submitted' and b.blob->>'status' is null and b.blob->>'txHash' is null)
+select row_number() over (order by a.block_number nulls last, a.transaction_hash, a.id) as ord,
+       coalesce(a.transaction_hash, '-') as transaction_hash,
+       coalesce(a.block_number::text, '-') as block_number,
+       coalesce(a.slot::text, '-') as slot,
+       coalesce(extract(epoch from a.confirmed_at)::bigint::text, '-') as confirmed_epoch
+  from stuck s join anchor_store a on a.id = s.blob->>'anchorId'
+ order by 1
+SQL
+
+# 5.1 schema guards: a wrong count is a STOP, never a retry with another column
+run "5.1a schema guard, column names, want 12" "$G1"; must 5.1a
+[ "$OUT" = 12 ] || stop "5.1a reads [$OUT], want 12"; echo "check 5.1a names: $OUT = 12 ok"
+run "5.1b schema guard, column types, want 10" "$G2"; must 5.1b
+[ "$OUT" = 10 ] || stop "5.1b reads [$OUT], want 10"; echo "check 5.1b types: $OUT = 10 ok"
+run "5.1c schema guard, leg B column types, want 5" "$G3"; must 5.1c
+[ "$OUT" = 5 ] || stop "5.1c reads [$OUT], want 5"; echo "check 5.1c leg B columns: $OUT = 5 ok"
+
+# 5.3 QA, the link
+run "5.3 QA the link" "$QA"; must QA; QA_OUT="$OUT"
+printf '%s\n' "$QA_OUT" | awk -F'|' '
+  function chk(n, ok, v) { printf "check %s: %s %s\n", n, v, (ok ? "ok" : "FAIL"); if (!ok) bad++ }
+  { rows++; nf = NF; for (i = 1; i <= NF; i++) f[i] = $i }
+  END {
+    ints = 1; for (i = 1; i <= 15; i++) if (f[i] !~ /^[0-9]+$/) ints = 0
+    chk("QA shape", (rows == 1 && nf == 17 && ints == 1), "rows=" rows " fields=" nf)
+    if (bad) exit 1
+    sn = f[1]+0; kp = f[2]+0; kn = f[3]+0; mid = f[5]+0; mdoc = f[6]+0; both = f[7]+0; same = f[8]+0
+    ido = f[9]+0; dco = f[10]+0; un = f[11]+0; rid = f[13]+0; rdoc = f[14]+0
+    chk("QA1 by_anchorid = both + anchorid_only", (mid == both + ido), mid " = " both " + " ido)
+    chk("QA2 by_docid = both + docid_only", (mdoc == both + dco), mdoc " = " both " + " dco)
+    chk("QA3 stuck = by_anchorid + docid_only + unmatched", (sn == mid + dco + un), sn " = " mid " + " dco " + " un)
+    chk("QA4 nonempty <= present <= stuck", (kn <= kp && kp <= sn), kn " <= " kp " <= " sn)
+    chk("QA5 by_anchorid <= nonempty", (mid <= kn), mid " <= " kn)
+    chk("QA6 same_row <= both", (same <= both), same " <= " both)
+    chk("QA7 rows_by_anchorid >= by_anchorid", (rid >= mid), rid " >= " mid)
+    chk("QA8 rows_by_docid >= by_docid", (rdoc >= mdoc), rdoc " >= " mdoc)
+    exit (bad ? 1 : 0)
+  }' || stop "a QA check failed"
+IFS='|' read -r SN KPRES KNON KATT MID MDOC MBOTH SAME IDONLY DOCONLY UNM MULTI RID RDOC AFTER OLDEST NEWEST <<< "$QA_OUT"
+[ "$SN" = 10 ] || stop "QA stuck_n=$SN is not exactly 10 (BRIEF R3: STOP and ask)"
+echo "check stuck total: $SN = 10 ok"
+
+if [ "$MODE" = agg ]; then
+ba_check() {
+  printf '%s\n' "$2" | awk -F'|' -v lab="$1" -v sn="$SN" '
+    function chk(n, ok, v) { printf "check %s: %s %s\n", n, v, (ok ? "ok" : "FAIL"); if (!ok) bad++ }
+    function isint(x) { return x ~ /^[0-9]+$/ }
+    function intdash(x) { return x == "-" || x ~ /^[0-9]+$/ }
+    function decdash(x) { return x == "-" || x ~ /^-?[0-9]+(\.[0-9]+)?$/ }
+    NF == 0 { next }
+    { rows++; nf = NF; for (i = 1; i <= NF; i++) f[i] = $i }
+    END {
+      ok = (rows == 1 && nf == 19)
+      split("1 2 3 4 7 8 9 10 13 14 18 19", I, " "); for (k in I) if (!isint(f[I[k]])) ok = 0
+      split("5 6 11 12", J, " "); for (k in J) if (!intdash(f[J[k]])) ok = 0
+      split("15 16 17", D, " "); for (k in D) if (!decdash(f[D[k]])) ok = 0
+      chk(lab " shape", ok, "rows=" (rows+0) " fields=" (nf+0))
+      if (bad) exit 1
+      chk(lab " n equals QA stuck_n and 10", (f[1]+0 == sn+0 && f[1]+0 == 10), f[1] " = " sn " = 10")
+      chk(lab " mock_block_pattern <= with_block", (f[3]+0 <= f[2]+0), f[3] " <= " f[2])
+      chk(lab " mock_pair_same_n <= mock_block_pattern", (f[10]+0 <= f[3]+0), f[10] " <= " f[3])
+      chk(lab " block_distinct <= with_block", (f[7]+0 <= f[2]+0), f[7] " <= " f[2])
+      if (!bad && (f[3]+0 > 0 || f[4]+0 > 0)) printf "R8 FLAG %s: mock_block_pattern=%s block_at_or_above_10_5m=%s (seat STOP: no hashes run, nothing further on the box after this run)\n", lab, f[3], f[4]
+      exit (bad ? 1 : 0)
+    }'
+}
+run "leg B, BA, rows reached by the blob anchor id" "$BA"; must BA; BA_OUT="$OUT"
+ba_check BA "$BA_OUT" || stop "a BA check failed"
+run "leg B, BB, rows reached by document id" "$BB"; must BB; BB_OUT="$OUT"
+ba_check BB "$BB_OUT" || stop "a BB check failed"
+if [ "$BA_OUT" = "$BB_OUT" ]; then BAEQ=yes; else BAEQ=no; fi
+echo "reported: BA equals BB line for line: $BAEQ"
+run "leg B, BN, networks, anchor types and simulated flag" "$BN"; must BN; BN_OUT="$OUT"
+printf '%s\n' "$BN_OUT" | awk -F'|' 'NF == 0 { next } { rows++; if (NF != 4 || $4 !~ /^[0-9]+$/) bad++; else sum += $4 }
+  END { ok = (rows+0 > 0 && bad+0 == 0 && sum+0 == 10); printf "check BN counts sum to 10: rows=%d bad=%d sum=%d %s\n", rows+0, bad+0, sum+0, (ok ? "ok" : "FAIL"); exit (ok ? 0 : 1) }' || stop "the BN check failed"
+zero() { run "5.6 made-up key $1, must read 0" "$2"; must "$1"; [ "$OUT" = 0 ] || stop "$1 reads [$OUT], want 0"; echo "check $1: $OUT = 0 ok"; }
+zero M1-anchor-id "$M1"
+# 5.7 after-state: a difference is reported, it is not a STOP and not proof that this session wrote
+run "5.7 documents after" "$DOCSUM"; must "5.7 documents"; DOC_AFTER="$OUT"
+run "5.7 census after" "$CENSUS"; must "5.7 census"; CENSUS_AFTER="$OUT"
+if [ "$DOC_AFTER" = "$DOC_BEFORE" ]; then echo "after-state documents: equal [$DOC_AFTER]"
+else echo "after-state documents: DIFFER before=[$DOC_BEFORE] after=[$DOC_AFTER] count_delta=$(( ${DOC_AFTER%%|*} - ${DOC_BEFORE%%|*} ))"; fi
+if [ "$CENSUS_AFTER" = "$CENSUS_BEFORE" ]; then echo "after-state census: equal"
+else echo "after-state census: DIFFER"; echo "before:"; printf '%s\n' "$CENSUS_BEFORE"; echo "after:"; printf '%s\n' "$CENSUS_AFTER"; fi
+IFS='|' read -r B1 B2 B3 B4 B5 B6 B7 B8 B9 B10 B11 B12 B13 B14 B15 B16 B17 B18 B19 <<< "$BA_OUT"
+echo "SUMMARY legB n=$B1 with_block=$B2 mock_block_pattern=$B3 block_at_or_above_10_5m=$B4 block_min=$B5 block_max=$B6 block_distinct=$B7 with_slot=$B8 mock_slot_pattern=$B9 mock_pair_same_n=$B10 slot_min=$B11 slot_max=$B12 slot_distinct=$B13 with_confirmed_at=$B14 secs_min=$B15 secs_median=$B16 secs_max=$B17 hex64=$B18 tx_distinct=$B19"
+printf '%s\n' "$BN_OUT" | awk -F'|' 'NF == 4 { printf "SUMMARY legB_network network=%s anchor_type=%s simulated=%s n=%s\n", $1, $2, $3, $4 }'
+echo "SUMMARY legB_bb_equals_ba=$BAEQ"
+else
+run "leg C input, TX, one line per stuck certification: ord|transaction_hash|block_number|slot|confirmed_epoch" "$TX"; must TX; TX_OUT="$OUT"
+printf '%s\n' "$TX_OUT" | awk -F'|' '
+  function intdash(x) { return x == "-" || x ~ /^[0-9]+$/ }
+  NF == 0 { next }
+  { rows++; if (NF != 5) shape++; else { if ($1 != rows "") ord++; if (length($2) != 64 || $2 ~ /[^0-9a-fA-F]/) hx++; if (!intdash($3) || !intdash($4) || !intdash($5)) num++ } }
+  END { ok = (rows+0 == 10 && shape+0 == 0 && ord+0 == 0 && hx+0 == 0 && num+0 == 0)
+    printf "check TX: lines=%d bad_shape=%d bad_ord=%d not_64hex=%d bad_numbers=%d %s\n", rows+0, shape+0, ord+0, hx+0, num+0, (ok ? "ok" : "FAIL"); exit (ok ? 0 : 1) }' || stop "the TX check failed (a missing or non-hex hash is a STOP)"
+NDIST=$(printf '%s\n' "$TX_OUT" | awk -F'|' 'NF == 5 { print $2 }' | sort -u | /usr/bin/grep -c .)
+echo "SUMMARY hashes lines=10 hex64=10 distinct=$NDIST"
+fi
+echo "END $(date -u +%FT%TZ)"
+
+===== end of tools
+
+LAUNCHER PREFLIGHT WARNINGS, VERBATIM:
+# launch 2026-11-27T05:04:29Z
+[F-02] No SSH identity available for git (keychain not seeded, on-disk fallback off).
+       Run: ssh-add --apple-use-keychain ~/.ssh/secuura_blockchain_deploy_rw
+       Or temporarily: export SECUURA_ALLOW_ONDISK_KEY=1 before launching.
+       (git will use whatever core.sshCommand is already in the repo config.)
+[KS-907] 1 other live session(s) on this project: PID 7141 (up since Fri 27 Nov 15:54:52 2026).
+         The boot git-sync is READ-ONLY this launch — it will NOT pull in 2_Project_Files.
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 35  SEEN:       45  BATCH: /private/tmp/wed_newmail/batch_20261127T051831Z.txt

@@ -1,0 +1,96 @@
+### C1 two real runs started together, 8 trials: exactly one may win
+trial 1: rc 0 and 6 ; loser was told: [another run holds the lock] ; lock left behind: no
+trial 2: rc 0 and 6 ; loser was told: [another run holds the lock] ; lock left behind: no
+trial 3: rc 0 and 6 ; loser was told: [another run holds the lock] ; lock left behind: no
+trial 4: rc 0 and 6 ; loser was told: [another run holds the lock] ; lock left behind: no
+trial 5: rc 6 and 0 ; loser was told: [another run holds the lock] ; lock left behind: no
+trial 6: rc 6 and 0 ; loser was told: [another run holds the lock] ; lock left behind: no
+trial 7: rc 6 and 0 ; loser was told: [another run holds the lock] ; lock left behind: no
+trial 8: rc 0 and 6 ; loser was told: [another run holds the lock] ; lock left behind: no
+winners per trial must be 1: GOOD lines in total = 8 of 8 trials
+
+### C2 lock owner pid: dead; alive but UNRELATED; alive, unrelated, with 'nas_backup' in its command line
+dead pid: rc=6 [STALE lock]
+pid reused by an unrelated 'sleep': rc=6 [STALE lock]
+/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-27_qa-nasbackup-r2/scripts/r1_adapted/C_lock_catchup_watch.sh: line 28: 70882 Terminated: 15          sleep 300
+pid reused by an unrelated process whose command line mentions nas_backup: rc=6 [STALE lock]
+  --clear-stale-lock on it: rc=0 [stale lock (pid 71001, started test) MOVED to /private/tmp/claude-501/-Volumes-DevMASTER-W]
+  nightly decision: nightly[wednesday]: RUN: no good backup on record
+  lock dir with NO owner.json (the window between mkdir and the owner write):
+/Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-27_qa-nasbackup-r2/scripts/r1_adapted/C_lock_catchup_watch.sh: line 32: 71001 Terminated: 15          bash -c 'exec -a "less /tmp/notes_about_nas_backup.md" sleep 300'
+mv: rename /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-nasbackup-r2/r1/fx/C2_62345/lane/state/wednesday.lock.d/owner.json to /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-nasbackup-r2/r1/fx/C2_62345/held/owner.json: No such file or directory
+  rc=0 []
+
+### C3 catch-up: missed nights are caught up exactly once; fires outside the window never run
+night0 00:30                 rc=0  RUN: no good backup on record
+night0 01:40                 rc=0  SKIP: already backed up for the window that opened 2026-12-01 00:30 (good at 2026-12-01 00:30:00 AEDT)
+night0 02:50                 rc=0  SKIP: already backed up for the window that opened 2026-12-01 00:30 (good at 2026-12-01 00:30:00 AEDT)
+night0 04:00                 rc=0  SKIP: already backed up for the window that opened 2026-12-01 00:30 (good at 2026-12-01 00:30:00 AEDT)
+(nights 1,2: nothing fires - machine asleep)
+day2 14:00 wake fire         rc=0  SKIP: fired outside the nightly window (2026-12-03 00:30 to 2026-12-03 05:30); it never runs outside its window on its o
+night3 00:30                 rc=0  RUN: no good backup since the window opened 2026-12-04 00:30 (last good 2026-12-01 00:30:00 AEDT, 3 night(s) missed: cat
+night3 01:40                 rc=0  SKIP: already backed up for the window that opened 2026-12-04 00:30 (good at 2026-12-04 00:30:00 AEDT)
+night3 05:30 (window end)    rc=0  SKIP: already backed up for the window that opened 2026-12-04 00:30 (good at 2026-12-04 00:30:00 AEDT)
+night3 05:29                 rc=0  SKIP: already backed up for the window that opened 2026-12-04 00:30 (good at 2026-12-04 00:30:00 AEDT)
+real runs on the fake NAS (STARTED markers / 2 clients): 2 ; expected 2
+--- a window that crosses midnight (fire=23:00, 5 h)
+22:59 (before open)          rc=0  SKIP: fired outside the nightly window (2026-11-30 23:00 to 2026-12-01 04:00); it never runs outside its window on its o
+23:00                        rc=0  RUN: no good backup on record
+00:30 next day (same window) rc=0  SKIP: already backed up for the window that opened 2026-12-01 23:00 (good at 2026-12-01 23:00:00 AEDT)
+03:59                        rc=0  SKIP: already backed up for the window that opened 2026-12-01 23:00 (good at 2026-12-01 23:00:00 AEDT)
+04:00 (closed)               rc=0  SKIP: already backed up for the window that opened 2026-12-01 23:00 (good at 2026-12-01 23:00:00 AEDT)
+23:05 next night             rc=0  RUN: no good backup since the window opened 2026-12-02 23:00 (last good 2026-12-01 23:00:00 AEDT, 1 night(s) missed: cat
+--- daylight saving (TZ=Australia/Sydney): Tuesday's fire=02:30 on 2027-10-03, when 02:00-03:00 does not exist
+Traceback (most recent call last):
+  File "<stdin>", line 8, in <module>
+TypeError: 'datetime.datetime' object cannot be interpreted as an integer
+
+### C4a watch threshold: exactly 72 h after the last good run's START
+day+2 23:59 -> rc=0  nas-backup watch[wednesday]: ok; 71.0 h since the last good backup (20
+day+3 00:59 -> rc=0  nas-backup watch[wednesday]: ok; 72.0 h since the last good backup (20
+day+3 01:00 -> rc=3  nas-backup watch[wednesday]: OVERDUE; 72.0 h since the last good backu
+day+3 01:01 -> rc=3  nas-backup watch[wednesday]: OVERDUE; 72.0 h since the last good backu
+
+### C4b NEVER a good backup, the arming mark NOT set, the job fires 4 times a night and is refused (NAS away): does the flag EVER fire?
+day 0 09:00 launcher check: rc=2  nas_backup_watch: REFUSED — unknown argument '--flag'; nothing done
+day 1 09:00 launcher check: rc=2  nas_backup_watch: REFUSED — unknown argument '--flag'; nothing done
+day 2 09:00 launcher check: rc=2  nas_backup_watch: REFUSED — unknown argument '--flag'; nothing done
+day 3 09:00 launcher check: rc=2  nas_backup_watch: REFUSED — unknown argument '--flag'; nothing done
+day 4 09:00 launcher check: rc=2  nas_backup_watch: REFUSED — unknown argument '--flag'; nothing done
+day 5 09:00 launcher check: rc=2  nas_backup_watch: REFUSED — unknown argument '--flag'; nothing done
+day 6 09:00 launcher check: rc=2  nas_backup_watch: REFUSED — unknown argument '--flag'; nothing done
+day 7 09:00 launcher check: rc=2  nas_backup_watch: REFUSED — unknown argument '--flag'; nothing done
+day 8 09:00 launcher check: rc=2  nas_backup_watch: REFUSED — unknown argument '--flag'; nothing done
+day 9 09:00 launcher check: rc=2  nas_backup_watch: REFUSED — unknown argument '--flag'; nothing done
+CARD-COMMAND lines over 10 days of failed nights (40 refused fires, 10 boots): 0
+--- CONTROL: the same 10 days with --mark-armed run once at day 0
+day 0 09:00: rc=2  nas_backup_watch: REFUSED — unknown argument '--flag'; nothing done
+day 1 09:00: rc=2  nas_backup_watch: REFUSED — unknown argument '--flag'; nothing done
+day 2 09:00: rc=2  nas_backup_watch: REFUSED — unknown argument '--flag'; nothing done
+day 3 09:00: rc=2  nas_backup_watch: REFUSED — unknown argument '--flag'; nothing done
+day 4 09:00: rc=2  nas_backup_watch: REFUSED — unknown argument '--flag'; nothing done
+CARD-COMMAND lines with the arming mark: 0
+
+### C4d WHERE does the one card command land? (the nightly job calls the watch with --flag too)
+the scheduled job's own stdout on night 3 (under launchd this is ~/Library/Logs/<seat>_nasbackup.out) holds 0 CARD-COMMAND line
+the launcher's --flag at the next boot: rc=2 ; CARD-COMMAND lines printed: 0 ; it says: 
+doctor's --check: rc=3 ; CARD-COMMAND lines: 0
+--reprint: rc=2 ; CARD-COMMAND lines: 0
+30 further boots in the same gap print 0 more CARD-COMMAND lines (flood check; 0 expected)
+state flag: raised=None printed_at=None
+
+### C4e a damaged state file
+garbage state file, 5 days after the last good run: watch rc=2 [nas_backup_watch: REFUSED — unknown argument '--flag'; nothing done] ; nightly rc=0 [nas-backup watch[wednesday]: STATE FILE DAMAGED: /private/tm] ; nightly.log lines for that fire: 3 ; run rc=0 [1 GOOD] state after: {  "armed_at": null,  "damage"
+empty state file, 5 days after the last good run: watch rc=2 [nas_backup_watch: REFUSED — unknown argument '--flag'; nothing done] ; nightly rc=0 [nas-backup watch[wednesday]: STATE FILE DAMAGED: /private/tm] ; nightly.log lines for that fire: 3 ; run rc=0 [1 GOOD] state after: {  "armed_at": null,  "damage"
+truncated state file, 5 days after the last good run: watch rc=2 [nas_backup_watch: REFUSED — unknown argument '--flag'; nothing done] ; nightly rc=0 [nas-backup watch[wednesday]: STATE FILE DAMAGED: /private/tm] ; nightly.log lines for that fire: 3 ; run rc=0 [1 GOOD] state after: {  "armed_at": null,  "damage"
+
+### C5 NAS not mounted but a plain local folder sits at the mount path; and the NAS vanishing mid-run
+rc=2 ; entries under the local folder before/after: 4/4 ; state: last_attempt=refused last_good=None
+nightly rc=2 ; watch after 4 such days: nas-backup watch[wednesday]: OVERDUE; 104.0 h since the first attempt on record (no good b
+share replaced mid-run by an EMPTY LOCAL folder: rc=5 ; state=failed ; files the tool then wrote into the local folder: 0 ; dirs: 0
+  - WEDNESDAY: engine exit code 12 (rsync: connection unexpectedly closed)
+  - unexpected error: FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-nasbackup-r2/r1/f
+  - could not write the manifest or the completion marker on the NAS: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/sc
+
+### C6 HOLD present: nightly fires, watch
+nightly under HOLD, 5 days after arming: rc=3 ; CARD lines: 0 ; nightly[wednesday]: HELD: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad/qa-nasbackup-

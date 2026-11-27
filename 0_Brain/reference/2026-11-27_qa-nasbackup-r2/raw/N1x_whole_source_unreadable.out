@@ -1,0 +1,9 @@
+### (1) the set's ROOT folder itself becomes mode 000 (the engine cannot enter it at all)
+root 000 during the copy, readable again by the proof: rc=5 GOOD=0 | at destination: 0 of 42 files | engine pass 1: ok rc=3; its log lists 0 new + 0 replaced | proven at the destination: 0 of 42;gone from the source during the run: 0;NOT PROVEN: 45; state=failed
+root 000 from the copy to the end of the run: rc=5 GOOD=0 | at destination: 0 of 42 files | engine pass 1: ok rc=3; its log lists 0 new + 0 replaced | proven at the destination: 0 of 0;gone from the source during the run: 42;NOT PROVEN: 0; state=failed
+### (2) EVERY top-level folder of the set becomes mode 000 (the root is enterable, nothing under it is readable)
+every folder and file under the root unreadable: rc=0 GOOD=1 | at destination: 0 of 42 files | engine pass 1: ok rc=23; its log lists 0 new + 0 replace | proven at the destination: 0 of 0;gone from the source during the run: 42;NOT PROVEN: 0; state=good
+### (3) the same on a LATER night, after a good first night, with every file changed (so every file is to be sent)
+night 0: rc=0 GOOD=1
+night 1: rc=0 GOOD=1 | destination files still holding LAST night's content: 40 of 40 | gone from the source during the run: 40;NOT PROVEN: 0; state=good recorded src_files=43 vanished=40
+night 2 (folders readable again, real engine via the same stub now a no-op): rc=0 GOOD=1 | still-stale destination files: 40

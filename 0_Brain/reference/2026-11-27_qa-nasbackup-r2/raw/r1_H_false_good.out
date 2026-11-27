@@ -1,0 +1,28 @@
+### H1 destination copy immutable (uchg), same-size change at the source; hash_sample=40 (the shipped default), 303 files in the set
+first run rc=0
+night 1: rc=8  GOOD lines=0  engine rc=[]  source=[LEDGER-v2-BBBB]  destination current=[LEDGER-v1-AAAA]  state=failed
+night 2: rc=8  GOOD lines=0  engine rc=[]  source=[LEDGER-v3-BBBB]  destination current=[LEDGER-v1-AAAA]  state=failed
+night 3: rc=8  GOOD lines=0  engine rc=[]  source=[LEDGER-v4-BBBB]  destination current=[LEDGER-v1-AAAA]  state=failed
+night 4: rc=8  GOOD lines=0  engine rc=[]  source=[LEDGER-v5-BBBB]  destination current=[LEDGER-v1-AAAA]  state=failed
+night 5: rc=8  GOOD lines=0  engine rc=[]  source=[LEDGER-v6-BBBB]  destination current=[LEDGER-v1-AAAA]  state=failed
+night 6: rc=8  GOOD lines=0  engine rc=[]  source=[LEDGER-v7-BBBB]  destination current=[LEDGER-v1-AAAA]  state=failed
+  - WEDNESDAY: 1 file(s) NOT PROVEN at the destination with the source's content (first: ledger.db)
+night 7, NOTHING changed at the source since night 6:
+  rc=8 ;     to copy: 1 files, 15 B (0 new, 1 changed -> previous cop ; source=[LEDGER-v7-BBBB] destination=[LEDGER-v1-AAAA] ; versions of ledger.db kept: 7
+
+### H2 an engine that skips one listed file and exits 23 (per-file transfer error), same-size change
+night 1: rc=8 GOOD=0 destination=[LEDGER-v1-AAAA]
+night 2: rc=8 GOOD=0 destination=[LEDGER-v1-AAAA]
+night 3: rc=8 GOOD=0 destination=[LEDGER-v1-AAAA]
+night 4: rc=8 GOOD=0 destination=[LEDGER-v1-AAAA]
+night 5: rc=8 GOOD=0 destination=[LEDGER-v1-AAAA]
+night 6: rc=8 GOOD=0 destination=[LEDGER-v1-AAAA]
+night 7: rc=8 GOOD=0 destination=[LEDGER-v1-AAAA]
+night 8: rc=8 GOOD=0 destination=[LEDGER-v1-AAAA]
+night 9: rc=8 GOOD=0 destination=[LEDGER-v1-AAAA]
+night 10: rc=8 GOOD=0 destination=[LEDGER-v1-AAAA]
+H2: nights recorded GOOD with the changed file NOT delivered: 0 of 10 ; source now [LEDGER-v11-CCCC], destination [LEDGER-v1-AAAA]
+
+### H3 CONTROLS: (a) the same per-file failure with a DIFFERENT-size change must FAIL; (b) the same same-size change with a healthy engine must arrive
+(a) different size, transfer fails: rc=8 GOOD=0 state=failed
+(b) same size, healthy engine: rc=0 destination=[LEDGER-v2-DDDD]

@@ -1,0 +1,79 @@
+### N3a a destination file DELETED behind the tool's back (index still says proven). Expected: noticed the next night, re-sent.
+night 1 rc=0 GOOD=1 | to copy: 1 files, 13 B (1 new, 0 changed -> previous cop | f7 back at destination: yes
+
+### N3b a destination file's CONTENT altered behind the tool's back, same size (bit rot, another writer). 400 unsent files, hash_sample=40 (the shipped default). How many nights until it is noticed?
+12 nights with nothing changed at the source: recorded GOOD on 12 nights while the destination copy differed; first night it was caught: never in 12 (expected chance per night 40/402 = 10%)
+   the catching night said: 
+
+### N3c the index file is damaged (garbage bytes). Expected: one plain line, not a traceback; the lock not left behind.
+night 1 rc=1 GOOD=0 | traceback lines: 1 | last line: sqlite3.DatabaseError: file is not a database
+   lock left behind: YES | state last_attempt=good
+   the next attempt: rc=6 | REFUSED — STALE lock at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratc
+   watch: rc=0 nas-backup watch[wednesday]: ok; 26.0 h since the last good backup (2026-12-01 01:00:00 AEDT); last attempt 2026-12-02 02:00 refused | lock: pid 97383 STALE since 2026-11-27 15:44:30 AEDT (nas_backup.
+   a DRY run with the damaged index: rc=0 traceback lines: 0
+
+### N3d an index from ANOTHER destination: the whole destination is replaced by same-size different content; the index is kept.
+night 1 rc=8 GOOD=0 | - WEDNESDAY: sha256 sample of files not sent tonight: 10 of 10 DIFFER from the source (first: sub/f6.txt) | NOT DELIVERED lines: 10 of 30 altered
+night 2 rc=8 GOOD=0 | still-altered destination files: 30
+night 6 rc=8 | still-altered destination files after 6 nights: 30
+
+### N4a the shrink guard and the nightly job: can the nightly job accept a shrink? can a shrink be accepted twice?
+night 0 (nightly) rc=0
+night 1 (nightly) after 42 -> 7 files: rc=8 | PROBLEM: SCOPE FELL SHARPLY: 7 files in scope now, 42 at the last good run (more than a 50% fall). If the source really shrank, run once with --accept-shrink "<card i
+night 2 (nightly) unchanged: rc=8 (still failing: the nightly job has no way to accept)
+   accept-shrink in the nightly script or the plist template: 0 / 0 (control: 'decide-only' in the nightly script: 2)
+by hand with --accept-shrink: rc=0 GOOD=1 ; new baseline: {'Secuura': 1, 'WEDNESDAY': 7}
+a FURTHER sharp fall the next night, no flag: rc=8 (2 SCOPE FELL line: the acceptance was not sticky)
+
+### N4b a SLOW shrink, 45% of what is left each night (below the 50% trigger).
+   night 1: 550 filler files left, rc=0 GOOD=1
+   night 2: 303 filler files left, rc=0 GOOD=1
+   night 3: 167 filler files left, rc=0 GOOD=1
+   night 4: 92 filler files left, rc=0 GOOD=1
+   night 5: 51 filler files left, rc=0 GOOD=1
+   night 6: 29 filler files left, rc=0 GOOD=1
+   night 7: 16 filler files left, rc=0 GOOD=1
+   night 8: 9 filler files left, rc=0 GOOD=1
+   night 9: 5 filler files left, rc=0 GOOD=1
+   night 10: 3 filler files left, rc=0 GOOD=1
+1000 -> 3 files in 10 nights, every night GOOD: YES
+
+### N4c FIRST run of a set that holds folders but ZERO files (ruling 4: 'a set whose in-scope count is zero FAILS').
+rc=0 GOOD=1 | source in scope: 0 files, 0 B, 2 folders, 0 symlinks (recorded, not copied), | EMPTY SCOPE lines: 0
+CONTROL the same with no folders either: rc=8 EMPTY SCOPE lines: 2
+
+### N4d exclusion patterns that are not literally '*' but match (nearly) every name, on a FIRST run and after a good run.
+   first run, exclude_name=*.*          rc=0 GOOD=1 | source in scope: 0 files, 0 B, 1 folders, 0 symlinks (re
+   first run, exclude_name=[!~]*        rc=8 GOOD=0 | source in scope: 0 files, 0 B, 0 folders, 0 symlinks (re
+   first run, exclude_name=*[a-z0-9]*   rc=8 GOOD=0 | source in scope: 0 files, 0 B, 0 folders, 0 symlinks (re
+   first run, exclude_name=?*           rc=2 GOOD=0 | REFUSED — the exclusion pattern '?*' in /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESD
+   first run, exclude_name=**           rc=2 GOOD=0 | REFUSED — the exclusion pattern '**' in /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESD
+   after a good 22-file night, exclude_name=*.* : rc=8 GOOD=0 | PROBLEM: EMPTY SCOPE: 0 files in scope now, 22 at the last good run
+   the same with max_drop_fraction=1 in the conf: rc=8 GOOD=0 (the conf can switch the fall guard off; the zero rule remains)
+   state file damaged AND 20 of 22 files newly excluded the same night: rc=0 GOOD=1 (the baseline went with the damaged state) | STATE FILE DAMAGED: /private/tmp/claude-501/-Volumes-DevMAST
+
+### N4e a set that GROWS by pulling in an unintended tree (5,000 files appear under the seat tree overnight).
+rc=0 GOOD=1 | to copy: 5000 files, 23.33 KiB (5000 new, 0 changed -> p | lines warning about growth: 0
+
+### N5a the END marker counts lines, it does not seal them: one exclude line REPLACED by another valid line, count unchanged.
+intact: rc=0 bulk marker on NAS=0
+exclude line replaced by 'io_timeout=1800' (END count untouched): rc=0 GOOD=1 bulk marker on NAS=1
+
+### N5b duplicate keys: which wins, and is it said?
+status=confirmed then status=unconfirmed: rc=2 (the configuration /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY)
+status=unconfirmed then status=confirmed: rc=0 GOOD=1 | duplicate-key warnings: 0
+
+### N5c an exclude_path that exists but is the WRONG folder (sub instead of cache/huge).
+rc=0 GOOD=1 bulk marker on NAS=1 ; sub/b.txt at destination: NO (accepted by nature: the tool cannot know intent)
+
+### N5d text after the END marker, and an END marker in the middle
+a line appended after END: rc=2 (REFUSED — /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/16b0d124-652d-4b80-961e-2819b9865881/scratchpad)
+
+### N5e the state file: valid JSON with a last_good in the FUTURE (a wrong clock during one good run)
+nightly 5 days later: nightly[wednesday]: SKIP: already backed up for the window that opened 2026-12-06 00:30 (good at 2026-12-01 01:00:00 AEDT)
+watch 9 days later: rc=0 nas-backup watch[wednesday]: ok; -9376.0 h since the last good backup (2028-01-05 01:00:00 AEDT); last attempt 2026-12-0
+
+### N5f the state file: valid JSON, right seat, but last_good without its fields
+watch: rc=0 traceback lines=0 | nas-backup watch[wednesday]: nothing on record for this seat (no attempt, no fire, no good backup) a
+nightly with last_good lacking 'time': rc=1 traceback lines=1 | KeyError: 'time'
+watch on it: rc=1 traceback lines=1 | KeyError: 'time'

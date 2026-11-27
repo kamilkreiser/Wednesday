@@ -1,0 +1,226 @@
+NEW ROWS: 1 (index first; full bodies follow and are also in /private/tmp/wed_newmail/batch_20261127T052640Z.txt)
+     1	[INBOUND] 2026-11-27T05:25 | Secuura/Blockchain-S | [Secuura/Blockchain-S -> Wednesday] FINAL STATUS: 10 of 10 found on preview, mock rows 0, 
+=========== [INBOUND] 2026-11-27T05:25 | Secuura/Blockchain-S | [Secuura/Blockchain-S -> Wednesday] FINAL STATUS: 10 of 10 found on preview, mock rows 0, 
+[Secuura/Blockchain-S -> Wednesday] FINAL STATUS: 10 of 10 found on preview, mock rows 0, DEMO_MODE false (Seat S 131st)
+Seat S 131st
+FINAL STATUS. Read-only on Kintsugi plus the licensed public lookup. Nothing was repaired, changed or deployed. I now WAIT for your word before the wrap.
+
+VERDICT
+REAL on chain: 10 of 10 found; mock-pattern rows: 0 of 10; DEMO_MODE now: false
+
+DO THE LEGS AGREE: yes. None of the three points to a mock. Their reach differs: A speaks only from the last container start, B cannot see a mock under W-1, C is the one source outside the box.
+
+1. LEG A, the box configuration now (box time 2026-11-27T05:20:12Z to 2026-11-27T05:20:17Z; evidence/R3_cfg.out)
+  name=/secuura-anchoring image12=3a6a53d4b268 status=running startedAt=2026-11-15T22:47:15.950724269Z
+  A2 DEMO_MODE rc=0 value=[false]
+  A2 ANCHORING_DEMO_MODE rc=1 value=[]
+  A2 NODE_ENV rc=0 value=[development]
+  A2 CARDANO_NETWORK rc=0 value=[preview]
+  A2 ZZ_S131_NO_SUCH_VAR rc=1 value=[]
+  compose, matched lines and controls, base file then override:
+    A3 control: container_name lines=39 ; made-up token lines=0
+    1325:      - DEMO_MODE=${ANCHORING_DEMO_MODE:-false}
+    A3 matched-line count=1
+    A3 control: container_name lines=0 ; made-up token lines=0
+    A3 matched-line count=0
+  LIMIT on A3: the override file read 0 for the key AND 0 for the control word, so its zero is not backed by a control hit. A2 is the effective value.
+  A4 env file, the one key: A4 lines naming the key anywhere=1 ; lines starting with the key and =1 ; value: false
+  A4 times: file mtime 2026-11-19T08:55:12Z, container start 2026-11-15T22:47:15Z. THE FILE CHANGED AFTER THE START, so it is not proof of what the container started with (what changed in it was not read).
+  A5 boot log counts: log_lines=144417 demo_active=0 integration_ready=1 made_up=0. The Integration ready line is present, so the boot lines survived and demo_active=0 is evidence about that start.
+  A supports: not in DEMO_MODE since the 2026-11-15T22:47:15Z start. Of the ten transactions, 1 is dated at or after that start (ordinal 10) and 9 before it, so A says nothing about those 9.
+
+2. LEG B, the rows own shape (box time 2026-11-27T05:20:34Z to 2026-11-27T05:20:36Z; evidence/R4_dm_agg.out)
+  SUMMARY legB n=10 with_block=10 mock_block_pattern=0 block_at_or_above_10_5m=0 block_min=4670511 block_max=4862077 block_distinct=10 with_slot=10 mock_slot_pattern=0 mock_pair_same_n=0 slot_min=122990697 slot_max=128161738 slot_distinct=10 with_confirmed_at=10 secs_min=29.223 secs_median=64.282 secs_max=144.402 hex64=10 tx_distinct=10
+  SUMMARY legB_network network=preview anchor_type=single simulated=f n=10
+  SUMMARY legB_bb_equals_ba=yes
+  mock_block_pattern 0 of 10; at or above 10500000: 0; mock slot pattern 0; same-n pair 0.
+  CAVEAT (your wording and mine): by W-1 a mock-pattern count of 0 would be expected whether or not demo mode had been on. It is NOT evidence against a mock. Leg C decides.
+  Confirmed minus created 29.223 to 144.402 s, median 64.282: described only; a reconciler can confirm later.
+  Controls: 25 checks ok, 0 FAIL, 15 statements run; session proof on|secuura|t|t|f; test write refused as read-only; missing table errored; guards 12, 10, 5; made-up anchor id 0.
+  after-state documents: equal [151|7355fe593504e3345842979f2ae5cb7a]
+  after-state census: equal
+  Hashes run (box time 2026-11-27T05:20:47Z to 2026-11-27T05:20:48Z): 14 checks ok, 0 FAIL; SUMMARY hashes lines=10 hex64=10 distinct=10; QA again 10 stuck.
+
+3. LEG C, the chain (Koios preview from this Mac, no key)
+  INSTRUMENT THAT ANSWERED: S131-CHAIN2, tx_info with _inputs true. S131-CHAIN2B (tx_status) was NOT used.
+  First run (S131-CHAIN, 2026-11-27T05:20:56Z to 2026-11-27T05:21:10Z): the positive control answered an empty list twice; the ten were not sent; files kept unchanged (evidence/R6_legc.out, evidence/legc_req*).
+  Second run (2026-11-27T05:23:31Z to 2026-11-27T05:23:38Z), requests sent=7 (budget 8):
+  control genesis: networkmagic=2 networkid=Testnet ok
+  tip: block_height=4899311 abs_slot=129100999 block_time=1795756999
+  control block: block_height=4899209 tx_count=2
+  control negative: HTTP 200 body [] ok
+  control positive: 1 element, block_height=4899209 equals the block read ok
+  ord 1: found block_height=4670511 tx_timestamp=1789646697 absolute_slot=122990697 block=equal slot=equal box_confirmed_minus_chain_secs=55
+  ord 2: found block_height=4711054 tx_timestamp=1790761151 absolute_slot=124105151 block=equal slot=equal box_confirmed_minus_chain_secs=30
+  ord 3: found block_height=4711077 tx_timestamp=1790761653 absolute_slot=124105653 block=equal slot=equal box_confirmed_minus_chain_secs=36
+  ord 4: found block_height=4711084 tx_timestamp=1790761842 absolute_slot=124105842 block=equal slot=equal box_confirmed_minus_chain_secs=18
+  ord 5: found block_height=4754032 tx_timestamp=1791900366 absolute_slot=125244366 block=equal slot=equal box_confirmed_minus_chain_secs=38
+  ord 6: found block_height=4800276 tx_timestamp=1793152662 absolute_slot=126496662 block=equal slot=equal box_confirmed_minus_chain_secs=29
+  ord 7: found block_height=4842618 tx_timestamp=1794292366 absolute_slot=127636366 block=equal slot=equal box_confirmed_minus_chain_secs=34
+  ord 8: found block_height=4842694 tx_timestamp=1794293857 absolute_slot=127637857 block=equal slot=equal box_confirmed_minus_chain_secs=48
+  ord 9: found block_height=4848976 tx_timestamp=1794464716 absolute_slot=127808716 block=equal slot=equal box_confirmed_minus_chain_secs=78
+  ord 10: found block_height=4862077 tx_timestamp=1794817738 absolute_slot=128161738 block=equal slot=equal box_confirmed_minus_chain_secs=12
+  TOTAL found=10 of 10 not_found=0
+  TOTAL box_block_number equals block_height: equal=10 different=0 box_null=0
+  TOTAL box_slot equals absolute_slot: equal=10 different=0 box_null=0
+  TOTAL box_confirmed_epoch minus tx_timestamp seconds: min=12 max=78 n=10
+  The ten tx timestamps run from 2026-09-17T12:04:57Z to 2026-11-16T08:28:58Z.
+  Seen once each, cause not established: the bare body your brief gives answered empty at 05:21Z; the same endpoint with _inputs true answered at 05:23Z.
+
+4. W-1 FOR A GATE TO RE-DERIVE (a claim to test, not a ruling)
+  CLAIM: on the code read, a DEMO_MODE mock leaves a bare 64-hex anchor row at submitted and no anchoring path takes it to confirmed.
+  Paths under Blockchain/Dev/services/anchoring/src. Commits 0e6479d7b (2_Project_Files) and 4764b2cfbc28 (readable in worktrees/s-w78-base).
+  cardano/index.ts (same blob at both): 58-69 demo branch sets demo and ready, returns at 69; 93 the only initProvider call; 270-273 submitAnchor demo return (hash and fee only); 326 submitAndConfirmAnchor declared; 335-337 the only use of the mock confirmation.
+  mocks/mockProvider.ts (same blob): 54-95.
+  index.ts (same blob): 1180, 2008, 2187, 2376 inject or call the real waitForConfirmation; 2054 and 2136 return before the mock paths when ready; 2070-2096 and 2275-2300 the mock_tx_ and mock_batch_tx_ paths.
+  cardano/confirmation.ts: waitForConfirmation at 57 and 69; its getTransaction call at 79 and 93 (0e6479d7b, then 4764b2cf).
+  cardano/provider.ts: getTransaction with no client: 451-452 returns null at 0e6479d7b; 477-479 returns undefined at 4764b2cf.
+  Confirmed writers at 4764b2cf, each behind a chain answer: anchorSubmission.ts 468-477 (callers 507, 565, 570, 910; pollMember 486-497; spender reads 550-557), 612, 866; reconciler.ts 217-218 (called 264, 375), 324; index.ts 2196; verifyAnchorStatus.ts 38.
+  Commands: git grep -n -w submitAndConfirmAnchor COMMIT -- Blockchain  (one hit: the declaration);  git log -S submitAndConfirmAnchor 4764b2cfbc28 -- Blockchain/Dev/services, tests excluded (one commit, e50dbde98);  anchor_store INSERT or UPDATE outside anchoring: migration and init SQL plus one deployment document.
+  LIMITS: two commits, not the running image (container started 2026-11-15T22:47:15Z, build revision not read, rows from 2026-09-17); writers found by the literal status string; merge commits own diffs not walked by git log -S; no code was run.
+
+5. WHAT THIS CANNOT SHOW
+  A is now, and dates only from the last start of anchoring; it does not prove 2026-09-17 to 2026-11-15.
+  B is silent on a mock under W-1; the modulus can match a real block by chance; a restarted mock counter repeats numbers.
+  C shows each hash is on Cardano preview, with the block and slot the box stored. It does not show the transaction carries that certification payload (metadata not requested). For a re-anchored row it names the row current transaction (one row per document and network, overwritten).
+  Read-only on the database was a session setting, not a permission barrier (the login reads superuser and bypasses row security, which is also why the counts cover all tenants).
+  C rests on one third party explorer. Preview is a TEST network. The host key pin has still never been confirmed from a second source. Nothing here says a repair is right.
+
+6. IDENTITY AND REACH
+  256 SHA256:gl2JBs7KpV7/wrYd/7bzqTNQ+wyFQJomCtQkfUs8nuU 20.198.226.148 (ED25519)
+  PINNED: fingerprint equals the carried SHA256:gl2JBs7KpV7/wrYd/7bzqTNQ+wyFQJomCtQkfUs8nuU
+  ID_S131 2026-11-27T05:20:04Z host=secuura02-kintsugi-vm
+  revision=4764b2cfbc28768ef9c7b684e2af2e0f2f1438e5
+  name=/secuura-originate image12=ca145807416e status=running startedAt=2026-11-27T00:59:44.4398908Z
+  names ending -postgres: count=1 value=[secuura-postgres]
+
+7. PRIVACY (evidence/R8_privacy.out)
+  R7 box check: PASS over 13 file(s) ; R7 hashes check: PASS over 1 file(s) ; planted controls read 1.
+  Swept all record files: the ten appear only in evidence/hashes_s131.out and the second run request 7 file and its response.
+  Exception to declare: the record of curl argv in the leg-C request files holds curl at-sign file syntax; left unchanged.
+
+8. DECLARED SINCE THE PLAN
+  D7 the privacy tool planted its control files inside evidence/ on its first run (my argument); moved to the scratchpad with mv -n, later runs plant there.
+  D8 the at-sign in the leg-C request records, above.
+  D9 I typed a guessed message id to fetch your second answer (the helper list cuts ids); HTTP 404; fetched with the full id.
+  D10 some commands used an unquoted glob (the record absence check and listing saved mail); the figures and times in my leg-C QUESTION were copied by hand from the output files.
+
+9. EVERY ARGV (evidence/argv_s131.txt)
+  keyscan 2026-11-27T05:19:51Z: /bin/bash <REC>/tools/kint_hostkey_s131.sh > <REC>/evidence/R1_hostkey.out  (ssh-keyscan -T 15 -t ed25519 20.198.226.148)
+  run1 2026-11-27T05:20:01Z: /bin/bash <REC>/tools/kint_run_s131.sh <REC>/tools/kint_id_s131.sh <REC>/evidence/R2_id.out > <REC>/evidence/R2_id.runner.out
+  run2 2026-11-27T05:20:09Z: /bin/bash <REC>/tools/kint_run_s131.sh <REC>/tools/kint_cfg_s131.sh <REC>/evidence/R3_cfg.out > <REC>/evidence/R3_cfg.runner.out
+  run3 2026-11-27T05:20:31Z: /bin/bash <REC>/tools/kint_run_s131.sh <REC>/tools/kint_dm_s131.sh <REC>/evidence/R4_dm_agg.out agg > <REC>/evidence/R4_dm_agg.runner.out
+  run4 2026-11-27T05:20:45Z: /bin/bash <REC>/tools/kint_run_s131.sh <REC>/tools/kint_dm_s131.sh <REC>/evidence/hashes_s131.out hashes > <REC>/evidence/R5_dm_hashes.runner.out
+  legc 2026-11-27T05:20:56Z: python3 -I <REC>/tools/legc_s131.py <REC>/evidence/hashes_s131.out <REC>/evidence <REC>/mail/chain.licence > <REC>/evidence/R6_legc.out
+  legc2 2026-11-27T05:23:31Z: python3 -I <REC>/tools/legc2_s131.py <REC>/evidence/hashes_s131.out <REC>/evidence/legc2 <REC>/mail/chain2.licence AB > <REC>/evidence/R7_legc2.out
+  ssh per runner run: one ssh running hostname, then one running bash -s with the tool on stdin; user secuura at 20.198.226.148; options: no config file, no control master, one identity file named in the runner (never opened by me), batch mode, strict host key checking against the pinned scratchpad known_hosts, 20 s connect timeout.
+  per statement on the box: docker exec -e SQLQ="$1" secuura-postgres sh -c 'PGOPTIONS="-c default_transaction_read_only=on" PGPASSWORD="$POSTGRES_PASSWORD" psql -X -q -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tA -F"|" -v ON_ERROR_STOP=1 -c "$SQLQ"' 2>&1
+
+10. EXACT SQL AS RUN (from the output files)
+-- [agg run] 3a session proof
+select current_setting('transaction_read_only'), current_database(), (select rolsuper from pg_roles where rolname = current_user), (select rolbypassrls from pg_roles where rolname = current_user), coalesce(nullif(current_setting('app.current_tenant_id', true), ''), 'unset') <> 'unset'
+-- [agg run] 3b refused-write control, MUST be refused
+create temp table zz_s131_probe(a int)
+-- [agg run] 3c negative control, must error
+select count(*) from no_such_table_s131
+-- [agg run] 4.1 identity census, anchor_store
+select status, simulated, count(*) from anchor_store group by 1,2 order by 1,2
+-- [agg run] 4.1 documents before
+select count(*), md5(string_agg(md5(d::text), ',' order by d.id)) from documents d
+-- [agg run] 5.1a schema guard, column names, want 12
+select count(*) from information_schema.columns where table_schema='public' and ((table_name='documents' and column_name in ('id','tenant_id','external_id','certification_metadata','metadata','created_at')) or (table_name='anchor_store' and column_name in ('id','document_id','status','transaction_hash','simulated','created_at')))
+-- [agg run] 5.1b schema guard, column types, want 10
+select count(*) from information_schema.columns where table_schema='public' and ((table_name='documents' and column_name='id' and data_type='uuid') or (table_name='documents' and column_name in ('certification_metadata','metadata') and data_type='jsonb') or (table_name='documents' and column_name='created_at' and data_type='timestamp with time zone') or (table_name='anchor_store' and column_name in ('id','document_id','status','transaction_hash') and data_type='text') or (table_name='anchor_store' and column_name='simulated' and data_type='boolean') or (table_name='anchor_store' and column_name='created_at' and data_type='timestamp with time zone'))
+-- [agg run] 5.1c schema guard, leg B column types, want 5
+select count(*) from information_schema.columns where table_schema='public' and table_name='anchor_store' and ((column_name in ('block_number','slot') and data_type='bigint') or (column_name in ('network','anchor_type') and data_type='text') or (column_name='confirmed_at' and data_type='timestamp with time zone'))
+-- [agg run] 5.3 QA the link
+with stuck as (select d.id, d.tenant_id, d.created_at, b.blob from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null and b.blob->>'anchoringStatus' = 'submitted' and b.blob->>'status' is null and b.blob->>'txHash' is null),
+j as (select s.id, s.blob,
+       (select count(*) from anchor_store a where a.id = s.blob->>'anchorId') as n_id,
+       (select count(*) from anchor_store a where a.document_id = s.id::text) as n_doc,
+       exists (select 1 from anchor_store a where a.id = s.blob->>'anchorId' and a.document_id = s.id::text) as same_row,
+       s.created_at
+  from stuck s)
+select count(*) as stuck_n,
+       count(*) filter (where blob ? 'anchorId') as key_anchorid_present,
+       count(*) filter (where jsonb_typeof(blob->'anchorId') = 'string' and blob->>'anchorId' <> '') as key_anchorid_nonempty,
+       count(*) filter (where blob ? 'createAttempts') as key_createattempts_present,
+       count(*) filter (where n_id > 0) as match_by_anchorid,
+       count(*) filter (where n_doc > 0) as match_by_docid,
+       count(*) filter (where n_id > 0 and n_doc > 0) as match_both_keys,
+       count(*) filter (where same_row) as both_keys_same_row,
+       count(*) filter (where n_id > 0 and n_doc = 0) as anchorid_only,
+       count(*) filter (where n_id = 0 and n_doc > 0) as docid_only,
+       count(*) filter (where n_id = 0 and n_doc = 0) as unmatched_either,
+       count(*) filter (where n_doc > 1) as docid_more_than_one_row,
+       coalesce(sum(n_id), 0) as anchor_rows_by_anchorid,
+       coalesce(sum(n_doc), 0) as anchor_rows_by_docid,
+       count(*) filter (where created_at > timestamptz '2026-11-25 23:06:36+00') as created_after_s127_count,
+       (min(created_at) at time zone 'utc')::date::text as oldest_day,
+       (max(created_at) at time zone 'utc')::date::text as newest_day
+  from j
+-- [agg run] leg B, BA, rows reached by the blob anchor id
+with stuck as (select d.id, d.tenant_id, d.created_at, b.blob from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null and b.blob->>'anchoringStatus' = 'submitted' and b.blob->>'status' is null and b.blob->>'txHash' is null)
+, r as (select a.* from stuck s join anchor_store a on a.id = s.blob->>'anchorId')
+select count(*) as n,
+       count(*) filter (where block_number is not null) as with_block,
+       count(*) filter (where block_number >= 10500047 and (block_number - 10500000) % 47 = 0) as mock_block_pattern,
+       count(*) filter (where block_number >= 10500000) as block_at_or_above_10_5m,
+       coalesce(min(block_number)::text, '-') as block_min,
+       coalesce(max(block_number)::text, '-') as block_max,
+       count(distinct block_number) as block_distinct,
+       count(*) filter (where slot is not null) as with_slot,
+       count(*) filter (where slot >= 131000020 and (slot - 131000000) % 20 = 0) as mock_slot_pattern,
+       count(*) filter (where block_number >= 10500047 and (block_number - 10500000) % 47 = 0 and slot = 131000000 + 20 * ((block_number - 10500000) / 47)) as mock_pair_same_n,
+       coalesce(min(slot)::text, '-') as slot_min,
+       coalesce(max(slot)::text, '-') as slot_max,
+       count(distinct slot) as slot_distinct,
+       count(*) filter (where confirmed_at is not null) as with_confirmed_at,
+       coalesce(round(min(extract(epoch from (confirmed_at - created_at)))::numeric, 3)::text, '-') as secs_min,
+       coalesce(round((percentile_cont(0.5) within group (order by extract(epoch from (confirmed_at - created_at))))::numeric, 3)::text, '-') as secs_median,
+       coalesce(round(max(extract(epoch from (confirmed_at - created_at)))::numeric, 3)::text, '-') as secs_max,
+       count(*) filter (where transaction_hash ~ '^[0-9a-fA-F]{64}$') as hex64,
+       count(distinct transaction_hash) as tx_distinct
+  from r
+-- [agg run] leg B, BB, rows reached by document id
+with stuck as (select d.id, d.tenant_id, d.created_at, b.blob from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null and b.blob->>'anchoringStatus' = 'submitted' and b.blob->>'status' is null and b.blob->>'txHash' is null)
+, r as (select a.* from stuck s join anchor_store a on a.document_id = s.id::text)
+select count(*) as n,
+       count(*) filter (where block_number is not null) as with_block,
+       count(*) filter (where block_number >= 10500047 and (block_number - 10500000) % 47 = 0) as mock_block_pattern,
+       count(*) filter (where block_number >= 10500000) as block_at_or_above_10_5m,
+       coalesce(min(block_number)::text, '-') as block_min,
+       coalesce(max(block_number)::text, '-') as block_max,
+       count(distinct block_number) as block_distinct,
+       count(*) filter (where slot is not null) as with_slot,
+       count(*) filter (where slot >= 131000020 and (slot - 131000000) % 20 = 0) as mock_slot_pattern,
+       count(*) filter (where block_number >= 10500047 and (block_number - 10500000) % 47 = 0 and slot = 131000000 + 20 * ((block_number - 10500000) / 47)) as mock_pair_same_n,
+       coalesce(min(slot)::text, '-') as slot_min,
+       coalesce(max(slot)::text, '-') as slot_max,
+       count(distinct slot) as slot_distinct,
+       count(*) filter (where confirmed_at is not null) as with_confirmed_at,
+       coalesce(round(min(extract(epoch from (confirmed_at - created_at)))::numeric, 3)::text, '-') as secs_min,
+       coalesce(round((percentile_cont(0.5) within group (order by extract(epoch from (confirmed_at - created_at))))::numeric, 3)::text, '-') as secs_median,
+       coalesce(round(max(extract(epoch from (confirmed_at - created_at)))::numeric, 3)::text, '-') as secs_max,
+       count(*) filter (where transaction_hash ~ '^[0-9a-fA-F]{64}$') as hex64,
+       count(distinct transaction_hash) as tx_distinct
+  from r
+-- [agg run] leg B, BN, networks, anchor types and simulated flag
+with stuck as (select d.id, d.tenant_id, d.created_at, b.blob from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null and b.blob->>'anchoringStatus' = 'submitted' and b.blob->>'status' is null and b.blob->>'txHash' is null)
+select a.network, a.anchor_type, a.simulated, count(*) as n
+  from stuck s join anchor_store a on a.id = s.blob->>'anchorId'
+ group by 1,2,3 order by 1,2,3
+-- [agg run] 5.6 made-up key M1-anchor-id, must read 0
+with stuck as (select d.id, d.tenant_id, d.created_at, b.blob from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null and b.blob->>'anchoringStatus' = 'submitted' and b.blob->>'status' is null and b.blob->>'txHash' is null) select count(*) from stuck s join anchor_store a on a.id = 'zz-s131-no-such-anchor-7d2e'
+-- [hashes run] leg C input, TX, one line per stuck certification: ord|transaction_hash|block_number|slot|confirmed_epoch
+with stuck as (select d.id, d.tenant_id, d.created_at, b.blob from documents d cross join lateral (select coalesce(nullif(d.certification_metadata->'blockchain','null'::jsonb), nullif(d.metadata->'blockchain','null'::jsonb)) as blob) b where d.certification_metadata->>'certificationType' is not null and d.external_id is null and b.blob->>'anchoringStatus' = 'submitted' and b.blob->>'status' is null and b.blob->>'txHash' is null)
+select row_number() over (order by a.block_number nulls last, a.transaction_hash, a.id) as ord,
+       coalesce(a.transaction_hash, '-') as transaction_hash,
+       coalesce(a.block_number::text, '-') as block_number,
+       coalesce(a.slot::text, '-') as slot,
+       coalesce(extract(epoch from a.confirmed_at)::bigint::text, '-') as confirmed_epoch
+  from stuck s join anchor_store a on a.id = s.blob->>'anchorId'
+ order by 1
+Each statement already shown ran again unchanged where its title recurs (after-state in the agg run; proofs, guards and the link in the hashes run).
+
+NEW-ROWS: 1  ROWS-IN-DIGEST: 35  SEEN:       48  BATCH: /private/tmp/wed_newmail/batch_20261127T052640Z.txt
