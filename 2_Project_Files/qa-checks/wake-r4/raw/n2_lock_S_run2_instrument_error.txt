@@ -1,0 +1,23 @@
+START Fri 27 Nov 2026 18:15:15 AEDT
+18:15  up  8:22, 2 users, load averages: 25.51 25.17 24.51
+## S. the lock path is not a plain fresh directory (HANDOVER_LOCK_WAIT 1)
+- a regular FILE, fresh                                              rc 5 LOCK BUSY  1.3s; traceback no; left exactly as it was True; state still S0 True | its line run rc 0; write again rc 0
+- a regular FILE, 5 minutes old                                      rc 5 STALE LOCK 0.1s; traceback no; left exactly as it was True; state still S0 True | its line run rc 0; write again rc 0
+- a dangling symlink (lstat mtime is the link's: fresh)              rc 5 LOCK BUSY  1.1s; traceback no; left exactly as it was True; state still S0 True | its line run rc 0; write again rc 0
+Traceback (most recent call last):
+  File "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/qa-checks/wake-r4/scripts/n2_lock.py", line 233, in <module>
+    shape("a symlink to a directory whose owner file names a DEAD pid here", lambda r, L: linkdir(r, L, "pid: %d\nhost: %s\nstarted: x\ntoken: t\n" % (dead.pid, host)))
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/qa-checks/wake-r4/scripts/n2_lock.py", line 213, in shape
+    make(root, L)
+    ~~~~^^^^^^^^^
+  File "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/qa-checks/wake-r4/scripts/n2_lock.py", line 233, in <lambda>
+    shape("a symlink to a directory whose owner file names a DEAD pid here", lambda r, L: linkdir(r, L, "pid: %d\nhost: %s\nstarted: x\ntoken: t\n" % (dead.pid, host)))
+                                                                                          ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/qa-checks/wake-r4/scripts/n2_lock.py", line 230, in linkdir
+    d = os.path.join(r, "elsewhere_lock"); os.mkdir(d)
+                                           ~~~~~~~~^^^
+FileExistsError: [Errno 17] File exists: '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/435f0b28-fa4c-43b1-8811-a27f707f05c7/scratchpad/qa-wake-r4/r3/n2_shape/a_symlink_to_a_directory_whose_owner_fil/WEDNESDAY/elsewhere_lock'
+rc=1
+END Fri 27 Nov 2026 18:15:19 AEDT
+18:15  up  8:22, 2 users, load averages: 25.51 25.17 24.51

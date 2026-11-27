@@ -1,0 +1,209 @@
+START Fri 27 Nov 2026 18:07:33 AEDT
+18:07  up  8:15, 2 users, load averages: 15.99 20.96 22.88
+Python 3.14.10
+tools under test: /Volumes/DevMASTER/WEDNESDAY/2_Project_Files/wake
+scratch: /var/folders/tw/2c1kf6tx61gbq0vpnx4ltyq80000gn/T/wake_tests.dhuul34b
+PASS H01 --where prints the seat's paths and writes nothing
+PASS H20 check on a tree with no state file says ABSENT, rc 0
+PASS H20b show with no state file is rc 1
+PASS H12 --dry prints the plan and writes nothing
+PASS H06 REFUSES an empty block (rc 3, says empty)
+PASS H06b REFUSES a whitespace-only block
+PASS H13 REFUSES write without --stdin (rc 2)
+PASS H13b REFUSES the block as an argument (rc 2)
+PASS H08 REFUSES a block with a part missing, names it
+PASS H09 REFUSES two blocks in one write (each part twice)
+PASS H10 REFUSES a '##' heading that is not one of the five
+PASS H10b REFUSES a '###' heading inside a block (any level, indented or not)
+PASS H10c REFUSES an INDENTED '## ' heading inside a block (any level, indented or not)
+PASS H10d REFUSES a second dated block under a '# ' heading inside a block (any level, indented or not)
+PASS H10e REFUSES a heading after a zero-width space inside a block (any level, indented or not)
+PASS H10f REFUSES a deeper heading (######) inside a block (any level, indented or not)
+PASS H10g REFUSES a part name followed by a zero-width space (a look-alike part)
+PASS H10h accepts a bold line and a '#' that is not a heading (must succeed beside H10 to H10g)
+PASS H11 REFUSES a part with no text under it
+PASS H07 REFUSES a clock with an x digit, names it
+PASS H07b accepts real clocks 11:42 and 9:05 (must succeed beside H07)
+PASS H07d x-clock override with a reason under 15 characters is still REFUSED
+PASS H07g without the variable the x-clock refusal stands (same block)
+PASS H07c x-clock override with an owned reason is accepted; the reason is in the block's header; check stays OK
+PASS H07e the override's reason is written into that block's archive heading
+PASS H07f a block with no x-clock records no override even when the variable is set
+PASS H05 REFUSES a block over the cap with size, cap and what to cut
+PASS H05b accepts a block of exactly the cap (must succeed beside H05)
+PASS H05c the cap is a variable: HANDOVER_CAP_BYTES=20000 accepts the 11000-byte block
+PASS H05d after every refusal above nothing was written
+PASS H02 first write succeeds; show returns the block byte for byte; no archive yet
+PASS H17a check says OK after a tool write
+PASS H03 second write leaves exactly ONE block in the state file
+PASS H03b second write put the previous block verbatim in the archive, one entry
+PASS H04 stacked third write: still one block, archive longer, newest entry first, earlier bytes kept
+PASS H15 a conservation mismatch refuses (rc 4) and writes nothing
+PASS H17 check goes red (rc 1) when the state file was appended to by hand
+PASS H18 a hand-edited state is archived verbatim by the next write, never lost
+PASS H17b check is OK again after the tool rewrote the block
+PASS H16 NEXT-PICKUP.md is byte-identical after every write
+PASS H19 no temp file left in the tasks directory
+PASS H14 the seat comes from the tree: a TUESDAY tree writes STATE-tuesday.md
+PASS H14b an unrecognised tree REFUSES (rc 2) and writes nothing
+PASS H14c WED_AGENT disagreeing with the tree REFUSES (rc 2)
+PASS H14d WED_AGENT agreeing with the tree is accepted (must succeed beside H14c)
+PASS H22 a block given without a final newline is stored with exactly one (the state file always ends in a newline)
+PASS H23 check goes red on a state file whose header names another seat
+PASS H24 an UNREADABLE state file is a refusal naming the path (rc 4, no traceback); it is never treated as absent
+PASS H25 the test seam HANDOVER_TREE is REFUSED for a tree that is not under a temp or scratch directory, and says so
+PASS H25b the same seam is honoured for a tree under the scratch directory (must succeed beside H25)
+PASS H25c the engine called directly with another seat's name for this tree is refused (rc 2), nothing written
+PASS H25d HANDOVER_TEST_BREAK is refused by the engine for a tree that is not under a temp directory
+PASS H21 a headerless state file is archived whole
+PASS W14 an unknown seat is refused (rc 2)
+PASS W09 over budget: non-zero, nothing written (no pack, no sidecar), parts listed largest first
+PASS W09b a planted over-budget part (a huge ledger) refuses at the default budget and is named first
+PASS W01 builds (rc 0) to the default path under the given root
+PASS W12 the manifest table lists every part with its source, bytes and tokens
+PASS W12b the manifest total equals the file's real size
+PASS W02 identity files are in the pack verbatim, whole
+PASS W03 rules: 'Most reinforced' lines are in, a family's own lines are not
+PASS W03b rules: family headings carry their line counts, and the fetch command is named
+PASS W04 state: with no STATE file the pack says so and carries ONLY the legacy pickup's first block
+PASS W05 grants: EVERY row of the register is in the pack verbatim, exactly once, in file order (65 rows: dead-marked, another seat's, past-dated, struck through and under the Expired heading included)
+PASS W05b grants: the file's own text is in the pack as ONE unbroken run between the BEGIN and END lines (headings and prose too)
+PASS W05c grants: the part's first line gives the file's bytes, its row count and its sha256, and says nothing is judged
+PASS W05d grants: no sidecar and no other file is written beside the pack
+PASS W07 ledger: date, headline and the Rule sentence only
+PASS W08 pointers are paths only: the tasks file and the index are named, their content is not loaded
+PASS W10 conflict copies and .pre- backups are never read
+PASS W11 --check is OK on a fresh pack
+PASS W11h --check goes red on ONE hand-added line that begins 'generated: ' in the pack (content hash, not a skipped line)
+PASS W11k --check goes red on free text of the SAME LENGTH on the pack's own 'generated:' line (N5: the stamp's format is checked; a rebuild would copy the text and call it current)
+PASS W11j --check is OK again once the pack is restored byte for byte (must succeed beside W11h, W11k)
+PASS W11b --check goes red when a source is newer than the pack, and names it
+PASS W11c --check is OK again once the source is older (must succeed beside W11b)
+PASS W11d --check goes red when content differs even though no source is newer
+PASS W11e --check goes red when the pack was built for an earlier date
+PASS W11f --check goes red when the pack is missing
+PASS W15 the date changes NO row: a build for tomorrow carries the same register, byte for byte (G07 past-dated, G09 ends today)
+PASS W06 --trust-expired-heading is GONE: the flag is refused as unknown (rc 2); no option switches a filter on
+PASS W13 tuesday gets ITS OWN card, ledger and pickup, and the SAME whole register as every seat (no row is another seat's to drop)
+PASS W19 friday gets ITS OWN card, ledger and pickup, and the SAME whole register as every seat (no row is another seat's to drop)
+PASS W05h the second checker's 41 hostile rows (38 LIVE, 3 controls), planted in the register, are ALL in the pack verbatim and in order, for all three seats
+PASS W18a FAILED BUILD, nothing written, the part named, when the rules card is missing
+PASS W18b FAILED BUILD, nothing written, the part named, when the rules card is empty
+PASS W18c FAILED BUILD, nothing written, the part named, when the rules card has no 'Most reinforced' section
+PASS W18d FAILED BUILD, nothing written, the part named, when rules_card.py is missing
+PASS W18e FAILED BUILD, nothing written, the part named, when the grants file is missing
+PASS W18f FAILED BUILD, nothing written, the part named, when the grants file is empty
+PASS W18g FAILED BUILD, nothing written, the part named, when the grants table is indented by one space (rows are there, none readable)
+PASS W18h FAILED BUILD, nothing written, the part named, when the grants file has rows but no table header
+PASS W18p FAILED BUILD, nothing written, the part named, when the grants file is not valid UTF-8 (it could not be carried verbatim)
+PASS W18j FAILED BUILD, nothing written, the part named, when the ledger is missing
+PASS W18k FAILED BUILD, nothing written, the part named, when the ledger has no table header
+PASS W18l FAILED BUILD, nothing written, the part named, when persona.md is empty
+PASS W18m FAILED BUILD, nothing written, the part named, when there is no state file and no legacy pickup
+PASS W18n FAILED BUILD, nothing written, the part named, when the legacy pickup holds no block
+PASS W18o FAILED BUILD with the path (a refusal, not a traceback) when a source is unreadable
+PASS W18z an EMPTY table is believed when its header IS found: 0 grant rows and 0 ledger rows build (must succeed beside W18e to W18k)
+PASS W18i an INDENTED grant row is carried like every other line (the file goes in whole, so no row can be missed by a parser)
+PASS W04b state: once handover.sh has written a STATE block the pack carries it and drops the legacy pickup
+PASS W16 a missing identity file refuses (rc 2) and writes nothing
+PASS W20a FAILED BUILD, nothing written, when the STATE file is one appended to by hand; `handover.sh check` refuses the same file
+PASS W20b FAILED BUILD, nothing written, when the STATE file is one whose header names another seat; `handover.sh check` refuses the same file
+PASS W20c FAILED BUILD, nothing written, when the STATE file is one with NO '## FLOOR' part under a header that matches it (the checker's Y09); `handover.sh check` refuses the same file
+PASS W20d FAILED BUILD, nothing written, when the STATE file is one typed by hand, no tool header; `handover.sh check` refuses the same file
+PASS W20e FAILED BUILD, nothing written, when the STATE file is one holding a STACK of two blocks under a header that matches it; `handover.sh check` refuses the same file
+PASS W20z the state file handover.sh itself wrote is accepted by the same build (must succeed beside W20a to W20e)
+PASS W20f a state file that cannot be checked (no handover engine beside wake_pack.py) is a FAILED BUILD, never carried unchecked
+PASS W21 the pack path is a directory: rc 2, and nothing at all is left behind (N13)
+PASS C01 census BEFORE total equals the sum of the mandated files' sizes
+PASS C01b census total without INDEX.md and entries is right
+PASS C02 census says the pack is MISSING when there is none (rc 0)
+PASS C03 census AFTER shows the pack's bytes and pack + kept reads
+PASS C07 census reports BEFORE both ways (with and without sync-conflict copies) and the headline reduction is against the LOWER one
+PASS C06 census also prints the figure with earlier notes on demand (pack + kept reads - the two notes)
+PASS C04 census writes nothing (only the pack build added a file: the pack, and no sidecar)
+PASS C05 census refuses an unknown seat (rc 2)
+PASS P00 the launcher's seat-files block and prompt region are found by their anchors
+PASS P01 tuesday: the prompt with the change is byte-identical to the prompt without it
+PASS P01b tuesday: the added code prints nothing and builds no pack
+PASS P02 friday: the prompt with the change is byte-identical to the prompt without it
+PASS P02b friday: the added code prints nothing and builds no pack
+PASS P03 wednesday: the pack is built and the prompt's read list becomes the pack
+PASS P03b wednesday: everything before FIRST ACTIONS and from step 5 on is the legacy text, byte for byte
+PASS P03c wednesday: no unexpanded variable is left in the new steps
+PASS P03d wednesday without the change: the legacy prompt (the comparison base)
+PASS P04 wednesday, pack over budget: the legacy prompt whole, and its FIRST lines say the pack failed, why, and what to do first
+PASS P04b wednesday, wake_pack.py absent: loud in the prompt's first lines; legacy reads
+PASS P04c wednesday, a source missing (the grants file): the build fails and the prompt's first lines name the part
+PASS P16 wednesday, the build exits 0 but there is NO pack file: not trusted; loud fallback (m2)
+PASS P17 wednesday, the launcher's prompt reworded so a slice marker is gone: loud fallback naming the markers, never a broken prompt
+PASS P15 tuesday with no wake_pack.py at all: no notice, no output, the prompt untouched (the loud fallback is the Wednesday seat's only)
+PASS P15b friday with no wake_pack.py at all: no notice, no output, the prompt untouched (the loud fallback is the Wednesday seat's only)
+PASS P21 wednesday, the build FAILS while an OLDER pack is still on disk: the exit code decides; loud fallback, never a boot on the stale pack (Q14)
+PASS P22 wednesday, the build exits 0 and leaves an EMPTY pack file: not trusted; loud fallback, never a boot on an empty pack (Y11)
+PASS P05 the stored diff is what the two hunk files give against today's launcher
+PASS P06 the diff is additive only: zero removed lines
+PASS P07 the diff applies cleanly to a scratch COPY of the launcher, which then passes bash -n and holds both hunks
+PASS P08 each hunk is one 'if AGENT = wednesday' block (hunk A preceded only by four default assignments)
+PASS P10 every 'old' block of the text proposals is in its target file exactly once (10 blocks); none is applied
+PASS P18 proposals 2 and 3 are scoped in words to a seat on a pack, add text only, and leave Kam's lesson-load sentence in place (it goes to FOR-KAM)
+PASS P19 the gitignore proposal ignores only generated packs, temp files and lock directories (a set-aside '.stale-' one too, N3); never the lane's whole out/ directory
+PASS P23 proposals 2 and 3 no longer tell the pack seat to skip Kam's lesson-load step before he has ruled (N9)
+PASS P24 proposal 6 tells LOCK BUSY (run it again) from STALE LOCK (run the recovery line first), and names rc 6 (N3)
+PASS P20 proposal 9 is marked all-seats and is not in this round's launcher diff
+PASS P11 the doctor proposal's insertion anchor and the helpers it uses exist in doctor.sh; the snippet is not applied
+PASS P12 daily notes on demand is a ONE-line change (WAKE_NOTES): step 5 is replaced, the legacy text from step 6 is reused byte for byte
+PASS P12b the default (WAKE_NOTES=whole) keeps Kam's rule: the legacy step 5 is in the Wednesday prompt
+PASS P13 proposal 7 applied to a scratch copy of doctor.sh passes bash -n
+PASS P14 proposal 9: with the two backticks escaped the prompt carries the command as text, nothing is run at launch, and proposal 1 still applies
+PASS P14b today, without proposal 9, the launcher runs that command and pastes its output into the prompt (what the proposal describes)
+PASS P09 a pointer whose file is gone is marked NOT FOUND in the pack (not silently listed)
+PASS D01 doctor snippet: a seat with no pack and no state file prints nothing
+PASS D02 doctor snippet: a fresh pack and a tool-written block give two OK lines and no warning
+PASS D03 doctor snippet: a pack older than a source warns and names the rebuild command
+PASS D04 doctor snippet: a block stacked onto the state file by hand warns
+PASS D05 doctor snippet: a TUESDAY tree holding the Wednesday seat's files prints nothing (the seat comes from the tree)
+PASS D06 doctor snippet: a seat that is cut over (state file exists) with NO pack is warned, with the build command
+PASS D07 doctor snippet: when handover.sh cannot resolve the seat its refusal is SHOWN in a warning, never discarded
+PASS D08 doctor snippet: a standing handover lock directory is WARNED at boot with the exact recovery line, and the seat is told it may run it itself (N3); with no lock directory the snippet says nothing about one
+PASS D08b doctor snippet: once the lock has been set aside by the recovery line the warning is gone (must succeed beside D08)
+PASS S01 seed is DRY by default: prints the block, writes nothing
+PASS S01b seed maps the newest legacy block into the five parts by each bullet's label
+PASS S01c seed keeps what it cannot map (unknown label, its continuation line, a plain bullet) under FIRST WORK
+PASS S06 seed loses no line of the newest block and takes nothing from an older block
+PASS S09 seed CARRIES the legacy file's standing sections: '## OWED' into OWED, '## STANDING' as a named line under FIRST WORK
+PASS S09b the dry report says what it took from where, by line number, and what it did NOT carry
+PASS S02 seed --run writes that same block as the FIRST state block; check is OK; the legacy file is untouched
+PASS S03 seed REFUSES when a state file already exists (dry and --run), and changes nothing
+PASS S04 a legacy block that carries an x-digit clock is seeded verbatim with the reason recorded, and the reason reaches the archive heading
+PASS S05 seed REFUSES when there is no legacy pickup (rc 3), nothing written
+PASS S05b seed without --from-legacy, and --run on write, are usage refusals (rc 2)
+PASS S07 the seat's own legacy file is used: a TUESDAY tree seeds STATE-tuesday.md from NEXT-PICKUP-TUESDAY.md
+PASS S08 a legacy block over the cap: the dry run says --run WOULD BE REFUSED, and --run is refused (rc 3), nothing written
+PASS S10 standing sections that do not fit the cap: the seed REFUSES (rc 3) with the list to place by hand, nothing written
+PASS S11 a legacy file with no standing section seeds as before and says there is none (must succeed beside S09)
+PASS R01 the deterministic interleave: writer A WAITS while writer B holds the lock; both are acknowledged and BOTH blocks survive
+PASS R02 a second writer waits a bounded time (HANDOVER_LOCK_WAIT=1), then REFUSES loudly with rc 5 and the recovery line; it never writes unlocked
+PASS R03 a STALE lock is reported at once (no 30 s wait) with the exact recovery line, and is NOT removed; nothing is written
+PASS R03b after the recovery line is run by a person the write succeeds (must succeed beside R03)
+PASS R04 a FRESH lock directory with no owner file: bounded wait, then rc 5 LOCK BUSY naming 'no usable owner file'; not called stale; left alone
+PASS R15 an owner-less lock (no owner file, or an empty one) untouched for over a minute is reported as STALE at once, with the recovery line; nothing is removed, nothing written
+PASS R16 an owner file whose pid is beyond a C int, or 0, is a plain refusal (rc 5, LOCK BUSY, the recovery line), no traceback (N4)
+PASS R03c a lock whose owner is a dead pid on ANOTHER host is not called stale (that pid cannot be judged from here): LOCK BUSY
+PASS R05 a death between the two renames leaves the old block in BOTH files (archive first, state second): nothing is lost
+PASS R05b the dead writer's lock is then reported as STALE with the recovery line (not removed, not waited on)
+PASS R05c after recovery the next write succeeds; the archive holds a duplicate of the old block, never a gap
+PASS R06 an edit made outside the tool during the write is seen: rc 4, the edited file is left as it is, nothing renamed
+PASS R07 a temp file that does not read back as written stops the write: rc 4, state and archive unchanged, the temp file named
+PASS R09 false STALE (the checker's reproduction): a holder that finished normally is NOT reported dead; the waiter looks twice, keeps waiting for the live writer, and all three acknowledged blocks are on disk
+PASS R10 the printed recovery line run while a writer is ALIVE, then two more writes: the displaced writer renames NOTHING (rc 5, LOCK LOST, no 'written'), and no acknowledged block is lost
+PASS R11 the lock moved away in the instant before the FIRST rename: rc 5, nothing renamed, state and archive byte-identical, no 'written'
+PASS R11b the lock moved away between the two renames: rc 5 saying exactly what was renamed; the old block is in BOTH files; the next write succeeds with one duplicate archive entry, never a gap
+PASS R12 the owner file is re-read before each rename: when it is another writer's, rc 5 and nothing is renamed; the other writer's lock is left with its owner file and with NOTHING of this writer's inside it (its temp files are moved out)
+PASS R13 a writer that finds its lock gone at release exits NON-ZERO (rc 6), says NOT ACKNOWLEDGED, and never prints 'written'
+PASS R14 release removes ONLY its own lock: another owner's lock standing at the path is left with its owner file, and the writer exits non-zero (Y01)
+PASS R08 200 trials of two simultaneous writes: every acknowledged block is in the state file or the archive
+     R08 counts: trials 200, both acknowledged 200, one refused 0, acknowledged block LOST 0, base block not once in archive 0
+checks: 199 passed, 0 failed, 199 total (groups HWCPDSR)
+rc=0
+END Fri 27 Nov 2026 18:09:04 AEDT
+18:09  up  8:16, 2 users, load averages: 24.60 22.43 23.24

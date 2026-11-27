@@ -1,0 +1,58 @@
+START Fri 27 Nov 2026 18:19:36 AEDT
+18:19  up  8:27, 2 users, load averages: 23.15 28.84 26.72
+## 1. proposal 5's lines:
+    # WED-170 step 1 (2026-11-27): wake packs are GENERATED at every launch from tracked files; never committed (gitignore at creation)
+    0_Brain/wake/
+    2_Project_Files/wake/out/WAKE-*
+    # handover.sh: temp files left for inspection after an I/O fault, and the write lock: a directory that exists only while a write runs, or, after a write died, the same directory set aside by the recovery line as STATE-<seat>.lock.d.stale-<stamp>
+    0_Brain/tasks/STATE-*.md.tmp.*
+    0_Brain/tasks/STATE-*.lock.d*
+## 1a. the REAL repo, read-only: git check-ignore -v --no-index with the scratch excludes file (the pattern that decides is named)
+- 0_Brain/tasks/STATE-wednesday.lock.d                                                     IGNORED     proposal 5
+- 0_Brain/tasks/STATE-wednesday.lock.d/owner                                               IGNORED     proposal 5
+- 0_Brain/tasks/STATE-wednesday.lock.d/archive.tmp.123-0a1b2c3d4e5f6071                    IGNORED     proposal 5
+- 0_Brain/tasks/STATE-wednesday.lock.d/state.tmp.123-0a1b2c3d4e5f6071                      IGNORED     proposal 5
+- 0_Brain/tasks/STATE-wednesday.lock.d.stale-20261127-181430                               IGNORED     proposal 5
+- 0_Brain/tasks/STATE-wednesday.lock.d.stale-20261127-181430/owner                         IGNORED     proposal 5
+- 0_Brain/tasks/STATE-wednesday.lock.d.stale-20261127-181430/state.tmp.123-0a1b            IGNORED     proposal 5
+- 0_Brain/tasks/STATE-wednesday.lock.d.stale-20261127-181430/STATE-wednesday.lock.d/owner  IGNORED     proposal 5
+- 0_Brain/tasks/STATE-tuesday.lock.d/owner                                                 IGNORED     proposal 5
+- 0_Brain/tasks/STATE-friday.lock.d.stale-20261127-000000/owner                            IGNORED     proposal 5
+- 0_Brain/tasks/STATE-wednesday.md.tmp.4242                                                IGNORED     proposal 5
+- 0_Brain/tasks/STATE-wednesday-archive.md.tmp.4242                                        IGNORED     proposal 5
+- 0_Brain/wake/WAKE-wednesday.md                                                           IGNORED     proposal 5
+- 0_Brain/wake/WAKE-wednesday.md.tmp.99                                                    IGNORED     proposal 5
+- 2_Project_Files/wake/out/WAKE-wednesday.md                                               IGNORED     ALREADY by the tree's own rules: .git/info/exclude:29:2_Project_Files/wake/out/
+- 0_Brain/tasks/STATE-wednesday.md                                                         not ignored -
+- 0_Brain/tasks/STATE-wednesday-archive.md                                                 not ignored -
+- 0_Brain/tasks/STATE-tuesday.md                                                           not ignored -
+- 0_Brain/tasks/STATE-tuesday-archive.md                                                   not ignored -
+- 0_Brain/tasks/STATE-friday.md                                                            not ignored -
+- 0_Brain/tasks/STATE-friday-archive.md                                                    not ignored -
+- 0_Brain/tasks/EXPIRING-GRANTS.md                                                         not ignored -
+- 0_Brain/tasks/NEXT-PICKUP.md                                                             not ignored -
+- 2_Project_Files/wake/out/STATUS_round3.md                                                IGNORED     ALREADY by the tree's own rules: .git/info/exclude:29:2_Project_Files/wake/out/   <<< NOT AS EXPECTED
+- 2_Project_Files/wake/handover.sh                                                         not ignored -
+- 2_Project_Files/qa-checks/wake-r4/verdict.md                                             not ignored -
+   not as expected: 1 of 26
+## 1b. a throw-away repo holding ONLY proposal 5's lines as .gitignore: what `git status --porcelain --untracked-files=all` lists
+   listed as untracked (6): ['0_Brain/tasks/STATE-friday-archive.md', '0_Brain/tasks/STATE-friday.md', '0_Brain/tasks/STATE-tuesday-archive.md', '0_Brain/tasks/STATE-tuesday.md', '0_Brain/tasks/STATE-wednesday-archive.md', '0_Brain/tasks/STATE-wednesday.md']
+   expected exactly the six STATE files: True
+## 2. the doctor snippet in a stub harness (ok/warn stubbed; doctor.sh itself is not run)
+- no lock at all (control: silent)                               rc 0; lock warnings 0 (expected 0) ok; each carries one exact `mv -n` line -; says the seat may run it -; names pgrep -; stderr ''; PWNED files none | the line(s) run: -; warnings afterwards: -
+- a lock dir with an owner file (dead pid here)                  rc 0; lock warnings 1 (expected 1) ok; each carries one exact `mv -n` line True; says the seat may run it True; names pgrep True; stderr ''; PWNED files none | the line(s) run: [0]; warnings afterwards: 0
+- a lock dir with NO owner file                                  rc 0; lock warnings 1 (expected 1) ok; each carries one exact `mv -n` line True; says the seat may run it True; names pgrep True; stderr ''; PWNED files none | the line(s) run: [0]; warnings afterwards: 0
+- the lock path is a regular FILE                                rc 0; lock warnings 1 (expected 1) ok; each carries one exact `mv -n` line True; says the seat may run it True; names pgrep True; stderr ''; PWNED files none | the line(s) run: [0]; warnings afterwards: 0
+- the lock path is a dangling symlink                            rc 0; lock warnings 1 (expected 1) ok; each carries one exact `mv -n` line True; says the seat may run it True; names pgrep True; stderr ''; PWNED files none | the line(s) run: [0]; warnings afterwards: 0
+- ANOTHER seat's lock dir in this tree (STATE-tuesday.lock.d)    rc 0; lock warnings 1 (expected 1) ok; each carries one exact `mv -n` line True; says the seat may run it True; names pgrep True; stderr ''; PWNED files none | the line(s) run: [0]; warnings afterwards: 0
+- two locks (wednesday and friday)                               rc 0; lock warnings 2 (expected 2) ok; each carries one exact `mv -n` line True; says the seat may run it True; names pgrep True; stderr ''; PWNED files none | the line(s) run: [0, 0]; warnings afterwards: 0
+- ONLY a set-aside directory (.stale-<stamp>) (control: silent)  rc 0; lock warnings 0 (expected 0) ok; each carries one exact `mv -n` line -; says the seat may run it -; names pgrep -; stderr ''; PWNED files none | the line(s) run: -; warnings afterwards: -
+- a set-aside directory AND a live lock                          rc 0; lock warnings 1 (expected 1) ok; each carries one exact `mv -n` line True; says the seat may run it True; names pgrep True; stderr ''; PWNED files none | the line(s) run: [0]; warnings afterwards: 0
+- an owner file holding hostile text (backticks, $( ), quotes)   rc 0; lock warnings 1 (expected 1) ok; each carries one exact `mv -n` line True; says the seat may run it True; names pgrep True; stderr ''; PWNED files none | the line(s) run: -; warnings afterwards: -
+      the warning text: WARN: a handover write lock is standing: STATE-wednesday.lock.d | owner: pid: `touch /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/435f0b28-fa4c-43b1-8811-a27f707f05c7/scratchpad/qa-wake-r4/r3/n3doc_19492/an_owner_file_holding — either a handover write is running this second, or one died and left it. While it stands every
+- doctor's recovery line == the line the tool itself prints for the same lock (stamp aside): True; the tool said STALE LOCK
+  doctor's whole output for that tree: WARN: a handover write lock is standing: STATE-wednesday.lock.d | owner: pid: 20059 host: Kamils-Mac-mini started: x token: t  — either a handover write is running this second, or one died and left it. While it stands every handover write is REFUSED (rc 5). If no write is running (pgrep -fl handover_core.py prints nothing), the seat may run this itself, no person is needed, and then write again: mv -n '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/435f0b28-fa4c-43b1-8811-a27f707f05c7/scratchpad/qa-wake-r4/r3/n3doc_19492/same_line/WEDNESDAY/0_Brain/tasks/STATE-wednesday.lock.d' '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/435f0b28-fa4c-43b1-8811-a27f707f05c7/scratchpad/qa-wake
+## 2b. the snippet inserted where proposal 4 says, on a scratch copy of doctor.sh, with proposal 7: /bin/bash -n
+- anchor found 1 time(s) at line 672; /bin/bash -n rc 0 ; names the snippet assigns ['HO', 'HO_OUT', 'WK_LOCK', 'WK_OUT', 'WK_PACK', 'WK_SEAT', 'WK_STATE', 'WP', 'WP_OUT']; of them already used in doctor.sh: none; `2>/dev/null` in the snippet 0 (control: `2>&1` 3)
+rc=0
+END Fri 27 Nov 2026 18:19:41 AEDT

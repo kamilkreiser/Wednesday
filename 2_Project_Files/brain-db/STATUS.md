@@ -1,6 +1,186 @@
-READY FOR QA
+WORKING
 
-# ROUND 3 (answer to `ANSWER-3.md`: the checker's NO GO on F1, and Wednesday's list of eleven fixes and four notes)
+**INTERIM, written 2026-11-27 18:06 AEDT: everything below is final EXCEPT the mutant figures. The pane is waiting on its own mutant re-run (about 45 minutes) and will finish this file by itself. This is not a stop and the first line stays WORKING until then.**
+
+# ROUND 4 (answer to `ANSWER-6.md`: qualify or stay out; the right database inside the same session)
+
+Fresh build seat, 2026-11-27, 16:42 to (still running) AEDT (both from `date`). All HOLDS kept: this lane and my scratchpad only (sockets under short `/tmp` paths of my own), no shared file edited, neither checker's folder written, no git write, no mail, post or network call, nothing installed, no `rm`, no `cd`. No file in any real `4_Credentials` or `3_Access_Keys` was opened. The drive cluster ran once, for one rebuild and the ten questions, and is STOPPED.
+
+**In one paragraph.** The deciders are rebuilt as qualify-or-stay-out and the fence and section-span code is deleted. The suite is 682 passed, 0 failed, under Python 3.14.10 and 3.9.6. The checker's `f1_new.py`, run unmodified, has 0 of its 58 must-be-absent shapes entering (28 entered in round 3) and 0 of its 20 index variants leaking. The F2c swap is refused with exit code 4 and the cluster that was never addressed is untouched. Mutants: the first run caught 59 of 61 (57 on the line I named, 2 on another line) and 2 survived; both causes are fixed and **the full set is being re-run on the final code as this is written.** **One thing differs from what the brief expected and it is large: read as written, clause (d) leaves out 57 real lessons, not 5.** 55 of them simply name Datasec somewhere in their text. I built the stricter reading, as `BRIEF.md` directs when a brief disagrees with itself; the question is at the end. It costs answers: the right lesson for questions 2 and 9 of the ten is now left out.
+
+## The qualify rule as built, clause by clause
+
+`qualify_lesson()` in `braindb_index.py`. The first clause not met is the one the lesson is named under. Every planted lesson in the fixtures qualifies on every clause except the one it is planted for, so its absence proves that clause alone; `tests/run.sh` section 6b compares the rebuild report's "file, clause" list with the fixture builder's own table (128 lessons, exact match required).
+
+| Clause | What qualifies (everything else is left out and named) | Planted cases | Neighbours that must be in | Mutants (each lets an unqualified lesson in) |
+|---|---|---|---|---|
+| (a) one row | Exactly one rules-index row whose key EQUALS the file name (both sides NFC, format characters removed; no case folding, no stripping, no path). `#n` rows allowed when each is read and none repeats. No line of the index that could not be read holds the file's name anywhere. A row is read only in the spec's shape: 7 TAB fields, none empty or padded, no control character, key `<file>.md` or `<file>.md#n` with n at least 2, status `live`, `dead` or `superseded`, seats as in (b). A comment line below line 1 counts as a line that could not be read. | 31: no row; key without `.md`, quoted, other case, a path, padded, a typo, a wikilink; TABs turned to spaces; 8 fields; 6 fields; CR; `#1`; good row plus damaged row; the same key twice; `#2` twice; commented-out row; a comment or a line of prose naming it; `#2` with no plain row; nine bad seats or status cells; a zero-width space making a second row for it | 4 (plain plus `#2`; file name NFD with key NFC; a row carrying injection strings; the base lessons) | `Qa_no_row_qualifies`, `Qa_unread_lines_ignored`, `Qa_duplicate_rows_ok`, `Qa_duplicate_hash_rows_ok`, `Qa_seats_cell_loose`, `Qa_key_any_shape`, `no_index_not_refused` |
+| (b) this seat | That one row's seats cell is `all` or holds this seat. The spec, quoted: "`seats` — `all`, or a comma list of `wednesday`, `tuesday`, `friday`". A `#n` row naming this seat does not rescue a lesson whose plain row names another seat; a `#n` row naming another seat keeps that rule line out of an indexed lesson. | 5 | 3, and one rule line that must be absent inside an indexed lesson | `Qb_seat_not_tested`, `Qb_any_row_counts`, `Qb_other_seat_rule_line_in` |
+| (c) frontmatter and tier | Line 1 exactly `---` (after an optional BOM); a later line exactly `---`; every line between a plain `key: value` with a lower-case ASCII key; no key twice; exactly one key `tier` and no other key holding "tier" once folded hard (NFKC, format characters and non-alphanumerics dropped, case folded); no other value carrying a tier assignment; no second block after the first. Tier VALUE on a closed list: `W`, `M`, `P-<own client>/<project>`. | 45: no tier; `MIXED`; another client's project in both spellings; unknown client; the bracket spelling; `w`; `W ` with a space; `W # ...`; quoted; a list; `Tier:`; `TIER:`; quoted key; `tier :`; `tier (project):`; `tier = `; `tiers:`; `tier_project:`; tier twice both ways; another key twice; list item; nested; folded; block scalar; tab indent; YAML comment; blank line; a tier inside another value (two forms); unclosed; leading blank; indented fence; fence with a space or a comment; four dashes; `+++`; a line before the block; no block; two blocks (near and 80 lines down); empty file; a file that is only `---` | 9 (M; `P-General/Claude to Claude`; BOM; the other keys real lessons use; a status line naming a "three-tier-routing" lesson; a `---` rule in the body; "tiers", "three-tier routing" and "frontier" in the body; unclosed code fences; an impossible date) | `Qc_any_tier`, `Qc_no_tier_is_W`, `Qc_line1_loose`, `Qc_odd_lines_skipped`, `Qc_dup_key_ok`, `Qc_keylike_ok`, `Qc_value_tierlike_ok`, `Qc_second_block_ok`, `Qc_closed_list_loose` |
+| (d) no marker, no other client's name | No `<!--` or `-->` anywhere. No line that starts with the word tier, or assigns one, outside the one frontmatter line. No `deny_clients` name in the text, the file name or the lesson's own rules-index line (compatibility forms unfolded, accents and the marks `* _ \` ~ \\` removed, case folded). No numeric character reference. A lesson with a mixed section is out WHOLE. **No fence or section-span code is left: `drop_foreign_sections`, `MARKER`, `P_MARK`, `tier_verdict` and the fence toggling in the decider are deleted.** (`heading_lines` still skips fences when it splits an already-qualified file into search rows; it decides nothing.) | 26: six marker forms (other client, OWN client, nested fences, three-line comment, list item, no word "tier"); any comment; a stray `-->`; six tier-like body lines; the name plain, in capitals, in a domain, split by emphasis, accented, full-width, in a heading; a numeric reference; the name in the FILE NAME, in the rule line, in a frontmatter value, in an own-client project name | 1 (the seat's own client named, and "data security") | `Qd_comment_ok`, `Qd_tierlike_line_ok`, `Qd_name_ok`, `Qd_name_not_squeezed`, `Qd_name_not_folded`, `Qd_only_body_tested`, `Qd_entity_ok` |
+| (t) plain text (mine; it is what makes (c) and (d) mean what they say) | Valid UTF-8; no control, format or line-separator character other than LF and TAB; every letter an ASCII letter once accents are removed. | 17: Latin-1; UTF-16; NUL; 0x1E; CRLF; CR only; form feed; U+2028; U+0085; zero-width space; soft hyphen; Cyrillic (twice); Greek; a Latin small capital; a right-to-left override; invalid bytes | 1 (accents, em dash, arrow, multiplication sign, tab) | `Qt_any_bytes`, `Qt_controls_ok`, `Qt_letters_ok` |
+| (f) file level | Opened with `O_NOFOLLOW` inside its already-open folder; `fstat` on that descriptor says regular file, link count 1; the bytes come from the same descriptor (N6). Applies to every kind, not only lessons. | 4: symlink to a credentials file, hard link to one, a directory, a FIFO; plus section 12f, the file flipped between regular and symlink during 14 rebuilds | - | `Qf_hard_link_through`, `Qf_symlink_followed` |
+
+**The tier values really in use** (`0_Brain/learnings/20*.md`, 293 files, measured before the list was written; every one opens on line 1 with exactly `---` and every frontmatter line is a plain `key: value`):
+
+| Value | Files | Under the Wednesday scope |
+|---|---|---|
+| `W` | 236 | allowed |
+| `M` | 43 | allowed |
+| `P-General/Claude to Claude` | 1 | allowed (own client) |
+| no tier line | 6 | OUT (3 of the 6 were indexed in round 3 as "untagged"; the other 3 are scoped to other seats anyway) |
+| `MIXED` | 5 | OUT |
+| `P-Datasec/HPSM-POC` | 1 | OUT |
+| `P (Datasec/OXPd)` | 1 | OUT |
+
+No real lesson holds a control or format character, a non-Latin letter, a CR or a numeric reference, so clause (t) costs nothing today. The real rules index: 379 rows, all read; 0 lines that could not be read; 1 comment line (line 1); 0 keys naming no file.
+
+## The other kinds: a closed table in the code (N5), validated before anything exists (N7)
+
+- `SEAT_DAILY`, `SEAT_LEDGERS`, `SEAT_PICKUP`, `ROOT_RULES`, `SHARED_DIRS`: one folder per kind and, for ledgers, pickup files, the rules index and the rules files, exact names, per seat. A scope line outside the table is REFUSED at load with exit code 2. The daily folder is also taken from `tools/seat_note.sh` (`SEAT_NOTE_REL`) and the two must agree.
+- Wednesday's ledger table is `_ledger.md` and `_ledger_archive.md`; Tuesday's `_ledger_laptop_datasec.md` and its archive; Friday's `_ledger_friday.md` and its archive.
+- **My reading, to confirm:** the pickup table. Wednesday `NEXT-PICKUP.md` and `WEEK-INSTRUCTION.md`; Tuesday `NEXT-PICKUP-TUESDAY.md` and `WEEK-INSTRUCTION-TUESDAY.md`; Friday `NEXT-PICKUP-FRIDAY.md` and `WEEK-INSTRUCTION-FRIDAY.md`. I took these from the file names in `0_Brain/tasks/`; I found no tool that states the mapping. `NEXT-PICKUP-DATASEC-LAPTOP.md`, `TASKS.md`, `EXPIRING-GRANTS.md` and the rest are in no seat's table. It is a new kind, `pickup`; no shipped or proposed scope has a line for it, so nothing from `tasks/` is indexed today.
+- Tests, section 7: 17 widening lines on the Wednesday tree each refused, index unchanged; 12 lines on trees named TUESDAY and FRIDAY asking for Wednesday's ledger, archive, daily notes and pickup file each refused with no cluster created; the seat's OWN pickup line accepted and its token present. Section 12e: four scope files that exist but are refused, four commands each: exit code 2, no cluster directory, no lock file, no server, 16 of 16. Mutants: `N5_names_not_closed`, `N5_folders_not_closed`, `N5_rules_not_closed`, `N7_scope_validated_late`, `F4_scope_checked_late`.
+
+## The right database, inside the same session (N3, N10, N11, N13)
+
+- Every `psql` session the tool opens starts with two statements: a `set_config` holding the addressed data directory, and a `DO` block that raises unless `current_setting('data_directory')` equals it. In a rebuild they are the first statements inside the one transaction that drops and reloads; in `check`, `search` and `at` the first statements of the reading transaction. There is no separate connection between the test and the write.
+- **Where I did not do what the brief says, and why.** The brief asks for both sides "through realpath". SQL cannot resolve a path. So `braindb.sh` resolves the data directory once, at the top, and that one spelling is used for `-D`, the pid-file test, the lock file and the assertion. A trailing or doubled slash, or a symlink to the directory, is therefore the same cluster (N10, tested). The server's side is compared as the server spells it, which is that same real path whenever this tool started it. A server someone started by hand through a symlink is REFUSED rather than accepted: the safe side, not the letter.
+- **F2c lifted, section 12c**, in two forms. A: the checker's own (the server is swapped while the rebuild waits for the lock). B: narrower, swapped after every separate session of the tool and before the load session opens; for this the indexer has a test-only pause, `BRAINDB_TEST_HOLD`. Both: exit code 4, "serves data directory X, but this command is addressed to Y", no `rebuild: done`, and the cluster that was never addressed still holds its own one file and nothing of the other tree. Then `check`, `search` and `at` addressed to the stopped cluster: exit code 4 each, no GREEN and no result printed. Control: a rebuild that waits for the lock and is not swapped ends rc 0. Mutants: `N3_no_assert_in_load` (only form B catches it), `N3_no_assert_in_reads`, `N3_assert_always_true`.
+- N11: nothing answering is exit code 3, "not answering", and never "another cluster"; `status` exits 4 when it prints REFUSED. N13: the indexer's lock wait gives up after 150 s (`BRAINDB_LOCK_WAIT`) with the same sentence as `braindb_lock.py`, exit code 75.
+
+## What fails closed is visible (N8)
+
+- `rebuild` names every left-out lesson under its clause; its LAST line reads, on the real tree, `rebuild: done; no file was unreadable and no row was truncated; 93 lesson file(s) LEFT OUT by the qualify rule: b=28, c=8, d=57`.
+- `check` prints the same count and up to five names per clause; `doctor`'s one line carries the count; `status` shows it.
+- `search`, when it finds nothing, adds `NOTE: N lesson file(s) are LEFT OUT of this index ... and are not searched`.
+- **Not done, on purpose:** `search` does not say "your word exists only in a left-out file". That would mean reading, at search time, files that did not qualify, and telling this seat what is in them.
+
+## The checker's attacks, re-run on the final code
+
+| Attack | Round 3 | Round 4 |
+|---|---|---|
+| `f1_new.py`, unmodified from where it lies, 58 must-be-absent shapes | 28 entered | **0 entered** (`evidence/checker_f1_new_round4_unmodified.txt`) |
+| its 20 whole-index variants | 2 leaked | **0 leak**: 15 refused with rc 2, 5 built with neither token present; its control token present in all 5 |
+| its 9 "want present" cases | - | 2 present, 7 absent. All 7 are the new rule working as ruled: an untagged lesson, a lesson with no row (twice), two rows with one key, a commented-out row, a marked section whose lesson is now out whole, a look-alike letter |
+| The same script with ONE change: a case that had no row gets one good row scoped `all` (`tests/f1_new_adapted.py`) | - | **0 entered**; the 64 left out fall under a=10, b=4, c=35, t=15, so each shape is stopped by its own clause and not by "no row" (`evidence/checker_f1_new_round4_every_case_has_a_good_row.txt`). Every left-out case is named in the report. |
+| `seat_f2.sh` F2c | rc 0, wrote into the other cluster | refused, rc 4 (lifted into section 12c; its script holds its own scratch paths, so I did not run the file itself) |
+| `seat_f2_part2.sh` S6 (T1 to T7) and its F4 block | Wednesday's ledger, archive, daily notes and pickup file entered; cluster left running | each line refused at load, nothing created (lifted: sections 7 and 12e) |
+| `f3_f5_f7.sh` F3c, the symlink flip | the secret entered in 10 of 40 rebuilds | 0 of 14, while the file flipped about 18,000 times; seen as a regular file 6 times and as a symlink 6 times in my first full run (lifted: section 12f) |
+
+In the adapted run one of the checker's "record only" cases is IN, as it was in round 3: `tier: P-General/DS-NexusAI`, an own-client tier whose project is the other client's by abbreviation. The rule reads names, not abbreviations.
+
+## The real tree: cost of the stricter rule
+
+One rebuild, 2026-11-27 17:58 AEDT (`evidence/real_rebuild_round4.txt`).
+
+| Measure | Round 3 | Round 4 |
+|---|---|---|
+| Files indexed | 419 | 354 |
+| Lesson files matching the allow line | 292 (plus one conflict copy) | the same |
+| Lessons indexed | 264 | **199** |
+| Lessons left out | 28 (26 by seats, 2 by tier) | **93**: b=28, c=8, d=57 |
+| Rule lines | 345 | 242 |
+| Search rows | 22,267 | 22,096 |
+| Other files not indexed | 4 conflict copies | 4 conflict copies |
+| `at` against `rules_card.py --at`, 22 triggers | 802 and 802 | 559 against 802; none only in the index (`evidence/at_crosscheck_round4.txt`) |
+| Rebuild time | 4.7 to 4.9 s | **19.2 s, one run** (parse 2.9 s, load 16.4 s) |
+| `check` | 0.48 s | 3.9 s |
+| Search latency, ten questions | 121 to 230 ms | 124 to 373 ms |
+| Size on the drive | 174 MB, database 118 MB | 174 MB, database 117 MB |
+
+The three slower figures were taken with the Mac's load average at 24 (`uptime` at 17:59; other seats were running, and my own mutant run had just ended). I was allowed one rebuild and did not repeat it, so I cannot separate the load from the new code. I have not shown that the new code is as fast as round 3's.
+
+**Every real lesson now left out, by clause** (`evidence/left_out_lessons_round4.txt` has each with its reason).
+
+(b) 28, the row is scoped to other seats. These are the same lessons round 3 left out by seats (26), plus the two Datasec project lessons that round 3 left out by tier.
+- `tuesday,friday` (9): 2026-08-12_hpsm-continuous-readiness-grant; 2026-09-17_guard-against-reinventing-prior-work-check; 2026-09-22_ornith-is-studio-only-not-datasec; 2026-09-27_hpsmpoc-every-hp-ask-is-its-own-email-plus-a-register; 2026-09-29_datasec-github-commits-go-through-codeql; 2026-09-30_qa-gates-may-switch-to-opus48-when-flagged; 2026-10-16_tuesday-boot-sweeps-project-feedback-into-tickets; 2026-10-16_tuesday-inherits-push-to-demo-hpsmpoc-unfrozen-account-controls-datasec; 2026-10-23_hpsmpoc-build-only-this-phase-next-phase-funds-it
+- `friday` (10): 2026-09-23_spark-kit-running-a-local-coding-model; 2026-09-23_use-the-local-model-as-much-as-possible; 2026-10-01_friday-cloud-threshold-90; 2026-10-03_hp-security-manager-azure-deploy-grant; 2026-10-06_push-to-demo-when-ready-no-card; 2026-11-16_architecture-agents-run-on-the-newest-fable; 2026-11-16_grant-build-coagent-overnight-until-the-morning-review; 2026-11-21_a-holding-helper-gets-the-next-useful-job; 2026-11-21_friday-runs-on-opus-fable-only-when-flagged; 2026-11-21_windows-helper-launches-without-permission-prompts
+- `tuesday` (9): 2026-10-12_boot-sweeps-all-feedback-repositories; 2026-10-20_tuesday-no-90pct-line-two-accounts; 2026-10-22_tuesday-sonnet-default-usage-is-a-guide; 2026-10-24_every-boot-works-the-actionable-tickets-unprompted; 2026-11-18_the-kit-stamp-checklist; 2026-11-19_no-hpsm-work-for-three-weeks-or-until-kam-asks; 2026-11-19_oxpd-runs-on-the-newest-fable-tuesday-boots-on-fable; 2026-11-21_no-fable-unless-flagged-opus-is-the-default; 2026-11-24_oxpd-jira-holds-the-latest-design-docs-and-kams-actions
+
+(c) 8. **These are the 5 the checker counted, plus the 3 untagged ones.**
+- tier `MIXED` (5; each also holds a section marker, so (d) would leave it out too): 2026-08-07_a-check-that-cannot-fail; 2026-08-13_headline-must-match-the-operative-case; 2026-08-14_i-read-representations-they-read-sources; 2026-08-16_a-recorded-blocker-is-not-a-boundary; 2026-08-16_an-overstated-record-gets-discounted-wholesale
+- no tier line (3; "untagged is W" reversed): 2026-10-12_be-more-careful-with-coding-files-and-deploys; 2026-10-12_clear-fleet-activity-once-answered-as-a-rule; 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say
+
+(d) 57. All are tier `W` or `M`, scoped to this seat, with clean frontmatter.
+- a tier-like line in the body (2): 2026-09-05_three-tier-learnings-wednesday-management-agents-project (line 26); 2026-10-26_spark-gate-pilot-if-it-works-put-it-into-practice (line 19, "Tier 2 stays on Sonnet")
+- names Datasec in its text, file name or rule line (55): 2026-08-03_role-beyond-code-three-priorities; 2026-08-04_delegation-v2-observability; 2026-08-05_identities-float-verify-always; 2026-08-06_ask-format-client-project-options-rec; 2026-08-07_authorship-is-checkable-dkim; 2026-08-07_autonomy-grant-ship-decisions; 2026-08-07_enumerate-every-surface-before-done; 2026-08-12_morning-ticket-sweep-autostart; 2026-08-13_containment-never-run-is-a-claim; 2026-08-13_establish-authority-before-reconciling; 2026-08-13_shared-bus-tag-filter-or-leak; 2026-08-15_a-cap-is-never-neutral; 2026-08-15_a-gui-open-is-a-write; 2026-08-16_classification-is-the-field-that-grants-authority; 2026-08-25_travel-drive-stale-pointers; 2026-08-26_a-sync-that-cannot-refuse-a-deletion; 2026-09-02_rotate-in-the-70-80-band-conditionally; 2026-09-02_style-guides-never-mixed; 2026-09-05_a-relayed-ruling-is-delivered-only-when-it-is-in-the-artefact; 2026-09-05_tickets-are-the-channel-whatsapp-via-kam-is-the-escalation; 2026-09-07_a-census-complete-over-a-frame-that-is-not; 2026-09-07_a-prior-ruling-gate-refusal-is-a-research-prompt; 2026-09-07_name-the-field-that-says-whose-it-is; 2026-09-07_production-ban-lifted-for-the-week; 2026-09-08_a-false-absence-is-usually-my-own-instrument; 2026-09-08_a-ghost-suggestion-is-dangerous-in-proportion-to-what-is-unwritten; 2026-09-08_take-ownership-of-wed-work; 2026-09-09_a-guard-refuses-malformed-input-and-the-real-failure-is-stale-input; 2026-09-09_quarantine-by-rename-is-not-removal-on-an-additive-sync; 2026-09-10_a-refusal-nobody-reads-is-indistinguishable-from-working; 2026-09-14_kams-instruction-stands-until-he-withdraws-it; 2026-09-14_the-coordinator-adds-value-or-it-is-waste-three-duties-not-watching; 2026-09-16_a-fix-authored-on-one-machine-is-a-claim-until-the-other-machine-runs-it; 2026-09-16_measure-the-whole-interface-before-answering-can-it-be-done; 2026-09-16_never-edit-a-bash-script-that-is-currently-running; 2026-09-17_every-project-keeps-kams-clarifications; 2026-09-20_a-closure-inherits-the-scope-of-its-measurement; 2026-09-20_a-control-in-the-wrong-scan-mode-buys-confidence; 2026-09-20_an-absence-goes-stale-while-you-compose-the-complaint; 2026-09-20_an-early-return-disarms-tests-outside-the-diff; 2026-09-20_most-of-a-project-folder-is-outside-its-git-repo; 2026-09-20_prepared-in-a-scratchpad-is-lost; 2026-09-20_refuting-a-mechanism-is-not-refuting-the-defect; 2026-09-21_a-partition-table-must-identify-seats-by-what-they-can-measure; 2026-09-24_decisions-go-on-the-fleet-activity-panel; 2026-09-25_three-tier-routing-ornith-spark-cloud-always-on; 2026-10-04_as-much-secuura-work-as-possible-spark-and-claude; 2026-10-08_ornith-15-replaces-10-push-it-harder; 2026-10-18_new-account-tickets-backlog-routing-definition-spark-max; 2026-10-23_kam-items-on-fleet-activity-morning-card-48h-email; 2026-10-23_tuesday-never-wait-on-kam-cards-morning-card-48h-email-priorities; 2026-11-10_never-wait-a-green-item-ships-and-every-wait-watches-the-board; 2026-11-11_nas-dev-working-dated-offload; 2026-11-11_wednesday-offloads-to-dev-working-nas; 2026-11-27_fleet-structure-project-fable-postgres-brain-tiered-briefs-skills
+
+## The ten questions on the real index, before and after
+
+Same questions, typed as before (`evidence/ten_questions_round4_raw.txt`; round 3's are in `evidence/ten_questions_round3_raw.txt`). "First five" is the knowledge results; the two incident rows under them are unchanged in kind.
+
+| # | Question | Round 3, first five | Round 4, first five | Lost? |
+|---|---|---|---|---|
+| 1 | what must be true before I close a pane | #1 `a-pane-close-is-a-session-kill` | #1 the same | no (old #4, a neighbour, is left out) |
+| 2 | what do I check before telling Kam something is absent | #1 `a-false-absence-is-usually-my-own-instrument` | that lesson is LEFT OUT (d: it names Datasec); #1 is now `a-safety-claim-names-the-property-it-checked`, a neighbour | **yes, the answer is lost** |
+| 3 | rules about typed clock times | #1 the "GENERATE timestamps" section of `i-read-representations-they-read-sources`; #2 `read-the-clock-at-boot` | the first is LEFT OUT (c: MIXED); `read-the-clock-at-boot` is now #1 | partly: one of two right answers |
+| 4 | what provenance does each fact in a brief need | #1 `brief-provenance-enforcement`; #2 `classification-is-the-field-that-grants-authority` | #1 the same; #2 is LEFT OUT (d) | partly: the second answer |
+| 5 | an agent has gone quiet ... | #1 `an-instruction-to-wait-must-name-what-wakes`; #2 `exercise-mechanisms-before-arming` | #1 to #4 the same | no |
+| 6 | what do I do instead of deleting files | #3 `never-delete-cleanup-means-quarantine` | #1 to #4 the same | no |
+| 7 | a deploy failed, can I skip it | nothing right; #1 `if-something-blocks-move-on-to-the-next` | the same wrong neighbour first | no change (still wrong) |
+| 8 | the usage gauge is high ... | #1 to #3 the usage and routing lessons | #1 to #5 the same | no |
+| 9 | how do I word a decision card for Kam | #1 `decisions-go-on-the-fleet-activity-panel` | that lesson is LEFT OUT (d); #1 is now `wednesday-go-counts-as-kams-word-for-starting-work`, not the answer | **yes, the answer is lost** |
+| 10 | what do I verify before merging after the QA gate | #4 `secuura-we-approve-and-merge-our-own-tested-work` only | #1 to #4 the same | no change |
+
+Right lesson in the first five: 8 of 10 in rounds 2 and 3; **6 of 10 now**, and for question 2 the tool gives a confident neighbour where it used to give the answer. Both lost lessons are left out for one reason: they mention Datasec in passing. `check` and `doctor` say 93 are left out; nothing tells a seat that the lesson it wanted is one of them unless it reads the list.
+
+## Suite and mutants
+
+- Suite, final code: **682 passed, 0 failed**, Python 3.14.10 (`evidence/test_run_round4.log`) and `/usr/bin/python3` 3.9.6 (`evidence/test_run_round4_python39.log`). 128 planted lessons left out under the planned clause; 34 lessons that must qualify. Round 3 was 483.
+- Mutants: RE-RUN IN PROGRESS on the final code; the figure goes here.
+- The checker's surviving mutants named in the brief: N06 and N07 (`N5_names_not_closed`, `N5_folders_not_closed`), N10 (`N3_no_assert_in_reads`, which section 12d's `status` test also catches), N11 (`N13_no_rebuild_lock`), N14 and N15 (`N14_sock_mode_untested`, `N15_sock_symlink_ok`; the mode test now uses a short path so it reaches the mode check), N24 (`N24_scope_change_unseen`: a scope file that differs by one comment line makes `check` red with 0 paths differing). **N27, a credentials folder below the top level, has no mutant of its own that can go red:** the closed table now refuses that line first, so removing the credentials test alone changes nothing. The line is refused in section 8; I count that guard as doubled, not as proved separately.
+- N9: `search quillwort marshwort` puts the rules row first at the default limit, at `--limit 20` and at `--limit 1`, with eight lessons outscoring it (mutant `N9_rules_row_after_the_cut`).
+
+## What I could not make sound
+
+1. **Clause (d)'s name test reads words, not meaning.** It finds the name plain, in any case, accented, full-width, inside a domain, split by markdown emphasis, and clause (t) removes look-alike letters and invisible characters. It does NOT find the name written with a space or a hyphen inside it ("Data sec"), with a digit for a letter, as an abbreviation ("DS"), or by a project's name alone ("NexusAI", "HPSM"). A lesson about the other client's work that never uses the client's name qualifies. I do not think a name list can close this, and I have not pretended it does.
+2. **Clause (c) trusts the tier line.** A lesson that says `tier: W` in a clean block and is in fact about the other client qualifies on (c). Only (b) and (d) stand behind it.
+3. **Folders are checked once, not held.** Each file is judged on the descriptor it is read from, inside its own folder opened without following a link. The folders above it are checked by `realpath` before that. A process that can swap a whole brain folder for a symlink mid-rebuild is outside this guard. Not tested.
+4. **"Both through realpath"** is met for the addressed side only; see above. A server started by hand through a symlink is refused, not recognised.
+5. **A hard link whose original is gone, and a secret pasted into a lesson,** as in round 3.
+6. **The `BRAINDB_TEST_HOLD` pause is test-only code in the indexer.** Set in a real shell it delays a rebuild by up to 60 s and does nothing else. It is the only way I found to make the in-transaction assertion a test that can fail.
+
+## Slips of mine in round 4
+
+1. **A redundant guard hid a mutant.** Two tests both caught "two rows with one key", so the mutant removing one survived my first mutant run. I removed the redundancy and added a mutant for the `#n` case.
+2. **Three mutants left a scratch server running each** (their broken guard let one start, and my suite did not stop it). I stopped the three with `pg_ctl` on their own data directories and added a stop line to the suite. Process lists here select by executable and then read `-D`.
+3. **Four mutant expectations were mis-aimed in the first run** (caught, but on a line my pattern did not name; one test's scope kept the lines the mutant was meant to bypass). Corrected; the full set was re-run on the final code.
+4. Two shell commands of mine were refused by the hooks before running (an unquoted list variable under zsh; a bare `======`). Nothing had run.
+5. My first fixture builder made a symlink before its folder existed, and wrote the rules index before the last lessons had added their rows. Both showed as failures in the first two suite runs.
+6. The interim status I wrote at 17:12 said "60 mutants"; the run had 61.
+
+## Not tested in round 4
+
+- A real TUESDAY or FRIDAY tree; another machine or drive; ejecting or syncing with the server up; unison with the proposed `Path` lines; a real Postgres major-version difference; the proposed blocks inside the real `doctor.sh` or launcher.
+- A second real rebuild, so no timing on a quiet machine and no check of rebuild-to-rebuild sameness on the real tree (the suite proves it on fixtures).
+- The first checker's attack tree (`tests/attack_tree.sh`): not re-run. Its 69 expectations include "present" cases that the new rule reverses on purpose (untagged lessons, lessons with no row, marked sections), so its count would no longer mean what it meant.
+- The second checker's `seat_f2.sh`, `seat_f2_part2.sh` and `f3_f5_f7.sh` as files: they hold that checker's own scratch paths. Their F2c, S6, F4 and F3c are lifted into the suite; their S1 to S5 (seat names), F2a, F2b, F5 and F7 blocks are covered only as far as round 3's own sections and section 12d go.
+- The NFD file-name case on the drive volume (the suite ran on the internal volume, where it passes).
+- The 150 s lock limit to its end (2 s, by `BRAINDB_LOCK_WAIT`).
+- `proposed/scope/tuesday.scope` and `friday.scope` beyond the fixtures. Their allow lines are all inside the table; their comment text still describes round 3's seat-word rule and I left it.
+- Search quality beyond the ten questions.
+
+## What exists (bytes)
+
+`braindb.sh` 16,242; `braindb_index.py` 72,538; `braindb_lock.py` 1,446 (unchanged); `scope/wednesday.scope` 2,151 (comments only changed); `tests/run.sh` 63,735; `tests/make_fixtures.py` 35,343; `tests/mutants.sh` 20,228; `tests/f1_new_adapted.py` 21,020 (the checker's script with the one change named above); `DESIGN.md` 16,392; `proposed/PROPOSALS.md` 13,477 (item 7 is now `Path` lines, N12); `proposed/INSTRUCTIONS-for-other-seats.md` 16,311 (step 1 rewritten: a seat adopts by confirming; the Python sentence, the row count and the "names every lesson kept out" sentence corrected). New evidence: `test_run_round4.log`, `test_run_round4_python39.log`, `mutants_round4.log`, `checker_f1_new_round4_unmodified.txt`, `checker_f1_new_round4_every_case_has_a_good_row.txt`, `real_rebuild_round4.txt`, `ten_questions_round4_raw.txt`, `at_crosscheck_round4.txt`, `measurements_round4.txt`, `left_out_lessons_round4.txt`.
+
+**End state of the drive cluster** (`evidence/measurements_round4.txt`, 17:59:26): `stop` rc 0 (pid 18598), second `stop` rc 0, `server: STOPPED`, no `postmaster.pid`, socket directory empty, 0 processes whose executable is postgres with a data directory in this lane (1 postgres on this Mac, another project's, not touched; control: 33 bash). 
+
+## QUESTION (does not block QA; it decides how useful the index is)
+
+**Clause (d) as written costs 57 lessons; the brief expected 5.** The brief says a lesson must hold no other-client "marker or token ANYWHERE in its text (the tier-marker comment in any spelling, or another client's name from the seat's own short list)", and then "the checker counted 5 such real lessons today". The 5 are the lessons with a marker. The name test is what takes the other 55, and `ANSWER-1.md` ruling 1 had said nothing is dropped by client name. I built what the sentence says. The two readings, measured:
+
+| Reading | Lessons indexed | Left out under (c) and (d) | Questions 2 and 9 |
+|---|---|---|---|
+| As built: marker, tier-like line, or the other client's name anywhere | 199 | 65 | lost |
+| Marker or tier-like line only (drop the name test; measured by a dry run with no `deny_clients` line) | 254 | 10 | both lessons are back in the index |
+
+Going from the first to the second is one test removed (`Qd_name_ok` is that change, as a mutant). It would also let in a section about the other client that carries no marker at all, which is the thing the second checker's N2 was about. Which do you want?
+
+---
+
+# ROUND 3 (superseded where ROUND 4 says so; its first line was READY FOR QA) (answer to `ANSWER-3.md`: the checker's NO GO on F1, and Wednesday's list of eleven fixes and four notes)
 
 WED build seat "brain-db". Round 3 finished; the last process check printed `2026-11-27 13:40:45 AEDT`, and one more suite run under Python 3.9 ended 13:41:32 with 0 postgres executables running. All HOLDS kept: this lane only (plus my scratchpad and socket directories under `/tmp`), no existing shared file edited, the checker's directory read and never written, no git write, no mail, post or network call, nothing installed, no `rm`.
 

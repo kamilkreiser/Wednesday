@@ -1,0 +1,86 @@
+## 1. the REAL register (a scratch copy of the real inputs)
+real register read at start: 89267 bytes, sha256 8c568afc80270c18
+build rc 0 | /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/435f0b28-fa4c-43b1-8811-a27f707f05c7/scratchpad/qa-wake-r4/r3/n1/real/WEDNESDAY/0_Brain/wake/WAKE-wednesday.md  bytes: 128293  ~tokens: 32074 of 60
+scratch copy of the register: 89267 bytes, sha256 8c568afc80270c18; equal to the bytes read from the real tree a moment before: True
+text between the pack's markers == the file, byte for byte: True (block 89267 bytes, file 89267 bytes; file ends with newline: True)
+BEGIN lines in pack 1, END lines in pack 1 (in the source file: BEGIN 0, END 0)
+table lines in the file 92, of them data rows 78 (the pack's own sentence says: 89267 bytes, 78 table rows, sha256 8c568afc80270c18)
+data rows found in the pack: 78 of 78; each exactly once: True; in file order: True; rows that occur more than once IN THE FILE itself: 0
+positive control: a made-up row is found 0 times; the header's stated sha16 equals the file's: True
+the register's bytes also occur OUTSIDE the block (a second, partial copy)? first 200 bytes of the file occur in the pack 1 time(s)
+files in wake/: ['WAKE-wednesday.md']
+## 2. hostile registers: is the block the file? (expected: block == file, or a clean refusal; never a changed row)
+- CRLF line ends (whole file)                                rc 0; block == file; wake/ ['WAKE-wednesday.md']; traceback no; as expected | /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/435f0b28-fa4c-43b1-8811-a27f707f05c7/scratchpad/qa-wake-r4/r3/n1/crlf/WEDNESDAY/0_Brain/wake/WAKE
+- a BOM in front                                             rc 0; block == file; wake/ ['WAKE-wednesday.md']; traceback no; as expected | /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/435f0b28-fa4c-43b1-8811-a27f707f05c7/scratchpad/qa-wake-r4/r3/n1/bom/WEDNESDAY/0_Brain/wake/WAKE-
+- NUL bytes inside a row                                     rc 0; block == file; wake/ ['WAKE-wednesday.md']; traceback no; as expected | /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/435f0b28-fa4c-43b1-8811-a27f707f05c7/scratchpad/qa-wake-r4/r3/n1/nul/WEDNESDAY/0_Brain/wake/WAKE-
+- lone CR, form feed, U+2028, U+FFFD, tabs inside rows       rc 0; block == file; wake/ ['WAKE-wednesday.md']; traceback no; as expected | /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/435f0b28-fa4c-43b1-8811-a27f707f05c7/scratchpad/qa-wake-r4/r3/n1/ctl/WEDNESDAY/0_Brain/wake/WAKE-
+- invalid UTF-8 (0xFF 0xFE in a row)                         rc 2; no pack; wake/ no wake dir; traceback no; as expected | wake_pack: FAILED — part d (grants): 0_Brain/tasks/EXPIRING-GRANTS.md is not valid UTF-8, so it cannot be carried verbatim; fix the file's encoding
+- invalid UTF-8 (a truncated multibyte char at the very end) rc 2; no pack; wake/ no wake dir; traceback no; as expected | wake_pack: FAILED — part d (grants): 0_Brain/tasks/EXPIRING-GRANTS.md is not valid UTF-8, so it cannot be carried verbatim; fix the file's encoding
+- an overlong / surrogate encoding (ED A0 80)                rc 2; no pack; wake/ no wake dir; traceback no; as expected | wake_pack: FAILED — part d (grants): 0_Brain/tasks/EXPIRING-GRANTS.md is not valid UTF-8, so it cannot be carried verbatim; fix the file's encoding
+- file ends WITHOUT a newline                                rc 0; block == file + ONE added newline; wake/ ['WAKE-wednesday.md']; traceback no; as expected | /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/435f0b28-fa4c-43b1-8811-a27f707f05c7/scratchpad/qa-wake-r4/r3/n1/nonl/WEDNESDAY/0_Brain/wake/WAKE
+- file ends with THREE blank lines                           rc 0; block == file; wake/ ['WAKE-wednesday.md']; traceback no; as expected | /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/435f0b28-fa4c-43b1-8811-a27f707f05c7/scratchpad/qa-wake-r4/r3/n1/blank3/WEDNESDAY/0_Brain/wake/WA
+- file starts with blank lines and spaces                    rc 0; block == file; wake/ ['WAKE-wednesday.md']; traceback no; as expected | /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/435f0b28-fa4c-43b1-8811-a27f707f05c7/scratchpad/qa-wake-r4/r3/n1/lead/WEDNESDAY/0_Brain/wake/WAKE
+  (the 5 MB register is 5248267 bytes)
+- a 5 MB register (over budget: must refuse, write nothing)  rc 3; no pack; wake/ no wake dir; traceback no; as expected | wake_pack: FAILED — over budget: ~1321827 tokens of 60000; the largest part is 'd. Grants register (WHOLE, verbatim: every row, in file order)' (52489
+- only a header, zero rows                                   rc 0; block == file; wake/ ['WAKE-wednesday.md']; traceback no; as expected | /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/435f0b28-fa4c-43b1-8811-a27f707f05c7/scratchpad/qa-wake-r4/r3/n1/zero/WEDNESDAY/0_Brain/wake/WAKE
+- header present but indented by a tab (no header at the margin) rc 2; no pack; wake/ no wake dir; traceback no; as expected | wake_pack: FAILED — part d (grants): no grants table header ('| grant | given | EXPIRES | ...' at the left margin) found in 0_Brain/tasks/EXPIRING-GRA
+- whitespace only                                            rc 2; no pack; wake/ no wake dir; traceback no; as expected | wake_pack: FAILED — part d (grants): source is empty: 0_Brain/tasks/EXPIRING-GRANTS.md
+- a symlink to a file elsewhere in the tree                  rc 0; block == file; wake/ ['WAKE-wednesday.md']; traceback no; as expected | /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/435f0b28-fa4c-43b1-8811-a27f707f05c7/scratchpad/qa-wake-r4/r3/n1/symlink/WEDNESDAY/0_Brain/wake/W
+- a dangling symlink                                         rc 2; no pack; wake/ no wake dir; traceback no; as expected | wake_pack: FAILED — part d (grants): source unreadable: 0_Brain/tasks/EXPIRING-GRANTS.md (No such file or directory)
+- a directory                                                rc 2; no pack; wake/ no wake dir; traceback no; as expected | wake_pack: FAILED — part d (grants): source unreadable: 0_Brain/tasks/EXPIRING-GRANTS.md (Is a directory)
+- unreadable (mode 000)                                      rc 2; no pack; wake/ no wake dir; traceback no; as expected | wake_pack: FAILED — part d (grants): source unreadable: 0_Brain/tasks/EXPIRING-GRANTS.md (Permission denied)
+- a FIFO at the register's path                              rc TIMEOUT(8s) after 8.0 s; wake/ no wake dir  (a FIFO with no writer: does the build return?)
+## 3. marker-like lines INSIDE the register
+- register holds an END line, pack-style part headings, a BEGIN line rc 0; block == file; wake/ ['WAKE-wednesday.md']; traceback no; as expected | /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/435f0b28-fa4c-43b1-8811-a27f707f05c7/scratchpad/qa-wake-r4/r3/n1/forge/WEDNESDAY/0_Brain/wake/WAK
+    END lines in the pack: 2; BEGIN lines: 2. A reader who stops at the FIRST END sees 89268 of the file's 89717 bytes as 'the register'; the forged instruction then sits OUTSIDE that reader's block
+    '## ' heading lines in the pack: 18; of them '## c. State' 2, '## e. Own ledger' 2, '## FIRST WORK' 1 (the genuine pack has one c and one e)
+    the part's intro states the file's size and sha256 (89717 bytes, 79 table rows, sha256 aa46435ce9931823), so the forgery is detectable by arithmetic, not by eye
+- the REAL register today holds any of: BEGIN/END marker text, a '---' line, a pack part heading, '## Manifest': none (positive control: it holds '## ' headings 2 times)
+- register holds a pack-style front matter block and '## Manifest' rc 0; block == file; wake/ ['WAKE-wednesday.md']; traceback no; as expected | /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/435f0b28-fa4c-43b1-8811-a27f707f05c7/scratchpad/qa-wake-r4/r3/n1/forge_fm/WEDNESDAY/0_Brain/wake/
+## 4. a register that changes DURING builds
+- the file REPLACED by rename (atomic) while 40 builds run: {'ok_known_version': 40, 'rc2': 0, 'rc_other': 0, 'PARTIAL_OR_MIXED': 0}
+- the file REWRITTEN IN PLACE in two halves (not atomic) while 40 builds run: {'ok_known_version': 10, 'rc2': 0, 'rc_other': 0, 'PARTIAL_OR_MIXED': 30}
+    build 2: block 44807 bytes (full versions are 89327 to 89587 bytes); ends with a newline True; header's sha16 matches the block: False
+    build 3: block 44669 bytes (full versions are 89327 to 89587 bytes); ends with a newline True; header's sha16 matches the block: False
+## 5. over budget never trims; an older pack is left alone
+- budget one token under the pack (32073 of 32074): rc 3; the older pack byte-identical True; files in wake/ ['WAKE-wednesday.md']; last line: wake_pack: FAILED — over budget: ~32074 tokens of 32073; the largest part is 'd. Grants register (WHOLE, verbatim: every row, in file order)' (89910 b
+- the same on a tree with no pack: rc 3; wake/ no wake dir; temp files anywhere in the tree: 0
+- budget exactly the pack's tokens (32074): rc 0; block == file True (must succeed beside the refusal)
+- the register's share: block 89267 bytes of pack 128293 bytes (22317 est. tokens of 32074)
+## 6. --check on a pack whose register block was edited by ONE byte (expected RED each time; GREEN for the two controls)
+- control: fresh                                                             GREEN ok | OK: wake pack current (0_Brain/wake/WAKE-wednesday.md, 128412 bytes, ~32103 tokens of 60000, sha256 8df48aa0d2
+- first byte of the block flipped                                            RED   ok | FAULT: pack content differs from what would be built now (sha256 d57407c115e1 on disk, 8df48aa0d2b6 expected)
+- a byte in the middle of the block flipped                                  RED   ok | FAULT: pack content differs from what would be built now (sha256 a5b8b0ca5c0b on disk, 8df48aa0d2b6 expected)
+- last byte before the END line flipped                                      RED   ok | FAULT: pack content differs from what would be built now (sha256 9a6b7112e03b on disk, 8df48aa0d2b6 expected)
+- one byte DELETED from the block                                            RED   ok | FAULT: pack content differs from what would be built now (sha256 74e06139ac2d on disk, 8df48aa0d2b6 expected)
+- one byte INSERTED in the block                                             RED   ok | FAULT: pack content differs from what would be built now (sha256 479a702d74c2 on disk, 8df48aa0d2b6 expected)
+- one newline in the block turned into a space                               RED   ok | FAULT: pack content differs from what would be built now (sha256 9fb7c46f5c0a on disk, 8df48aa0d2b6 expected)
+- a digit of one date changed (2026 -> 2027) inside the block                RED   ok | FAULT: pack content differs from what would be built now (sha256 a91701071627 on disk, 8df48aa0d2b6 expected)
+- one whole row removed from the block                                       RED   ok | FAULT: pack content differs from what would be built now (sha256 15424c151d4b on disk, 8df48aa0d2b6 expected)
+- two adjacent rows swapped                                                  RED   ok | FAULT: pack content differs from what would be built now (sha256 8b58e746ea4f on disk, 8df48aa0d2b6 expected)
+- the END line moved up by one row                                           RED   ok | FAULT: pack content differs from what would be built now (sha256 a23fe6b865b9 on disk, 8df48aa0d2b6 expected)
+- the 3 bytes of the block's U+FFFD replaced by ONE invalid byte 0xFF (decodes to the same character) GREEN <<< UNEXPECTED | OK: wake pack current (0_Brain/wake/WAKE-wednesday.md, 128412 bytes, ~32103 tokens of 60000, sha256 8df48aa0d2
+- the header sentence's sha256 edited (one hex digit)                        RED   ok | FAULT: pack content differs from what would be built now (sha256 b8275b90954e on disk, 8df48aa0d2b6 expected)
+- control: restored byte for byte                                            GREEN ok | OK: wake pack current (0_Brain/wake/WAKE-wednesday.md, 128412 bytes, ~32103 tokens of 60000, sha256 8df48aa0d2
+  U+FFFD occurs in the REAL register 0 time(s); in the real pack built in section 1: 0 time(s)
+## 7. the old flag, the sidecar, the deleted names
+- --trust-expired-heading    rc 2; wake/ no wake dir | wake_pack.py: error: unrecognized arguments: --trust-expired-heading
+- --trust-expired            rc 2; wake/ no wake dir | wake_pack.py: error: unrecognized arguments: --trust-expired
+- --trust                    rc 2; wake/ no wake dir | wake_pack.py: error: unrecognized arguments: --trust
+- a plain build afterwards: rc 0; files in wake/: ['WAKE-wednesday.md']; any file in the tree whose name holds 'dropped': none
+- wake_pack.py lines matching 'classify_grant'  : none
+- wake_pack.py lines matching 'names_seat'      : none
+- wake_pack.py lines matching 'trust-expired'   : none
+- wake_pack.py lines matching 'trust_expired'   : none
+- wake_pack.py lines matching 'dropped'         : [26, 28, 29, 278]
+- wake_pack.py lines matching 'DEAD_MARK'       : none
+- wake_pack.py lines matching 'OTHER_SEAT'      : none
+- wake_pack.py lines matching 'past_date'       : none
+- wake_pack.py lines matching 'sidecar'         : [29]
+- wake_pack.py lines matching 'STOP_WORDS'      : none
+- wake_pack.py lines matching '\\.pop\\('       : none
+- wake_pack.py lines matching '\\[:-'           : [171, 341]
+- wake_pack.py lines matching 'sorted\\('       : [91, 480, 528]
+- wake_pack.py lines matching '\\.replace\\('   : [546]
+- wake_pack.py lines matching '\\.strip\\('     : [127, 174, 295, 296, 319, 327, 471]
+- wake_pack.py lines matching 'rstrip\\('       : [183, 267, 324, 326]

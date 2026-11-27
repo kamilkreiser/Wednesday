@@ -94,7 +94,7 @@ echo "started $(date '+%Y-%m-%d %H:%M:%S %Z')"
 section "0. fixtures, and the tool copied into a tree named WEDNESDAY"
 "$PY" "$TESTS/make_fixtures.py" "$TREE" || { echo "fixture build failed" >&2; exit 2; }
 mksim WEDNESDAY with-scope || { echo "could not copy the tool" >&2; exit 2; }
-[ -f "$EXP/absent.txt" ] && [ -f "$EXP/present.txt" ] && [ -f "$EXP/paths.txt" ] && ok "expectation tables written by the fixture builder ($(wc -l < "$EXP/absent.txt" | tr -d ' ') absent, $(wc -l < "$EXP/present.txt" | tr -d ' ') present, $(wc -l < "$EXP/paths.txt" | tr -d ' ') paths)" || bad "expectation tables missing"
+[ -f "$EXP/absent.txt" ] && [ -f "$EXP/present.txt" ] && [ -f "$EXP/paths.txt" ] && [ -f "$EXP/clauses.txt" ] && ok "expectation tables written by the fixture builder ($(wc -l < "$EXP/absent.txt" | tr -d ' ') absent, $(wc -l < "$EXP/present.txt" | tr -d ' ') present, $(wc -l < "$EXP/paths.txt" | tr -d ' ') paths, $(wc -l < "$EXP/clauses.txt" | tr -d ' ') lessons to be left out)" || bad "expectation tables missing"
 
 section "1. guards before any cluster exists"
 env -u WED_AGENT BRAINDB_ROOT="$TREE" /bin/bash "$TOOL" check > "$RUN/guard-root.out" 2>&1; RC=$?
@@ -150,50 +150,10 @@ if diff "$EXP/paths.txt" "$RUN/paths-A.txt" > "$RUN/paths.diff" 2>&1; then ok "$
 SEATREC="daily_tuesday|daily_friday|_ledger_friday|_ledger_laptop_datasec|2_Project_Files/tuesday|0_Brain/tasks|conflict_on_|\.pre-|4_Credentials|3_Access_Keys|dashboard|reference"
 t_hasnt_re "no indexed path is another seat's record, a sync leftover or a hard-excluded folder" "$SEATREC" "$RUN/paths-A.txt"
 can_fail "that path assertion: with 'learnings' added to the same pattern it is red" hasnt_re "$SEATREC|learnings" "$RUN/paths-A.txt"
-t_has_re "a lesson, a skill and an architecture file with another seat's word in the NAME are indexed (ANSWER-1 item 2)" "tuesday-sweeps|tuesday-ritual|tuesday-vs-wednesday|laptop_datasec-habit" "$RUN/paths-A.txt"
+t_has_re "a lesson, a skill and an architecture file with another seat's word in the NAME are indexed (ANSWER-1 item 2)" "tuesday-sweeps|tuesday-ritual|tuesday-vs-wednesday" "$RUN/paths-A.txt"
 
-section "6. every exclusion: the planted file is absent, its neighbour is present (whole-index dump)"
+section "6. QUALIFY OR STAY OUT: every planted file is absent, every neighbour is present (whole-index dump)"
 dump A
-while IFS='|' read -r tok why; do
-  [ -n "$tok" ] || continue
-  t_hasnt "absent  $tok  $why" "$tok" "$RUN/dump-A.sql"
-done <<'EOF'
-xcanary03|lesson whose only rules-index row is scoped to another seat (friday)
-xcanary03rule|its rules-index line
-xcanary17|lesson whose only rules-index row is scoped to another seat (tuesday)
-xcanary17rule|its rules-index line
-xcanary05|lesson, a (conflict_on_ copy
-xcanary06|lesson, .pre- inside a name that still ends .md
-xcanary07|lesson backup ending .md.pre-0101
-xcanary08|lesson, tier P-Datasec/HPSM-POC
-xcanary08rule|its rules-index line
-xcanary09|lesson, tier P (Datasec/OXPd)
-xcanary13|lesson, project tier naming no client of this seat
-xcanary14|section marked tier P-Datasec inside a MIXED lesson
-xcanary15|4_Credentials file, reached through a symlink in learnings/
-xcanary22|the friday ledger and its archive
-xcanary23|the laptop_datasec ledger and its archive
-xcanary24|ledger (conflict_on_ copy
-xcanary25|ledger .pre- backup
-xcanary26|_ledger_fleet_insights.md (not on the allow-list)
-xcanary33|daily/_template.md
-xcanary34|daily/.spoken.log
-xcanary35|daily (conflict_on_ copy
-xcanary36|daily .pre- backup
-xcanary37|daily_tuesday/
-xcanary38|daily_friday/
-xcanary41|skill .pre- backup
-xcanary76|a CLAUDE.md that is not one of the two allowed
-xcanary77|2_Project_Files/tuesday/ (another seat's folder, not on the allow-list)
-xcanary78|a (conflict_on_ copy of the root rules file
-xcanary47|chat store under 0_Brain/dashboard/
-xcanary48|markdown under 0_Brain/dashboard/
-xcanary49|0_Brain/reference/
-xcanary50|3_Access_Keys/
-xcanary51|0_Brain/tasks/ (not on the allow-list)
-xcanary52|learnings/families/ (no recursion)
-xcanary53rule|rules-index row whose lesson file does not exist
-EOF
 while IFS='|' read -r tok why; do
   [ -n "$tok" ] || continue
   t_hasnt "absent  $tok  $why" "$tok" "$RUN/dump-A.sql"
@@ -202,106 +162,118 @@ t_hasnt "absent  xcanary  ANY canary token at all" "xcanary" "$RUN/dump-A.sql"
 while IFS='|' read -r tok why; do
   [ -n "$tok" ] || continue
   t_has "present $tok  $why" "$tok" "$RUN/dump-A.sql"
-done <<'EOF'
-xneighbour01|lesson, tier W
-xneighbour02|lesson with 'tuesday' in its NAME whose rules-index row is scoped all
-xneighbour02rule|its rules-index line
-xneighbour04|lesson with 'laptop_datasec' in its NAME, no rules-index row, tier W
-xneighbour19|lesson with one row for another seat and one row naming this seat
-xneighbour19ruleb|the row that names this seat
-xneighbour42|skill with 'tuesday' in its name
-xneighbour46|architecture file with 'tuesday' in its name
-xneighbour70|rules file at the tree root: text before the first heading
-xneighbour70b|a section's own text before its numbered rules
-xneighbour71|numbered rule 0
-xneighbour71b|its continuation line
-xneighbour72|numbered rule 0a
-xneighbour73|numbered rule 3b-i
-xneighbour74|a numbered rule under a second heading
-xneighbour75|0_Brain/CLAUDE.md
-xneighbour01apply|its second section
-xneighbour01rule|its rules-index line
-xneighbour01ruletwo|its #2 rules-index line
-xneighbour10|lesson, tier P-Secuura/Blockchain
-xneighbour11|lesson, tier M
-xneighbour12|lesson with no tier
-xneighbour14|MIXED lesson, unmarked text
-xneighbour14b|section marked tier P-Secuura inside it
-xneighbour14c|the section after the dropped one
-xneighbour16|superseded lesson
-xneighbour20|this seat's ledger
-xneighbour20rule|a ledger row's rule sentence
-xneighbour21|this seat's ledger archive
-xneighbour30|daily bullet
-xneighbour30b|its continuation line
-xneighbour30c|daily bullet with no time
-xneighbour30d|daily plain paragraph
-xneighbour40|skill
-xneighbour43|identity
-xneighbour44|people
-xneighbour45|architecture
-EOF
-while IFS='|' read -r tok why; do
-  [ -n "$tok" ] || continue
-  t_has "present $tok  $why" "$tok" "$RUN/dump-A.sql"
 done < "$EXP/present.txt"
 can_fail "absence assertion: pointed at a neighbour token it is red" hasnt "xneighbour01" "$RUN/dump-A.sql"
 can_fail "presence assertion: pointed at a canary token it is red" has "xcanary03" "$RUN/dump-A.sql"
 sql "select heading from brain.chunks where kind = 'rules' order by id" > "$RUN/rules-headings.txt" || bad "rules headings"
-[ "$(wc -l < "$RUN/rules-headings.txt" | tr -d ' ')" = "7" ] && ok "the two rules files give 7 rows (1 intro, 1 section text, 3 numbered rules, 1 rule under a second heading, 1 section of the brain file)" || { bad "rules rows: $(wc -l < "$RUN/rules-headings.txt")"; sed 's/^/        /' "$RUN/rules-headings.txt"; }
+[ "$(wc -l < "$RUN/rules-headings.txt" | tr -d ' ')" = "8" ] && ok "the two rules files give 8 rows (1 intro, 1 section text, 3 numbered rules, 2 rules under later headings, 1 section of the brain file)" || { bad "rules rows: $(wc -l < "$RUN/rules-headings.txt")"; sed 's/^/        /' "$RUN/rules-headings.txt"; }
 for h in "CLAUDE.md > Rules > rule 0" "CLAUDE.md > Rules > rule 0a" "CLAUDE.md > Rules > rule 3b-i" "CLAUDE.md > Session end > rule 1" "0_Brain/CLAUDE.md > Folders"; do
   [ "$(/usr/bin/grep -i -x -F -c -- "$h" "$RUN/rules-headings.txt")" = "1" ] && ok "one row headed: $h" || bad "no single row headed: $h"
 done
 [ -z "$(find "$RUN" -iname 'PWNED*' -not -path '*/pgdata-*' | head -1)$(find "$PWD" -maxdepth 1 -iname 'PWNED*' | head -1)" ] && ok "no injection string in a file name, heading, body or rules-index field created a file (find PWNED*: nothing)" || bad "a PWNED file exists: $(find "$RUN" -iname 'PWNED*' | head -3)"
 [ -n "$(find "$RUN" -name 'paths.txt' | head -1)" ] && ok "(control) the same find does find a file that exists" || bad "find control failed"
 
-section "6b. the rebuild report names what failed closed (ANSWER-3 F1, F3)"
-t_has "UNTAGGED lessons are listed by name" "UNTAGGED lessons indexed" "$RUN/rebuild1.out"
-t_has "  including the fixture's untagged lesson" "$L/2026-01-12_untagged.md" "$RUN/rebuild1.out"
-t_has "damaged rules-index rows are counted" "DAMAGED row(s) ignored" "$RUN/rebuild1.out"
-t_has "a lesson excluded for a damaged row is named with the row's line" "2026-07-20_r-six-fields.md  [a damaged rules-index row names it (rules index line" "$RUN/rebuild1.out"
-t_has "a lesson whose tier cannot be read safely is named with the reason" "2026-06-05_fm-dup-ds-w.md  [tier cannot be read safely: tier is given more than once" "$RUN/rebuild1.out"
-t_has "the hard link is named as a hard link" "2026-07-27_hardlink.md  [hard link (link count 2)" "$RUN/rebuild1.out"
+section "6b. every left-out lesson is NAMED, under the clause it was planted for (N8)"
+# the rebuild report -> "file name|clause", compared with the fixture builder's own table
+"$PY" - "$RUN/rebuild1.out" > "$RUN/clauses-got.txt" <<'PYEOF'
+import re, sys
+cl = None
+out = []
+for line in open(sys.argv[1], encoding="utf-8"):
+    m = re.match(r"\s+clause \((\w)\) ", line)
+    if m:
+        cl = m.group(1); continue
+    m = re.match(r"\s{11}(.+?)  \[", line)
+    if m and cl:
+        out.append("%s|%s" % (m.group(1), cl)); continue
+    if not line.startswith("     "):
+        cl = None
+print("\n".join(sorted(out)))
+PYEOF
+N_CL="$(wc -l < "$EXP/clauses.txt" | tr -d ' ')"
+if diff "$EXP/clauses.txt" "$RUN/clauses-got.txt" > "$RUN/clauses.diff" 2>&1; then ok "all $N_CL left-out lessons are named in the rebuild report, each under the clause it was planted for"; else bad "left-out lessons or their clauses differ from the plan"; sed 's/^/        /' "$RUN/clauses.diff" | head -30; fi
+for c in a b c d t f; do
+  n="$(/usr/bin/grep -i -c -- "|$c\$" "$EXP/clauses.txt")"
+  t_has "the report counts clause ($c): $n" "clause ($c) " "$RUN/rebuild1.out"
+  [ "$(/usr/bin/grep -i -E -c -- "clause \($c\) .*: $n\$" "$RUN/rebuild1.out")" = "1" ] && ok "  and the count printed for clause ($c) is $n" || bad "clause ($c) count is not $n: $(/usr/bin/grep -i -F -- "clause ($c) " "$RUN/rebuild1.out")"
+done
+t_has_re "the rebuild's LAST line gives the count left out by each clause" "^rebuild: done; .*; $N_CL lesson file\(s\) LEFT OUT by the qualify rule: a=[0-9]+, b=[0-9]+, c=[0-9]+, d=[0-9]+, t=[0-9]+, f=[0-9]+\$" "$RUN/rebuild1.out"
+[ "$(tail -1 "$RUN/rebuild1.out" | count_in 'LEFT OUT by the qualify rule' /dev/stdin)" = "1" ] && ok "  (it is the last line)" || bad "the left-out line is not last: $(tail -1 "$RUN/rebuild1.out")"
+t_has "check prints the same count" "left out: $N_CL lesson file(s) LEFT OUT by the qualify rule" "$RUN/check1.out"
+t_has "  and names lessons under each clause, up to its limit" "(+" "$RUN/check1.out"
+t_has "  for example the hard link, by name" "2026-09-02_f-hardlink.md  [hard link (link count 2)" "$RUN/check1.out"
+t_has "the report says which rules-index lines could not be read" "could NOT be read as a row" "$RUN/rebuild1.out"
+t_has "  and names a row whose lesson file does not exist" "2026-01-99_missing-lesson.md" "$RUN/rebuild1.out"
 t_has "a daily note whose name is not a plain date is skipped with that reason" "not a daily-note file name" "$RUN/rebuild1.out"
 t_hasnt "no Python traceback anywhere in the rebuild output" "Traceback" "$RUN/rebuild1.out"
+run sLO search xcanary03; t_has "search for a left-out lesson's word says NO MATCH" "NO MATCH" "$RUN/sLO.out"
+t_has "  and says that $N_CL lesson files are left out and not searched" "NOTE: $N_CL lesson file(s) are LEFT OUT" "$RUN/sLO.out"
+run docLO doctor; t_has "doctor's one line carries the left-out count" "$N_CL lesson file(s) LEFT OUT" "$RUN/docLO.out"
 
-section "7. the exclusions are load-bearing"
-# 7a. Widen the ALLOW-LIST onto other seats' records, under several KINDS, and keep the deny lines:
-#     the seat words must still stop them whatever kind the allow line declares (ANSWER-3 F11).
-{ cat "$LANE/scope/wednesday.scope"
-  echo "allow daily 0_Brain/daily_tuesday/20*.md"; echo "allow daily 0_Brain/daily_friday/20*.md"
-  echo "allow skill 0_Brain/daily_tuesday/*.md"
-  echo "allow ledger 0_Brain/learnings/_ledger_friday.md"; echo "allow ledger 0_Brain/learnings/_ledger_laptop_datasec.md"
-  echo "allow lesson 0_Brain/learnings/*.md"; echo "allow skill 0_Brain/learnings/_ledger_*.md"
-  echo "allow skill 0_Brain/tasks/*.md"; echo "allow skill 0_Brain/tasks/NEXT-PICKUP-TUESDAY.md"
-  echo "allow skill 2_Project_Files/tuesday/*.md"; } > "$RUN/widened.scope"
-T_SCOPE="$RUN/widened.scope" run rebuildW rebuild; rc_is "rebuild with the allow-list widened onto other seats' records under five kinds" 0 rebuildW
+section "7. what a scope file may ask for is a closed table in the code (N5): anything else is REFUSED at load"
+NF7="$(sql "select count(*) from brain.files")"
+n=0
+while IFS= read -r line; do
+  [ -n "$line" ] || continue
+  n=$((n+1))
+  { cat "$LANE/scope/wednesday.scope"; echo "$line"; } > "$RUN/wide$n.scope"
+  T_SCOPE="$RUN/wide$n.scope" run wide$n rebuild
+  if [ "$RC" -eq 2 ] && has "REFUSED" "$RUN/wide$n.out"; then ok "refused (rc 2): $line"; else bad "NOT refused: $line (rc $RC): $(tail -1 "$RUN/wide$n.out")"; fi
+done <<'EOF'
+allow daily 0_Brain/daily_tuesday/20*.md
+allow daily 0_Brain/daily_friday/20*.md
+allow skill 0_Brain/daily_tuesday/*.md
+allow lesson 0_Brain/daily/20*.md
+allow ledger 0_Brain/learnings/_ledger_friday.md
+allow ledger 0_Brain/learnings/_ledger_laptop_datasec.md
+allow ledger 0_Brain/learnings/_ledger*.md
+allow ledger 0_Brain/learnings/_ledger_fleet_insights.md
+allow skill 0_Brain/learnings/_ledger_*.md
+allow skill 0_Brain/tasks/*.md
+allow pickup 0_Brain/tasks/*.md
+allow pickup 0_Brain/tasks/NEXT-PICKUP-TUESDAY.md
+allow pickup 0_Brain/tasks/WEEK-INSTRUCTION-FRIDAY.md
+allow skill 2_Project_Files/tuesday/*.md
+allow rules 2_Project_Files/CLAUDE.md
+allow rules_index 0_Brain/learnings/_other_index.tsv
+allow architecture 1_Project_Definition/Discovery/*.md
+EOF
+[ "$(sql "select count(*) from brain.files")" = "$NF7" ] && ok "the index is unchanged by the $n refused scopes ($NF7 files)" || bad "the index changed"
+{ cat "$LANE/scope/wednesday.scope"; echo "allow pickup 0_Brain/tasks/NEXT-PICKUP.md"; echo "allow lesson 0_Brain/learnings/*.md"; echo "allow skill 0_Brain/skills/_*.md"; } > "$RUN/own.scope"
+T_SCOPE="$RUN/own.scope" run rebuildW rebuild; rc_is "(can fail) a line for this seat's OWN pickup file, and wider patterns inside the table's folders, are accepted" 0 rebuildW
 dump W
-for tok in xcanary37 xcanary38 xcanary22 xcanary23 xcanary77 xcanary700 xcanary701; do
-  t_hasnt "seat words still exclude $tok" "$tok" "$RUN/dump-W.sql"
+t_has "  the seat's own pickup file enters, so the table is live in both directions" "xtasksown202" "$RUN/dump-W.sql"
+t_hasnt_re "  and no other seat's record, ledger-named skill or planted lesson came with the wider patterns" "xcanary" "$RUN/dump-W.sql"
+t_has "  a file whose name starts with '_' is never a skill or a lesson" "is a ledger, digest or index, never a" "$RUN/rebuildW.out"
+# 7a. the other two seats' tables, on trees named for them: Wednesday's records are refused whatever line asks
+mksim TUESDAY; mksim FRIDAY
+for seatname in TUESDAY FRIDAY; do
+  low="$(echo "$seatname" | tr '[:upper:]' '[:lower:]')"
+  for line in "allow ledger 0_Brain/learnings/_ledger.md" "allow ledger 0_Brain/learnings/_ledger_archive.md" "allow ledger 0_Brain/learnings/_ledger*.md" "allow daily 0_Brain/daily/20*.md" "allow skill 0_Brain/tasks/*.md" "allow pickup 0_Brain/tasks/NEXT-PICKUP.md"; do
+    { cat "$LANE/proposed/scope/$low.scope"; echo "$line"; } > "$RUN/sim/$seatname/2_Project_Files/brain-db/scope/$low.scope"
+    runs n5$low $seatname rebuild
+    if [ "$RC" -eq 2 ] && has "REFUSED" "$RUN/n5$low.out" && [ ! -e "$RUN/pgdata-$seatname" ]; then ok "a $seatname tree: '$line' is refused (rc 2) and no cluster is created"; else bad "a $seatname tree: '$line' rc $RC, cluster dir $([ -e "$RUN/pgdata-$seatname" ] && echo created || echo absent)"; fi
+  done
+  mv -n "$RUN/sim/$seatname/2_Project_Files/brain-db/scope/$low.scope" "$GONE/$low.scope.n5"
 done
-t_has "  the rebuild output says why" "another seat's records" "$RUN/rebuildW.out"
-t_has "(control) this seat's OWN pickup file does enter under the same widened line, so the line is live" "xtasksown202" "$RUN/dump-W.sql"
-t_has "(control) a lesson named for another seat is still indexed under the same scope" "xneighbour02" "$RUN/dump-W.sql"
-# 7b. Now remove the deny lines too: the planted files enter.
-sed -e '/^deny_path /d' -e '/^deny_seat_word /d' -e '/^deny_clients /d' -e 's/^own_clients .*/& datasec acme/' "$RUN/widened.scope" > "$RUN/permissive.scope"
-T_SCOPE="$RUN/permissive.scope" run rebuildP rebuild; rc_is "rebuild under the permissive scope" 0 rebuildP
+# 7b. the clauses that read the scope file are load-bearing: name this seat for the other client and its lessons enter
+sed -e '/^deny_clients /d' -e '/^deny_path /d' -e 's/^own_clients .*/& datasec/' "$LANE/scope/wednesday.scope" > "$RUN/permissive.scope"
+T_SCOPE="$RUN/permissive.scope" run rebuildP rebuild; rc_is "rebuild under a scope that calls the other client its own" 0 rebuildP
 dump P
-for tok in xcanary05 xcanary06 xcanary08 xcanary09 xcanary13 xcanary14 xcanary22 xcanary23 xcanary37 xcanary38 xcanary77 xcanary700 xcanary701; do
-  t_has "(can fail) without the deny lines $tok DOES enter the index" "$tok" "$RUN/dump-P.sql"
+for tok in xcanary08 xcanary715 xcanary716 xcanary725 xcanary726 xcanary727; do
+  t_has "(can fail) under that scope $tok DOES enter, so its absence above is clause (c) or (d) at work" "$tok" "$RUN/dump-P.sql"
 done
-t_hasnt_re "even then: a lesson whose every rules-index row names another seat stays out (the seats column is not a scope-file setting)" "xcanary03|xcanary17" "$RUN/dump-P.sql"
-t_hasnt_re "even then: backups ending .md.pre-*, the symlinks, the hard link, credentials, keys, dashboard, reference stay out" \
-  "xcanary07|xcanary15|xcanary25|xcanary36|xcanary41|xcanary47|xcanary48|xcanary49|xcanary50|xcanary680|xcanary681" "$RUN/dump-P.sql"
-t_hasnt_re "even then: every lesson whose tier or rules-index row cannot be read safely stays out (fail closed is not a scope-file setting)" \
-  "xcanary60[45678]|xcanary61[02345]|xcanary618|xcanary62[0123]|xcanary66[0-9]|xcanary67[015]" "$RUN/dump-P.sql"
-for tok in xcanary601 xcanary602 xcanary609 xcanary611; do
-  t_has "(can fail) a lesson of the other client whose tier IS read correctly ($tok) enters once that client is allowed, so its absence above is the tier rule at work" "$tok" "$RUN/dump-P.sql"
-done
-run checkP check; rc_is "check under the real scope is red after a permissive rebuild (scope hash differs)" 1 checkP
+t_hasnt_re "even then: every lesson left out under (a), (b), (t) or (f), and every structural (c) and (d) case, stays out" \
+  "xcanary03|xcanary17|xcanary3[0-9][0-9]|xcanary40[12]|xcanary50[1-9]|xcanary5[1-4][0-9]|xcanary70[1-9]|xcanary71[0-4]|xcanary8[0-9][0-9]|xcanary15|xcanary680" "$RUN/dump-P.sql"
+t_hasnt_re "even then: sync copies and backups stay out although the scope's deny_path lines are not what holds them" "xcanary05|xcanary06|xcanary07|xcanary24|xcanary25" "$RUN/dump-P.sql"
+run checkP check; rc_is "check under the real scope is red after that rebuild" 1 checkP
 run rebuild2 rebuild; rc_is "rebuild under the real scope" 0 rebuild2
 dump C
 t_hasnt "and every canary is gone again" "xcanary" "$RUN/dump-C.sql"
+{ cat "$LANE/scope/wednesday.scope"; echo "# one more comment line"; } > "$RUN/comment.scope"
+T_SCOPE="$RUN/comment.scope" run checkC check; rc_is "a scope file that differs only by a comment line makes check red (N24)" 1 checkC
+t_has "  with 0 paths differing" "RED, 0 path(s) differ" "$RUN/checkC.out"
+t_has "  and the reason given" "the scope file has changed since the last rebuild" "$RUN/checkC.out"
 
 section "8. hard exclusions: a scope file that names them is refused, and the index is untouched"
 n=0
@@ -325,26 +297,38 @@ allow nonsense 0_Brain/skills/*.md
 allow rules ../CLAUDE.md
 allow rules *.md
 allow lesson CLAUDE.md
+allow skill 0_Brain/skills/4_Credentials/*.md
+allow skill 0_Brain/skills_link/*.md
 deny_seat_word two words
+own_clients secuura general Datasec
+deny_clients ds
+seat tuesday
+alow skill 0_Brain/skills/*.md
 EOF
 run check2 check; rc_is "the index is unchanged by the refused rebuilds (check green)" 0 check2
-{ cat "$LANE/scope/wednesday.scope"; echo "allow skill 0_Brain/skills_link/*.md"; } > "$RUN/symdir.scope"
-T_SCOPE="$RUN/symdir.scope" run rebuildS rebuild; rc_is "a scope naming a SYMLINKED directory still rebuilds" 0 rebuildS
+mv -n "$TREE/0_Brain/people" "$GONE/people.real"; ln -s "../4_Credentials" "$TREE/0_Brain/people"
+run rebuildS rebuild; rc_is "a table folder that is itself a SYMLINK (people -> 4_Credentials) still rebuilds" 0 rebuildS
 dump S
 t_hasnt "  but nothing behind the symlink is indexed" "xcanary" "$RUN/dump-S.sql"
-t_has "  and the rebuild output names the skipped directory" "symlink" "$RUN/rebuildS.out"
+t_has "  and the rebuild output names the skipped directory" "0_Brain/people/  [directory is or sits under a symlink]" "$RUN/rebuildS.out"
+mv -n "$TREE/0_Brain/people" "$GONE/people.symlink"; mv -n "$GONE/people.real" "$TREE/0_Brain/people"
 run rebuild3 rebuild; rc_is "back to the real scope" 0 rebuild3
 
 section "8b. no usable rules index: the rebuild is REFUSED, not run with every lesson let in (ANSWER-3 F1 iii)"
 NF0="$(sql "select count(*) from brain.files")"
 mv -n "$TREE/$L/_rules_index.tsv" "$GONE/_rules_index.tsv"
 run noidx rebuild; rc_not0 "rebuild with the rules index missing is refused"
-t_has "  and says why" "REFUSED: lessons are on the allow-list but no readable rules index" "$RUN/noidx.out"
+t_has "  and says why" "REFUSED: lessons are on the allow-list but the rules index" "$RUN/noidx.out"
 [ "$(sql "select count(*) from brain.files")" = "$NF0" ] && ok "  the index still holds its $NF0 files" || bad "the index changed: $(sql "select count(*) from brain.files") files"
 dump N; t_hasnt_re "  neither other-seat lesson entered" "xcanary03|xcanary17" "$RUN/dump-N.sql"
 printf '# a rules index with a header and no rows\n' > "$TREE/$L/_rules_index.tsv"
-run noidx2 rebuild; rc_not0 "rebuild with a rules index that has no well-formed row is refused"
-mv -n "$TREE/$L/_rules_index.tsv" "$GONE/_rules_index.header-only.tsv"; mv -n "$GONE/_rules_index.tsv" "$TREE/$L/_rules_index.tsv"
+run noidx2 rebuild; rc_not0 "rebuild with a rules index that has no row is refused"
+ln -s "$GONE/_rules_index.tsv" "$TREE/$L/_rules_index.tsv.tmp"; mv -n "$TREE/$L/_rules_index.tsv" "$GONE/_rules_index.header-only.tsv"; mv -n "$TREE/$L/_rules_index.tsv.tmp" "$TREE/$L/_rules_index.tsv"
+run noidx3 rebuild; rc_not0 "rebuild with a rules index that is a SYMLINK is refused"
+t_has "  and says it is not a plain regular file" "not a plain regular file (symlink)" "$RUN/noidx3.out"
+[ "$(sql "select count(*) from brain.files")" = "$NF0" ] && ok "  the index still holds its $NF0 files" || bad "the index changed"
+mv -n "$TREE/$L/_rules_index.tsv" "$GONE/_rules_index.symlink"
+mv -n "$GONE/_rules_index.tsv" "$TREE/$L/_rules_index.tsv"
 run check2b check; rc_is "(can fail) with the rules index back, check is green again" 0 check2b
 
 section "9. check: red on a changed, added or removed fixture; green after rebuild"
@@ -353,17 +337,20 @@ echo "an appended line" >> "$TREE/$L/2026-01-01_alpha-keeps-panes-open.md"
 echo "an appended line" >> "$TREE/$L/2026-01-03_what-friday-does.md"
 run check4 check; rc_is "red after one indexed file and one excluded file changed" 1 check4
 t_has "  and names the changed path" "changed since the last rebuild: $L/2026-01-01_alpha-keeps-panes-open.md" "$RUN/check4.out"
-t_hasnt "  the changed EXCLUDED file is not named" "what-friday-does" "$RUN/check4.out"
+t_hasnt "  the changed LEFT-OUT file is not named as changed (it is not in the index)" "changed since the last rebuild: $L/2026-01-03_what-friday-does.md" "$RUN/check4.out"
 t_has "  and exactly one path differs" "RED, 1 path(s) differ" "$RUN/check4.out"
 run rebuild4 rebuild; run check5 check; rc_is "green after rebuild" 0 check5
-printf -- '---\ndate: 2026-01-18\ntier: W\n---\n\n# A new lesson\n\nxneighbour60\n' > "$TREE/$L/2026-01-18_new.md"
+printf -- '---\ndate: 2026-01-18\ntier: W\n---\n\n# A new lesson\n\nxnewnorow60\n' > "$TREE/$L/2026-01-18_new.md"
+run check6a check; rc_is "a NEW lesson with no rules-index row does not make check red: it does not qualify, so it is not owed to the index" 0 check6a
+t_has "  but check names it as left out under clause (a)" "2026-01-18_new.md  [it has no rules-index row whose key is exactly its file name]" "$RUN/check6a.out"
+printf '# A new skill\n\nxneighbour60\n' > "$TREE/0_Brain/skills/new-skill.md"
 run check6 check; rc_is "red after a file was added" 1 check6
-t_has "  and names it" "on disk, not in the index: $L/2026-01-18_new.md" "$RUN/check6.out"
+t_has "  and names it" "on disk, not in the index: 0_Brain/skills/new-skill.md" "$RUN/check6.out"
 mv -n "$TREE/0_Brain/skills/ritual.md" "$GONE/ritual.md"
 run check7 check; rc_is "red after a file was removed" 1 check7
 t_has "  and names it" "gone from disk or now out of scope: 0_Brain/skills/ritual.md" "$RUN/check7.out"
 mv -n "$GONE/ritual.md" "$TREE/0_Brain/skills/ritual.md"
-i=0; while [ "$i" -lt 25 ]; do i=$((i+1)); printf -- '---\ndate: 2026-02-01\ntier: W\n---\n\n# Bulk %s\n\ntext\n' "$i" > "$TREE/$L/2026-02-01_bulk-$i.md"; done
+i=0; while [ "$i" -lt 25 ]; do i=$((i+1)); printf '# Bulk %s\n\ntext\n' "$i" > "$TREE/0_Brain/skills/bulk-$i.md"; done
 run check8 check; rc_is "red with 26 differing paths" 1 check8
 [ "$(count_in 'on disk, not in the index' "$RUN/check8.out")" = "20" ] && ok "  names exactly 20 paths" || bad "named $(count_in 'on disk, not in the index' "$RUN/check8.out") paths, wanted 20"
 t_has "  and counts the rest" "(+6 more)" "$RUN/check8.out"
@@ -373,20 +360,20 @@ section "9b. one bad file does not lose the rebuild (ANSWER-3 F7)"
 printf -- '---\ntier: W\n---\n# locked\n\nxlocked300\n' > "$TREE/$L/2026-09-01_locked.md"; chmod 000 "$TREE/$L/2026-09-01_locked.md"
 "$PY" -c "
 import sys
-open(sys.argv[1], 'w').write('---\ntier: W\n---\n# big\n\nxbigrow301 ' + ' '.join('w%07dx' % i for i in range(300000)) + '\n')" "$TREE/$L/2026-09-02_big.md"
+open(sys.argv[1], 'w').write('# big\n\nxbigrow301 ' + ' '.join('w%07dx' % i for i in range(300000)) + '\n')" "$TREE/0_Brain/skills/big-row.md"
 run rebuildF rebuild; rc_is "rebuild with one unreadable lesson and one 3 MB section still succeeds" 0 rebuildF
 t_hasnt "  with no Python traceback" "Traceback" "$RUN/rebuildF.out"
 t_has "  the unreadable file is listed" "2026-09-01_locked.md  [unreadable: PermissionError]" "$RUN/rebuildF.out"
-t_has "  the truncated row is listed" "2026-09-02_big.md" "$RUN/rebuildF.out"
-t_has "  and the LAST line says so" "DONE WITH FAULTS: 1 unreadable file(s) skipped, 1 row(s) truncated" "$RUN/rebuildF.out"
+t_has "  the truncated row is listed" "0_Brain/skills/big-row.md" "$RUN/rebuildF.out"
+t_has "  and the LAST line says so" "DONE WITH FAULTS: 1 unreadable file(s) skipped, 1 row(s) truncated; they are listed above; " "$RUN/rebuildF.out"
 [ "$(tail -1 "$RUN/rebuildF.out" | count_in 'DONE WITH FAULTS' /dev/stdin)" = "1" ] && ok "  (it is the last line)" || bad "the fault line is not last: $(tail -1 "$RUN/rebuildF.out")"
 can_fail "fault line: the clean rebuild before it did not print it" has "DONE WITH FAULTS" "$RUN/rebuild5.out"
 run checkF check; rc_is "check is green on what could be read" 0 checkF
 t_has "  and reports the skipped counts" "skipped for a fault: 1 file(s) unreadable on disk now; at the last rebuild 1 unreadable, 1 row(s) truncated" "$RUN/checkF.out"
 t_hasnt "  with no Python traceback" "Traceback" "$RUN/checkF.out"
-run sF search xbigrow301; t_has "the truncated row is still found by a word before the cut" "2026-09-02_big.md" "$RUN/sF.out"
+run sF search xbigrow301; t_has "the truncated row is still found by a word before the cut" "0_Brain/skills/big-row.md" "$RUN/sF.out"
 run sF2 search xlocked300; t_has "the unreadable file's word is not in the index" "NO MATCH" "$RUN/sF2.out"
-chmod 644 "$TREE/$L/2026-09-01_locked.md"; mv -n "$TREE/$L/2026-09-01_locked.md" "$GONE/"; mv -n "$TREE/$L/2026-09-02_big.md" "$GONE/"
+chmod 644 "$TREE/$L/2026-09-01_locked.md"; mv -n "$TREE/$L/2026-09-01_locked.md" "$GONE/"; mv -n "$TREE/0_Brain/skills/big-row.md" "$GONE/"
 run rebuild5b rebuild; run check9b check; rc_is "green and clean after the two files are moved away" 0 check9b
 t_has "  the fault counts are back to zero" "0 file(s) unreadable on disk now; at the last rebuild 0 unreadable, 0 row(s) truncated" "$RUN/check9b.out"
 
@@ -410,7 +397,7 @@ can_fail "NO MATCH line: a search that finds something does not print it" has "N
 run s5 search "seat thing" --kind ledger --limit 2; t_has "--limit 2 gives two results" "(2 results" "$RUN/s5.out"
 run s6 search word --kind bogus; rc_not0 "an unknown --kind is refused"
 run s7 search "the of and"; t_has "a query of stop words gives zero results, not an error" "(0 results" "$RUN/s7.out"
-run s8 search xneighbour910; t_has "a row holding the separator bytes 0x1F and 0x1E is FOUND by search (ANSWER-3 F8)" "2026-07-28_separator-bytes.md" "$RUN/s8.out"
+run s8 search xneighbour910; t_has "a row holding the separator bytes 0x1F and 0x1E is FOUND by search (ANSWER-3 F8)" "0_Brain/skills/separator-bytes.md" "$RUN/s8.out"
 [ "$(sql "select count(*) from brain.chunks where body like '%xneighbour910%'")" = "1" ] && ok "  (control) and the database holds that row once" || bad "the row count is not 1"
 
 echo "  -- what a result is, lessons first, rules files, weak matches"
@@ -451,12 +438,18 @@ t_has "at pane lists three rules (the lesson named for tuesday but scoped all is
 [ "$(sed -n 3p "$RUN/a1.out" | /usr/bin/grep -i -E -c '×2\].*xneighbour11rule')" = "1" ] && ok "second: cited once plus one passed on by the superseded lesson (the laptop_datasec ledger's 3 citations are NOT counted)" || bad "second line is not the x2 rule"
 t_hasnt_re "another seat's rule, a superseded rule and excluded lessons' rules are not listed" "xneighbour19rulea|old wording|xcanary" "$RUN/a1.out"
 run a2 at 'pane; drop schema brain cascade'; rc_not0 "a trigger that is not one plain word is refused"
+run a2b at pane --top -5; rc_not0 "at --top with a negative number is refused"
+echo "  -- N9: whether a rules row leads does not depend on --limit"
+run q1 search quillwort marshwort; run q2 search quillwort marshwort --limit 20; run q3 search quillwort marshwort --limit 1
+for q in q1 q2 q3; do
+  [ "$(line_of 2 "$RUN/$q.out" | count_re '^ 1\. .*\[rules\]  CLAUDE.md:' /dev/stdin)" = "1" ] && ok "the rules row holding both rare words is result 1 ($q: default limit, --limit 20, --limit 1)" || bad "$q: result 1 is not the rules row: $(line_of 2 "$RUN/$q.out")"
+done
+[ "$(sql "select count(*) from brain.chunks where kind = 'lesson' and slug like 'quillwort%'")" = "8" ] && ok "(control) eight lessons outscore that row on those words, so before the cut it was not in the first five" || bad "the N9 filler lessons are not indexed"
 B at $'pane\n' > "$RUN/a3.out" 2>&1; RC=$?; rc_not0 "a trigger with a trailing newline is refused"
 B at "$(printf 'pane\nq')" > "$RUN/a4.out" 2>&1; RC=$?; rc_not0 "a trigger holding a newline is refused"
 run check10 check; rc_is "  and the index is intact" 0 check10
 
 section "12. other seats: each from its OWN tree (a copy of the tool in a tree named TUESDAY, then FRIDAY)"
-mksim TUESDAY; mksim FRIDAY
 runs t0 TUESDAY check; rc_not0 "a seat with no scope file is refused"
 t_has "  and says why" "no scope file for seat 'tuesday'" "$RUN/t0.out"
 [ ! -e "$RUN/pgdata-TUESDAY" ] && ok "  and NOTHING was created: no cluster directory (ANSWER-3 F4)" || bad "the refused command created a cluster directory"
@@ -470,14 +463,14 @@ T_SCOPE="$LANE/proposed/scope/tuesday.scope" run t1 rebuild; rc_not0 "the wednes
 cp -n "$LANE/proposed/scope/tuesday.scope" "$RUN/sim/TUESDAY/2_Project_Files/brain-db/scope/tuesday.scope"
 runs t2 TUESDAY rebuild; rc_is "(can fail) once its scope file is in place the tuesday tree builds on the fixtures" 0 t2
 dump2 T
-for tok in xcanary23 xcanary37 xcanary08 xcanary14 xcanary17 xneighbour02 xneighbour01 xneighbour19 xneighbour46 xneighbour71; do t_has "tuesday scope: present $tok" "$tok" "$RUN/dump-T.sql"; done
-for tok in xneighbour20 xneighbour30 xneighbour10 xneighbour14b xcanary38 xcanary22 xcanary03 xcanary15 xcanary47 xcanary77 xcanary680; do t_hasnt "tuesday scope: absent  $tok" "$tok" "$RUN/dump-T.sql"; done
+for tok in xcanary23 xcanary37 xcanary08 xcanary17 xcanary401 xcanary402 xcanary715 xcanary725 xneighbour02 xneighbour01 xneighbour46 xneighbour71; do t_has "tuesday scope: present $tok" "$tok" "$RUN/dump-T.sql"; done
+for tok in xneighbour20 xneighbour30 xneighbour10 xneighbour730 xneighbour403 xcanary38 xcanary22 xcanary03 xcanary15 xcanary47 xcanary77 xcanary680 xcanary301 xcanary501 xcanary701 xcanary801 xtasksown202; do t_hasnt "tuesday scope: absent  $tok" "$tok" "$RUN/dump-T.sql"; done
 runs t3 TUESDAY stop; rc_is "tuesday's server stopped" 0 t3
 cp -n "$LANE/proposed/scope/friday.scope" "$RUN/sim/FRIDAY/2_Project_Files/brain-db/scope/friday.scope"
 runs f2 FRIDAY rebuild; rc_is "the friday tree builds on the fixtures with its proposed scope" 0 f2
 dump2 F
-for tok in xcanary22 xcanary38 xcanary03 xcanary08 xneighbour10 xneighbour01 xneighbour02 xneighbour04 xneighbour19; do t_has "friday scope: present $tok" "$tok" "$RUN/dump-F.sql"; done
-for tok in xneighbour20 xneighbour30 xcanary37 xcanary23 xcanary17 xcanary15 xcanary47 xcanary77 xcanary680; do t_hasnt "friday scope: absent  $tok" "$tok" "$RUN/dump-F.sql"; done
+for tok in xcanary22 xcanary38 xcanary03 xcanary08 xcanary401 xcanary715 xneighbour10 xneighbour01 xneighbour02 xneighbour404 xneighbour730; do t_has "friday scope: present $tok" "$tok" "$RUN/dump-F.sql"; done
+for tok in xneighbour20 xneighbour30 xneighbour403 xcanary37 xcanary23 xcanary17 xcanary15 xcanary47 xcanary77 xcanary680 xcanary301 xcanary501 xcanary701 xcanary801; do t_hasnt "friday scope: absent  $tok" "$tok" "$RUN/dump-F.sql"; done
 runs f3 FRIDAY stop; rc_is "friday's server stopped" 0 f3
 [ "$(server_procs "$RUN/pgdata-TUESDAY")$(server_procs "$RUN/pgdata-FRIDAY")" = "00" ] && ok "no other-seat test server is left" || bad "an other-seat test server is still running"
 
@@ -503,6 +496,125 @@ run p6ok check; rc_is "(can fail) the same check addressed to the main cluster i
 run doc1 doctor; rc_is "doctor for the main cluster: rc 0" 0 doc1
 t_has "  it says index current and names the data directory" "OK brain-db: index current, $PGD" "$RUN/doc1.out"
 [ "$(server_procs "$RUN/pgdata-c2")" = "0" ] && ok "c2 was never started" || bad "c2 is running"
+
+section "12c. the right database INSIDE the same session (N3; the second checker's F2c, lifted)"
+X() { local pg="$1"; shift; env -u WED_AGENT BRAINDB_ROOT="${X_ROOT:-$RUN/tiny}" BRAINDB_PGDATA="$pg" BRAINDB_SOCKDIR="$SOCK2" /bin/bash "$TOOL" "$@"; }
+psql2() { "$PGBIN/psql" -X -At -h "$SOCK2" -d "${2:-braindb}" -c "$1"; }
+holder() { # holder <lock file> <flag written once held> <file whose appearance releases it>
+  "$PY" -c "
+import fcntl, os, sys, time
+fd = os.open(sys.argv[1], os.O_RDWR | os.O_CREAT, 0o600); fcntl.flock(fd, fcntl.LOCK_EX); open(sys.argv[2], 'w').write('held')
+t = time.time()
+while not os.path.exists(sys.argv[3]) and time.time() - t < 90: time.sleep(0.1)" "$1" "$2" "$3" & HOLD=$!
+  while [ ! -f "$2" ]; do sleep 0.1; done
+}
+waitfor() { local i=0; while [ ! -e "$1" ] && [ "$i" -lt 300 ]; do sleep 0.1; i=$((i+1)); done; [ -e "$1" ]; }
+mkdir -p "$RUN/tiny2/0_Brain/learnings"; printf -- '---\ntier: W\n---\n# tiny two\n\nztwotoken\n' > "$RUN/tiny2/0_Brain/learnings/2026-01-02_tiny.md"
+printf '# idx\n2026-01-02_tiny.md\tlive\tall\tlearning-loop\tpane\t-\tWhen tiny: do it.\n' > "$RUN/tiny2/0_Brain/learnings/_rules_index.tsv"
+X_ROOT="$RUN/tiny2" X "$RUN/f2c-t2" rebuild > "$RUN/f2c-t2-build.out" 2>&1; RC=$?; rc_is "cluster t2 is built from its own tree (one file, token ztwotoken)" 0 f2c-t2-build
+X_ROOT="$RUN/tiny2" X "$RUN/f2c-t2" stop > "$RUN/f2c-t2-stop.out" 2>&1
+X "$RUN/f2c-t1" rebuild > "$RUN/f2c-t1-build.out" 2>&1; RC=$?; rc_is "cluster t1 is built from the other tree, on the SAME socket directory, and is the one answering" 0 f2c-t1-build
+# -- control: a rebuild that waits for the lock and is NOT swapped succeeds
+holder "$RUN/f2c-t1.lock" "$RUN/f2c-h0.flag" "$RUN/f2c-h0.release"
+X "$RUN/f2c-t1" rebuild > "$RUN/f2c-control.out" 2>&1 & RB=$!
+sleep 2; alive "$RB" && ok "(control) a rebuild behind a lock holder waits" || bad "the rebuild did not wait for the lock"
+touch "$RUN/f2c-h0.release"; wait "$HOLD"; wait "$RB"; RC=$?; rc_is "(can fail) and, with no swap, ends rc 0 once the holder lets go" 0 f2c-control
+# -- A. the checker's F2c: the server is swapped while the rebuild waits for the lock
+holder "$RUN/f2c-t1.lock" "$RUN/f2c-h1.flag" "$RUN/f2c-h1.release"
+X "$RUN/f2c-t1" rebuild > "$RUN/f2c-a.out" 2>&1 & RB=$!
+sleep 2
+"$PGBIN/pg_ctl" -D "$RUN/f2c-t1" -m fast -w stop > "$RUN/f2c-a-pgctl.out" 2>&1 || bad "could not stop t1 behind the tool's back"
+X_ROOT="$RUN/tiny2" X "$RUN/f2c-t2" start > "$RUN/f2c-a-t2start.out" 2>&1 || bad "could not start t2"
+touch "$RUN/f2c-h1.release"; wait "$HOLD"; wait "$RB"; RC=$?
+rc_is "A. swapped during the lock wait: the rebuild addressed to t1 is REFUSED with rc 4" 4 f2c-a
+t_has "  it names the directory that answered and the one addressed" "serves data directory '$RUN/f2c-t2', but this command is addressed to '$RUN/f2c-t1'" "$RUN/f2c-a.out"
+t_hasnt "  it does not print 'rebuild: done'" "rebuild: done" "$RUN/f2c-a.out"
+[ "$(psql2 "select count(*) from brain.chunks where body like '%ztwotoken%'")" = "1" ] && [ "$(psql2 "select count(*) from brain.chunks where body like '%ztinytoken%'")" = "0" ] && [ "$(psql2 "select count(*) from brain.files")" = "2" ] \
+  && ok "  t2, never addressed, still holds its own index and nothing of t1's tree" || bad "t2 was written to: $(psql2 "select count(*) from brain.files") files, ztinytoken $(psql2 "select count(*) from brain.chunks where body like '%ztinytoken%'")"
+# -- B. the narrowest window: swapped AFTER the tool's last separate session and BEFORE the load session opens
+X_ROOT="$RUN/tiny2" X "$RUN/f2c-t2" stop > "$RUN/f2c-b-t2stop.out" 2>&1; X "$RUN/f2c-t1" start > "$RUN/f2c-b-t1start.out" 2>&1 || bad "could not restart t1"
+BRAINDB_TEST_HOLD="$RUN/f2c-hold" X "$RUN/f2c-t1" rebuild > "$RUN/f2c-b.out" 2>&1 & RB=$!
+waitfor "$RUN/f2c-hold.waiting" && ok "B. the rebuild has passed every separate check and is about to open its load session" || bad "the rebuild never reached the hold point"
+"$PGBIN/pg_ctl" -D "$RUN/f2c-t1" -m fast -w stop > "$RUN/f2c-b-pgctl.out" 2>&1 || bad "could not stop t1"
+X_ROOT="$RUN/tiny2" X "$RUN/f2c-t2" start > "$RUN/f2c-b-t2start.out" 2>&1 || bad "could not start t2"
+touch "$RUN/f2c-hold"; wait "$RB"; RC=$?
+rc_is "  swapped at that point: REFUSED with rc 4 by the assertion INSIDE the load transaction" 4 f2c-b
+t_has "  the refusal is the data-directory one" "serves data directory '$RUN/f2c-t2'" "$RUN/f2c-b.out"
+[ "$(psql2 "select count(*) from brain.chunks where body like '%ztwotoken%'")" = "1" ] && [ "$(psql2 "select count(*) from brain.chunks where body like '%ztinytoken%'")" = "0" ] \
+  && ok "  and t2's index is untouched (the transaction never dropped or loaded anything)" || bad "t2 was written to by a rebuild addressed to t1"
+for c in "check" "search ztwotoken" "at pane"; do
+  BRAINDB_NO_AUTOSTART=1 X "$RUN/f2c-t1" $c > "$RUN/f2c-read.out" 2>&1; RC=$?
+  rc_is "  a '$c' addressed to t1 while t2 answers is refused in its own session" 4 f2c-read
+  t_hasnt_re "    and printed no result or GREEN line off the other cluster" "GREEN|ztwotoken|Rules for" "$RUN/f2c-read.out"
+done
+X_ROOT="$RUN/tiny2" X "$RUN/f2c-t2" stop > "$RUN/f2c-t2-stop2.out" 2>&1; RC=$?; rc_is "t2 stopped" 0 f2c-t2-stop2
+[ "$(server_procs "$RUN/f2c-")" = "0" ] && ok "no F2c server is left" || bad "an F2c server is still running"
+
+section "12d. spellings of the data directory, exit codes, the lock wait (N10, N11, N13)"
+T_PGD="$PGD/" run n10a status; rc_is "the data directory spelled with a trailing slash is the same running cluster" 0 n10a
+t_has "  status prints the one real spelling" "data directory: $PGD" "$RUN/n10a.out"
+T_PGD="$RUN//pgdata-test" run n10b start; rc_is "spelled with a doubled slash: start says already running" 0 n10b
+t_has "  (already running)" "already running" "$RUN/n10b.out"
+ln -s "$PGD" "$RUN/pglink"
+T_PGD="$RUN/pglink" BRAINDB_NO_AUTOSTART=1 run n10c check; rc_is "addressed through a symlink to the data directory: check is green for the same cluster" 0 n10c
+[ "$(server_procs)" = "1" ] && ok "  still exactly one server for it" || bad "server count is $(server_procs)"
+BRAINDB_PORT=5502 T_PGD="$RUN/pgdata-c2" run n11a start; rc_is "c2 is started on its own socket name in the SAME socket directory" 0 n11a
+BRAINDB_PORT=5432 T_PGD="$RUN/pgdata-c2" T_ROOT="$RUN/tiny" run n11b status
+rc_is "status addressed to c2 on the main cluster's socket prints REFUSED and exits 4, not 0 (N11)" 4 n11b
+t_has "  (it printed REFUSED)" "REFUSED: the server answering" "$RUN/n11b.out"
+BRAINDB_PORT=5502 T_PGD="$RUN/pgdata-c2" T_ROOT="$RUN/tiny" run n11c status; rc_is "(can fail) on its own socket the same status is rc 0" 0 n11c
+BRAINDB_PORT=5502 T_PGD="$RUN/pgdata-c2" run n11d stop; rc_is "c2 stopped" 0 n11d
+BRAINDB_PORT=5999 BRAINDB_NO_AUTOSTART=1 run n11e check; rc_is "no server on the socket named: rc 3" 3 n11e
+t_has "  it says 'not answering'" "is not answering" "$RUN/n11e.out"
+t_hasnt_re "  and never claims another cluster answered" "REFUSED|unknown" "$RUN/n11e.out"
+holder "$PGD.lock" "$RUN/n13.flag" "$RUN/n13.release"
+BRAINDB_LOCK_WAIT=2 run n13a rebuild; rc_is "a rebuild behind a holder that never lets go gives up at its limit: rc 75 (N13)" 75 n13a
+t_has "  with the same words as the lock wrapper" "another braindb command has held $PGD.lock for more than 2 s; nothing was done" "$RUN/n13a.out"
+BRAINDB_LOCK_WAIT=2 run n13b stop; rc_is "  stop behind the same holder gives up the same way" 75 n13b
+t_has "  with the same words" "another braindb command has held $PGD.lock for more than 2 s; nothing was done" "$RUN/n13b.out"
+touch "$RUN/n13.release"; wait "$HOLD"
+run n13c check; rc_is "(can fail) with the holder gone the index is intact and green" 0 n13c
+
+section "12e. a scope file that EXISTS but is refused creates nothing (N7)"
+i=0
+for badline in "seat tuesday" "allow skill 4_Credentials/*.md" "alow skill 0_Brain/skills/*.md" "allow ledger 0_Brain/learnings/_ledger_friday.md"; do
+  i=$((i+1))
+  { if [ "$i" = 1 ]; then /usr/bin/grep -v -i -E '^seat ' "$LANE/scope/wednesday.scope"; else cat "$LANE/scope/wednesday.scope"; fi; echo "$badline"; } > "$RUN/n7-$i.scope"
+  for c in check rebuild "search x" up; do
+    T_SCOPE="$RUN/n7-$i.scope" T_PGD="$RUN/pgdata-n7" T_SOCK="$SOCK2" run n7 $c
+    if [ "$RC" -eq 2 ] && [ ! -e "$RUN/pgdata-n7" ] && [ ! -e "$RUN/pgdata-n7.lock" ] && [ "$(server_procs "$RUN/pgdata-n7")" = "0" ]; then ok "scope with '$badline': '$c' is rc 2 and created no cluster, no lock file and no server"; else bad "scope with '$badline': '$c' rc $RC, cluster dir $([ -e "$RUN/pgdata-n7" ] && echo CREATED || echo absent), servers $(server_procs "$RUN/pgdata-n7")"; fi
+  done
+done
+T_PGD="$RUN/pgdata-n7" T_SOCK="$SOCK2" run n7stop stop     # a no-op, unless a broken guard let a server start
+T_PGD="$RUN/pgdata-n7" T_SOCK="$SOCK2" T_SCOPE="$RUN/n7-2.scope" run n7doc doctor; t_hasnt "doctor on a seat with a refused scope does not print OK" "OK brain-db" "$RUN/n7doc.out"
+
+section "12f. a file swapped for a symlink while rebuilds run never gets read (N6)"
+printf '# secret\n\nzsecretswap\n' > "$TREE/4_Credentials/swap-secret.md"
+"$PY" - "$TREE/0_Brain/skills/swap.md" "$TREE/4_Credentials/swap-secret.md" "$RUN/swap.stop" <<'PYEOF' &
+import os, sys
+target, secret, stop = sys.argv[1:4]
+d = os.path.dirname(target); n = 0
+while not os.path.exists(stop):
+    a = os.path.join(d, ".swap-a"); b = os.path.join(d, ".swap-b")
+    with open(a, "w") as f: f.write("# swap\n\nzswapregular\n")
+    os.replace(a, target)
+    os.symlink(secret, b); os.replace(b, target)
+    n += 1
+open(stop + ".n", "w").write(str(n))
+PYEOF
+FLIP=$!
+hits=0; reg=0; sym=0; i=0
+while [ "$i" -lt 14 ]; do
+  i=$((i+1)); run swap$i rebuild; dump X
+  hasnt "zsecretswap" "$RUN/dump-X.sql" || hits=$((hits+1))
+  hasnt "zswapregular" "$RUN/dump-X.sql" || reg=$((reg+1))
+  hasnt "0_Brain/skills/swap.md  [symlink]" "$RUN/swap$i.out" || sym=$((sym+1))
+done
+touch "$RUN/swap.stop"; wait "$FLIP"
+[ "$hits" = "0" ] && ok "14 rebuilds while the file flipped $(cat "$RUN/swap.stop.n") times: the 4_Credentials text entered the index in 0 of them" || bad "the 4_Credentials text entered the index in $hits of 14 rebuilds"
+[ "$reg" -gt 0 ] && [ "$sym" -gt 0 ] && ok "(control) the instrument saw both states: indexed as a regular file $reg time(s), skipped as a symlink $sym time(s)" || bad "the flip was not seen in both states (regular $reg, symlink $sym): the test proved nothing"
+mv -n "$TREE/0_Brain/skills/swap.md" "$GONE/swap-final-state"; mv -n "$TREE/4_Credentials/swap-secret.md" "$GONE/"
+run rebuildX rebuild; run checkX check; rc_is "green again with the swapped file moved away" 0 checkX
 
 section "13. stop, and on-demand start"
 [ "$(server_procs)" = "1" ] && ok "(control) one server process before stop" || bad "server process count before stop is $(server_procs)"
@@ -581,8 +693,14 @@ section "15. socket directory guards"
 LONG="/tmp/wed-bdb-t$$-a-very-long-name-that-pushes-the-socket-path-past-the-limit-of-one-hundred-and-three-bytes"
 T_SOCK="$LONG" run sock1 start
 rc_not0 "a socket path over the macOS limit is refused"; t_has "  and says why" "macOS allows 103" "$RUN/sock1.out"
-mkdir -m 755 "$RUN/sock755"
-T_SOCK="$RUN/sock755" run sock2 start; rc_not0 "a socket directory that is not mode 700 is refused"
+mkdir -m 755 "$SOCK-m"
+T_SOCK="$SOCK-m" run sock2 start; rc_not0 "a socket directory that is not mode 700 is refused"
+t_has "  for its MODE (the path is short enough to reach that test)" "is not mode 700 (it is 755)" "$RUN/sock2.out"
+mkdir -m 700 "$SOCK-real"; ln -s "$SOCK-real" "$SOCK-l"
+T_SOCK="$SOCK-l" run sock3 start; rc_not0 "a socket directory that is a symlink is refused"
+t_has "  and says so" "is a symlink" "$RUN/sock3.out"
+T_SOCK="$SOCK-m" run sock2stop stop; T_SOCK="$SOCK-l" run sock3stop stop     # no-ops, unless a broken guard let a server start there
+mv -n "$SOCK-m" "$GONE/"; mv -n "$SOCK-l" "$GONE/sock-symlink"; mv -n "$SOCK-real" "$GONE/"
 [ "$(server_procs)" = "0" ] && ok "  and nothing was started" || bad "a server started"
 [ ! -e "$LONG" ] && ok "  and the over-long directory was never created" || bad "the over-long socket directory was created"
 

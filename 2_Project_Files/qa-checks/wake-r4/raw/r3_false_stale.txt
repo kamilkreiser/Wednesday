@@ -1,0 +1,14 @@
+START Fri 27 Nov 2026 18:11:28 AEDT
+18:11  up  8:19, 2 users, load averages: 23.39 24.63 24.18
+## 1. deterministic: holder A finishes normally while waiter B sits between 'read the owner file' and 'is that pid alive'
+- A: rc 0 (handover: written QA); the lock directory existed after A ended: False
+- B: rc 5 after 29.95 s (wait was 30 s); says STALE LOCK: False; names A's pid as the dead holder: False; gives the recovery line: True
+- at that moment the lock at the path named by B's recovery line belongs to writer C, which is ALIVE and mid-write: owner pid 92823, C's pid 92823, C running True
+  B's message, first 330 characters: handover: REFUSED — LOCK BUSY — another handover write holds /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/435f0b28-fa4c-43b1-8811-a27f707f05c7/scratchpad/qa-wake-r4/r3/false_stale/det/WEDNESDAY/0_Brain/tasks/STATE-wednesday.lock.d (pid 92823 on Kamils-Mac-mini since QA) and did not finish within 30 s (HANDOVER_LOCK_WAIT)
+- the seat runs B's recovery line (rc 0) and writes again: D rc 0; C then finishes rc 5. On disk: A 1, C 0, D 1 copy(ies); state is D
+  => acknowledged block LOST: 
+## 2. natural: 5 writers per trial, 9 KB blocks, wait 30 s, with 8 CPU burners running beside them
+- trials run 60: acknowledged 300, acknowledged LOST 0, refusals by (rc, kind): {}
+rc=0
+END Fri 27 Nov 2026 18:12:27 AEDT
+18:12  up  8:20, 2 users, load averages: 26.80 24.84 24.25

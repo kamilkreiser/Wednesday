@@ -2,46 +2,46 @@
 
 For the Tuesday and Friday coordinators. Written 2026-11-27 by the WED build seat "brain-db" on the Wednesday tree (Kamils-Mac-mini, drive DevMASTER); revised after Wednesday's rulings (`ANSWER-1.md`) and after the independent checker's findings (`ANSWER-3.md`). **To be sent only after the Wednesday coordinator has tested it.** Nothing here has been run on a real Tuesday or Friday tree or on another machine; the build seat and the checker each ran it on a fixture tree named TUESDAY on this Mac. Where a step is unproven on your machine, it says so.
 
-## STEP 1, before anything else: confirm or change your seat's scope file before the first rebuild
+## STEP 1, before anything else: confirm your seat's scope file
 
-**This choice is yours, not Wednesday's and not the build seat's.** Your scope file is the allow-list: a file enters your index only if a line in it says so. A proposal for your seat is at
+Round 4 changed what this step is. **You adopt by CONFIRMING your seat's scope file. Nothing in it is changed to taste.** What a seat may index is a closed table in the code (`braindb_index.py`, the block headed "ROUND 4: what an allow line may ask for"); a scope file can leave a line out, and it can never add anything the table does not hold. A line that asks for anything else is REFUSED when the file is loaded, with exit code 2, before any cluster is created or any server is started.
 
-```
-<tree>/2_Project_Files/brain-db/proposed/scope/<seat>.scope
-```
+Your proposed file is `proposed/scope/<seat>.scope`. It is not live. Until a file sits at `<tree>/2_Project_Files/brain-db/scope/<seat>.scope`, every command refuses with "no scope file for seat" and creates nothing.
 
-It is not live. Until you put a file at `<tree>/2_Project_Files/brain-db/scope/<seat>.scope`, every command refuses with "no scope file for seat", and creates nothing: no cluster, no server. Read the proposal whole, change what is wrong for your seat, then copy it into place (a copy, so the proposal stays for comparison):
+1. Read the proposal whole.
+2. Confirm the three lines that are yours to confirm (table below). If one is wrong, do not edit it yourself: tell your coordinator, because the same fact is in the code's table.
+3. Copy it: `cp -n proposed/scope/<seat>.scope scope/<seat>.scope`.
 
-```
-cp -n "<tree>/2_Project_Files/brain-db/proposed/scope/<seat>.scope" "<tree>/2_Project_Files/brain-db/scope/<seat>.scope"
-```
-
-**The boundary the scope must keep (Wednesday's ruling, 2026-11-27):** the index holds only files your seat is already allowed to read at boot; no file that belongs to another seat or another client's project enters it. Rows inside your own files that name the other client stay, because shared rules name both clients; nothing is dropped by client name.
-
-**What each line does:**
-
-| Line | What it does | What to check for your seat |
+| Line | What it does | What you confirm |
 |---|---|---|
-| `seat <name>` | Ties the file to one seat. The tool refuses a scope file whose `seat` is not your tree's seat. | It is your seat. |
-| `own_clients <words>` | A lesson whose tier is a project tier (`P-<Client>/<Project>` or `P (<Client>/<Project>)`) is indexed only if its CLIENT is exactly one of these words. A client's name inside a project name does not count. | Tuesday proposal: `datasec general`. Friday proposal: `secuura datasec general`. |
-| `deny_clients <words>` | A lesson whose tier names one of these anywhere is excluded, and a section marked `<!-- tier: P-<that client>/... -->` inside an indexed lesson is dropped with its sub-sections. | Tuesday proposal: `secuura`. **Friday proposal: no such line**, because Friday works for both clients. That is the build seat's guess, not a ruling: decide it. |
-| `allow rules CLAUDE.md` and `allow rules 0_Brain/CLAUDE.md` | Indexes your tree's two rules files, one row per numbered rule or heading section. A file at the tree root can only be named exactly. | That these two files in YOUR tree are the rules your seat boots on. |
-| `allow lesson 0_Brain/learnings/20*.md` | Indexes lesson files (a lesson's name starts with its date). Which lessons is decided by content, never by name, and every doubt keeps a lesson OUT: see "Which lessons" below. | Nothing to change; read the "NOT indexed" list in step 4. |
-| `allow rules_index 0_Brain/learnings/_rules_index.tsv` | Loads the rules index: it feeds `at <trigger>` and decides lessons. **Without a readable rules index holding at least one well-formed row, `rebuild` refuses**; it will not index every lesson. | Keep. |
-| `allow ledger <file>` (two lines) | Indexes YOUR ledger and its archive, one row per table row. A ledger file can only be indexed by an `allow ledger` line. | Tuesday: `_ledger_laptop_datasec.md` and `_ledger_laptop_datasec_archive.md` (the historical file name). Friday: `_ledger_friday.md` and `_ledger_friday_archive.md`. |
-| `allow daily <folder>/20*.md` | Indexes YOUR daily notes, one row per bullet line. Only files named as a plain date (`2026-11-27.md`) are taken, and a daily-note folder can only be indexed by an `allow daily` line. | Tuesday: `0_Brain/daily_tuesday/`. Friday: `0_Brain/daily_friday/`. |
-| `allow skill`, `allow identity`, `allow people`, `allow architecture` | Index those folders' `.md` files, split at headings. | Whether your seat reads all four at boot; delete a line you do not want. |
-| `deny_path (conflict_on_` and `deny_path .pre-` | Sync conflict copies and backups are excluded wherever that text appears in the path. | Keep. |
-| `deny_seat_word <word>` | Another seat's own records. The word excludes a path when it is in ANY folder name, or in the file name, whatever kind the allow line declares. One exception: a lesson in `learnings/`, a skill in `skills/`, an identity, people or architecture file in its own folder may be NAMED for a seat (Wednesday's ruling). | Tuesday proposal: `friday`, `wednesday`. Friday proposal: `tuesday`, `wednesday`, `laptop_datasec`. |
+| `seat <name>` | Ties the file to one seat. A file whose `seat` is not your tree's seat is refused. | It is your seat. |
+| `own_clients <words>` | The clients whose PROJECT lessons (`tier: P-<Client>/<Project>`) your seat may index. | Tuesday proposal: `datasec general`. Friday proposal: `secuura datasec general`. |
+| `deny_clients <words>` | A lesson that names one of these words ANYWHERE (its text, its file name, its rules-index line) is left out whole. | Tuesday proposal: `secuura`. **Friday proposal: no such line, because Friday works for both clients. That is the build seat's reading, not a ruling: Kam or your coordinator confirms it.** |
 
-**One thing the seat words cannot do for you.** The Wednesday seat's own records carry no seat word in their names (`_ledger.md`, `_ledger_archive.md`, `daily/`, `tasks/NEXT-PICKUP.md`). They are kept out of your index by not being on your allow-list, and by the two rules above (a ledger only by `allow ledger`, a daily folder only by `allow daily`). Do not add an allow line that names them.
+Every `allow` line in the proposal is already the only thing the table permits for your seat:
 
-**Which lessons enter (each test fails closed; the rebuild report names every lesson kept out and why):**
-1. The lesson's head must be unambiguous about its tier. A lesson is kept out when its frontmatter is not closed, when `tier` is given more than once, or when a line looks like a tier line but no value could be read.
-2. The tier: `W`, `M`, `MIXED` or no tier are in (untagged ones are listed by name); a project tier only for your own client; anything unrecognised is out.
-3. The rules index: a lesson named by a damaged row (wrong number of fields, a bad `#n`) is out; a lesson whose rows all name only other seats is out; a lesson with no row is decided by its tier alone.
+| Kind | The one place it may come from, for your seat |
+|---|---|
+| `rules` | `CLAUDE.md` and `0_Brain/CLAUDE.md` of your own tree, named exactly |
+| `lesson` | `0_Brain/learnings/` (file names that start with a date) |
+| `rules_index` | `0_Brain/learnings/_rules_index.tsv` |
+| `ledger` | your seat's own two ledger files, named exactly. Wednesday: `_ledger.md`, `_ledger_archive.md`. Tuesday: `_ledger_laptop_datasec.md` and its `_archive`. Friday: `_ledger_friday.md` and its `_archive`. |
+| `daily` | your seat's own daily folder, as `tools/seat_note.sh` resolves it (`0_Brain/daily`, `0_Brain/daily_tuesday`, `0_Brain/daily_friday`); only files named as a plain date |
+| `pickup` | your seat's own pickup and week files in `0_Brain/tasks/`, named exactly (no proposal carries this line; add it only with your coordinator's word) |
+| `skill`, `identity`, `people`, `architecture` | `0_Brain/skills/`, `0_Brain/identity/`, `0_Brain/people/`, `1_Project_Definition/Architecture/`; you may delete a line you do not want |
 
-Things the scope file cannot do, by design: name anything under `4_Credentials/`, `3_Access_Keys/`, `0_Brain/dashboard/` or `0_Brain/reference/`; use `..`, an absolute path, a wildcard in a folder name, or a pattern that does not end in `.md`. Each is refused when the file is loaded. Symlinks and hard links are skipped. **A secret pasted into a lesson is not something a path rule can see.**
+So a Tuesday or Friday tree cannot index the Wednesday seat's ledger, daily notes or pickup file by any line, and the reverse. `(conflict_on_` copies and `.pre-` backups are left out by the code whatever the file says.
+
+**Which lessons enter: QUALIFY OR STAY OUT.** A lesson is indexed only when it positively qualifies on every clause. Anything else is left out and NAMED, with the clause it failed, by `rebuild`, `check` and `doctor`:
+
+- (a) it has exactly one row in the rules index whose key is exactly its file name, and no line of the rules index that could not be read so much as holds its name;
+- (b) that row's seats cell is `all` or names your seat;
+- (c) its frontmatter is one block opened on line 1 by `---` and closed by `---`, every line in it a plain `key: value`, with exactly one `tier:` line whose value is `W`, `M`, or `P-<one of your own clients>/<project>`. No tier, `MIXED`, or any other value stays out;
+- (d) nowhere in its text is there an HTML comment, a tier-like line, or the name of a client on your `deny_clients` line;
+- (t) it is plain UTF-8 text with Latin letters and no control or invisible characters;
+- (f) it is a plain regular file: not a symlink, not hard-linked, readable.
+
+This is deliberately strict. It leaves out real lessons you might want (on the Wednesday seat: see step 4), and the fix for a lesson that should be in is in the lesson file or the rules index, never in the tool.
 
 ## What you get
 
@@ -58,7 +58,7 @@ braindb.sh at pane --top 10
 |---|---|---|---|
 | 1 | Your tree holds `2_Project_Files/brain-db/` (it arrives by git once the coordinator commits it) | `ls <tree>/2_Project_Files/brain-db/braindb.sh` | present |
 | 2 | Postgres 15 binaries on this Mac | `/opt/homebrew/opt/postgresql@15/bin/postgres --version` prints 15.x (the tool also looks in `/usr/local/opt/postgresql@15/bin` and on PATH) | 15.19 |
-| 3 | `python3` on PATH (standard library only; the checker ran the round-2 suite under 3.9.6; round 3 has run only under 3.14.10) | `python3 --version` | 3.14.10 |
+| 3 | `python3` on PATH (standard library only; the round 4 suite passes under 3.9.6 and 3.14.10) | `python3 --version` | 3.14.10 |
 | 4 | **Your tree's FOLDER is named for your seat** (`TUESDAY` or `FRIDAY`). The tool takes the seat from the folder name. If `WED_AGENT` is set in your shell it must say the same seat; a disagreement, or any other folder name, is refused. | `braindb.sh status` prints `seat: <yours>` on its first line | wednesday |
 | 5 | The drive accepts a Postgres data directory | step 3 below is the proof; it worked on a Case-sensitive APFS volume with Owners Disabled | proved |
 | 6 | No Postgres service is configured to start by itself | `brew services list` shows `postgresql@15` as `none` | not re-measured by the build seat (the census of 2026-11-27 read `none`) |
@@ -86,9 +86,9 @@ B rebuild     # run it once by hand as well, to read its report
 B check       # must print GREEN, and names the data directory it is reporting on
 ```
 
-**4. Read the `rebuild` report before trusting the index.** It lists every file that matched an allow line and was NOT indexed, with the reason; every lesson kept out because its tier or its rules-index row could not be read safely, by name; every UNTAGGED lesson that was indexed, by name; and anything unreadable or cut. If a file you expected is in the "NOT indexed" list, or a file you did not expect is missing from it, stop and tell your coordinator: that is your scope file, a lesson's frontmatter, or the rules index being wrong, and the fix is there, not in the tool.
+**4. Read the `rebuild` report before trusting the index.** It lists every lesson that was LEFT OUT, by name, under the clause it failed; every other file that matched an allow line and was not indexed, with the reason; every rules-index line that could not be read; and anything unreadable or cut. Its LAST line gives the count left out by each clause, and `check` and `doctor` print the same count afterwards, so a lesson that drops out later is visible without re-reading this report. If a lesson you expected is in the left-out list, the list tells you which clause to look at in the lesson file or the rules index.
 
-On the Wednesday seat the report reads: 419 files, 22,263 search rows, about 5 to 7 s; 32 files not indexed (26 lessons whose every rules-index row names only other seats, 4 sync conflict copies, 2 lessons of another client's project); 3 untagged lessons; nothing unreadable, nothing cut. The cluster takes about 157 MB on the drive.
+On the Wednesday seat (2026-11-27, round 4) the report reads: 354 files, 22,096 search rows. Of 292 lesson files, 199 qualified and 93 were left out: 28 under (b) (their row is scoped to other seats), 8 under (c) (5 with tier `MIXED`, 3 with no tier line), 57 under (d) (55 of them because they name the other client somewhere in their text). Nothing unreadable, nothing cut. The cluster takes about 174 MB on the drive. That one rebuild took 19 s on a Mac that was busy with other seats' work (load average 24); round 3 measured about 5 s on the same tree.
 
 **5. Confirm the git ignore** (the cluster must never be committed):
 
@@ -128,7 +128,9 @@ B stop                              # at the end of the session, and before ejec
 | `no index yet ... building it now` | the server was stopped uncleanly and the unlogged tables came back empty, or it was never built | nothing: `search` and `at` rebuild it themselves |
 | **`STALE PID FILE: ... names pid N, which is alive but is NOT this index's server`** | after a power cut or a pulled drive, the old server's pid number now belongs to some other program; `start`, `search` and `up` all stop here | run the ONE `mv -n` line the message prints (a person or the coordinator runs it; the tool never moves that file itself), then `B start`. Expect a rebuild afterwards. |
 | `REFUSED: the server answering on socket directory ... serves data directory 'A', but this command is addressed to 'B'` (exit code 4) | another cluster is running on your seat's socket directory, for example a second copy of your tree on another drive | stop that one with ITS OWN `braindb.sh stop`, or run this one with `BRAINDB_SOCKDIR=<another short private directory>` on every call |
-| `REFUSED: lessons are on the allow-list but no readable rules index ...` | `_rules_index.tsv` is missing, unreadable or has no well-formed row | restore the rules index; the tool will not guess |
+| `REFUSED: lessons are on the allow-list but the rules index ... cannot be used` | `_rules_index.tsv` is missing, is not a plain regular file, is not UTF-8, or has no row that could be read | restore the rules index; without it no lesson qualifies |
+| `REFUSED, for seat '<seat>' kind '<kind>' is indexed only from ...` (exit code 2) | a line in your scope file asks for something outside the code's table for your seat | remove the line; nothing was created or started |
+| `another braindb command has held ... for more than 150 s; nothing was done` (exit code 75) | another rebuild, start or stop of the same cluster is still running, or is stuck | wait, or find the stuck command; the lock frees itself when that process ends |
 | `REFUSED — WED_AGENT='x' but this tree ('Y') is seat 'y'` | your shell's `WED_AGENT` names another seat | unset it, or run from the matching tree |
 | `REFUSED: cannot tell which seat this tree is` | the tree's folder is not named WEDNESDAY, TUESDAY or FRIDAY | run from the real tree; a copy must sit in a folder with the seat's name |
 | `REFUSED: the cluster ... was made by Postgres X and the binaries here are Postgres Y ... rebuild` | the drive was plugged into a Mac with a different Postgres major version | move `pgdata-<seat>/` into `<lane>/_quarantine_<date>/` with `mv -n`, then `B up`. Never delete it. |
@@ -144,8 +146,9 @@ B stop                              # at the end of the session, and before ejec
 3. **A stale index answers without saying so.** `search` and `at` build a missing index but do not rebuild one that is merely behind the files; `check` tells you, and the launcher's `up` rebuilds at boot.
 4. **`at` weights count only your own indexed ledgers.** `rules_card.py` counts every seat's ledger, so the order differs between the two. On the Wednesday seat the two list exactly the same 802 rule lines.
 5. **Only your own tree's rules files are indexed.** A rule that lives in the workspace file one level above your tree is not in the index (ruled out by Wednesday: that file carries another client's environment detail, and the harness loads it into every session anyway).
-6. **Fail closed costs you lessons when a file is malformed.** A lesson with a mistyped frontmatter or a damaged rules-index row disappears from the index until the file is fixed. The rebuild report is where you see it; nothing else tells you.
+6. **The qualify rule costs you lessons, on purpose.** A lesson with no tier line, a `MIXED` tier, an HTML comment, or any mention of a client on your `deny_clients` line is not in the index, however useful it is. `rebuild`, `check` and `doctor` all print how many are left out, and `rebuild` names every one. `search` does not look inside left-out files; when it finds nothing it says how many lessons are left out.
 7. **Nothing writes to the brain.** The tool only reads your files. Corrections go in the files; the index follows at the next rebuild.
+8. **What the rule cannot see.** It reads names and words, not meaning: a lesson about another client's work that never uses a name on your `deny_clients` line, or spells it as an abbreviation, with a digit for a letter or with a space inside it, qualifies. A secret pasted into a lesson is not a path problem and is not seen either.
 
 ## The shared-file changes that go with it
 

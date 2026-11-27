@@ -132,14 +132,18 @@ Rollback: remove the line.
 For every unison profile that copies a seat tree. The one I found is `/Volumes/DevMASTER/!SYNC FILES/devnas.prf`; its `ignore` lines begin at **line 53** (`ignore = Name .git`; round 2 said 48, which is the `# --- Ignores ---` comment, corrected by the checker). I read only its `ignore` lines, not the whole profile, and I did not open the other profiles in that folder, so whoever owns them confirms the list. I have not run unison; the pattern syntax below follows the profile's own `ignore = Name <name>` lines and unison's documented shell-style patterns.
 
 ```
-# brain-db: a rebuildable search index and its probes, never copied (PORTABILITY brain-db item)
-ignore = Name pgdata-*
-ignore = Name pgdata-*.lock
-ignore = Name _probe_*
+# brain-db: a rebuildable search index and its probe, never copied (PORTABILITY brain-db item)
+ignore = Path WEDNESDAY/2_Project_Files/brain-db/pgdata-*
+ignore = Path TUESDAY/2_Project_Files/brain-db/pgdata-*
+ignore = Path FRIDAY/2_Project_Files/brain-db/pgdata-*
+ignore = Path WEDNESDAY/2_Project_Files/brain-db/_quarantine_*/_probe_*
 ```
 
-- `pgdata-*` covers `pgdata-wednesday`, `pgdata-tuesday` and `pgdata-friday`.
-- `_probe_*` covers the dead 39 MB cluster in this lane's quarantine, `_quarantine_2026-11-27/_probe_1127/pgdata`, left by the round-1 drive proof (the checker's note N2: round 2's three lines did not cover it).
+**Round 4 (the second checker's N12): these are `Path` lines scoped to this lane's folder, not `Name` patterns.** Round 3 proposed `ignore = Name pgdata-*`, `Name pgdata-*.lock` and `Name _probe_*`. A `Name` pattern matches that name anywhere under the synced roots: the checker found `Name _probe_*` already matching 6 unrelated paths under `0_Brain/reference/`, which would silently have stopped reaching the NAS. A `Path` line is matched against the whole path from the profile's root, which in `devnas.prf` is the drive root (its own lines 114 and 115 are written `ignore = Path WEDNESDAY/2_Project_Files/local-model/models`), so each line above can only ever match inside a `brain-db` lane.
+
+- `pgdata-*` in a lane covers `pgdata-<seat>` and its lock file `pgdata-<seat>.lock` (the `*` does not cross a `/`).
+- The fourth line covers the dead 39 MB cluster in this lane's quarantine, `_quarantine_2026-11-27/_probe_1127`, left by the round-1 drive proof. It exists only on the Wednesday tree.
+- Not run: I have not run unison. The syntax follows the profile's own `Path` lines.
 
 **Until these lines are applied, the next NAS sync copies `pgdata-wednesday/` (about 157 MB), and copies it live if the server is up.** That copy is harmless to the drive and useless at the far end; it is a reason to apply this item with the launcher block, not after it.
 

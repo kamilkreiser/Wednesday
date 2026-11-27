@@ -1,0 +1,153 @@
+START Fri 27 Nov 2026 18:13:09 AEDT
+18:13  up  8:20, 2 users, load averages: 26.48 25.11 24.38
+## D. the PRINTED recovery line run while a writer is ALIVE, the writer paused at every point of its write (load 26.48 25.11 24.38)
+   history: S0, S1 acknowledged. C is paused at <point>. A waiter W (1 s) is refused; the line W's refusal prints is run as printed;
+   D and E then write; C is released; if C exits non-zero a caller that reads non-zero as 'not written' writes C's block AGAIN (C2); F writes last.
+- after-mkdir          arch  W rc 5 LOCK BUSY, line run rc 0 | D rc 0, E rc 0 | C rc 4 cannot take the write lock, said written False | C again: rc 0 - | F rc 0 
+      before C2: lost none
+      end: copies S0:1 S1:1 C:1 W:0 D:1 E:1 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 5 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0
+      => acknowledged LOST NONE; more than one copy none
+- after-owner          arch  W rc 5 LOCK BUSY, line run rc 0 | D rc 0, E rc 0 | C rc 4 I/O fault, said written False | C again: rc 0 - | F rc 0 
+      before C2: lost none
+      end: copies S0:1 S1:1 C:1 W:0 D:1 E:1 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 5 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0
+      => acknowledged LOST NONE; more than one copy none
+- after-fsync1         arch  W rc 5 LOCK BUSY, line run rc 0 | D rc 0, E rc 0 | C rc 4 I/O fault, said written False | C again: rc 0 - | F rc 0 
+      before C2: lost none
+      end: copies S0:1 S1:1 C:1 W:0 D:1 E:1 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 5 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0
+      => acknowledged LOST NONE; more than one copy none
+- after-fsync2         arch  W rc 5 LOCK BUSY, line run rc 0 | D rc 0, E rc 0 | C rc 4 I/O fault, said written False | C again: rc 0 - | F rc 0 
+      before C2: lost none
+      end: copies S0:1 S1:1 C:1 W:0 D:1 E:1 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 5 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0
+      => acknowledged LOST NONE; more than one copy none
+- before-replace1      arch  W rc 5 LOCK BUSY, line run rc 0 | D rc 0, E rc 0 | C rc 5 LOCK LOST, said written False | C again: rc 0 - | F rc 0 
+      before C2: lost none
+      end: copies S0:1 S1:1 C:1 W:0 D:1 E:1 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 5 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0
+      => acknowledged LOST NONE; more than one copy none
+- after-replace1       arch  W rc 5 LOCK BUSY, line run rc 0 | D rc 0, E rc 0 | C rc 5 LOCK LOST, said written False | C again: rc 0 - | F rc 0 
+      before C2: lost none
+      end: copies S0:1 S1:2 C:1 W:0 D:1 E:1 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 6 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0
+      => acknowledged LOST NONE; more than one copy ['S1']
+- before-replace2      arch  W rc 5 LOCK BUSY, line run rc 0 | D rc 0, E rc 0 | C rc 5 LOCK LOST, said written False | C again: rc 0 - | F rc 0 
+      before C2: lost none
+      end: copies S0:1 S1:2 C:1 W:0 D:1 E:1 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 6 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0
+      => acknowledged LOST NONE; more than one copy ['S1']
+- after-replace2       arch  W rc 5 LOCK BUSY, line run rc 0 | D rc 0, E rc 0 | C rc 6 NOT ACKNOWLEDGED, said written False | C again: rc 0 - | F rc 0 
+      before C2: lost none
+      end: copies S0:1 S1:1 C:2 W:0 D:1 E:1 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 6 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0
+      => acknowledged LOST NONE; more than one copy ['C']
+- after-remove-owner   arch  W rc 5 LOCK BUSY, line run rc 0 | D rc 0, E rc 0 | C rc 6 NOT ACKNOWLEDGED, said written False | C again: rc 0 - | F rc 0 
+      before C2: lost none
+      end: copies S0:1 S1:1 C:2 W:0 D:1 E:1 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 6 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0
+      => acknowledged LOST NONE; more than one copy ['C']
+- after-mkdir          first W rc 5 LOCK BUSY, line run rc 0 | D rc 0, E rc 0 | C rc 4 cannot take the write lock, said written False | C again: rc 0 - | F rc 0 
+      before C2: lost none
+      end: copies C:1 W:0 D:1 E:1 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0
+      => acknowledged LOST NONE; more than one copy none
+- after-owner          first W rc 5 LOCK BUSY, line run rc 0 | D rc 0, E rc 0 | C rc 4 I/O fault, said written False | C again: rc 0 - | F rc 0 
+      before C2: lost none
+      end: copies C:1 W:0 D:1 E:1 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0
+      => acknowledged LOST NONE; more than one copy none
+- after-fsync1         first W rc 5 LOCK BUSY, line run rc 0 | D rc 0, E rc 0 | C rc 4 I/O fault, said written False | C again: rc 0 - | F rc 0 
+      before C2: lost none
+      end: copies C:1 W:0 D:1 E:1 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0
+      => acknowledged LOST NONE; more than one copy none
+- before-replace1      first W rc 5 LOCK BUSY, line run rc 0 | D rc 0, E rc 0 | C rc 5 LOCK LOST, said written False | C again: rc 0 - | F rc 0 
+      before C2: lost none
+      end: copies C:1 W:0 D:1 E:1 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0
+      => acknowledged LOST NONE; more than one copy none
+- after-replace1       first W rc 5 LOCK BUSY, line run rc 0 | D rc 0, E rc 0 | C rc 6 NOT ACKNOWLEDGED, said written False | C again: rc 0 - | F rc 0 
+      before C2: lost none
+      end: copies C:2 W:0 D:1 E:1 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 4 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0
+      => acknowledged LOST NONE; more than one copy ['C']
+- after-remove-owner   first W rc 5 LOCK BUSY, line run rc 0 | D rc 0, E rc 0 | C rc 6 NOT ACKNOWLEDGED, said written False | C again: rc 0 - | F rc 0 
+      before C2: lost none
+      end: copies C:2 W:0 D:1 E:1 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 4 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0
+      => acknowledged LOST NONE; more than one copy ['C']
+D total: cases 15, acknowledged writes 78, acknowledged LOST 0
+## T. three actors: C is paused and DISPLACED (lock moved away as the recovery line does); D then takes a NEW lock and is itself paused; C is released first, then D (load 27.00 25.48 24.56)
+- C@after-mkdir     D@after-owner        C rc 0 -                D rc 4 I/O fault        F rc 0            - | copies S0:1 S1:1 C:1 D:0 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@after-mkdir     D@after-fsync1       C rc 6 NOT ACKNOWLEDGED D rc 4 I/O fault        F rc 5 LOCK BUSY  line rc 0, G rc 0  | copies S0:1 S1:1 C:1 D:0 F:0 G:1 | state is ['G'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 2 | temp files beside the state file 2 => LOST NONE; dup none
+- C@after-mkdir     D@before-replace1    C rc 6 NOT ACKNOWLEDGED D rc 5 LOCK LOST        F rc 5 LOCK BUSY  line rc 0, G rc 0  | copies S0:1 S1:1 C:1 D:0 F:0 G:1 | state is ['G'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 2 | temp files beside the state file 1 => LOST NONE; dup none
+- C@after-mkdir     D@before-replace2    C rc 6 NOT ACKNOWLEDGED D rc 6 NOT ACKNOWLEDGED F rc 5 LOCK BUSY  line rc 0, G rc 0  | copies S0:1 S1:2 C:0 D:1 F:0 G:1 | state is ['G'], ONE block True, check rc 0 | archive entries 4 | lock dir left False | set-aside dirs 2 | temp files beside the state file 0 => LOST NONE; dup ['S1']
+- C@after-mkdir     D@after-replace2     C rc 0 -                D rc 6 NOT ACKNOWLEDGED F rc 0            - | copies S0:1 S1:1 C:1 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 4 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@after-mkdir     D@after-remove-owner C rc 0 -                D rc 6 NOT ACKNOWLEDGED F rc 0            - | copies S0:1 S1:1 C:1 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 4 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@after-owner     D@after-owner        C rc 5 LOCK LOST        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 2 => LOST NONE; dup none
+- C@after-owner     D@after-fsync1       C rc 5 LOCK LOST        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 2 => LOST NONE; dup none
+- C@after-owner     D@before-replace1    C rc 5 LOCK LOST        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 2 => LOST NONE; dup none
+- C@after-owner     D@before-replace2    C rc 5 LOCK LOST        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 2 => LOST NONE; dup none
+- C@after-owner     D@after-replace2     C rc 5 LOCK LOST        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 2 => LOST NONE; dup none
+- C@after-owner     D@after-remove-owner C rc 5 LOCK LOST        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 2 => LOST NONE; dup none
+- C@after-fsync1    D@after-owner        C rc 4 I/O fault        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@after-fsync1    D@after-fsync1       C rc 4 I/O fault        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@after-fsync1    D@before-replace1    C rc 4 I/O fault        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@after-fsync1    D@before-replace2    C rc 4 I/O fault        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@after-fsync1    D@after-replace2     C rc 4 I/O fault        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@after-fsync1    D@after-remove-owner C rc 4 I/O fault        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@after-fsync2    D@after-owner        C rc 4 I/O fault        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@after-fsync2    D@after-fsync1       C rc 4 I/O fault        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@after-fsync2    D@before-replace1    C rc 4 I/O fault        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@after-fsync2    D@before-replace2    C rc 4 I/O fault        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@after-fsync2    D@after-replace2     C rc 4 I/O fault        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@after-fsync2    D@after-remove-owner C rc 4 I/O fault        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@before-replace1 D@after-owner        C rc 5 LOCK LOST        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@before-replace1 D@after-fsync1       C rc 5 LOCK LOST        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@before-replace1 D@before-replace1    C rc 5 LOCK LOST        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@before-replace1 D@before-replace2    C rc 5 LOCK LOST        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@before-replace1 D@after-replace2     C rc 5 LOCK LOST        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@before-replace1 D@after-remove-owner C rc 5 LOCK LOST        D rc 0 -                F rc 0            - | copies S0:1 S1:1 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup none
+- C@before-replace2 D@after-owner        C rc 5 LOCK LOST        D rc 0 -                F rc 0            - | copies S0:1 S1:2 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 4 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup ['S1']
+- C@before-replace2 D@after-fsync1       C rc 5 LOCK LOST        D rc 0 -                F rc 0            - | copies S0:1 S1:2 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 4 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup ['S1']
+- C@before-replace2 D@before-replace1    C rc 5 LOCK LOST        D rc 0 -                F rc 0            - | copies S0:1 S1:2 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 4 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup ['S1']
+- C@before-replace2 D@before-replace2    C rc 5 LOCK LOST        D rc 0 -                F rc 0            - | copies S0:1 S1:2 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 4 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup ['S1']
+- C@before-replace2 D@after-replace2     C rc 5 LOCK LOST        D rc 0 -                F rc 0            - | copies S0:1 S1:2 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 4 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup ['S1']
+- C@before-replace2 D@after-remove-owner C rc 5 LOCK LOST        D rc 0 -                F rc 0            - | copies S0:1 S1:2 C:0 D:1 F:1 G:0 | state is ['F'], ONE block True, check rc 0 | archive entries 4 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup ['S1']
+T total: cases 36, acknowledged writes 141, acknowledged LOST 0
+## T2. two displaced writers in a row, the SAME recovery line used twice (same .stale-<stamp> name)
+- line run twice: rc 0 then rc 0; lock entries after the second run: ['STATE-wednesday.lock.d.stale-20261127-181430']
+  C1 rc 5 LOCK LOST; C2 rc 4 I/O fault; D rc 0; E rc 0  | copies S0:1 S1:1 C1:0 C2:0 D:1 E:1 | state is ['E'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE
+## K. kill -9 at every point; what is left; what `check`, the next writer and the printed line do with it (load 24.38 25.00 24.42)
+- kill at after-mkdir         engine rc -9, said written False | left in the lock dir: []; temp files beside the state file 0; check rc 0 | next write rc 5 LOCK BUSY in 1.1s; its line run rc 0; then rc 0
+      end: copies S0:1 S1:1 C:0 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 2 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0; the set-aside dir holds [[]] => LOST NONE
+- kill at after-owner         engine rc -9, said written False | left in the lock dir: ['owner']; temp files beside the state file 0; check rc 0 | next write rc 5 STALE LOCK in 0.1s; its line run rc 0; then rc 0
+      end: copies S0:1 S1:1 C:0 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 2 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0; the set-aside dir holds [['owner']] => LOST NONE
+- kill at after-fsync1        engine rc -9, said written False | left in the lock dir: ['archive.tmp.*', 'owner']; temp files beside the state file 0; check rc 0 | next write rc 5 STALE LOCK in 0.2s; its line run rc 0; then rc 0
+      end: copies S0:1 S1:1 C:0 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 2 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0; the set-aside dir holds [['archive.tmp.*', 'owner']] => LOST NONE
+- kill at after-fsync2        engine rc -9, said written False | left in the lock dir: ['archive.tmp.*', 'owner', 'state.tmp.*']; temp files beside the state file 0; check rc 0 | next write rc 5 STALE LOCK in 0.1s; its line run rc 0; then rc 0
+      end: copies S0:1 S1:1 C:0 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 2 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0; the set-aside dir holds [['archive.tmp.*', 'owner', 'state.tmp.*']] => LOST NONE
+- kill at before-replace1     engine rc -9, said written False | left in the lock dir: ['archive.tmp.*', 'owner', 'state.tmp.*']; temp files beside the state file 0; check rc 0 | next write rc 5 STALE LOCK in 0.1s; its line run rc 0; then rc 0
+      end: copies S0:1 S1:1 C:0 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 2 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0; the set-aside dir holds [['archive.tmp.*', 'owner', 'state.tmp.*']] => LOST NONE
+- kill at after-replace1      engine rc -9, said written False | left in the lock dir: ['owner', 'state.tmp.*']; temp files beside the state file 0; check rc 0 | next write rc 5 STALE LOCK in 0.1s; its line run rc 0; then rc 0
+      end: copies S0:1 S1:2 C:0 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0; the set-aside dir holds [['owner', 'state.tmp.*']] => LOST NONE
+- kill at before-replace2     engine rc -9, said written False | left in the lock dir: ['owner', 'state.tmp.*']; temp files beside the state file 0; check rc 0 | next write rc 5 STALE LOCK in 0.1s; its line run rc 0; then rc 0
+      end: copies S0:1 S1:2 C:0 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0; the set-aside dir holds [['owner', 'state.tmp.*']] => LOST NONE
+- kill at after-replace2      engine rc -9, said written False | left in the lock dir: ['owner']; temp files beside the state file 0; check rc 0 | next write rc 5 STALE LOCK in 0.1s; its line run rc 0; then rc 0
+      end: copies S0:1 S1:1 C:1 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0; the set-aside dir holds [['owner']] => LOST NONE
+- kill at after-remove-owner  engine rc -9, said written False | left in the lock dir: []; temp files beside the state file 0; check rc 0 | next write rc 5 LOCK BUSY in 1.1s; its line run rc 0; then rc 0
+      end: copies S0:1 S1:1 C:1 F:1 | state is ['F'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0; the set-aside dir holds [[]] => LOST NONE
+## S. the lock path is not a plain fresh directory (HANDOVER_LOCK_WAIT 1)
+- a regular FILE, fresh                                              rc 5 LOCK BUSY  1.1s; traceback no; left exactly as it was True; state still S0 False | its line run rc 0; write again rc 0
+- a regular FILE, 5 minutes old                                      rc 5 STALE LOCK 0.1s; traceback no; left exactly as it was True; state still S0 False | its line run rc 0; write again rc 0
+- a dangling symlink (lstat mtime is the link's: fresh)              rc 5 LOCK BUSY  1.1s; traceback no; left exactly as it was True; state still S0 False | its line run rc 0; write again rc 0
+- a symlink to a directory whose owner file names a DEAD pid here    rc 5 STALE LOCK 0.1s; traceback no; left exactly as it was True; state still S0 False | its line run rc 0; write again rc 0
+- a symlink to a directory whose owner names a LIVE unrelated pid    rc 5 LOCK BUSY  1.1s; traceback no; left exactly as it was True; state still S0 False | its line run rc 0; write again rc 0
+- a symlink to an EMPTY directory (fresh)                            rc 5 LOCK BUSY  1.1s; traceback no; left exactly as it was True; state still S0 False | its line run rc 0; write again rc 0
+- a directory, owner names a LIVE unrelated pid (pid reuse)          rc 5 LOCK BUSY  1.1s; traceback no; left exactly as it was True; state still S0 False | its line run rc 0; write again rc 0
+- a directory, owner names pid 1 on this host                        rc 5 LOCK BUSY  1.1s; traceback no; left exactly as it was True; state still S0 False | its line run rc 0; write again rc 0
+- a directory, owner: a dead pid on ANOTHER host, 5 minutes old      rc 5 LOCK BUSY  1.2s; traceback no; left exactly as it was True; state still S0 False | its line run rc 0; write again rc 0
+- a directory, owner: dead pid, host line MISSING                    rc 5 LOCK BUSY  1.1s; traceback no; left exactly as it was True; state still S0 False | its line run rc 0; write again rc 0
+- a directory, owner file is a DIRECTORY, 5 minutes old              rc 5 STALE LOCK 0.2s; traceback no; left exactly as it was True; state still S0 False | its line run rc 0; write again rc 0
+- a directory, no owner, holding a stray temp file, 5 minutes old    rc 5 STALE LOCK 0.1s; traceback no; left exactly as it was True; state still S0 False | its line run rc 0; write again rc 0
+- a directory, owner pid NEGATIVE (-1)                               rc 5 LOCK BUSY  1.2s; traceback no; left exactly as it was True; state still S0 False | its line run rc 0; write again rc 0
+- a directory, owner pid with a + sign / spaces / unicode digits     rc 5 LOCK BUSY  1.1s; traceback no; left exactly as it was True; state still S0 False | its line run rc 0; write again rc 0
+- a directory, a 2 MB owner file of garbage                          rc 5 LOCK BUSY  1.4s; traceback no; left exactly as it was True; state still S0 False | its line run rc 0; write again rc 0
+Traceback (most recent call last):
+  File "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/qa-checks/wake-r4/scripts/n2_lock.py", line 241, in <module>
+    shape("a directory, owner is a dead pid here but the dir is mode 000", lambda r, L: (os.mkdir(L), open(os.path.join(L, "owner"), "w").write("pid: %d\nhost: %s\n" % (dead.pid, host)), os.chmod(L, 0)))
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/qa-checks/wake-r4/scripts/n2_lock.py", line 214, in shape
+    before = (os.path.islink(L), os.path.isdir(L), sorted(os.listdir(L)) if os.path.isdir(L) else None)
+                                                          ~~~~~~~~~~^^^
+PermissionError: [Errno 13] Permission denied: '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/435f0b28-fa4c-43b1-8811-a27f707f05c7/scratchpad/qa-wake-r4/r3/n2_shape/a_directory_owner_is_a_dead_pid_here_but/WEDNESDAY/0_Brain/tasks/STATE-wednesday.lock.d'
+rc=1
+END Fri 27 Nov 2026 18:14:57 AEDT
+18:14  up  8:22, 2 users, load averages: 24.66 25.00 24.44

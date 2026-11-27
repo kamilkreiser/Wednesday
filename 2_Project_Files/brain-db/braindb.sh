@@ -13,8 +13,10 @@
 #   braindb.sh doctor               one line for doctor.sh; starts nothing; rc 0 ok, rc 1 warn
 # rebuild, check, search and at bring the server up themselves when it is down (init if there is no
 # cluster yet); search and at also build the index when there is none. BRAINDB_NO_AUTOSTART=1 turns
-# that off. Every command that talks to the server first asks it for its data directory and refuses
-# (rc 4) unless that is the one the command is addressed to.
+# that off. Every psql session the tool opens first asserts, inside that same session (and for a rebuild or
+# a read, inside the same transaction as the work), that the server's data directory is the one the command
+# is addressed to; otherwise rc 4 and nothing is read or changed. rc 3 = no server answers.
+# The scope file is read and validated BEFORE any cluster is created or started (rc 2 on any refusal).
 #
 # Seat: the tree's folder name (WEDNESDAY, TUESDAY, FRIDAY). WED_AGENT, when set, must agree with it.
 # Overrides (tests): BRAINDB_ROOT (tree to index; needs BRAINDB_PGDATA too), BRAINDB_PGDATA,
@@ -43,6 +45,7 @@ if [ -f "$NOTE_LIB" ]; then
   . "$NOTE_LIB"
   seat_note_dir "$CODE_ROOT" braindb || exit 2
   SEAT="$SEAT_NOTE_SEAT"
+  DAILY_REL="$SEAT_NOTE_REL"
 else
   [ -f "$RESOLVER" ] || die "seat resolver not found: $RESOLVER"
   # shellcheck disable=SC1090
@@ -57,6 +60,7 @@ else
     echo "braindb: REFUSED: WED_AGENT='$WED_AGENT' but this tree ('$(basename "$CODE_ROOT")') is seat '$TREE_SEAT'; unset WED_AGENT, or run from the matching tree" >&2; exit 2
   fi
   SEAT="$TREE_SEAT"
+  DAILY_REL=""          # the indexer's own seat table decides (the same mapping as tools/seat_note.sh)
 fi
 case "$SEAT" in wednesday|tuesday|friday) ;; *) die "unknown seat '$SEAT' (wednesday|tuesday|friday)" ;; esac
 
@@ -65,6 +69,10 @@ if [ -n "${BRAINDB_ROOT:-}" ] && [ -z "${BRAINDB_PGDATA:-}" ]; then
 fi
 ROOT="${BRAINDB_ROOT:-$CODE_ROOT}"
 PGDATA="${BRAINDB_PGDATA:-$LANE/pgdata-$SEAT}"
+# ONE spelling of the data directory for everything below (pid file test, -D, lock file, the in-session
+# assertion): its real path. A trailing or doubled slash, or a symlink, is the same directory (N10).
+PGDATA="$("$PY" -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$PGDATA")" || die "cannot resolve the data directory path"
+[ -n "$PGDATA" ] || die "cannot resolve the data directory path"
 SOCKDIR="${BRAINDB_SOCKDIR:-/tmp/wed-braindb-$(id -u)-$SEAT}"
 SCOPE="${BRAINDB_SCOPE:-$LANE/scope/$SEAT.scope}"
 PORT="${BRAINDB_PORT:-5432}"
@@ -91,7 +99,11 @@ find_pgbin() {
 
 bin_major() { "$PGBIN/postgres" --version | sed -E 's/^[^0-9]*([0-9]+).*/\1/'; }
 
-need_scope() { # a seat with no scope file gets NOTHING created or started
+need_scope() { # a seat with no scope file, or one that is refused, gets NOTHING created or started
+  need_scope_file
+  indexer validate || exit 2
+}
+need_scope_file() {
   [ -f "$SCOPE" ] || die "no scope file for seat '$SEAT' at $SCOPE. A seat is indexed only through its own confirmed allow-list (see proposed/INSTRUCTIONS-for-other-seats.md, step 1). Nothing was created or started."
 }
 
@@ -149,12 +161,13 @@ check_sockdir() {
 
 export_env() {
   export BRAINDB_ROOT_EFF="$ROOT" BRAINDB_SCOPE_EFF="$SCOPE" BRAINDB_SEAT="$SEAT" BRAINDB_PGDATA_EFF="$PGDATA"
-  export BRAINDB_SOCKDIR_EFF="$SOCKDIR" BRAINDB_PORT_EFF="$PORT" BRAINDB_PGBIN_EFF="$PGBIN" BRAINDB_LOCK_EFF="$LOCKFILE"
+  export BRAINDB_SOCKDIR_EFF="$SOCKDIR" BRAINDB_PORT_EFF="$PORT" BRAINDB_PGBIN_EFF="${PGBIN:-unset}" BRAINDB_LOCK_EFF="$LOCKFILE"
+  export BRAINDB_DAILY_REL="$DAILY_REL"
 }
 indexer() { export_env; "$PY" "$LANE/braindb_index.py" "$@"; }
 # locked <internal command>: run it in a fresh braindb.sh while holding the cluster's lock, so two commands
 # can never run initdb or pg_ctl on one data directory at the same time (the second waits its turn).
-locked() { "$PY" "$LANE/braindb_lock.py" "$LOCKFILE" 150 /bin/bash "$SELF" "$@"; }
+locked() { "$PY" "$LANE/braindb_lock.py" "$LOCKFILE" "${BRAINDB_LOCK_WAIT:-150}" /bin/bash "$SELF" "$@"; }
 
 cmd_init() {
   find_pgbin
@@ -235,7 +248,7 @@ cmd_status() {
   fi
   if running; then
     echo "server: RUNNING (pid $PF_PID, socket $SOCKDIR/.s.PGSQL.$PORT)"
-    if [ -f "$SCOPE" ]; then indexer info; fi
+    if [ -f "$SCOPE" ]; then indexer info; return $?; fi     # rc 4 when it prints REFUSED, rc 3 when nothing answers, rc 2 for a refused scope
     return 0
   fi
   echo "server: STOPPED"
@@ -266,15 +279,17 @@ cmd_doctor() { # ONE line for doctor.sh. Starts nothing, stops nothing. rc 0 = o
   if ! find_pgbin_soft; then echo "WARN brain-db: Postgres 15 binaries missing | brew install postgresql@15 (PORTABILITY 25 and the brain-db item)"; return 1; fi
   if [ ! -f "$SCOPE" ]; then echo "OK brain-db: not adopted on this seat (no scope/$SEAT.scope)"; return 0; fi
   if [ ! -f "$PGDATA/PG_VERSION" ]; then echo "WARN brain-db: no cluster yet | run 2_Project_Files/brain-db/braindb.sh up"; return 1; fi
-  local have want out rc first
+  local have want out rc first lo
+  if ! out="$(indexer validate 2>&1)"; then echo "WARN brain-db: the scope file is refused | $(printf '%s\n' "$out" | sed -n 1p)"; return 1; fi
   have="$(tr -d ' \n' < "$PGDATA/PG_VERSION")"; want="$(bin_major)"
   if [ "$have" != "$want" ]; then echo "WARN brain-db: cluster is Postgres $have, binaries are Postgres $want | quarantine pgdata-$SEAT (mv -n) and run braindb.sh up"; return 1; fi
   out="$(BRAINDB_NO_AUTOSTART=1 indexer check 2>&1)"; rc=$?
   first="$(printf '%s\n' "$out" | sed -n 1p)"
+  lo="$(printf '%s\n' "$out" | sed -n 's/^  left out: //p' | sed -n 1p)"
   case "$rc" in
-    0) echo "OK brain-db: index current, $PGDATA (${first#check: })"; return 0 ;;
+    0) echo "OK brain-db: index current, $PGDATA (${first#check: }); $lo"; return 0 ;;
     3) echo "OK brain-db: server stopped (on demand; the next search starts it), $PGDATA"; return 0 ;;
-    1) echo "WARN brain-db: index stale, $PGDATA | braindb.sh rebuild (${first#check: })"; return 1 ;;
+    1) echo "WARN brain-db: index stale, $PGDATA | braindb.sh rebuild (${first#check: }); $lo"; return 1 ;;
     4) echo "WARN brain-db: ANOTHER cluster is answering on this seat's socket directory $SOCKDIR | $first"; return 1 ;;
     *) echo "WARN brain-db: check could not run (rc $rc) | $first"; return 1 ;;
   esac

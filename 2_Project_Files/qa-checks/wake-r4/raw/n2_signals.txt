@@ -1,0 +1,26 @@
+START Fri 27 Nov 2026 18:32:34 AEDT
+18:32  up  8:40, 2 users, load averages: 21.29 26.29 27.35
+## 1. a catchable signal while the writer is at <point> (history S0, S1; the writer carries C; then F is written, with the printed line if refused)
+- SIGINT  at after-mkdir      writer rc -2, said written False, traceback YES | lock left: []; C on disk 0 | next write: rc 5 LOCK BUSY in 1.1s; line run rc 0; then rc 0 | S0 1 S1 1 F 1; check rc 0
+- SIGINT  at after-owner      writer rc -2, said written False, traceback YES | lock left: ['owner']; C on disk 0 | next write: rc 5 STALE LOCK in 0.1s; line run rc 0; then rc 0 | S0 1 S1 1 F 1; check rc 0
+- SIGINT  at after-fsync2     writer rc -2, said written False, traceback YES | lock left: ['archive.tmp', 'state.tmp']; C on disk 0 | next write: rc 5 LOCK BUSY in 1.1s; line run rc 0; then rc 0 | S0 1 S1 1 F 1; check rc 0
+- SIGINT  at before-replace2  writer rc -2, said written False, traceback YES | lock left: ['state.tmp']; C on disk 0 | next write: rc 5 LOCK BUSY in 1.1s; line run rc 0; then rc 0 | S0 1 S1 2 F 1; check rc 0
+- SIGINT  at after-replace2   writer rc -2, said written False, traceback YES | lock left: no lock dir; C on disk 1 | next write: rc 0 written in 0.1s; line run rc -; then rc 0 | S0 1 S1 1 F 1; check rc 0
+- SIGTERM at after-mkdir      writer rc -15, said written False, traceback no | lock left: []; C on disk 0 | next write: rc 5 LOCK BUSY in 1.2s; line run rc 0; then rc 0 | S0 1 S1 1 F 1; check rc 0
+- SIGTERM at after-owner      writer rc -15, said written False, traceback no | lock left: ['owner']; C on disk 0 | next write: rc 5 STALE LOCK in 0.1s; line run rc 0; then rc 0 | S0 1 S1 1 F 1; check rc 0
+- SIGTERM at after-fsync2     writer rc -15, said written False, traceback no | lock left: ['archive.tmp', 'owner', 'state.tmp']; C on disk 0 | next write: rc 5 STALE LOCK in 0.1s; line run rc 0; then rc 0 | S0 1 S1 1 F 1; check rc 0
+- SIGTERM at before-replace2  writer rc -15, said written False, traceback no | lock left: ['owner', 'state.tmp']; C on disk 0 | next write: rc 5 STALE LOCK in 0.1s; line run rc 0; then rc 0 | S0 1 S1 2 F 1; check rc 0
+- SIGTERM at after-replace2   writer rc -15, said written False, traceback no | lock left: ['owner']; C on disk 1 | next write: rc 5 STALE LOCK in 0.1s; line run rc 0; then rc 0 | S0 1 S1 1 F 1; check rc 0
+- SIGHUP  at after-mkdir      writer rc -1, said written False, traceback no | lock left: []; C on disk 0 | next write: rc 5 LOCK BUSY in 1.1s; line run rc 0; then rc 0 | S0 1 S1 1 F 1; check rc 0
+- SIGHUP  at after-owner      writer rc -1, said written False, traceback no | lock left: ['owner']; C on disk 0 | next write: rc 5 STALE LOCK in 0.1s; line run rc 0; then rc 0 | S0 1 S1 1 F 1; check rc 0
+- SIGHUP  at after-fsync2     writer rc -1, said written False, traceback no | lock left: ['archive.tmp', 'owner', 'state.tmp']; C on disk 0 | next write: rc 5 STALE LOCK in 0.1s; line run rc 0; then rc 0 | S0 1 S1 1 F 1; check rc 0
+- SIGHUP  at before-replace2  writer rc -1, said written False, traceback no | lock left: ['owner', 'state.tmp']; C on disk 0 | next write: rc 5 STALE LOCK in 0.1s; line run rc 0; then rc 0 | S0 1 S1 2 F 1; check rc 0
+- SIGHUP  at after-replace2   writer rc -1, said written False, traceback no | lock left: ['owner']; C on disk 1 | next write: rc 5 STALE LOCK in 0.1s; line run rc 0; then rc 0 | S0 1 S1 1 F 1; check rc 0
+## 2. the owner file cannot be written after mkdir succeeded (ENOSPC injected at the open)
+- writer rc 4 | handover: REFUSED — cannot take the write lock at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/435f0b28-fa4c-43b1-8811-a27f707f05c7/scratchpad/qa-wake-r4/r3/n2sig_60268/failowner/WEDNESDAY/0_B
+  the lock directory THIS call made is still there: True (holding []); state still S0: True
+  the next write: rc 5 LOCK BUSY in 1.1 s
+## 3. stdout is closed before the writer prints 'written' (a reader that went away)
+- writer rc 120; traceback no; state is C True; S0 in archive 1; lock left False | BrokenPipeError: [Errno 32] Broken pipe
+rc=0
+END Fri 27 Nov 2026 18:32:48 AEDT

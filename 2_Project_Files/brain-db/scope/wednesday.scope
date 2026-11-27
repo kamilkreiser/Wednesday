@@ -22,20 +22,24 @@ allow identity     0_Brain/identity/*.md
 allow people       0_Brain/people/*.md
 allow architecture 1_Project_Definition/Architecture/*.md
 
-# LESSONS are decided by content, not by name (Wednesday's ruling, ANSWER-1 item 2):
-#   - excluded when the frontmatter tier names a deny_clients client (or is a
-#     project tier naming none of own_clients);
-#   - excluded when the lesson has rows in the rules index and EVERY row's seats
-#     column names only other seats; a lesson with no row is decided by tier alone.
+# ROUND 4. What an allow line may ask for is a CLOSED TABLE in braindb_index.py, per
+# seat: one folder per kind, and exact names for the ledgers, the rules index and the
+# rules files. A line outside the table is REFUSED when this file is loaded, before
+# anything is created or started. This file can leave a line out; it cannot widen.
+#
+# LESSONS: QUALIFY OR STAY OUT. A lesson is indexed only when it has exactly one
+# rules-index row keyed by its exact file name, that row is scoped `all` or names this
+# seat, its frontmatter is one clean block with one `tier:` line whose value is W, M or
+# P-<one of own_clients>/<project>, and nowhere in it is there an HTML comment, a
+# tier-like line or a deny_clients name. Everything else is left out and named by
+# rebuild, check and doctor.
 
 # Sync leftovers: excluded wherever the text appears in the tree-relative path.
 deny_path (conflict_on_
 deny_path .pre-
 
-# Another seat's own RECORDS: the word excludes a path when it is in a FOLDER
-# name (any kind: daily_tuesday/, 2_Project_Files/tuesday/), or in the FILE name
-# of a record kind (ledger, daily). It never excludes a lesson, skill or
-# architecture file by its name.
+# Kept from round 3 as a second guard on folder names; the table above is what
+# decides.
 deny_seat_word tuesday
 deny_seat_word friday
 deny_seat_word laptop_datasec

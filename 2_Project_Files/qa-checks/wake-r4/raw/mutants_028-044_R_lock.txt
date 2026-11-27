@@ -1,0 +1,23 @@
+START Fri 27 Nov 2026 18:18:23 AEDT
+18:18  up  8:25, 2 users, load averages: 34.49 31.35 27.32
+RED-AS-EXPECTED m28 B1: no mutual exclusion (the lock path is different for every process) :: went red: R01 R02 R03 R04 R15 R16 R03c R05b R09 R10 R11 R11b R12 R13 R14 R08
+RED-AS-EXPECTED m29 a second writer proceeds after the wait instead of refusing :: went red: R02 R04 R16 R03c R10
+RED-AS-EXPECTED m30 a stale lock is removed silently :: went red: R03 R15 R05b
+RED-AS-EXPECTED m31 a stale lock is waited on instead of reported :: went red: R03 R15 R05b
+RED-AS-EXPECTED m32 N2a: STALE is reported on the FIRST look (no second look) :: went red: R09
+RED-AS-EXPECTED m33 N2b: the temp files live in the tasks directory again (a displaced writer can rename them into place) :: went red: R10 R11 R11b
+RED-AS-EXPECTED m34 N2b: the owner file is not re-read before a rename :: went red: R12
+RED-AS-EXPECTED m35 N2c: a writer whose lock is gone at release still says written and exits 0 :: went red: R13 R14
+RED-AS-EXPECTED m36 Y01 release removes a lock that is not this call's :: went red: R12 R14
+RED-AS-EXPECTED m37 a writer stopped by LOCK LOST leaves its temp files inside a lock directory another writer owns :: went red: R12
+RED-AS-EXPECTED m38 N3: an owner-less lock is never stale, however old :: went red: R15
+RED-AS-EXPECTED m39 N3: an owner-less lock is stale at any age (a fresh one too) :: went red: R04 R16 R08
+RED-AS-EXPECTED m40 N4: a number beyond a C int is taken as a pid (traceback) :: went red: R16
+RED-AS-EXPECTED m41 Y02 STALE is declared for a dead pid on ANY host :: went red: R03c
+RED-AS-EXPECTED m42 Q01 rename order swapped: state first, archive second :: went red: R05 R05b R05c R11b R12
+RED-AS-EXPECTED m43 Q02 changed-on-disk check removed :: went red: R06
+RED-AS-EXPECTED m44 Q03 temp-file read-back checks removed :: went red: R07
+mutants: 17 of 17 caught (each tool broken in a scratch copy; the lane's files are untouched); this run covered mutants 28 to 44 of 115
+rc=0
+END Fri 27 Nov 2026 18:42:42 AEDT
+18:42  up  8:50, 2 users, load averages: 11.23 16.40 21.48

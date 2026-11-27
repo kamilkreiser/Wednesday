@@ -13,39 +13,57 @@ Called by braindb.sh, which sets the environment:
 Standard library only. Database access is through psql only. No network, no model call.
 stderr of every child process is inherited, never discarded.
 """
-import os, sys, re, json, hashlib, fnmatch, subprocess, time, datetime, argparse
+import os, sys, re, json, hashlib, fnmatch, subprocess, time, datetime, argparse, stat, unicodedata, threading
 
 DB = "braindb"
-KINDS = ("rules", "lesson", "rules_index", "ledger", "daily", "skill", "identity", "people", "architecture")
-SEARCH_KINDS = ("rules", "lesson", "ledger", "daily", "skill", "identity", "people", "architecture")
-# A seat's own RECORDS: for these kinds a deny_seat_word is tested on the file name too. For every kind it is
-# tested on the directory names. Lessons, skills and the rest are decided by content rules, never by a name.
-RECORD_KINDS = ("ledger", "daily")
-# Search shows knowledge (rules files, lessons, skills, ...) ahead of records (incident rows) by default.
-RECORD_GROUP = ("ledger", "daily")
+KINDS = ("rules", "lesson", "rules_index", "ledger", "daily", "pickup", "skill", "identity", "people", "architecture")
+SEARCH_KINDS = ("rules", "lesson", "ledger", "daily", "pickup", "skill", "identity", "people", "architecture")
 MAX_ROW_CHARS = 80000        # a search row's text is cut here (Postgres refuses a tsvector over 1 MB)
 MAX_HEAD_CHARS = 20000       # titles, headings and rule lines
-# Where a kind's files live. Only THERE may a lesson, skill, identity, people, architecture or rules file
-# carry another seat's word in its NAME (ANSWER-1 ruling 2); anywhere else the name is tested (ANSWER-3 F11).
-HOME = {"lesson": ("0_brain/learnings",), "skill": ("0_brain/skills",), "identity": ("0_brain/identity",),
-        "people": ("0_brain/people",), "architecture": ("1_project_definition/architecture",),
-        "rules": ("", "0_brain")}
+SEATS = ("wednesday", "tuesday", "friday")
+ALL_SEATS = "all"            # the rules index's all-seats word (spec: "`all`, or a comma list of `wednesday`, `tuesday`, `friday`")
+ROW_STATUS = ("live", "dead", "superseded")
+
+# ---- ROUND 4: what an allow line may ask for is a CLOSED TABLE IN THIS FILE, per seat. A scope file can
+# narrow it and can never widen it: a line that asks for anything else is REFUSED when the scope is loaded,
+# before any cluster is created or started. (dir, exact file names or None = any name the pattern gives)
+LEARN = "0_Brain/learnings"
+SEAT_DAILY = {"wednesday": "0_Brain/daily", "tuesday": "0_Brain/daily_tuesday", "friday": "0_Brain/daily_friday"}   # as tools/seat_note.sh
+SEAT_LEDGERS = {"wednesday": ("_ledger.md", "_ledger_archive.md"),
+                "tuesday": ("_ledger_laptop_datasec.md", "_ledger_laptop_datasec_archive.md"),
+                "friday": ("_ledger_friday.md", "_ledger_friday_archive.md")}
+SEAT_PICKUP = {"wednesday": ("NEXT-PICKUP.md", "WEEK-INSTRUCTION.md"),
+               "tuesday": ("NEXT-PICKUP-TUESDAY.md", "WEEK-INSTRUCTION-TUESDAY.md"),
+               "friday": ("NEXT-PICKUP-FRIDAY.md", "WEEK-INSTRUCTION-FRIDAY.md")}
+ROOT_RULES = ("CLAUDE.md", "0_Brain/CLAUDE.md")
+SHARED_DIRS = {"lesson": LEARN, "skill": "0_Brain/skills", "identity": "0_Brain/identity", "people": "0_Brain/people",
+               "architecture": "1_Project_Definition/Architecture"}
+BUILTIN_DENY_PATH = ("(conflict_on_", ".pre-")     # sync leftovers and backups, whatever a scope file says
+
+
+def allowed_place(seat, kind, daily_rel):
+    """-> (directory, tuple of exact names or None). The one place a kind may be indexed from, for this seat."""
+    if kind == "ledger":
+        return LEARN, SEAT_LEDGERS[seat]
+    if kind == "daily":
+        return daily_rel, None
+    if kind == "pickup":
+        return "0_Brain/tasks", SEAT_PICKUP[seat]
+    if kind == "rules_index":
+        return LEARN, ("_rules_index.tsv",)
+    return SHARED_DIRS[kind], None
+
+
 LESSON_NAME = re.compile(r"\d{4}-\d{2}-\d{2}[_-].+\.md", re.S)   # used with fullmatch: a name may hold any character
 DAILY_NAME = re.compile(r"\d{4}-\d{2}-\d{2}\.md")
-TIERISH = re.compile(r'(?i)^\W*"?tier"?\s*:')                       # a line that looks like a tier line
-MARKER = re.compile(r"(?i)^\s*<!--\s*tier\s*:\s*(.*?)\s*-->\s*$")   # a section's tier marker, any case or indent
-FM_FENCE = re.compile(r"^---\s*$")
-CLIENT_SEG = re.compile(r"^p\s*(?:-|\()\s*([^/()]*?)\s*(?:/|\)|$)")  # the CLIENT of 'P-Client/Project' or 'P (Client/Project)'
 STRIP_BYTES = {0x00: None, 0x1e: None, 0x1f: None}                 # NUL, and the two bytes psql output is split on
 ITEM_RE = re.compile(r"^(\d+[a-z]?(?:-[ivx]+)?)\.\s+(.*)$")
 # Refused in code even when a scope file names them (matched on whole path segments, lower case).
 HARD_DENY_PREFIX = ("4_credentials", "3_access_keys", "0_brain/dashboard", "0_brain/reference")
 HARD_DENY_SEGMENT = ("4_credentials", "3_access_keys")
-SEATS = ("wednesday", "tuesday", "friday")
 
 HEAD_RE = re.compile(r"^(#{1,6})\s+(.*\S)\s*$")
 FENCE_RE = re.compile(r"^\s*(```|~~~)")
-P_MARK = re.compile(r"^<!--\s*tier:\s*(P-.*?)\s*-->\s*$")          # same marker boot_digest.py reads
 LEDGER_ROW = re.compile(r"^\|\s*(\d{4}-\d{2}-\d{2})\s*\|\s?(.*)$")
 BOLD = re.compile(r"\*\*(.+?)\*\*")
 BULLET = re.compile(r"^\s*[-*]\s+(.*)$")
@@ -70,11 +88,18 @@ def env(name):
 
 # ---------------------------------------------------------------- scope (the allow-list)
 
-def load_scope(path, seat):
+def load_scope(path, seat, daily_rel=None):
+    """Read and VALIDATE the scope file. Everything here runs before a cluster is created or started
+    (braindb.sh calls `validate` first), and every refusal is rc 2."""
+    daily_rel = daily_rel or SEAT_DAILY[seat]
+    if daily_rel != SEAT_DAILY[seat]:
+        die("REFUSED: tools/seat_note.sh says seat %r keeps its daily notes in %r, this tool's table says %r; "
+            "the two must agree before any daily note is indexed" % (seat, daily_rel, SEAT_DAILY[seat]))
     if not os.path.isfile(path):
         die("no scope file for seat '%s' at %s. A seat is indexed only through its own reviewed "
             "allow-list; see proposed/INSTRUCTIONS-for-other-seats.md" % (seat, path))
-    sc = dict(seat=None, own=[], deny_clients=[], allow=[], deny_path=[], deny_seat_word=[], path=path)
+    sc = dict(seat=None, own=[], deny_clients=[], allow=[], deny_path=[], deny_seat_word=[], path=path, daily_rel=daily_rel)
+    pending = []
     with open(path, encoding="utf-8") as f:
         for n, line in enumerate(f, 1):
             s = line.strip()
@@ -102,47 +127,93 @@ def load_scope(path, seat):
                 glob_ = glob_.strip()
                 if kind not in KINDS:
                     die("%s: unknown kind %r (kinds: %s)" % (where, kind, " ".join(KINDS)))
-                check_allow(glob_, kind, where)
-                sc["allow"].append((kind, glob_))
+                pending.append((kind, glob_, where))
             else:
                 die("%s: unknown directive %r" % (where, key))
     if sc["seat"] != seat:
-        die("scope file %s is for seat %r but this tree resolves to seat %r" % (path, sc["seat"], seat))
+        die("REFUSED: scope file %s is for seat %r but this tree resolves to seat %r" % (path, sc["seat"], seat))
+    for kind, glob_, where in pending:              # judged only once the seat line is known to be this seat's
+        check_allow(glob_, kind, where, seat, daily_rel)
+        sc["allow"].append((kind, glob_))
+    for w_ in sc["own"] + sc["deny_clients"]:
+        if not re.fullmatch(r"[a-z][a-z0-9]{2,}", w_):
+            die("%s: a client name is one plain lower-case word of 3 or more letters and digits: %r" % (path, w_))
+    if set(sc["own"]) & set(sc["deny_clients"]):
+        die("%s: a client cannot be both own and denied: %s" % (path, " ".join(sorted(set(sc["own"]) & set(sc["deny_clients"])))))
     if not sc["allow"]:
         die("scope file %s has no allow lines" % path)
     return sc
 
 
-def check_allow(glob_, kind, where):
-    """An allow line is one plain directory plus one file-name pattern. Refuses anything wider."""
+def check_allow(glob_, kind, where, seat, daily_rel):
+    """An allow line is honoured only when it asks for something in the closed table above: the kind's one
+    directory for THIS seat and, for ledgers, pickup files, the rules index and the rules files, one of the
+    exact names listed there. Anything else is REFUSED here (N5, N7): a refusal, never a silent skip."""
     if not glob_ or glob_.startswith("/") or "\\" in glob_:
-        die("%s: allow path must be relative to the tree root: %r" % (where, glob_))
+        die("%s: REFUSED, an allow path must be relative to the tree root: %r" % (where, glob_))
     d, pat = os.path.split(glob_)
-    segs = d.split("/")
-    if not d:
-        # a file at the tree root: one exact name, no pattern (the seat's own rules file)
-        if kind != "rules" or any(c in pat for c in "*?[") or not pat.endswith(".md"):
-            die("%s: only an exactly named .md file of kind 'rules' may sit at the tree root: %r" % (where, glob_))
-        return
-    if any(s in ("", ".", "..") for s in segs):
-        die("%s: allow path needs a plain directory (no '..', no empty segment): %r" % (where, glob_))
-    if any(c in d for c in "*?["):
-        die("%s: no wildcard is allowed in the directory part (no recursion): %r" % (where, glob_))
     low = d.lower()
     for p in HARD_DENY_PREFIX:
         if low == p or low.startswith(p + "/"):
             die("%s: REFUSED, %s is never indexed (hard exclusion in braindb_index.py): %r" % (where, p, glob_))
     if any(s in HARD_DENY_SEGMENT for s in low.split("/")):
         die("%s: REFUSED, a credentials or keys directory is never indexed: %r" % (where, glob_))
-    want = ".tsv" if kind == "rules_index" else ".md"
-    if not pat.endswith(want):
-        die("%s: a %s pattern must end in %s: %r" % (where, kind, want, glob_))
     if pat.lower().startswith("chat_"):
         die("%s: REFUSED, chat stores are never indexed: %r" % (where, glob_))
+    if kind == "rules":
+        if glob_ not in ROOT_RULES:
+            die("%s: REFUSED, kind 'rules' is only the seat's two rules files, named exactly (%s): %r"
+                % (where, ", ".join(ROOT_RULES), glob_))
+        return
+    want_dir, names = allowed_place(seat, kind, daily_rel)
+    if d != want_dir:
+        die("%s: REFUSED, for seat '%s' kind '%s' is indexed only from %s/ (table in braindb_index.py); this line "
+            "asks for %r. Another seat's records, and any folder not in the table, cannot be allowed by a scope line."
+            % (where, seat, kind, want_dir, glob_))
+    if names is not None:
+        if pat not in names:
+            die("%s: REFUSED, for seat '%s' kind '%s' is only the file(s) %s in %s/, named exactly (no pattern); "
+                "this line asks for %r" % (where, seat, kind, ", ".join(names), want_dir, glob_))
+        return
+    if not pat.endswith(".md") or "/" in pat:
+        die("%s: REFUSED, a %s pattern must be a file-name pattern ending in .md: %r" % (where, kind, glob_))
+
+
+class Unsafe(Exception):
+    """A file that may not be read: not a regular file, a link of either kind, or it changed under us."""
+
+
+def open_checked(dirfd, name):
+    """Open `name` inside the already-open directory WITHOUT following a symlink, then judge the file by
+    fstat on the descriptor the bytes will be read from (N6): the thing judged is the thing read, so a file
+    swapped for a symlink between a test and an open cannot get through. -> raw bytes, or raises Unsafe/OSError."""
+    try:
+        fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | getattr(os, "O_CLOEXEC", 0), dir_fd=dirfd)
+    except OSError as e:
+        import errno
+        if e.errno in (errno.ELOOP, errno.EMLINK):
+            raise Unsafe("symlink")
+        raise
+    try:
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode):
+            raise Unsafe("not a regular file")
+        if st.st_nlink != 1:
+            raise Unsafe("hard link (link count %d): the same file exists under another name" % st.st_nlink)
+        chunks = []
+        while True:
+            b = os.read(fd, 1 << 20)
+            if not b:
+                break
+            chunks.append(b)
+        return b"".join(chunks)
+    finally:
+        os.close(fd)
 
 
 def enumerate_files(root, sc):
-    """-> ({rel: kind}, [(rel, reason)]) for every allow-list match; the second list is what was skipped."""
+    """-> ({rel: (kind, raw bytes)}, [(rel, reason)]) for every allow-list match; the second list is what
+    was skipped. Each file is read here, once, through open_checked(): nothing is opened by name later."""
     out, skipped = {}, []
     rroot = os.path.realpath(root)
     for kind, glob_ in sc["allow"]:
@@ -154,139 +225,220 @@ def enumerate_files(root, sc):
             skipped.append((d + "/", "directory is or sits under a symlink"))
             continue
         try:
-            names = sorted(os.listdir(absd))
+            dirfd = os.open(absd, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | (os.O_NOFOLLOW if d else 0))
         except OSError as e:
             skipped.append((d + "/", "unreadable: %s" % type(e).__name__))
             continue
-        for name in names:
-            if not fnmatch.fnmatchcase(name, pat):
-                continue
-            rel = (d + "/" + name) if d else name
-            low = rel.lower()
-            hit = next((x for x in sc["deny_path"] if x in low), None)
-            if hit:
-                skipped.append((rel, "path contains '%s'" % hit))
-                continue
-            dlow, nlow = d.lower(), name.lower()
-            # a file is taken only under the kind its name and folder say it is
-            if kind == "lesson" and not LESSON_NAME.fullmatch(name):
-                skipped.append((rel, "not a lesson file name (a lesson's name starts with its date)"))
-                continue
-            if kind == "daily" and not DAILY_NAME.fullmatch(name):
-                skipped.append((rel, "not a daily-note file name (a plain date, nothing more)"))
-                continue
-            if kind == "ledger" and not nlow.startswith("_ledger"):
-                skipped.append((rel, "not a ledger file name"))
-                continue
-            if kind != "ledger" and nlow.startswith("_ledger"):
-                skipped.append((rel, "a ledger file is indexed only by an 'allow ledger' line"))
-                continue
-            if kind != "daily" and os.path.basename(dlow).startswith("daily"):
-                skipped.append((rel, "a daily-note folder is indexed only by an 'allow daily' line"))
-                continue
-            # another seat's own records: its word in a folder name (any kind), or in the file name, unless the
-            # file sits in its kind's home folder (a lesson, skill or architecture file may be NAMED for a seat)
-            name_exempt = kind in HOME and dlow in HOME[kind]
-            hit = next((x for x in sc["deny_seat_word"] if x in dlow or (not name_exempt and x in nlow)), None)
-            if hit:
-                skipped.append((rel, "another seat's records ('%s' in the %s)" % (hit, "folder name" if hit in dlow else "file name")))
-                continue
-            p = os.path.join(absd, name)
+        try:
             try:
-                st = os.lstat(p)
+                names = sorted(os.listdir(dirfd))
             except OSError as e:
-                skipped.append((rel, "unreadable: %s" % type(e).__name__))
+                skipped.append((d + "/", "unreadable: %s" % type(e).__name__))
                 continue
-            if os.path.islink(p):
-                skipped.append((rel, "symlink"))
-                continue
-            if not os.path.isfile(p):
-                skipped.append((rel, "not a regular file"))
-                continue
-            if st.st_nlink > 1:
-                skipped.append((rel, "hard link (link count %d): the same file exists under another name" % st.st_nlink))
-                continue
-            out.setdefault(rel, kind)
+            for name in names:
+                if not fnmatch.fnmatchcase(name, pat):
+                    continue
+                rel = (d + "/" + name) if d else name
+                if rel in out:
+                    continue
+                low = rel.lower()
+                hit = next((x for x in tuple(sc["deny_path"]) + BUILTIN_DENY_PATH if x in low), None)
+                if hit:
+                    skipped.append((rel, "path contains '%s'" % hit))
+                    continue
+                # a file is taken only under the kind its name says it is
+                if kind == "lesson" and not LESSON_NAME.fullmatch(name):
+                    skipped.append((rel, "not a lesson file name (a lesson's name starts with its date)"))
+                    continue
+                if kind == "daily" and not DAILY_NAME.fullmatch(name):
+                    skipped.append((rel, "not a daily-note file name (a plain date, nothing more)"))
+                    continue
+                if kind not in ("ledger", "rules_index") and name.lower().startswith("_"):
+                    skipped.append((rel, "a file whose name starts with '_' is a ledger, digest or index, never a %s" % kind))
+                    continue
+                hit = next((x for x in sc["deny_seat_word"] if x in d.lower()), None)
+                if hit:
+                    skipped.append((rel, "another seat's records ('%s' in the folder name)" % hit))
+                    continue
+                try:
+                    out[rel] = (kind, open_checked(dirfd, name))
+                except Unsafe as e:
+                    skipped.append((rel, str(e)))
+                except OSError as e:
+                    skipped.append((rel, "unreadable: %s" % type(e).__name__))
+        finally:
+            os.close(dirfd)
     return out, skipped
 
 
-def tier_verdict(tier, sc):
-    """-> (indexed?, reason). W / M / MIXED / untagged are indexed. A project tier is indexed only when its
-    CLIENT segment is exactly one of the seat's own clients (never a substring of the project name).
-    A denied client's name anywhere in the value excludes. Anything else is unknown, and excluded."""
-    t = (tier or "").strip().strip("\"'").strip()
-    if not t:
-        return True, "untagged"
-    low = t.lower()
+# ---------------------------------------------------------------- ROUND 4: QUALIFY OR STAY OUT
+# A lesson is indexed only when it positively qualifies on EVERY clause below, each read strictly.
+# Nothing here recognises a bad shape: each clause states the one good shape, and whatever is not that
+# shape is left out and named with the clause it failed. There is no "untagged", no "unknown, so W",
+# no section dropping and no fence or span parsing.
+
+def fold(s):
+    """Text reduced for a WORD test: compatibility forms unfolded, accents and format characters dropped,
+    case folded. (Clause t guarantees every letter of a qualifying lesson is an ASCII letter under this.)"""
+    return "".join(c for c in unicodedata.normalize("NFKD", s) if unicodedata.category(c) not in ("Mn", "Cf")).casefold()
+
+
+def fold_key(s):
+    """A frontmatter key folded HARD: NFKC, format characters and non-alphanumerics dropped, case folded."""
+    return "".join(c for c in unicodedata.normalize("NFKC", s) if c.isalnum() and unicodedata.category(c) != "Cf").casefold()
+
+
+def norm_name(s):
+    """A file name or a rules-index key for comparison: NFC, format characters removed. Nothing else: no
+    case folding, no stripping, no path removal. A key that is not EXACTLY the name is not this file's row."""
+    return "".join(c for c in unicodedata.normalize("NFC", s) if unicodedata.category(c) != "Cf")
+
+
+FM_KEY_LINE = re.compile(r"([a-z][a-z0-9_-]*):(?: (\S.*))?")
+P_TIER = re.compile(r"P-([A-Za-z][A-Za-z0-9]*)/[A-Za-z0-9][A-Za-z0-9 ._-]*")
+TIER_LINE_START = re.compile(r"^[^a-z0-9]*tier(?![a-z0-9])")                      # on a folded line
+TIER_ASSIGN = re.compile(r"(?<![a-z0-9])tier[^a-z0-9\n]{0,3}(?:\([^)\n]{0,40}\)[^a-z0-9\n]{0,3})?[:=]")   # on a folded line
+
+
+def allowed_tier(value, sc):
+    """The CLOSED list of tier values, written exactly as the lessons write them: `W`, `M`, or
+    `P-<Client>/<Project>` whose client is one of this seat's own. Nothing else is a tier."""
+    if value in ("W", "M"):
+        return True
+    m = P_TIER.fullmatch(value or "")
+    return bool(m) and m.group(1).casefold() in sc["own"]
+
+
+def plain_text(raw):
+    """Clause (t). -> (text, None) or (None, why). The bytes must be UTF-8 (an optional BOM first), hold no
+    control, format or line-separator character other than LF and TAB, and every letter must be an ASCII
+    letter once accents are removed. Without this the word tests of clauses (c) and (d) could be walked
+    round with a look-alike letter, a zero-width character or a line break only some readers see."""
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return None, "the file is not valid UTF-8"
+    if text.startswith("﻿"):
+        text = text[1:]
+    for c in set(text):
+        cat = unicodedata.category(c)
+        if c in "\n\t":
+            continue
+        if cat in ("Cc", "Cf", "Zl", "Zp", "Cs", "Co", "Cn"):
+            return None, "it holds a control, format or line-separator character (U+%04X)" % ord(c)
+        if cat.startswith("L") and ord(c) > 127:
+            base = "".join(x for x in unicodedata.normalize("NFKD", c) if not unicodedata.category(x).startswith("M"))
+            if not base or any(ord(x) > 127 or not x.isalpha() for x in base):
+                return None, "it holds a letter that is not a Latin letter (U+%04X)" % ord(c)
+    return text, None
+
+
+def qualify_lesson(name, raw, idx, sc):
+    """-> (None, None) when the lesson qualifies, else (clause, why). Clauses: 'a' its rules-index row,
+    'b' that row's seat, 'c' its frontmatter and tier, 'd' no other-client marker or name, 't' plain text.
+    `idx` is the parsed rules index (parse_rules_index)."""
+    # ---- (t) plain text
+    text, why = plain_text(raw)
+    if text is None:
+        return "t", why
+    # ---- (a) exactly one row whose key EQUALS the file's name, in an index whose other rows do not name it
+    key = norm_name(name)
+    stem = key[:-3] if key.endswith(".md") else key
+    for ln, bad in idx["rejected"]:
+        if stem in bad:
+            return "a", "a rules-index line that could not be read names it (line %d)" % ln
+    mine = [r for r in idx["rows"] if r["base"] == key]
+    plain = [r for r in mine if r["n"] == 1]
+    if len(plain) != 1:
+        return "a", ("it has no rules-index row whose key is exactly its file name" if not plain
+                     else "it has %d rules-index rows with the same key" % len(plain))
+    ns = [r["n"] for r in mine if r["n"] > 1]
+    if len(ns) != len(set(ns)):
+        return "a", "two of its rules-index rows have the same '#n' key"
+    # ---- (b) that row names this seat
+    seats = plain[0]["seats"]
+    if not (ALL_SEATS in seats or sc["seat"] in seats):
+        return "b", "its rules-index row is scoped to %s" % ",".join(seats)
+    # ---- (c) one frontmatter block opened on line 1 and closed; one clean tier line; a tier from the closed list
+    lines = text.split("\n")
+    if lines[0] != "---":
+        return "c", "line 1 is not exactly '---' (the frontmatter must open on line 1)"
+    try:
+        end = lines.index("---", 1)
+    except ValueError:
+        return "c", "the frontmatter is not closed by a line that is exactly '---'"
+    tier, seen = None, set()
+    for i in range(1, end):
+        m = FM_KEY_LINE.fullmatch(lines[i])
+        if not m:
+            return "c", "frontmatter line %d is not a plain 'key: value' line" % (i + 1)
+        k, v = m.group(1), m.group(2) or ""
+        if k in seen:
+            return "c", "frontmatter key '%s' is given twice" % k
+        seen.add(k)
+        if k == "tier":
+            tier = v
+        elif "tier" in fold_key(k):
+            return "c", "frontmatter key '%s' looks like a tier key and is not exactly 'tier'" % k
+        elif TIER_ASSIGN.search(fold(v)) or TIER_LINE_START.search(fold(v)):
+            return "c", "frontmatter line %d carries something tier-like inside the value of '%s'" % (i + 1, k)
+    if tier is None:
+        return "c", "no tier line in the frontmatter"
+    nxt = next((l for l in lines[end + 1:] if l.strip()), "")
+    if nxt.lstrip().startswith("---") or nxt.lstrip().startswith("+++"):
+        return "c", "a second frontmatter block follows the first (exactly one is allowed)"
+    if not allowed_tier(tier, sc):
+        return "c", "tier '%s' is not one of this seat's tiers (W, M, P-<own client>/<project>)" % tier[:60]
+    # ---- (d) no other-client marker or name ANYWHERE in the text, and nothing tier-like outside that one line
+    if "<!--" in text or "-->" in text:
+        return "d", "it holds an HTML comment (a section marker in any spelling is one)"
+    for i, line in enumerate(lines):
+        if i < end and i != 0 and line.startswith("tier:"):
+            continue                                    # the one clean tier line, judged above
+        f = fold(line)
+        if TIER_LINE_START.search(f) or TIER_ASSIGN.search(f):
+            return "d", "line %d is tier-like outside the frontmatter's one tier line" % (i + 1)
+    whole = fold(text) + "\n" + fold(" ".join(r["raw"] for r in mine)) + "\n" + fold(name)
+    squeezed = re.sub(r"[*_`~\\]", "", whole)
     for c in sc["deny_clients"]:
-        if c in low:
-            return False, "tier '%s' names %s" % (t, c)
-    if low in ("w", "m", "mixed"):
-        return True, t
-    m = CLIENT_SEG.match(low)
-    if m:
-        client = m.group(1).strip()
-        if client in sc["own"]:
-            return True, t
-        return False, "project tier '%s': its client is not one of this seat's" % t
-    return False, "unknown tier value '%s'" % t
+        if c in squeezed:
+            return "d", "it names another client ('%s') in its text, its name or its rules-index row" % c
+    if "&#" in text:
+        return "d", "it holds a numeric character reference (&#...;), which can spell a name the word test cannot see"
+    return None, None
+
+
+CLAUSES = (("a", "no single well-read rules-index row for it"),
+           ("b", "its rules-index row is scoped to other seats"),
+           ("c", "frontmatter or tier does not qualify"),
+           ("d", "other-client marker, name or tier-like line in its text"),
+           ("t", "not plain text"),
+           ("f", "not a plain regular file (link, hard link, unreadable)"))
 
 
 # ---------------------------------------------------------------- parsing
 
-def read_file(p):
-    """-> (raw bytes, text). The text has no BOM, no NUL and neither of the two separator bytes."""
-    with open(p, "rb") as f:
-        raw = f.read()
+def to_text(raw):
+    """Bytes -> text for indexing: no BOM, LF line ends, no NUL and neither of the two separator bytes."""
     text = raw.decode("utf-8", errors="replace")
-    if text.startswith("\ufeff"):
+    if text.startswith("﻿"):
         text = text[1:]
-    return raw, text.replace("\r\n", "\n").translate(STRIP_BYTES)
+    return text.replace("\r\n", "\n").translate(STRIP_BYTES)
 
 
-def parse_frontmatter(text):
-    """-> (fm dict, body, body_first_line, faults). Keys are folded (stripped, unquoted, lower case).
-    `faults` lists every way the head is ambiguous about the lesson's tier; the caller EXCLUDES a lesson
-    with any fault (fail closed): unclosed frontmatter, tier given more than once (in the block, in a second
-    block, or as a stray line before the first heading), or a tier line whose value could not be read."""
+def split_frontmatter(text):
+    """-> (fm dict, body, body_first_line). For DISPLAY only (date, type, status of a file that is already
+    in): it decides nothing. A lesson reaches here only after qualify_lesson() accepted its head."""
     lines = text.split("\n")
-    i = 0
-    while i < len(lines) and not lines[i].strip():
-        i += 1
-    fm, faults, tier_lines, start = {}, [], 0, 0
-    if i < len(lines) and FM_FENCE.match(lines[i]):
-        j = i + 1
-        while j < len(lines) and not FM_FENCE.match(lines[j]):
-            j += 1
-        if j >= len(lines):
-            faults.append("the frontmatter is not closed")
-        block, start = lines[i + 1:j], min(j + 1, len(lines))
-        for line in block:
-            if ":" in line:
-                k, v = line.split(":", 1)
-                k = k.strip().strip("\"'").strip().lower()
-                if k == "tier":
-                    tier_lines += 1
-                if k:
-                    fm[k] = v.strip().strip("\"'").strip()
-            elif TIERISH.match(line):
-                tier_lines += 1
-        k = start
-        while k < len(lines) and not lines[k].strip():
-            k += 1
-        if k < len(lines) and FM_FENCE.match(lines[k]) and any(FM_FENCE.match(l) for l in lines[k + 1:k + 40]):
-            faults.append("a second frontmatter block follows the first")
-    # stray tier lines between the frontmatter and the first heading (section markers are not tier lines)
-    for line in lines[start:start + 60]:
-        if HEAD_RE.match(line):
-            break
-        if TIERISH.match(line) and not MARKER.match(line):
-            tier_lines += 1
-    if tier_lines > 1:
-        faults.append("tier is given more than once")
-    if tier_lines >= 1 and not fm.get("tier"):
-        faults.append("a tier line is present but no tier value could be read from the frontmatter")
-    return fm, "\n".join(lines[start:]), start + 1, faults
+    fm, start = {}, 0
+    if lines and lines[0] == "---" and "---" in lines[1:]:
+        end = lines.index("---", 1)
+        for line in lines[1:end]:
+            m = FM_KEY_LINE.fullmatch(line)
+            if m:
+                fm[m.group(1)] = m.group(2) or ""
+        start = end + 1
+    return fm, "\n".join(lines[start:]), start + 1
 
 
 def heading_lines(lines):
@@ -299,36 +451,6 @@ def heading_lines(lines):
         if not fenced and HEAD_RE.match(l):
             out.append(i)
     return out
-
-
-def drop_foreign_sections(lines, sc):
-    """Blank out every section marked <!-- tier: ... --> for a client this seat may not index (marker in any
-    case, with any indent, in either spelling, blank lines allowed before its heading). The dropped span runs
-    from the marker to the next heading of the SAME OR A HIGHER level, so sub-sections go with it. A marker
-    with no heading directly under it drops everything to the next heading. Line numbers are kept."""
-    heads = heading_lines(lines)
-    level = dict((i, len(HEAD_RE.match(lines[i]).group(1))) for i in heads)
-    drop, dropped = set(), []
-    for k, l in enumerate(lines):
-        m = MARKER.match(l)
-        if not m:
-            continue
-        ok, why = tier_verdict(m.group(1), sc)
-        if ok:
-            continue
-        j = k + 1
-        while j < len(lines) and not lines[j].strip():
-            j += 1
-        if j in level:
-            end = next((h for h in heads if h > j and level[h] <= level[j]), len(lines))
-            name = HEAD_RE.match(lines[j]).group(2)
-        else:
-            end = next((h for h in heads if h > k), len(lines))
-            name = "(no heading directly under the marker)"
-        drop.update(range(k, end))
-        dropped.append((m.group(1), name))
-    kept = ["" if (i in drop or MARKER.match(l)) else l for i, l in enumerate(lines)]
-    return kept, dropped
 
 
 def chunk(lines, first_line, fallback_title):
@@ -451,40 +573,43 @@ def parse_daily(text):
     return [tuple(r) for r in rows if r is not None]
 
 
-def norm_name(s):
-    """A rules-index key or a file name, reduced to what identifies the lesson: stripped, '#n' and any
-    path removed, case folded."""
-    s = s.strip().split("#", 1)[0].strip()
-    return s.replace("\\", "/").rsplit("/", 1)[-1].casefold()
+ROW_KEY = re.compile(r"([^#/\\\t]+\.md)(?:#([2-9]|[1-9][0-9]+))?")
 
 
-def read_rules(text):
-    """-> (rows, rejected). rows: the well-formed lines (7 tab-separated fields, '#' lines skipped), as
-    rules_card.py reads them. rejected: [(line_no, first field)] for every other non-blank line; a lesson
-    named by a rejected line is EXCLUDED by scan() (fail closed), never treated as having no row."""
-    out, rejected = [], []
+def parse_rules_index(raw):
+    """-> dict(rows=[...], rejected=[(line_no, normalised line)], fatal=None or why).
+    A ROW is read only when it is exactly the shape the spec gives (0_Brain/learnings/_rules_index/README.md):
+    seven TAB-separated fields, none empty, none with outer white space, no control character; a key that is
+    `<file>.md` or `<file>.md#n` (n >= 2); a status of live, dead or superseded; a seats cell that is `all`
+    or a comma list of distinct seat words. Any other non-blank line, a comment line below line 1 included,
+    is REJECTED and kept: qualify_lesson() leaves out every lesson whose name such a line so much as holds."""
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return dict(rows=[], rejected=[], fatal="it is not valid UTF-8")
+    if text.startswith("﻿"):
+        text = text[1:]
+    rows, rejected = [], []
     for ln, line in enumerate(text.split("\n"), 1):
-        line = line.rstrip("\r")
-        if not line.strip() or line.startswith("#"):
+        if not line.strip():
             continue
-        f = line.split("\t")
-        if len(f) != 7:
-            rejected.append((ln, f[0]))
+        if ln == 1 and line.startswith("#"):
+            continue                                 # the header comment
+        nline = norm_name(line)
+        f = nline.split("\t")
+        ok = (len(f) == 7 and not line.startswith("#")
+              and all(x and x == x.strip() for x in f)
+              and not any(unicodedata.category(c) in ("Cc", "Zl", "Zp") and c != "\t" for c in nline))
+        m = ROW_KEY.fullmatch(f[0]) if ok else None
+        seats = f[2].split(",") if ok else []
+        if not (m and f[1] in ROW_STATUS and len(seats) == len(set(seats))
+                and (seats == [ALL_SEATS] or all(x in SEATS for x in seats))):
+            rejected.append((ln, nline))
             continue
-        key = f[0]
-        if "#" in key:
-            base, _, num = key.partition("#")
-            if not (num.isdigit() and int(num) >= 2):
-                rejected.append((ln, f[0]))
-                continue
-            n = int(num)
-        else:
-            base, n = key, 1
-        out.append(dict(key=key, base=base, n=n, status=f[1].strip(),
-                        seats=[x.strip() for x in f[2].split(",") if x.strip()],
-                        family=f[3].strip(), triggers=[t.strip() for t in f[4].split(",") if t.strip()],
-                        enforced_by=f[5].strip(), rule=f[6].strip()))
-    return out, rejected
+        rows.append(dict(key=f[0], base=m.group(1), n=int(m.group(2) or 1), status=f[1], seats=seats, family=f[3],
+                         triggers=[t.strip() for t in f[4].split(",") if t.strip()], enforced_by=f[5], rule=f[6],
+                         raw=nline, line=ln))
+    return dict(rows=rows, rejected=rejected, fatal=None)
 
 
 def compute_weights(rules, ledger_lines):
@@ -543,72 +668,87 @@ def compute_weights(rules, ledger_lines):
 # ---------------------------------------------------------------- scan (shared by rebuild and check)
 
 def scan(root, sc, want_text):
-    """Walk the allow-list. -> dict(files={rel: dict(kind, sha, bytes, text)}, skipped=[(rel, reason)],
-    unreadable=[rel], untagged=[rel], rejected_rows=n). Every decision about a LESSON fails closed: a head
-    that is ambiguous about its tier, a damaged rules-index row naming it, or no usable rules index at all
-    keeps it OUT. rebuild and check both go through here, so they agree."""
-    listed, skipped = enumerate_files(root, sc)
-    files, unreadable, untagged = {}, [], []
-    loaded = {}
-
-    def load(rel):
-        if rel not in loaded:
-            try:
-                loaded[rel] = read_file(os.path.join(root, rel))
-            except OSError as e:
-                loaded[rel] = None
-                unreadable.append(rel)
-                skipped.append((rel, "unreadable: %s" % type(e).__name__))
-        return loaded[rel]
-
-    # the rules index decides lessons: normalised lesson name -> True when a row is scoped 'all' or this seat
-    seat_rows, bad_names, good, rejected = {}, {}, 0, 0
+    """Walk the allow-list. -> dict(files={rel: dict(kind, sha, bytes, text)}, skipped=[(rel, reason)] for
+    non-lesson files and folders, left_out=[(rel, clause, why)] for LESSON files, idx=the parsed rules index,
+    rules={lesson file name: [its rows that name this seat]}, orphan_rows, other_seat_rows).
+    rebuild and check both go through here, so they agree."""
+    listed, skipped0 = enumerate_files(root, sc)
+    lesson_dir = SHARED_DIRS["lesson"] + "/"
+    skipped, left_out = [], []
+    for rel, why in skipped0:
+        is_lesson = rel.startswith(lesson_dir) and LESSON_NAME.fullmatch(rel[len(lesson_dir):] or "") \
+            and not any(x in rel.lower() for x in tuple(sc["deny_path"]) + BUILTIN_DENY_PATH)
+        if is_lesson:
+            left_out.append((rel, "f", why))
+        else:
+            skipped.append((rel, why))
+    wants_lessons = any(k == "lesson" for k, _ in sc["allow"])
+    idx = dict(rows=[], rejected=[], fatal="no rules index is on the allow-list")
+    idx_rels = [rel for rel in listed if listed[rel][0] == "rules_index"]
+    if idx_rels:
+        idx = parse_rules_index(listed[idx_rels[0]][1])
+    elif any(k == "rules_index" for k, _ in sc["allow"]):
+        idx["fatal"] = "it is missing, or is not a plain regular file (%s)" % (
+            "; ".join(w for r, w in skipped if r.endswith("_rules_index.tsv")) or "not found")
+    if wants_lessons and (idx["fatal"] or not idx["rows"]):
+        die("REFUSED: lessons are on the allow-list but the rules index under %s cannot be used: %s. The rules "
+            "index decides which lessons belong to this seat; without it no lesson qualifies. Nothing was read "
+            "into or changed in the index." % (root, idx["fatal"] or "it has no row that could be read"), 2)
+    files, rules = {}, {}
+    names_on_disk = set()
     for rel in sorted(listed):
-        if listed[rel] != "rules_index":
-            continue
-        got = load(rel)
-        if got is None:
-            continue
-        rows, rej = read_rules(got[1])
-        good += len(rows)
-        rejected += len(rej)
-        for r in rows:
-            mine = "all" in r["seats"] or sc["seat"] in r["seats"]
-            k = norm_name(r["key"])
-            seat_rows[k] = seat_rows.get(k, False) or mine
-        for ln, first in rej:
-            bad_names.setdefault(norm_name(first), ln)
-    if any(k == "lesson" for k, _ in sc["allow"]) and good == 0:
-        die("REFUSED: lessons are on the allow-list but no readable rules index with at least one well-formed "
-            "row was found under %s. The rules index decides which lessons belong to this seat; without it every "
-            "other seat's lesson would be indexed. Nothing was read into or changed in the index." % root, 2)
-    for rel in sorted(listed):
-        kind = listed[rel]
-        got = load(rel)
-        if got is None:
-            continue
-        raw, text = got
+        kind, raw = listed[rel]
+        name = os.path.basename(rel)
         if kind == "lesson":
-            fm, _, _, faults = parse_frontmatter(text)
-            if faults:
-                skipped.append((rel, "tier cannot be read safely: " + "; ".join(faults)))
+            names_on_disk.add(norm_name(name))
+            clause, why = qualify_lesson(name, raw, idx, sc)
+            if clause:
+                left_out.append((rel, clause, why))
                 continue
-            ok, why = tier_verdict(fm.get("tier"), sc)
-            if not ok:
-                skipped.append((rel, why))
-                continue
-            k = norm_name(os.path.basename(rel))
-            if k in bad_names:
-                skipped.append((rel, "a damaged rules-index row names it (rules index line %d)" % bad_names[k]))
-                continue
-            if seat_rows.get(k) is False:
-                skipped.append((rel, "every rules-index row for it names only other seats"))
-                continue
-            if not (fm.get("tier") or "").strip():
-                untagged.append(rel)
+            rules[name] = [r for r in idx["rows"] if r["base"] == norm_name(name)
+                           and (ALL_SEATS in r["seats"] or sc["seat"] in r["seats"])]
         files[rel] = dict(kind=kind, sha=hashlib.sha256(raw).hexdigest(), bytes=len(raw),
-                          text=text if want_text else None)
-    return dict(files=files, skipped=skipped, unreadable=unreadable, untagged=untagged, rejected_rows=rejected)
+                          text=to_text(raw) if want_text else None)
+    for rel, clause, why in left_out:
+        names_on_disk.add(norm_name(os.path.basename(rel)))
+    orphan = sorted(set(r["key"] for r in idx["rows"] if r["base"] not in names_on_disk))
+    kept = sum(len(v) for v in rules.values())
+    return dict(files=files, skipped=skipped, left_out=sorted(left_out), idx=idx, rules=rules, orphan_rows=orphan,
+                unreadable=[rel for rel, why in skipped0 if why.startswith("unreadable")],
+                rows_not_joined=len(idx["rows"]) - kept)
+
+
+def left_out_counts(res):
+    c = dict((k, 0) for k, _ in CLAUSES)
+    for _, clause, _ in res["left_out"]:
+        c[clause] += 1
+    return c
+
+
+def left_out_line(res):
+    """One line: how many lesson files are left out, by clause. Printed by rebuild (last line), check and doctor."""
+    c = left_out_counts(res)
+    n = len(res["left_out"])
+    if not n:
+        return "0 lesson files left out"
+    return "%d lesson file(s) LEFT OUT by the qualify rule: %s" % (
+        n, ", ".join("%s=%d" % (k, c[k]) for k, _ in CLAUSES if c[k]))
+
+
+def print_left_out(res, limit):
+    """The names, grouped by clause, up to `limit` per clause (0 = all)."""
+    by = {}
+    for rel, clause, why in res["left_out"]:
+        by.setdefault(clause, []).append((rel, why))
+    for k, title in CLAUSES:
+        items = by.get(k, [])
+        if not items:
+            continue
+        print("    clause (%s) %s: %d" % (k, title, len(items)))
+        for rel, why in (items if not limit else items[:limit]):
+            print("           %s  [%s]" % (os.path.basename(rel), why))
+        if limit and len(items) > limit:
+            print("           (+%d more: braindb.sh rebuild lists every name)" % (len(items) - limit))
 
 
 def self_hashes(sc):
@@ -620,9 +760,15 @@ def self_hashes(sc):
 
 # ---------------------------------------------------------------- psql
 
+def want_dd():
+    """The data directory this command is addressed to, as the server itself spells it: braindb.sh resolves
+    the path (realpath) once and both starts the server with it and passes it here."""
+    return os.path.realpath(env("BRAINDB_PGDATA_EFF"))
+
+
 def psql_cmd(db, variables=None, tuples=False):
     cmd = [os.path.join(env("BRAINDB_PGBIN_EFF"), "psql"), "-X", "-q", "-v", "ON_ERROR_STOP=1",
-           "-h", env("BRAINDB_SOCKDIR_EFF"), "-p", env("BRAINDB_PORT_EFF"), "-d", db]
+           "-h", env("BRAINDB_SOCKDIR_EFF"), "-p", env("BRAINDB_PORT_EFF"), "-d", db, "-v", "want_dd=" + want_dd()]
     for k, v in (variables or {}).items():
         cmd += ["-v", "%s=%s" % (k, v)]
     if tuples:
@@ -630,9 +776,46 @@ def psql_cmd(db, variables=None, tuples=False):
     return cmd
 
 
-def query(sql, db=DB, variables=None):
-    """Run SQL read from stdin (so :'var' is interpolated). -> (rc, [row fields])"""
-    r = subprocess.run(psql_cmd(db, variables, tuples=True), input=sql.encode("utf-8"), stdout=subprocess.PIPE)
+# ROUND 4 (N3): the FIRST statements of EVERY psql session this tool opens. They run in the same session, and
+# for a rebuild or a read in the same transaction, as the work itself: the server that answers these is the
+# server that does the work, so there is no moment between "which cluster is this" and the write.
+ASSERT_SQL = r"""SELECT set_config('braindb.want_dd', :'want_dd', false) AS v \gset bdb_
+DO $bdb$ BEGIN
+  IF current_setting('data_directory') IS DISTINCT FROM current_setting('braindb.want_dd') THEN
+    RAISE EXCEPTION 'BRAINDB_WRONG_CLUSTER got=[%] want=[%]', current_setting('data_directory'), current_setting('braindb.want_dd');
+  END IF;
+END $bdb$;
+"""
+WRONG = re.compile(r"BRAINDB_WRONG_CLUSTER got=\[(.*?)\] want=\[")
+
+
+def judge_psql(rc, err, on_down="die"):
+    """Exit the tool when the session was refused or never happened. rc 4: another cluster answered (nothing
+    was read or changed). rc 3: nothing answered (N11: an empty answer is 'not answering', never 'another')."""
+    m = WRONG.search(err)
+    if m:
+        die("REFUSED: the server answering on socket directory %s serves data directory '%s', but this command "
+            "is addressed to '%s'. Nothing was read or changed. Another cluster is using this socket directory: "
+            "stop it with its own braindb.sh, or give this one its own BRAINDB_SOCKDIR."
+            % (env("BRAINDB_SOCKDIR_EFF"), m.group(1), want_dd()), 4)
+    if rc == 2 and not re.search(r'database "[^"]*" does not exist', err):
+        if on_down == "die":
+            die("the index server is not answering on %s (run: braindb.sh start)" % env("BRAINDB_SOCKDIR_EFF"), 3)
+        return "down"
+    return "ok"
+
+
+def query(sql, db=DB, variables=None, txn=True, on_down="die"):
+    """Run SQL read from stdin (so :'var' is interpolated) in ONE psql session that first asserts the server's
+    data directory. -> (rc, [row fields]); with on_down='return', rc is 'down' when nothing answers."""
+    full = ("BEGIN;\n" if txn else "") + ASSERT_SQL + sql + ("\n;COMMIT;\n" if txn else "\n")
+    r = subprocess.run(psql_cmd(db, variables, tuples=True), input=full.encode("utf-8"),
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    err = r.stderr.decode("utf-8", errors="replace")
+    if judge_psql(r.returncode, err, on_down) == "down":
+        return "down", []
+    if err:
+        sys.stderr.write(err)                         # psql's own words are never discarded
     out = r.stdout.decode("utf-8", errors="replace")
     if out.endswith("\n"):
         out = out[:-1]
@@ -640,24 +823,12 @@ def query(sql, db=DB, variables=None):
     return r.returncode, rows
 
 
-def server_up():
-    rc, rows = query("select 1", db="postgres")
-    return rc == 0 and rows == [["1"]]
-
-
 def need_server():
-    """The server must answer AND must be the one this command is addressed to: a socket directory alone
-    does not identify a cluster (ANSWER-3 F2). rc 3 = not answering, rc 4 = another cluster answers."""
-    if not server_up():
+    """An early, friendly form of the same test: rc 3 when nothing answers, rc 4 when another cluster does.
+    It is NOT what protects the work: every later session carries the assertion itself."""
+    rc, rows = query("select 1", db="postgres")
+    if rc != 0 or rows != [["1"]]:
         die("the index server is not answering on %s (run: braindb.sh start)" % env("BRAINDB_SOCKDIR_EFF"), 3)
-    want = env("BRAINDB_PGDATA_EFF")
-    rc, rows = query("show data_directory", db="postgres")
-    got = rows[0][0] if rc == 0 and rows and rows[0] else ""
-    if not got or os.path.realpath(got) != os.path.realpath(want):
-        die("REFUSED: the server answering on socket directory %s serves data directory '%s', but this command "
-            "is addressed to '%s'. Nothing was read or changed. Another cluster is using this socket directory: "
-            "stop it with its own braindb.sh, or give this one its own BRAINDB_SOCKDIR."
-            % (env("BRAINDB_SOCKDIR_EFF"), got or "(unknown)", want), 4)
 
 
 def index_present():
@@ -705,7 +876,6 @@ def pg_array(items):
 
 
 SCHEMA = r"""
-BEGIN;
 DROP SCHEMA IF EXISTS brain CASCADE;
 CREATE SCHEMA brain;
 CREATE UNLOGGED TABLE brain.meta (k text PRIMARY KEY, v text);
@@ -774,28 +944,24 @@ def build_rows(root, sc, seat):
                             cap(body, MAX_ROW_CHARS, rel, line, "row")))
 
     # rules index first: lessons carry their rule lines into the search text
-    rules = []
-    for rel, f in files.items():
-        if f["kind"] == "rules_index":
-            rules += read_rules(f["text"])[0]
-    lesson_names = dict((os.path.basename(rel), rel) for rel, f in files.items() if f["kind"] == "lesson")
-    kept_rules = [r for r in rules if r["base"] in lesson_names]
-    seen, uniq = set(), []
-    for r in kept_rules:
-        if r["key"] not in seen:
-            seen.add(r["key"])
-            uniq.append(r)
-    kept_rules = uniq
-    if rules:
-        notes.append("rules index: %d well-formed rows, %d joined to an indexed lesson, %d dropped "
-                     "(their lesson is excluded or missing)" % (len(rules), len(kept_rules), len(rules) - len(kept_rules)))
-    if sc_res["rejected_rows"]:
-        notes.append("rules index: %d DAMAGED row(s) ignored (wrong field count or a bad '#n'); a lesson named by "
-                     "one is excluded and listed below" % sc_res["rejected_rows"])
+    idx = sc_res["idx"]
+    kept_rules = []
+    for name in sorted(sc_res["rules"]):
+        for r in sc_res["rules"][name]:
+            kept_rules.append(dict(r, file=name))
+    notes.append("rules index: %d row(s) read, %d joined to an indexed lesson for this seat, %d not joined "
+                 "(the lesson is left out or missing, or the row is scoped to other seats)"
+                 % (len(idx["rows"]), len(kept_rules), sc_res["rows_not_joined"]))
+    if idx["rejected"]:
+        notes.append("rules index: %d line(s) could NOT be read as a row (line %s); every lesson such a line "
+                     "names is left out under clause (a)"
+                     % (len(idx["rejected"]), ", ".join(str(ln) for ln, _ in idx["rejected"][:20])))
+    if sc_res["orphan_rows"]:
+        notes.append("rules index: %d row(s) name no lesson file on disk: %s"
+                     % (len(sc_res["orphan_rows"]), ", ".join(sc_res["orphan_rows"][:10])))
 
     ledger_lines = []
     cid = 0
-    dropped_sections = 0
     for rel in sorted(files):
         f = files[rel]
         kind, text, name = f["kind"], f["text"], os.path.basename(rel)
@@ -815,7 +981,7 @@ def build_rows(root, sc, seat):
                 cid += 1
                 add(cid, rel, kind, "%s:%d" % (rel, n), n, date, stamp, None, None, None, section, None, body)
             continue
-        fm, body, first, _faults = parse_frontmatter(text)
+        fm, body, first = split_frontmatter(text)
         lines = body.split("\n")
         status = None
         extra = None
@@ -827,9 +993,7 @@ def build_rows(root, sc, seat):
                     "%s > %s" % (rel, head), None, ctext)
             continue
         if kind == "lesson":
-            lines, dropped = drop_foreign_sections(lines, sc)
-            dropped_sections += len(dropped)
-            mine = [r for r in kept_rules if r["base"] == name]
+            mine = sc_res["rules"].get(name, [])
             plain = next((r for r in mine if r["n"] == 1), None)
             status = plain["status"] if plain else ((fm.get("status") or "").split() or [None])[0]
             extra = " ".join(r["rule"] for r in mine) or None
@@ -845,31 +1009,38 @@ def build_rows(root, sc, seat):
     weights = compute_weights(kept_rules, ledger_lines)
     for r in kept_rules:
         w, last = weights.get(r["base"], (0, None))
-        T["rules"].append((r["key"], r["base"], r["n"], r["status"], pg_array(r["seats"]), r["family"],
+        T["rules"].append((r["key"], r["file"], r["n"], r["status"], pg_array(r["seats"]), r["family"],
                            pg_array(r["triggers"]), r["enforced_by"], r["rule"], w, iso_date(last)))
-    if dropped_sections:
-        notes.append("lesson sections dropped by their project-tier marker: %d" % dropped_sections)
     return T, sc_res, notes, truncated
 
 
 def reason_group(why):
-    """One heading per kind of exclusion, for the rebuild report."""
-    if why.startswith("tier '"):
-        return "tier names a client this seat may not index"
-    if why.startswith("project tier"):
-        return "project tier whose client is not one of this seat's"
-    if why.startswith("unknown tier"):
-        return "unknown tier value"
-    return re.sub(r"\s*\((rules index line|link count) \d+\)", "", why)
+    """One heading per kind of skip, for the rebuild report (non-lesson files)."""
+    return re.sub(r"\s*\(link count \d+\).*$", "", why)
 
 
 def take_lock():
     """One rebuild at a time per cluster (two first builds would both try to create the database). The lock
-    is flock() on the cluster's lock file; the kernel drops it when this process ends."""
+    is flock() on the cluster's lock file; the kernel drops it when this process ends. The wait has the same
+    limit and the same words as braindb_lock.py (N13)."""
     import fcntl
-    fd = os.open(env("BRAINDB_LOCK_EFF"), os.O_RDWR | os.O_CREAT, 0o600)
-    fcntl.flock(fd, fcntl.LOCK_EX)
-    return fd
+    path = env("BRAINDB_LOCK_EFF")
+    try:
+        wait_s = float(os.environ.get("BRAINDB_LOCK_WAIT", "150"))
+    except ValueError:
+        die("BRAINDB_LOCK_WAIT must be a number of seconds")
+    fd = os.open(path, os.O_RDWR | os.O_CREAT, 0o600)
+    deadline = time.time() + wait_s
+    while True:
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            return fd
+        except OSError:
+            if time.time() > deadline:
+                print("braindb: another braindb command has held %s for more than %.0f s; nothing was done" % (path, wait_s),
+                      file=sys.stderr)
+                sys.exit(75)
+            time.sleep(0.1)
 
 
 def cmd_rebuild(a, root, sc, seat, lock_held=False):
@@ -882,7 +1053,8 @@ def cmd_rebuild(a, root, sc, seat, lock_held=False):
     if rc != 0:
         die("cannot query the server", 1)
     if not rows:
-        rc, _ = query("CREATE DATABASE braindb ENCODING 'UTF8' TEMPLATE template0", db="postgres")
+        # same session: the assertion, then the CREATE (which cannot run inside a transaction block)
+        rc, _ = query("CREATE DATABASE braindb ENCODING 'UTF8' TEMPLATE template0", db="postgres", txn=False)
         if rc != 0:
             die("cannot create database braindb", 1)
     idx_sha, scope_sha = self_hashes(sc)
@@ -895,10 +1067,22 @@ def cmd_rebuild(a, root, sc, seat, lock_held=False):
     meta = [("seat", seat), ("root", root), ("built_at", datetime.datetime.now().astimezone().isoformat(timespec="seconds")),
             ("indexer_sha256", idx_sha), ("scope_sha256", scope_sha),
             ("counts", json.dumps(dict(files=fkinds, search_rows=kinds, rules=len(T["rules"])))),
-            ("faults", json.dumps(dict(unreadable=len(sc_res["unreadable"]), truncated=len(truncated))))]
-    p = subprocess.Popen(psql_cmd(DB), stdin=subprocess.PIPE)
+            ("faults", json.dumps(dict(unreadable=len(sc_res["unreadable"]), truncated=len(truncated)))),
+            ("left_out", json.dumps(dict(total=len(sc_res["left_out"]), by_clause=left_out_counts(sc_res))))]
+    hold = os.environ.get("BRAINDB_TEST_HOLD")       # tests only: pause here, after every separate session and
+    if hold:                                         # before the load session opens, until the named file exists
+        open(hold + ".waiting", "w").close()
+        t_hold = time.time()
+        while not os.path.exists(hold) and time.time() - t_hold < 60:
+            time.sleep(0.1)
+    p = subprocess.Popen(psql_cmd(DB), stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+    errbuf = []
+    drain = threading.Thread(target=lambda: errbuf.append(p.stderr.read()))
+    drain.start()
     try:
         w = lambda s: p.stdin.write(s.encode("utf-8"))
+        # ONE session, ONE transaction: BEGIN, the data-directory assertion, then the whole reload.
+        w("BEGIN;\n" + ASSERT_SQL)
         w(SCHEMA)
         for blk in (
             copy_block("meta", ("k", "v"), meta),
@@ -921,6 +1105,11 @@ def cmd_rebuild(a, root, sc, seat, lock_held=False):
         except OSError:
             pass
     rc = p.wait()
+    drain.join()
+    err = b"".join(errbuf).decode("utf-8", errors="replace")
+    judge_psql(rc, err)
+    if err:
+        sys.stderr.write(err)
     if rc != 0:
         die("REBUILD FAILED (psql rc %d). The transaction was rolled back; the previous index, if any, is unchanged." % rc, 1)
     dt = time.time() - t0
@@ -939,21 +1128,20 @@ def cmd_rebuild(a, root, sc, seat, lock_held=False):
     for rel, why in sc_res["skipped"]:
         reasons.setdefault(reason_group(why), []).append((rel, why))
     if reasons:
-        print("  matched an allow line but NOT indexed: %d" % len(sc_res["skipped"]))
+        print("  matched an allow line but NOT indexed (files that are not lessons): %d" % len(sc_res["skipped"]))
         for key in sorted(reasons):
             items = reasons[key]
-            # anything that fails closed, or is a fault, is listed in full by name; routine exclusions are sampled
-            full = key.startswith(("tier cannot", "a damaged", "unreadable", "hard link", "unknown tier", "project tier", "tier names"))
+            full = key.startswith(("unreadable", "hard link", "symlink", "not a regular", "directory is"))
             show = items if full else items[:4]
             print("    %3d  %s%s" % (len(items), key.strip(), "" if full else "  (%s%s)" % (
                 ", ".join(os.path.basename(x.rstrip("/")) or x for x, _ in show), ", ..." if len(items) > 4 else "")))
             if full:
                 for rel, why in show:
                     print("           %s  [%s]" % (rel, why))
-    if sc_res["untagged"]:
-        print("  UNTAGGED lessons indexed (no tier in the frontmatter; treated as W, as boot_digest.py does): %d" % len(sc_res["untagged"]))
-        for rel in sc_res["untagged"]:
-            print("           %s" % rel)
+    n_lessons = fkinds.get("lesson", 0)
+    print("  LESSONS: %d file(s) matched the allow line; %d qualified and are indexed; %d LEFT OUT, each named with the clause it failed:"
+          % (n_lessons + len(sc_res["left_out"]), n_lessons, len(sc_res["left_out"])))
+    print_left_out(sc_res, 0)
     if truncated:
         print("  rows TRUNCATED at their size limit: %d" % len(truncated))
         for rel, line, what, n in truncated[:20]:
@@ -962,10 +1150,11 @@ def cmd_rebuild(a, root, sc, seat, lock_held=False):
             print("           (+%d more)" % (len(truncated) - 20))
     print("  time: %.2f s (read and parse %.2f s, load and index %.2f s)" % (dt, t_parse, dt - t_parse))
     nu, nt = len(sc_res["unreadable"]), len(truncated)
+    tail = left_out_line(sc_res)
     if nu or nt:
-        print("rebuild: DONE WITH FAULTS: %d unreadable file(s) skipped, %d row(s) truncated; they are listed above" % (nu, nt))
+        print("rebuild: DONE WITH FAULTS: %d unreadable file(s) skipped, %d row(s) truncated; they are listed above; %s" % (nu, nt, tail))
     else:
-        print("rebuild: done; no file was unreadable and no row was truncated")
+        print("rebuild: done; no file was unreadable and no row was truncated; %s" % tail)
     if lock_fd is not None:
         os.close(lock_fd)
     return 0
@@ -1018,12 +1207,19 @@ def cmd_check(a, root, sc, seat):
         last = {}
     faults = "  skipped for a fault: %d file(s) unreadable on disk now; at the last rebuild %s unreadable, %s row(s) truncated" % (
         len(res["unreadable"]), last.get("unreadable", "?"), last.get("truncated", "?"))
-    if not diffs and not stale:
-        print("check: GREEN, %d files on disk match the index (built %s)" % (len(disk), meta.get("built_at", "?")))
+    def tail_lines():
         print(where)
         print(faults)
         for rel in res["unreadable"][:20]:
             print("    unreadable: " + rel)
+        print("  left out: " + left_out_line(res))
+        print_left_out(res, NAMES_SHOWN)
+        if res["idx"]["rejected"]:
+            print("  rules index: %d line(s) could not be read as a row (line %s)" % (
+                len(res["idx"]["rejected"]), ", ".join(str(ln) for ln, _ in res["idx"]["rejected"][:20])))
+    if not diffs and not stale:
+        print("check: GREEN, %d files on disk match the index (built %s)" % (len(disk), meta.get("built_at", "?")))
+        tail_lines()
         return 0
     print("check: RED, %d path(s) differ%s (run: braindb.sh rebuild)"
           % (len(diffs), "; " + "; ".join(stale) if stale else ""))
@@ -1031,10 +1227,7 @@ def cmd_check(a, root, sc, seat):
         print("  " + d)
     if len(diffs) > 20:
         print("  (+%d more)" % (len(diffs) - 20))
-    print(where)
-    print(faults)
-    for rel in res["unreadable"][:20]:
-        print("    unreadable: " + rel)
+    tail_lines()
     return 1
 
 
@@ -1072,13 +1265,21 @@ WITH terms AS (
     FROM scored s CROSS JOIN allq a
 ), best AS (
     SELECT DISTINCT ON (unit) id, unit, kind, score FROM ranked ORDER BY unit, score DESC, id
+), flagged AS (
+    -- N9: a rules-file row that holds EVERY key word is selected here, before the top-N cut, so whether it is
+    -- shown first can never depend on --limit
+    SELECT b.id, b.score, b.kind,
+           (b.kind = 'rules' AND :'mode' = 'default' AND EXISTS (SELECT 1 FROM keyw)
+            AND NOT EXISTS (SELECT 1 FROM keyw k JOIN brain.chunks c ON c.id = b.id WHERE NOT c.tsv @@ k.tq)) AS lead
+    FROM best b
 ), grouped AS (
-    SELECT id, score, CASE WHEN kind IN ('ledger', 'daily') THEN 1 ELSE 0 END AS grp,
+    SELECT id, score, lead, CASE WHEN kind IN ('ledger', 'daily') THEN 1 ELSE 0 END AS grp,
            row_number() OVER (PARTITION BY (CASE WHEN kind IN ('ledger', 'daily') THEN 1 ELSE 0 END)
-                              ORDER BY score DESC, id) AS rn
-    FROM best
+                              ORDER BY score DESC, id) AS rn,
+           row_number() OVER (PARTITION BY lead ORDER BY score DESC, id) AS rn_lead
+    FROM flagged
 ), top AS (
-    SELECT id, score, grp FROM grouped WHERE rn <= :lim
+    SELECT id, score, grp FROM grouped WHERE rn <= :lim OR (lead AND rn_lead <= :lim)
 )
 SELECT round(t.score::numeric, 4), c.kind, c.path, coalesce(c.line::text, ''), coalesce(c.date::text, ''),
        coalesce(c.stamp, ''), coalesce(c.status, ''), coalesce(c.title, ''), coalesce(c.heading, ''),
@@ -1094,6 +1295,7 @@ FROM top t JOIN brain.chunks c ON c.id = t.id CROSS JOIN allq a
 ORDER BY t.score DESC, c.id;
 """
 
+NAMES_SHOWN = 5        # check: names printed per clause of the qualify rule (rebuild prints every name)
 RECORDS_SHOWN = 2      # in the default order: how many incident rows follow the knowledge results
 TOPK_DEFAULT = "4"     # how many of the question's rarest words count as its key words
 
@@ -1158,7 +1360,7 @@ def cmd_search(a, root, sc, seat):
         die("--limit must be 1 to 200")
     mode = "kind" if kind else ("all" if a.all else "default")
     t0 = time.time()
-    rc, rows = query(SEARCH_SQL, variables=dict(q=words, kind=kind, lim=str(a.limit), topk=topk))
+    rc, rows = query(SEARCH_SQL, variables=dict(q=words, kind=kind, lim=str(a.limit), topk=topk, mode=mode))
     ms = (time.time() - t0) * 1000
     if rc != 0:
         die("search failed (is the index built? run: braindb.sh check)", 1)
@@ -1175,6 +1377,14 @@ def cmd_search(a, root, sc, seat):
     n = len(main) + len(tail)
     if not main and not tail:
         print("NO MATCH: none of these words is in the index. If you know the moment, try: braindb.sh at <trigger>")
+        rc, lo = query("select v from brain.meta where k = 'left_out'")
+        try:
+            n_out = json.loads(lo[0][0])["total"] if rc == 0 and lo else 0
+        except (ValueError, KeyError, IndexError, TypeError):
+            n_out = 0
+        if n_out:
+            print("NOTE: %d lesson file(s) are LEFT OUT of this index by the qualify rule and are not searched; "
+                  "`braindb.sh check` names them. search does not look inside them." % n_out)
         print("(0 results, %.0f ms)" % ms)
         return 0
     if not main:
@@ -1205,6 +1415,8 @@ def cmd_at(a, root, sc, seat):
     ensure_index(root, sc, seat)
     if not re.fullmatch(r"[a-z][a-z-]*", a.trigger):
         die("a trigger is one lower-case word from the rules-index vocabulary")
+    if a.top < 0:
+        die("--top must be 0 (all) or more")
     rc, rows = query(AT_SQL, variables=dict(t=a.trigger, seat=seat))
     if rc != 0:
         die("lookup failed (is the index built? run: braindb.sh check)", 1)
@@ -1223,9 +1435,10 @@ def cmd_at(a, root, sc, seat):
 # ---------------------------------------------------------------- info (used by `braindb.sh status`)
 
 def cmd_info(a, root, sc, seat):
-    if not server_up():
+    rc, rows = query("select 1", db="postgres", on_down="return")   # rc 4 (exit) when another cluster answers
+    if rc == "down":
+        print("  the server process exists but is not answering on %s" % env("BRAINDB_SOCKDIR_EFF"))
         return 3
-    need_server()                                   # refuses (rc 4) when another cluster answers on this socket
     print("  the server answering is this data directory's: %s" % env("BRAINDB_PGDATA_EFF"))
     rc, rows = query("select 1 from pg_database where datname = 'braindb'", db="postgres")
     if rc != 0 or not rows:
@@ -1238,7 +1451,7 @@ def cmd_info(a, root, sc, seat):
     if rc != 0 or rows != [["t"]]:
         print("  index: schema missing (run: braindb.sh rebuild)")
         return 0
-    rc, rows = query("select k, v from brain.meta where k in ('built_at', 'seat', 'counts', 'faults') order by k")
+    rc, rows = query("select k, v from brain.meta where k in ('built_at', 'seat', 'counts', 'faults', 'left_out') order by k")
     for r in rows:
         if len(r) == 2:
             print("  %s: %s" % (r[0], r[1]))
@@ -1251,6 +1464,7 @@ def main():
     sub.add_parser("rebuild")
     sub.add_parser("check")
     sub.add_parser("info")
+    sub.add_parser("validate")
     s = sub.add_parser("search")
     s.add_argument("words", nargs="+")
     s.add_argument("--kind")
@@ -1269,7 +1483,9 @@ def main():
     root = env("BRAINDB_ROOT_EFF")
     if not os.path.isdir(root):
         die("tree root does not exist: " + root)
-    sc = load_scope(env("BRAINDB_SCOPE_EFF"), seat)
+    sc = load_scope(env("BRAINDB_SCOPE_EFF"), seat, os.environ.get("BRAINDB_DAILY_REL") or None)
+    if a.cmd == "validate":                          # the scope is sound; nothing was created, started or read
+        return 0
     return dict(rebuild=cmd_rebuild, check=cmd_check, search=cmd_search, at=cmd_at, info=cmd_info)[a.cmd](a, root, sc, seat)
 
 

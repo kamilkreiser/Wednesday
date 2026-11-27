@@ -1,0 +1,17 @@
+START Fri 27 Nov 2026 18:16:41 AEDT
+18:16  up  8:24, 2 users, load averages: 38.43 29.09 26.04
+## 3, 5, 10 and 20 simultaneous handover.sh writers
+RACE w3         writers  3, trials  60, wait 60 s: acknowledged 180, refused 0 ; acknowledged LOST 0; a block more than once 0; refused-but-on-disk 0; archive entry count wrong 0; state file not ONE block 0; lock dir (or set-aside) left 0; temp files left 0; slowest writer 0.6 s | load 40.38 30.51 26.66
+RACE w5         writers  5, trials  40, wait 60 s: acknowledged 200, refused 0 ; acknowledged LOST 0; a block more than once 0; refused-but-on-disk 0; archive entry count wrong 0; state file not ONE block 0; lock dir (or set-aside) left 0; temp files left 0; slowest writer 0.5 s | load 40.31 31.14 26.98
+RACE w10        writers 10, trials  20, wait 120 s: acknowledged 200, refused 0 ; acknowledged LOST 0; a block more than once 0; refused-but-on-disk 0; archive entry count wrong 0; state file not ONE block 0; lock dir (or set-aside) left 0; temp files left 0; slowest writer 0.6 s | load 41.59 31.88 27.32
+RACE w20        writers 20, trials  12, wait 180 s: acknowledged 240, refused 0 ; acknowledged LOST 0; a block more than once 0; refused-but-on-disk 0; archive entry count wrong 0; state file not ONE block 0; lock dir (or set-aside) left 0; temp files left 0; slowest writer 0.7 s | load 43.49 32.62 27.63
+TOTAL acknowledged 820, refused 0, acknowledged LOST 0, duplicated 0
+rc=0
+## NEGATIVE CONTROL: the same harness, a COPY of the engine with a per-process lock path (no mutual exclusion). It must SEE a loss or a refusal.
+RACE NOLOCK     writers  3, trials  60, wait 30 s: acknowledged 168, refused 12 {(4, 'other'): 12}; acknowledged LOST 1; a block more than once 0; refused-but-on-disk 0; archive entry count wrong 1; state file not ONE block 0; lock dir (or set-aside) left 0; temp files left 12; slowest writer 0.3 s | load 37.29 31.78 27.42
+    trial 2 rc 4: handover: REFUSED — I/O fault, the state file was not replaced: the state or archive file changed on disk while this write was being prepared (an edit made outside this tool; the lock keeps other handover writes out) /   temp file(s) left for inspection (never
+    trial 3 rc 4: handover: REFUSED — I/O fault, the state file was not replaced: the state or archive file changed on disk while this write was being prepared (an edit made outside this tool; the lock keeps other handover writes out) /   temp file(s) left for inspection (never
+control verdict: the harness SEES the missing lock (lost 1, entry count wrong 1, refused 12)
+rc=0
+END Fri 27 Nov 2026 18:18:12 AEDT
+18:18  up  8:25, 2 users, load averages: 37.29 31.78 27.42

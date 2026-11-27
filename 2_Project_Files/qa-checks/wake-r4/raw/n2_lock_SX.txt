@@ -1,0 +1,45 @@
+START Fri 27 Nov 2026 18:15:28 AEDT
+18:15  up  8:23, 2 users, load averages: 27.21 25.55 24.66
+## S. the lock path is not a plain fresh directory (HANDOVER_LOCK_WAIT 1)
+- a regular FILE, fresh                                              rc 5 LOCK BUSY  1.2s; traceback no; left exactly as it was True; state still S0 True | its line run rc 0; write again rc 0
+- a regular FILE, 5 minutes old                                      rc 5 STALE LOCK 0.2s; traceback no; left exactly as it was True; state still S0 True | its line run rc 0; write again rc 0
+- a dangling symlink (lstat mtime is the link's: fresh)              rc 5 LOCK BUSY  1.1s; traceback no; left exactly as it was True; state still S0 True | its line run rc 0; write again rc 0
+- a symlink to a directory whose owner file names a DEAD pid here    rc 5 STALE LOCK 0.2s; traceback no; left exactly as it was True; state still S0 True | its line run rc 0; write again rc 0
+- a symlink to a directory whose owner names a LIVE unrelated pid    rc 5 LOCK BUSY  1.2s; traceback no; left exactly as it was True; state still S0 True | its line run rc 0; write again rc 0
+- a symlink to an EMPTY directory (fresh)                            rc 5 LOCK BUSY  1.1s; traceback no; left exactly as it was True; state still S0 True | its line run rc 0; write again rc 0
+- a directory, owner names a LIVE unrelated pid (pid reuse)          rc 5 LOCK BUSY  1.2s; traceback no; left exactly as it was True; state still S0 True | its line run rc 0; write again rc 0
+- a directory, owner names pid 1 on this host                        rc 5 LOCK BUSY  1.1s; traceback no; left exactly as it was True; state still S0 True | its line run rc 0; write again rc 0
+- a directory, owner: a dead pid on ANOTHER host, 5 minutes old      rc 5 LOCK BUSY  1.2s; traceback no; left exactly as it was True; state still S0 True | its line run rc 0; write again rc 0
+- a directory, owner: dead pid, host line MISSING                    rc 5 LOCK BUSY  1.1s; traceback no; left exactly as it was True; state still S0 True | its line run rc 0; write again rc 0
+- a directory, owner file is a DIRECTORY, 5 minutes old              rc 5 STALE LOCK 0.1s; traceback no; left exactly as it was True; state still S0 True | its line run rc 0; write again rc 0
+- a directory, no owner, holding a stray temp file, 5 minutes old    rc 5 STALE LOCK 0.1s; traceback no; left exactly as it was True; state still S0 True | its line run rc 0; write again rc 0
+- a directory, owner pid NEGATIVE (-1)                               rc 5 LOCK BUSY  1.1s; traceback no; left exactly as it was True; state still S0 True | its line run rc 0; write again rc 0
+- a directory, owner pid with a + sign / spaces / unicode digits     rc 5 LOCK BUSY  1.4s; traceback no; left exactly as it was True; state still S0 True | its line run rc 0; write again rc 0
+- a directory, a 2 MB owner file of garbage                          rc 5 LOCK BUSY  1.2s; traceback no; left exactly as it was True; state still S0 True | its line run rc 0; write again rc 0
+- a directory, owner is a dead pid here but the dir is mode 000      rc 5 LOCK BUSY  1.1s; traceback no; left exactly as it was True; state still S0 True | its line run rc 0; write again rc 0
+## X. rc 6: what is on disk, and what a caller that writes again gets
+- the lock moved away after the 2nd rename (recovery line run then) C rc 6 NOT ACKNOWLEDGED; stdout ''
+      right after: copies S0:1 S1:1 C:1 F:0 | state is ['C'], ONE block True, check rc 0 | archive entries 2 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0
+      the caller writes C again: rc 0 written in 0.1s
+      then: copies S0:1 S1:1 C:2 F:0 | state is ['C'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup ['C']
+- a foreign FILE appears in the lock dir before the 2nd rename (.DS_Store) C rc 6 NOT ACKNOWLEDGED; stdout ''
+      right after: copies S0:1 S1:1 C:1 F:0 | state is ['C'], ONE block True, check rc 0 | archive entries 2 | lock dir left True holding ['.DS_Store'] | set-aside dirs 0 | temp files beside the state file 0
+      the caller writes C again: rc 5 LOCK BUSY in 1.1s
+      then: copies S0:1 S1:1 C:1 F:0 | state is ['C'], ONE block True, check rc 0 | archive entries 2 | lock dir left True holding ['.DS_Store'] | set-aside dirs 0 | temp files beside the state file 0 => LOST NONE; dup none
+- a foreign FILE appears in the lock dir after the owner is written C rc 0 -; stdout 'handover: seat wednesday\n  sta'
+      right after: copies S0:1 S1:1 C:1 F:0 | state is ['C'], ONE block True, check rc 0 | archive entries 2 | lock dir left False | set-aside dirs 0 | temp files beside the state file 0
+      the caller writes C again: rc 0 written in 0.1s
+      then: copies S0:1 S1:1 C:2 F:0 | state is ['C'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 0 | temp files beside the state file 0 => LOST NONE; dup ['C']
+- the lock moved away between 'owner removed' and rmdir          C rc 6 NOT ACKNOWLEDGED; stdout ''
+      right after: copies S0:1 S1:1 C:1 F:0 | state is ['C'], ONE block True, check rc 0 | archive entries 2 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0
+      the caller writes C again: rc 0 written in 0.1s
+      then: copies S0:1 S1:1 C:2 F:0 | state is ['C'], ONE block True, check rc 0 | archive entries 3 | lock dir left False | set-aside dirs 1 | temp files beside the state file 0 => LOST NONE; dup ['C']
+- the tasks directory becomes read-only after the 2nd rename (rmdir fails) C rc 6 NOT ACKNOWLEDGED; stdout ''
+      right after: copies S0:1 S1:1 C:1 F:0 | state is ['C'], ONE block True, check rc 0 | archive entries 2 | lock dir left True holding [] | set-aside dirs 0 | temp files beside the state file 0
+      the caller writes C again: rc 5 LOCK BUSY in 1.2s
+      then: copies S0:1 S1:1 C:1 F:0 | state is ['C'], ONE block True, check rc 0 | archive entries 2 | lock dir left True holding [] | set-aside dirs 0 | temp files beside the state file 0 => LOST NONE; dup none
+   ordinary use: 60 plain writes one after another, exit codes seen (rc 6 must not appear without interference):
+   {0: 60}; lock dir left False; files in tasks: ['STATE-wednesday-archive.md', 'STATE-wednesday.md']
+rc=0
+END Fri 27 Nov 2026 18:16:04 AEDT
+18:16  up  8:23, 2 users, load averages: 33.59 26.88 25.15
