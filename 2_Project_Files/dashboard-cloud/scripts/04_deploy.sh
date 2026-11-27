@@ -32,7 +32,7 @@ if ! $AZ webapp show -n "$WEBAPP" -g "$RG" -o none 2>"$SCRATCH/app_err.txt"; the
 fi
 $AZ webapp update -n "$WEBAPP" -g "$RG" --https-only true --client-affinity-enabled false -o none
 $AZ webapp config set -n "$WEBAPP" -g "$RG" --ftps-state Disabled --min-tls-version 1.2 --http20-enabled true --always-on true \
-   --startup-file "gunicorn -k uvicorn.workers.UvicornWorker -w 2 --bind 0.0.0.0:8000 --timeout 120 --chdir app main:app" -o none
+   --startup-file "gunicorn -k uvicorn.workers.UvicornWorker -w 1 --bind 0.0.0.0:8000 --timeout 120 --chdir app main:app" -o none
 # basic-auth publishing creds off (zip deploy uses the AAD token; FTP is disabled anyway)
 APP_RES=$($AZ webapp show -n "$WEBAPP" -g "$RG" --query id -o tsv)
 $AZ resource update --ids "$APP_RES/basicPublishingCredentialsPolicies/ftp" --set properties.allow=false -o none
