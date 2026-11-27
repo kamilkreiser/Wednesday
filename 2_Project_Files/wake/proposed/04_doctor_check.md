@@ -12,9 +12,11 @@ The launcher builds the pack in its path; doctor is the backstop, in the same sh
 
 A seat counts as "on the pack" once its state file exists (the cut-over's first step). From then on a MISSING pack is a warning too (round 3, the checker's M3: a build that has never succeeded must have a backstop). A seat with no state file and no pack is skipped silently, so Tuesday's and Friday's doctor output does not change. The snippet never discards stderr (m7): if `handover.sh --where` refuses, doctor prints a warning with the refusal and says the two checks were not run.
 
+Round 4 (the second checker's N3): a third check, first in the block. **Any standing lock directory `0_Brain/tasks/STATE-*.lock.d` is warned at boot**, with its owner line and the exact `mv -n` recovery line, and the text says the seat may run that line itself once `pgrep -fl handover_core.py` prints nothing. A write that died at 10:00 is then met at the next launch, not at the 85% handover. Doctor removes nothing. A lock already set aside (`...lock.d.stale-<stamp>`) is not a lock and is not reported; proposal 5 keeps it out of git's way. Tested: D08 (warned, with the line), D08b (gone once set aside).
+
 Known behaviour, stated so it is not read as a fault: the pack is rebuilt only at launch. Doctor run by hand later in a session will truthfully say the pack is older than the ledger or the state file. That is a statement about the file, not about the running seat.
 
-Tested in `tests/run.sh --groups D` (D01 to D07; D05 is a TUESDAY tree that holds the Wednesday seat's state file and must print nothing) with doctor's `ok`/`warn` stubbed; doctor itself was not run with the snippet in it.
+Tested in `tests/run.sh --groups D` (D01 to D08b; D05 is a TUESDAY tree that holds the Wednesday seat's state file and must print nothing) with doctor's `ok`/`warn` stubbed; doctor itself was not run with the snippet in it.
 
 Related: proposal 7 retargets doctor's own 2026-09-18 warning on `NEXT-PICKUP.md`.
 

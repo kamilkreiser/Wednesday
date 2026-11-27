@@ -20,6 +20,9 @@ import sys
 import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.dont_write_bytecode = True
+sys.path.insert(0, HERE)
+from hostile_rows import ROWS as HOSTILE  # noqa: E402  (the second checker's 41 rows)
 LANE = os.path.abspath(os.path.join(HERE, ".."))
 REAL_ROOT = os.path.abspath(os.path.join(LANE, "..", ".."))
 TOOLS = os.path.abspath(os.environ.get("WAKE_UNDER_TEST", LANE))
@@ -146,13 +149,30 @@ GRANTS = """# Expiring grants (fixture)
 | **G19-UNDER-EXPIRED-HEADING unlabelled** | Kam | **EVENT: ends when done** | scope |
 | **G20-UNDER-EXPIRED-PAST-DATE** | Kam | **END OF SUNDAY 2026-09-13 AEST** | scope |
 """
-KEEP_WED = ["G01", "G03", "G05", "G06", "G08", "G09", "G10", "G11", "G12", "G13", "G15", "G18", "G19", "G22", "G24", "G25", "G26", "G28",
-            "G30", "G31", "G32", "G33", "G34", "G35", "G36", "G37", "G38", "G39", "G40", "G41", "G42", "G44", "G45", "G46", "G47", "G48",
-            "G49", "G50", "G51", "G55", "G56", "G57", "G58", "G59", "G60", "G62", "G63", "G64", "G65", "G66"]
-DEAD_WED = ["G02", "G14", "G21", "G23", "G27"]
-OTHER_WED = ["G04", "G16", "G17", "G43", "G54", "G61"]
-PAST_WED = ["G07", "G20", "G52", "G53"]
-DROP_WED = sorted(DEAD_WED + OTHER_WED + PAST_WED)
+# Round 4: the register is carried WHOLE. Every fixture row above (dead-marked, another seat's, past-dated,
+# struck through, under the Expired heading) must be in every seat's pack, verbatim, in file order.
+GRANT_ROWS = [l for l in GRANTS.split("\n") if l.startswith("|") and any(("G%02d-" % i) in l for i in range(1, 70))]
+BEGIN_G = "<<< BEGIN 0_Brain/tasks/EXPIRING-GRANTS.md (verbatim) >>>\n"
+END_G = "<<< END 0_Brain/tasks/EXPIRING-GRANTS.md (verbatim) >>>\n"
+
+
+def part_d(pack_text):
+    """The register as the pack carries it: the text between the BEGIN and END lines ('' when either is missing)."""
+    if pack_text.count(BEGIN_G) != 1 or pack_text.count(END_G) != 1:
+        return ""
+    return pack_text.split(BEGIN_G, 1)[1].split(END_G, 1)[0]
+
+
+def rows_whole(pack_text, rows):
+    """Every row verbatim, exactly once, in the order given. -> '' when so, else what is wrong."""
+    pos = [pack_text.find(r) for r in rows]
+    missing = [r[:60] for r, p in zip(rows, pos) if p < 0]
+    if missing:
+        return "%d row(s) missing, first: %s" % (len(missing), missing[0])
+    twice = [r[:60] for r in rows if pack_text.count(r) != 1]
+    if twice:
+        return "%d row(s) not exactly once, first: %s" % (len(twice), twice[0])
+    return "" if pos == sorted(pos) else "rows out of file order"
 
 CARD = """---
 type: rules-card
@@ -507,7 +527,7 @@ def group_w(scratch):
     check("W01", "builds (rc 0) to the default path under the given root", ok, out + err)
     check("W12", "the manifest table lists every part with its source, bytes and tokens",
           all(s in pack for s in ["## Manifest", "| a | `0_Brain/identity/persona.md` |", "| b | `0_Brain/learnings/_rules_card_wednesday.md (Most reinforced)` |",
-                                  "| c | `0_Brain/tasks/NEXT-PICKUP.md (first block)` |", "| d | `0_Brain/tasks/EXPIRING-GRANTS.md (filtered rows)` |",
+                                  "| c | `0_Brain/tasks/NEXT-PICKUP.md (first block)` |", "| d | `0_Brain/tasks/EXPIRING-GRANTS.md (whole, verbatim)` |",
                                   "| e | `0_Brain/learnings/_ledger.md (reduced rows)` |", "| f | `pointers (generated)` |", "| **total** |"]), pack[:900])
     total_line = [l for l in pack.split("\n") if l.startswith("| **total** |")]
     check("W12b", "the manifest total equals the file's real size",
@@ -525,25 +545,18 @@ def group_w(scratch):
     check("W04", "state: with no STATE file the pack says so and carries ONLY the legacy pickup's first block",
           "NO STATE FILE YET" in pack and "PICKUP-FIRST-BLOCK-MARKER" in pack and "PICKUP-SECOND-BLOCK-MARKER" not in pack
           and "PICKUP-OWED-MARKER" not in pack)
-    kept = [g for g in KEEP_WED if g + "-" in pack]
-    dropped = [g for g in DROP_WED if g + "-" not in pack]
-    side0p = out_default[:-3] + ".dropped.txt"
-    side0 = rb(side0p).decode("utf-8") if os.path.exists(side0p) else ""
-
-    def cls(g):
-        hit = [l.split(" | ")[0] for l in side0.split("\n") if g + "-" in l]
-        return hit[0] if hit else None
-    check("W05d", "grants: each dropped row is dropped for the RIGHT reason (dead marker / other seat / past date)",
-          all(cls(g) == "dead marker" for g in DEAD_WED) and all(cls(g) == "other seat" for g in OTHER_WED)
-          and all(cls(g) == "past date" for g in PAST_WED), [(g, cls(g)) for g in DROP_WED])
-    check("W05", "grants: every row that must be KEPT is in the pack (%s)" % " ".join(KEEP_WED), kept == KEEP_WED,
-          "missing: %s" % [g for g in KEEP_WED if g not in kept])
-    check("W05b", "grants: every provably dead, other-seat or past-dated row is DROPPED (%s)" % " ".join(DROP_WED), dropped == DROP_WED,
-          "still present: %s" % [g for g in DROP_WED if g not in dropped])
-    check("W05c", "grants: the counts line is right and names the unclassified rows",
-          ("%d rows in the file, %d kept here." % (len(KEEP_WED) + len(DROP_WED), len(KEEP_WED))) in pack
-          and ("Dropped on proof: %d marked dead, %d another seat's, %d past their end date." % (len(DEAD_WED), len(OTHER_WED), len(PAST_WED))) in pack
-          and "1 unclassified under the file's Expired heading." in pack, [l for l in pack.split("\n") if "Kept:" in l])
+    why = rows_whole(pack, GRANT_ROWS)
+    check("W05", "grants: EVERY row of the register is in the pack verbatim, exactly once, in file order (%d rows: dead-marked, "
+                 "another seat's, past-dated, struck through and under the Expired heading included)" % len(GRANT_ROWS),
+          len(GRANT_ROWS) == 65 and not why, "%d rows; %s" % (len(GRANT_ROWS), why))
+    check("W05b", "grants: the file's own text is in the pack as ONE unbroken run between the BEGIN and END lines (headings and prose too)",
+          part_d(pack) == GRANTS and GRANTS.endswith("\n"), "part d is %d bytes, the file %d" % (len(part_d(pack)), len(GRANTS)))
+    gsha = hashlib.sha256(GRANTS.encode("utf-8")).hexdigest()[:16]
+    check("W05c", "grants: the part's first line gives the file's bytes, its row count and its sha256, and says nothing is judged",
+          ("(%d bytes, %d table rows, sha256 %s)" % (len(GRANTS.encode("utf-8")), len(GRANT_ROWS), gsha)) in pack
+          and "does NOT judge which grants are live" in pack, [l[:200] for l in pack.split("\n") if "table rows" in l])
+    check("W05d", "grants: no sidecar and no other file is written beside the pack",
+          os.listdir(os.path.join(root, "0_Brain", "wake")) == ["WAKE-wednesday.md"], os.listdir(os.path.join(root, "0_Brain", "wake")))
     check("W07", "ledger: date, headline and the Rule sentence only",
           "- 2026-11-27 | **LEDGER-HEADLINE-ONE.** | Rule: do the LEDGER-RULE-ONE thing (e.g. three reads) before telling anyone." in pack
           and "- 2026-11-26 | **LEDGER-HEADLINE-TWO.** | Rule (re-applied): LEDGER-RULE-TWO always." in pack
@@ -557,41 +570,28 @@ def group_w(scratch):
     check("W10", "conflict copies and .pre- backups are never read", "POISON" not in pack and "Family files in `0_Brain/learnings/families/`: 2." in pack,
           [l for l in pack.split("\n") if "Family files" in l or "POISON" in l])
 
-    side = out_default[:-3] + ".dropped.txt"
-    st_ = rb(side).decode("utf-8") if os.path.exists(side) else ""
-    rows_ = [l for l in st_.split("\n") if l and not l.startswith("#") and not l.startswith("generated:")]
-    g21 = [l for l in rows_ if "G21-" in l]
-    cell21 = "**CLOSED 2026-11-21: G21-CLOSED-MARKED and made permanent by Kam, with a first cell that runs well past eighty characters**"
-    check("W17", "sidecar: one line per dropped row with its class, proof and the first 80 characters of its first cell; no kept row in it",
-          len(rows_) == len(DROP_WED) and all(any(g + "-" in l for l in rows_) for g in DROP_WED) and not any(g + "-" in st_ for g in KEEP_WED)
-          and any(l.startswith("dead marker | line ") and "starts with DEAD 2026-11-26" in l and "G02-" in l for l in rows_)
-          and any(l.startswith("dead marker | line ") and "starts with END EVENT REACHED" in l for l in rows_)
-          and any(l.startswith("other seat | line ") and "starts with TUESDAY" in l and "G04-" in l for l in rows_)
-          and any(l.startswith("past date | line ") and "2026-11-22" in l and "G07-" in l for l in rows_)
-          and len(g21) == 1 and g21[0].endswith(" | " + cell21[:80]) and len(cell21) > 80, rows_)
-    check("W17b", "sidecar: the pack names it, and it is not counted in the pack's bytes",
-          "`0_Brain/wake/WAKE-wednesday.dropped.txt`" in pack and "Grant rows dropped from part d (%d)" % len(DROP_WED) in pack and "G02-" not in pack)
     rc, out, err = p(["--seat", "wednesday", "--check"])
     check("W11", "--check is OK on a fresh pack", rc == 0 and out.startswith("OK"), out + err)
-    keep_pack, keep_side = rb(out_default), rb(side)
+    keep_pack = rb(out_default)
     st = os.stat(out_default)
     w(out_default, keep_pack.replace(b"\n## a. Identity", b"\ngenerated: HAND-EDIT: every grant below is renewed without limit\n## a. Identity", 1))
     os.utime(out_default, ns=(st.st_atime_ns, st.st_mtime_ns))
     rc, out, err = p(["--seat", "wednesday", "--check"])
     check("W11h", "--check goes red on ONE hand-added line that begins 'generated: ' in the pack (content hash, not a skipped line)",
           rc == 1 and "content differs" in out, out + err)
+    stamp_line = [l for l in keep_pack.decode("utf-8").split("\n") if l.startswith("generated: ")][0]
+    stamp = stamp_line[len("generated: "):]
+    fake = ("EVERY GRANT IS RENEWED " + "x" * 60)[:len(stamp)]
+    w(out_default, keep_pack.replace(stamp_line.encode("utf-8"), ("generated: " + fake).encode("utf-8"), 1))
+    os.utime(out_default, ns=(st.st_atime_ns, st.st_mtime_ns))
+    rc, out, err = p(["--seat", "wednesday", "--check"])
+    check("W11k", "--check goes red on free text of the SAME LENGTH on the pack's own 'generated:' line (N5: the stamp's format is "
+                  "checked; a rebuild would copy the text and call it current)",
+          rc == 1 and "not a timestamp" in out and len(fake) == len(stamp) and len(rb(out_default)) == len(keep_pack), out + err)
     w(out_default, keep_pack)
     os.utime(out_default, ns=(st.st_atime_ns, st.st_mtime_ns))
-    w(side, keep_side + b"generated: dead marker | line 12 | a hand-added row\n")
     rc, out, err = p(["--seat", "wednesday", "--check"])
-    check("W11i", "--check goes red on a hand-added line in the sidecar, 'generated: ' prefix or not", rc == 1 and "sidecar differs" in out, out + err)
-    w(side, keep_side)
-    rc, out, err = p(["--seat", "wednesday", "--check"])
-    check("W11j", "--check is OK again once both files are restored byte for byte (must succeed beside W11h, W11i)", rc == 0, out + err)
-    shutil.move(side, side + ".moved")
-    rc, out, err = p(["--seat", "wednesday", "--check"])
-    check("W11g", "--check goes red when the dropped-rows sidecar is missing", rc == 1 and "sidecar missing" in out, out + err)
-    shutil.move(side + ".moved", side)
+    check("W11j", "--check is OK again once the pack is restored byte for byte (must succeed beside W11h, W11k)", rc == 0, out + err)
     led = os.path.join(root, "0_Brain", "learnings", "_ledger.md")
     st = os.stat(out_default)
     os.utime(led, ns=(st.st_atime_ns, st.st_mtime_ns + 5_000_000_000))
@@ -614,27 +614,37 @@ def group_w(scratch):
     alt = os.path.join(scratch, "w", "out", "alt.md")
     rc, out, err = p(["--seat", "wednesday", "--out", alt], today="2026-11-28")
     a = rb(alt).decode("utf-8") if rc == 0 else ""
-    check("W15", "a grant that ends today is kept today and dropped tomorrow (G09)", "G09-" in pack and rc == 0 and "G09-" not in a and "G08-" in a, out + err)
+    check("W15", "the date changes NO row: a build for tomorrow carries the same register, byte for byte (G07 past-dated, G09 ends today)",
+          rc == 0 and part_d(a) == GRANTS and "G07-" in a and "G09-" in a and "built_for_date: 2026-11-28" in a, out + err)
     rc, out, err = p(["--seat", "wednesday", "--out", alt, "--trust-expired-heading"])
-    a = rb(alt).decode("utf-8") if rc == 0 else ""
-    alt_side = rb(alt[:-3] + ".dropped.txt").decode("utf-8") if rc == 0 else ""
-    check("W06", "--trust-expired-heading drops the row under '## Expired' (kept by default: W05) and lists it in the sidecar",
-          rc == 0 and "G19-" not in a and "G01-" in a and any(l.startswith("expired heading | line ") and "G19-" in l for l in alt_side.split("\n")), out + err)
+    check("W06", "--trust-expired-heading is GONE: the flag is refused as unknown (rc 2); no option switches a filter on",
+          rc == 2 and "unrecognized arguments" in err, out + err)
+    for tid, seat, mark in (("W13", "tuesday", "TUE-"), ("W19", "friday", "FRI-")):
+        rc, out, err = p(["--seat", seat, "--out", alt])
+        a = rb(alt).decode("utf-8") if rc == 0 else ""
+        check(tid, "%s gets ITS OWN card, ledger and pickup, and the SAME whole register as every seat (no row is another seat's to drop)" % seat,
+              rc == 0 and (mark + "TOP-RULE-ONE") in a and (mark + "LEDGER-HEADLINE-ONE") in a and (mark + "PICKUP-FIRST-BLOCK-MARKER") in a
+              and "| **LEDGER-HEADLINE-ONE" not in a and part_d(a) == GRANTS and not rows_whole(a, GRANT_ROWS), out + err)
 
-    rc, out, err = p(["--seat", "tuesday", "--out", alt])
-    a = rb(alt).decode("utf-8") if rc == 0 else ""
-    check("W13", "another seat gets ITS files and ITS grants (tuesday: G04 kept, G01 dropped)",
-          rc == 0 and "TUE-TOP-RULE-ONE" in a and "TUE-LEDGER-HEADLINE-ONE" in a and "TUE-PICKUP-FIRST-BLOCK-MARKER" in a
-          and "| **LEDGER-HEADLINE-ONE" not in a and "G04-" in a and "G01-" not in a and "G05-" in a and "G16-" not in a, out + err)
-
-    rc, out, err = p(["--seat", "friday", "--out", alt])
-    a = rb(alt).decode("utf-8") if rc == 0 else ""
-    check("W19", "a seat that serves every client (friday) keeps another seat's HOLD (G54, the register's line-26 shape) and every other-seat row",
-          rc == 0 and "G54-" in a and "G04-" in a and "G01-" in a and "G02-" not in a and "G52-" not in a and "FRI-TOP-RULE-ONE" in a, out + err)
-    rc, out, err = p(["--seat", "tuesday", "--out", alt])
-    a = rb(alt).decode("utf-8") if rc == 0 else ""
-    check("W19b", "the HOLD is its owner's own row in a tuesday build, and is dropped as another seat's in the wednesday build (W05b)",
-          rc == 0 and "G54-" in a and "G54-" not in pack, out + err)
+    # The second checker's 38 hostile LIVE rows and its 3 controls (round 3 dropped 30 of the 38). Nothing is judged now,
+    # so all 41 are carried, for every seat.
+    hroot = make_tree(os.path.join(scratch, "whost", "WEDNESDAY"))
+    hrows = [r[3] for r in HOSTILE]
+    glines = GRANTS.split("\n")
+    at = glines.index("|---|---|---|---|") + 1
+    planted = "\n".join(glines[:at] + hrows + glines[at:])
+    w(os.path.join(hroot, "0_Brain", "tasks", "EXPIRING-GRANTS.md"), planted)
+    bad = []
+    for seat in ("wednesday", "tuesday", "friday"):
+        ho_ = os.path.join(scratch, "whost", "pack-%s.md" % seat)
+        rc, out, err = p(["--seat", seat, "--out", ho_], r=hroot)
+        a = rb(ho_).decode("utf-8") if rc == 0 else ""
+        why = rows_whole(a, hrows + GRANT_ROWS) if rc == 0 else "rc %d %s" % (rc, err[-200:])
+        if why or part_d(a) != planted:
+            bad.append("%s: %s" % (seat, why or "part d is not the file"))
+    check("W05h", "the second checker's %d hostile rows (38 LIVE, 3 controls), planted in the register, are ALL in the pack verbatim "
+                  "and in order, for all three seats" % len(hrows),
+          len(hrows) == 41 and sum(1 for r in HOSTILE if r[1] == "LIVE") == 38 and not bad, bad)
 
     # M2: a part never shrinks to a placeholder while the build exits 0
     def faulty(name, mutate):
@@ -662,7 +672,7 @@ def group_w(scratch):
         ("f", "the grants file is empty", setto(gr, ""), "part d (grants)"),
         ("g", "the grants table is indented by one space (rows are there, none readable)", setto(gr, "\n".join((" " + l) if l.startswith("|") else l for l in GRANTS.split("\n"))), "part d (grants)"),
         ("h", "the grants file has rows but no table header", setto(gr, "\n".join(l for l in GRANTS.split("\n") if not l.startswith(("| grant", "|---")))), "part d (grants)"),
-        ("i", "some grant rows are indented", setto(gr, GRANTS.replace("| **WEDNESDAY: G08", " | **WEDNESDAY: G08")), "part d (grants)"),
+        ("p", "the grants file is not valid UTF-8 (it could not be carried verbatim)", setto(gr, GRANTS.encode("utf-8") + b"| \xff\xfe a row | Kam | x | y |\n"), "part d (grants)"),
         ("j", "the ledger is missing", gone(led), "part e (ledger)"),
         ("k", "the ledger has no table header", setto(led, "# Ledger\n\nprose only\n"), "part e (ledger)"),
         ("l", "persona.md is empty", setto("0_Brain/identity/persona.md", ""), "part a (identity)"),
@@ -686,7 +696,15 @@ def group_w(scratch):
     rc_, out_, err_ = p(["--seat", "wednesday"], r=r_ok)
     pk_ = os.path.join(r_ok, "0_Brain", "wake", "WAKE-wednesday.md")
     check("W18z", "an EMPTY table is believed when its header IS found: 0 grant rows and 0 ledger rows build (must succeed beside W18e to W18k)",
-          rc_ == 0 and os.path.exists(pk_) and "0 rows in the file, 0 kept here." in rb(pk_).decode("utf-8"), out_ + err_)
+          rc_ == 0 and os.path.exists(pk_) and "0 table rows" in rb(pk_).decode("utf-8") and "0 rows, each reduced" in rb(pk_).decode("utf-8"), out_ + err_)
+    r_ind = make_tree(os.path.join(scratch, "wfail", "indented", "WEDNESDAY"))
+    ind = GRANTS.replace("| **WEDNESDAY: G08", " | **WEDNESDAY: G08")
+    w(os.path.join(r_ind, gr), ind)
+    rc_, out_, err_ = p(["--seat", "wednesday"], r=r_ind)
+    pk_ = os.path.join(r_ind, "0_Brain", "wake", "WAKE-wednesday.md")
+    pt_ = rb(pk_).decode("utf-8") if os.path.exists(pk_) else ""
+    check("W18i", "an INDENTED grant row is carried like every other line (the file goes in whole, so no row can be missed by a parser)",
+          rc_ == 0 and part_d(pt_) == ind and "\n | **WEDNESDAY: G08-FUTURE-DATE**" in pt_ and ("%d table rows" % len(GRANT_ROWS)) in pt_, out_ + err_)
 
     ho = os.path.join(TOOLS, "handover.sh")
     rc, out, err = run(["bash", ho, "write", "--stdin"], block("STATE-IN-PACK"), {"HANDOVER_TREE": root, "HANDOVER_TEST_STAMP": STAMP})
@@ -700,6 +718,44 @@ def group_w(scratch):
     rc, out, err = p(["--seat", "wednesday"], r=nok)
     check("W16", "a missing identity file refuses (rc 2) and writes nothing",
           rc == 2 and not os.path.exists(os.path.join(nok, "0_Brain", "wake")) and "wake_pack: FAILED — part a (identity): source missing" in err, out + err)
+
+    # N6 (and the checker's mutant Y09): the pack's state part refuses what `handover.sh check` refuses
+    good = rb(os.path.join(root, "0_Brain", "tasks", "STATE-wednesday.md"))
+
+    def crafted(body_):
+        return ("---\ntype: seat-state\nseat: wednesday\nwritten: %s\nblock_bytes: %d\nblock_sha256: %s\nsource: crafted by the test\n---\n"
+                % (STAMP, len(body_), hashlib.sha256(body_).hexdigest())).encode("utf-8") + body_
+    nofloor = block("NOFLOOR").replace(b"## FLOOR\n- NOFLOOR floor: no seat running\n\n", b"")
+    scases = [("a", "appended to by hand", good + b"\nHAND-APPENDED-LINE\n", "sha256"),
+              ("b", "whose header names another seat", good.replace(b"\nseat: wednesday\n", b"\nseat: tuesday\n", 1), "names seat 'tuesday'"),
+              ("c", "with NO '## FLOOR' part under a header that matches it (the checker's Y09)", crafted(nofloor), "part missing: '## FLOOR'"),
+              ("d", "typed by hand, no tool header", b"## FLOOR\n- typed\n", "no tool header"),
+              ("e", "holding a STACK of two blocks under a header that matches it", crafted(block("ONE") + b"\n" + block("TWO")), "appears 2 times")]
+    for cid, what, data, needle in scases:
+        r_ = make_tree(os.path.join(scratch, "wstate", cid, "WEDNESDAY"))
+        w(os.path.join(r_, "0_Brain", "tasks", "STATE-wednesday.md"), data)
+        rc_, out_, err_ = p(["--seat", "wednesday"], r=r_)
+        last = err_.strip().split("\n")[-1] if err_.strip() else ""
+        rcc, outc, errc = run(["bash", ho, "check"], None, {"HANDOVER_TREE": r_})
+        check("W20" + cid, "FAILED BUILD, nothing written, when the STATE file is one " + what + "; `handover.sh check` refuses the same file",
+              rc_ == 2 and last.startswith("wake_pack: FAILED — part c (state)") and needle in last and "Traceback" not in err_
+              and not os.path.exists(os.path.join(r_, "0_Brain", "wake")) and rcc == 1 and needle in outc, err_ + outc + errc)
+    rc_, out_, err_ = p(["--seat", "wednesday", "--out", alt])
+    check("W20z", "the state file handover.sh itself wrote is accepted by the same build (must succeed beside W20a to W20e)",
+          rc_ == 0 and b"block_sha256: " in good and "STATE-IN-PACK floor" in rb(alt).decode("utf-8"), out_ + err_)
+    lone = os.path.join(scratch, "wstate", "lone_tool")
+    os.makedirs(lone)
+    shutil.copy(wp, os.path.join(lone, "wake_pack.py"))
+    rc_, out_, err_ = run([sys.executable, os.path.join(lone, "wake_pack.py"), "--root", root, "--today", TODAY, "--seat", "wednesday", "--out", alt])
+    check("W20f", "a state file that cannot be checked (no handover engine beside wake_pack.py) is a FAILED BUILD, never carried unchecked",
+          rc_ == 2 and "wake_pack: FAILED — part c (state)" in err_ and "cannot be loaded" in err_, out_ + err_)
+    asdir = os.path.join(scratch, "w", "out", "a_directory.md")
+    os.makedirs(asdir)
+    rc_, out_, err_ = p(["--seat", "wednesday", "--out", asdir])
+    check("W21", "the pack path is a directory: rc 2, and nothing at all is left behind (N13)",
+          rc_ == 2 and "is a directory" in err_ and os.listdir(asdir) == [] and not [f for f in os.listdir(os.path.dirname(asdir)) if ".tmp." in f],
+          err_ + repr(os.listdir(os.path.dirname(asdir))))
+
 
 
 # ── C: census ──────────────────────────────────────────────────────────────────────────────────
@@ -746,8 +802,8 @@ def group_c(scratch):
     check("C06", "census also prints the figure with earlier notes on demand (pack + kept reads - the two notes)",
           ol and int(ol[0].split()[-2]) == pb + kept - notes, ol)
     after = sorted(os.path.join(dp, f) for dp, _, fs in os.walk(root) for f in fs)
-    check("C04", "census writes nothing (only the pack build added files: the pack and its sidecar)",
-          [f for f in after if f not in before] == [pack[:-3] + ".dropped.txt", pack])
+    check("C04", "census writes nothing (only the pack build added a file: the pack, and no sidecar)",
+          [f for f in after if f not in before] == [pack], [f for f in after if f not in before])
     rc, out, err = run(["bash", cs, "--seat", "nobody", "--root", root])
     check("C05", "census refuses an unknown seat (rc 2)", rc == 2, out + err)
 
@@ -878,6 +934,27 @@ def group_p(scratch):
         check(n_, "%s with no wake_pack.py at all: no notice, no output, the prompt untouched (the loud fallback is the Wednesday seat's only)" % seat_,
               rc == 0 and fin == leg and so == "" and se == "" and b"WAKE PACK" not in fin, so + se)
 
+    # the checker's Q14 and Y11: "never boots on a stale or an empty pack" had no test
+    old = tree("t_oldpack")
+    rc, so, se, leg, fin = go("wednesday", old, "with", "wed_oldpack_1")
+    oldpack = os.path.join(old, "0_Brain", "wake", "WAKE-wednesday.md")
+    built = rc == 0 and os.path.isfile(oldpack) and fin != leg
+    shutil.move(os.path.join(old, "0_Brain", "tasks", "EXPIRING-GRANTS.md"), os.path.join(old, "grants_moved"))
+    rc, so, se, leg, fin = go("wednesday", old, "with", "wed_oldpack_2")
+    check("P21", "wednesday, the build FAILS while an OLDER pack is still on disk: the exit code decides; loud fallback, never a boot on the stale pack (Q14)",
+          built and rc == 0 and os.path.getsize(oldpack) > 1000 and loud(leg, fin, "wake_pack: FAILED — part d (grants): source missing")
+          and "WAKE PACK boot" not in (fin or b"").decode("utf-8"), so + se)
+    emp = tree("t_emptypack")
+    w(os.path.join(emp, "2_Project_Files", "wake", "wake_pack.py"),
+      "import os\nr = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))\n"
+      "p = os.path.join(r, '0_Brain', 'wake', 'WAKE-wednesday.md')\nos.makedirs(os.path.dirname(p), exist_ok=True)\n"
+      "open(p, 'w').close()\nprint(p + '  bytes: 0  ~tokens: 0 of 60000')\n")
+    rc, so, se, leg, fin = go("wednesday", emp, "with", "wed_emptypack")
+    check("P22", "wednesday, the build exits 0 and leaves an EMPTY pack file: not trusted; loud fallback, never a boot on an empty pack (Y11)",
+          rc == 0 and os.path.isfile(os.path.join(emp, "0_Brain", "wake", "WAKE-wednesday.md"))
+          and loud(leg, fin, "exited 0 but there is no pack (or an empty one)"), so + se)
+
+
     diff_path = os.path.join(prop, "01_launcher_boot_prompt.diff")
     rc, so, se = run([sys.executable, os.path.join(prop, "build_launcher_diff.py"), "--launcher", LAUNCHER])
     stored = open(diff_path, encoding="utf-8").read() if os.path.exists(diff_path) else ""
@@ -966,7 +1043,8 @@ def group_p_texts(prop):
     olds = {}
     news = {}
     for name in ("02_root_CLAUDE_md.md", "03_brain_CLAUDE_md.md", "06_wrap_step.md", "05_gitignore.md",
-                 "07_doctor_pickup_warning.md", "08_nas_staleness.md", "09_prompt_backtick.md", "FOR-KAM_lesson-load-ruling.md"):
+                 "07_doctor_pickup_warning.md", "08_nas_staleness.md", "09_prompt_backtick.md", "10_stuart_weekly.md",
+                 "FOR-KAM_lesson-load-ruling.md"):
         text = open(os.path.join(prop, name), encoding="utf-8").read()
         m = re.search(r"^TARGET: `([^`]+)`", text, re.M)
         if not m:
@@ -983,7 +1061,7 @@ def group_p_texts(prop):
             if new in target:
                 bad.append("%s: a new block is ALREADY in %s" % (name, m.group(1)))
     check("P10", "every 'old' block of the text proposals is in its target file exactly once (%d blocks); none is applied" % n_old,
-          not bad and n_old == 9, bad)
+          not bad and n_old == 10, bad)
     kam1, kam2 = "the full lesson load STAYS", "**All** of `learnings/`"
     scoped = "**On a seat that boots on a wake pack**"
     check("P18", "proposals 2 and 3 are scoped in words to a seat on a pack, add text only, and leave Kam's lesson-load sentence in place (it goes to FOR-KAM)",
@@ -995,9 +1073,17 @@ def group_p_texts(prop):
           and any(kam1 in o for o in olds["FOR-KAM_lesson-load-ruling.md"]),
           [o[:60] for o in olds["02_root_CLAUDE_md.md"]])
     gi = news["05_gitignore.md"][0].split("\n")
-    check("P19", "the gitignore proposal ignores only generated packs, sidecars, temp files and the lock; never the lane's whole out/ directory",
-          "2_Project_Files/wake/out/WAKE-*" in gi and "2_Project_Files/wake/out/" not in gi and "0_Brain/tasks/STATE-*.lock.d/" in gi
-          and not any(l.strip() in ("0_Brain/tasks/", "0_Brain/tasks/STATE-*") for l in gi), gi)
+    check("P19", "the gitignore proposal ignores only generated packs, temp files and lock directories (a set-aside '.stale-' one too, N3); "
+                 "never the lane's whole out/ directory",
+          "2_Project_Files/wake/out/WAKE-*" in gi and "2_Project_Files/wake/out/" not in gi and "0_Brain/tasks/STATE-*.lock.d*" in gi
+          and "0_Brain/tasks/STATE-*.lock.d/" not in gi and not any(l.strip() in ("0_Brain/tasks/", "0_Brain/tasks/STATE-*") for l in gi), gi)
+    n2, n3, n6 = news["02_root_CLAUDE_md.md"][0], news["03_brain_CLAUDE_md.md"][0], " ".join(news["06_wrap_step.md"][0].split())
+    check("P23", "proposals 2 and 3 no longer tell the pack seat to skip Kam's lesson-load step before he has ruled (N9)",
+          "in place of steps 1 and 3 below" in " ".join(n2.split()) and "for step 2 see the question put to Kam" in " ".join(n2.split())
+          and "steps 1 to 3" not in n2 and "items 1, 2, 4 and 5 below" in " ".join(n3.split())
+          and "for item 3 see the question put to Kam" in " ".join(n3.split()) and "items 1 to 5" not in n3, [n2[:300], n3[:300]])
+    check("P24", "proposal 6 tells LOCK BUSY (run it again) from STALE LOCK (run the recovery line first), and names rc 6 (N3)",
+          "LOCK BUSY" in n6 and "STALE LOCK" in n6 and "recovery line" in n6 and "rc 6" in n6 and "simply run again" not in n6, n6[-700:])
     t9 = open(os.path.join(prop, "09_prompt_backtick.md"), encoding="utf-8").read()
     dtext = open(os.path.join(prop, "01_launcher_boot_prompt.diff"), encoding="utf-8").read()
     check("P20", "proposal 9 is marked all-seats and is not in this round's launcher diff",
@@ -1217,6 +1303,23 @@ def group_d(scratch):
     rc, out, err = run(["/bin/bash", hs, els, "wednesday"])
     check("D07", "doctor snippet: when handover.sh cannot resolve the seat its refusal is SHOWN in a warning, never discarded",
           "WARN: handover.sh cannot tell which seat this tree is" in out and "REFUSED" in out and "were NOT run" in out, out + err)
+    lk = make_tree(os.path.join(scratch, "d", "lock", "WEDNESDAY"))
+    install_tools(lk)
+    rc0, out0, err0 = run(["/bin/bash", hs, lk, "wednesday"])
+    lockp = os.path.join(lk, "0_Brain", "tasks", "STATE-wednesday.lock.d")
+    os.makedirs(lockp)
+    w(os.path.join(lockp, "owner"), "pid: 1\nhost: somewhere\nstarted: earlier\n")
+    rc, out, err = run(["/bin/bash", hs, lk, "wednesday"])
+    rec = [x for x in out.replace(" mv -n '", "\nmv -n '").split("\n") if x.startswith("mv -n '")]
+    check("D08", "doctor snippet: a standing handover lock directory is WARNED at boot with the exact recovery line, and the seat is told "
+                 "it may run it itself (N3); with no lock directory the snippet says nothing about one",
+          rc == 0 and "lock" not in out0 and "WARN: a handover write lock is standing" in out and "STATE-wednesday.lock.d" in out
+          and len(rec) == 1 and rec[0].startswith("mv -n '%s' '%s.stale-" % (lockp, lockp)) and "the seat may run this itself" in out
+          and "pid: 1" in out and os.path.isdir(lockp), out0 + out + err)
+    os.rename(lockp, lockp + ".stale-20261127-000000")
+    rc, out, err = run(["/bin/bash", hs, lk, "wednesday"])
+    check("D08b", "doctor snippet: once the lock has been set aside by the recovery line the warning is gone (must succeed beside D08)",
+          rc == 0 and "lock is standing" not in out, out + err)
 
 
 # ── R: the write lock, races, and a death part-way (the checker's Blocker B1 and its missed mutants) ──
@@ -1324,14 +1427,62 @@ def group_r(scratch):
     rc, o, e = write(r, A)
     check("R03b", "after the recovery line is run by a person the write succeeds (must succeed beside R03)", rc == 0 and body(t) == A and S0 in arch(t), o + e)
 
-    # R04: a lock directory with no owner file is never assumed stale: wait, then refuse
+    # R04: a FRESH lock directory with no owner file is never assumed stale: wait, then refuse
     r, t = tree("noowner")
     write(r, S0)
     lock = os.path.join(t, "STATE-wednesday.lock.d")
     os.mkdir(lock)
     rc, o, e = write(r, A, wait="1")
-    check("R04", "a lock directory with no owner file: bounded wait, then rc 5 naming 'no owner file'; the directory is left alone",
-          rc == 5 and "no owner file" in e and os.path.isdir(lock) and body(t) == S0, e)
+    check("R04", "a FRESH lock directory with no owner file: bounded wait, then rc 5 LOCK BUSY naming 'no usable owner file'; not called stale; left alone",
+          rc == 5 and "LOCK BUSY" in e and "no usable owner file" in e and "STALE LOCK" not in e and os.path.isdir(lock) and body(t) == S0, e)
+
+    # R15: an owner-less lock OLDER THAN A MINUTE is stale (the checker's 2 of 8 kill points: killed between mkdir and the
+    # owner file, or between removing the owner file and rmdir). Reported at once with the recovery line; never removed.
+    ok15, notes15 = True, []
+    for name, owner in (("ownerless_old", None), ("ownerempty_old", "")):
+        r, t = tree(name)
+        write(r, S0)
+        lock = os.path.join(t, "STATE-wednesday.lock.d")
+        os.mkdir(lock)
+        if owner is not None:
+            w(os.path.join(lock, "owner"), owner)
+        old_t = time.time() - 120
+        os.utime(lock, (old_t, old_t))
+        t1 = time.time()
+        rc, o, e = write(r, A, wait="30")
+        took = time.time() - t1
+        rec = [x.strip() for x in e.split("\n") if x.strip().startswith("mv -n '")]
+        good_ = (rc == 5 and "STALE LOCK" in e and "no usable owner file" in e and took < 5 and len(rec) == 1
+                 and rec[0].startswith("mv -n '%s' '%s.stale-" % (lock, lock)) and os.path.isdir(lock) and body(t) == S0)
+        ok15 = ok15 and good_
+        notes15.append("%s rc %s took %.1fs %s" % (name, rc, took, e[:200]))
+    check("R15", "an owner-less lock (no owner file, or an empty one) untouched for over a minute is reported as STALE at once, with the "
+                 "recovery line; nothing is removed, nothing written", ok15, notes15)
+
+    # R16 (N4): an owner pid that is not a pid is a plain refusal, never a traceback
+    ok16, notes16 = True, []
+    for name, pid_text in (("pid_huge", "99999999999999999999999"), ("pid_past_int", "4294967296"), ("pid_zero", "0")):
+        r, t = tree(name)
+        write(r, S0)
+        lock = os.path.join(t, "STATE-wednesday.lock.d")
+        os.mkdir(lock)
+        w(os.path.join(lock, "owner"), "pid: %s\nhost: %s\n" % (pid_text, socket.gethostname()))
+        rc, o, e = write(r, A, wait="1")
+        good_ = rc == 5 and "Traceback" not in e and "LOCK BUSY" in e and "mv -n '" in e and os.path.isdir(lock) and body(t) == S0
+        ok16 = ok16 and good_
+        notes16.append("%s rc %s %s" % (name, rc, e[-300:]))
+    check("R16", "an owner file whose pid is beyond a C int, or 0, is a plain refusal (rc 5, LOCK BUSY, the recovery line), no traceback (N4)",
+          ok16, notes16)
+
+    # R03c (the checker's mutant Y02): a dead pid recorded by ANOTHER host proves nothing here
+    r, t = tree("otherhost")
+    write(r, S0)
+    lock = os.path.join(t, "STATE-wednesday.lock.d")
+    os.mkdir(lock)
+    w(os.path.join(lock, "owner"), "pid: %d\nhost: some-other-mac\nstarted: earlier\nepoch: 1\n" % dead.pid)
+    rc, o, e = write(r, A, wait="1")
+    check("R03c", "a lock whose owner is a dead pid on ANOTHER host is not called stale (that pid cannot be judged from here): LOCK BUSY",
+          rc == 5 and "LOCK BUSY" in e and "STALE LOCK" not in e and os.path.isdir(lock) and body(t) == S0, e)
 
     # R05: the process dies BETWEEN the archive rename and the state rename (the checker's crash; its mutant Q01)
     r, t = tree("crash")
@@ -1377,6 +1528,139 @@ def group_r(scratch):
           rct == 4 and "does not read back as written" in et and rb(os.path.join(t, "STATE-wednesday.md")) == s_before and arch(t) == a_before
           and "left for inspection" in et, et)
 
+    def waitfor(path, secs=20):
+        t0_ = time.time()
+        while not os.path.exists(path) and time.time() - t0_ < secs:
+            time.sleep(0.005)
+        return os.path.exists(path)
+
+    C, D, E = block("WRITER-C"), block("WRITER-D"), block("WRITER-E")
+
+    # R09: the second checker's false_stale.py, lifted. Holder A finishes NORMALLY while waiter B sits between "read the
+    # owner file" and "is that pid alive"; a third writer C then holds a live lock at the same path. Round 3 told B
+    # "STALE LOCK, pid A is no longer running" and printed a recovery line that named C's live lock.
+    r, t = tree("falsestale")
+    write(r, S0)
+    gA, gB, gC = (os.path.join(base, "falsestale", x) for x in ("gateA", "gateB", "gateC"))
+    pa = engine("barrier:" + gA, t, A, r=r)
+    okA = waitfor(gA + ".waiting")
+    pb = engine("pause-at-kill:" + gB, t, B, wait="30", r=r)
+    okB = waitfor(gB + ".atkill")
+    open(gA, "w").close()
+    rca = pa.wait()
+    pc = engine("barrier:" + gC, t, C, r=r)
+    okC = waitfor(gC + ".waiting")
+    open(gB, "w").close()
+    time.sleep(1.5)
+    b_waits = pb.poll() is None
+    open(gC, "w").close()
+    rcc = pc.wait()
+    rcb = pb.wait()
+    eb = pb.stderr.read().decode()
+    ar = arch(t)
+    check("R09", "false STALE (the checker's reproduction): a holder that finished normally is NOT reported dead; the waiter looks twice, "
+                 "keeps waiting for the live writer, and all three acknowledged blocks are on disk",
+          okA and okB and okC and rca == 0 and b_waits and "STALE" not in eb and rcc == 0 and rcb == 0 and body(t) == B
+          and ar.count(S0) == 1 and ar.count(A) == 1 and ar.count(C) == 1 and not os.path.exists(os.path.join(t, "STATE-wednesday.lock.d")),
+          "paused A/B/C %s %s %s; rcA %s rcC %s rcB %s; B still waiting %s; B stderr: %s" % (okA, okB, okC, rca, rcc, rcb, b_waits, eb[:300]))
+
+    # R10: the PRINTED recovery line is run while a writer is ALIVE (the LOCK BUSY message prints it too). The live writer C
+    # is paused INSIDE its first rename, after every check it makes in Python. Two more writers then complete. C must not
+    # rename anything: its temp files sat in the lock directory that was moved away.
+    r, t = tree("recoveryalive")
+    write(r, S0)
+    g = os.path.join(base, "recoveryalive", "gate")
+    pc = engine("barrier:" + g, t, C, r=r)
+    okC = waitfor(g + ".waiting")
+    WAITER = block("WAITER")
+    rcw, ow, ew = write(r, WAITER, wait="1")
+    rec = [x.strip() for x in ew.split("\n") if x.strip().startswith("mv -n '")]
+    ran = -1
+    if len(rec) == 1 and rec[0].count(base) == 2:     # the line names scratch paths only
+        ran = subprocess.run(["/bin/sh", "-c", rec[0]], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).returncode
+    rcd, od, ed = write(r, D)
+    rce, oe, ee = write(r, E)
+    open(g, "w").close()
+    rcc = pc.wait()
+    oc, ec = pc.stdout.read().decode(), pc.stderr.read().decode()
+    ar = arch(t)
+    check("R10", "the printed recovery line run while a writer is ALIVE, then two more writes: the displaced writer renames NOTHING "
+                 "(rc 5, LOCK LOST, no 'written'), and no acknowledged block is lost",
+          okC and rcw == 5 and "LOCK BUSY" in ew and ran == 0 and rcd == 0 and rce == 0 and rcc == 5 and "LOCK LOST" in ec
+          and "NOTHING was renamed" in ec and "handover: written" not in oc and body(t) == E and ar.count(D) == 1 and ar.count(S0) == 1
+          and C not in ar and WAITER not in ar,
+          "waiter rc %s; recovery ran %s; D %s E %s; C rc %s: %s | archive D x%d S0 x%d" % (rcw, ran, rcd, rce, rcc, ec[:300], ar.count(D), ar.count(S0)))
+
+    # R11: the lock directory is moved away in the instant before a rename (after the owner check). The rename itself must fail.
+    r, t = tree("steal1")
+    write(r, S0)
+    write(r, S1)
+    s_before, a_before = rb(os.path.join(t, "STATE-wednesday.md")), arch(t)
+    lock = os.path.join(t, "STATE-wednesday.lock.d")
+    px = engine("steal-lock-at:1:" + lock, t, S2, r=r)
+    rcx = px.wait()
+    ox, ex = px.stdout.read().decode(), px.stderr.read().decode()
+    check("R11", "the lock moved away in the instant before the FIRST rename: rc 5, nothing renamed, state and archive byte-identical, no 'written'",
+          rcx == 5 and "LOCK LOST" in ex and "NOTHING was renamed" in ex and "handover: written" not in ox
+          and rb(os.path.join(t, "STATE-wednesday.md")) == s_before and arch(t) == a_before, "rc %s %s" % (rcx, ex[:300]))
+    r, t = tree("steal2")
+    write(r, S0)
+    write(r, S1)
+    lock = os.path.join(t, "STATE-wednesday.lock.d")
+    px = engine("steal-lock-at:2:" + lock, t, S2, r=r)
+    rcx = px.wait()
+    ox, ex = px.stdout.read().decode(), px.stderr.read().decode()
+    mid_ok = (rcx == 5 and "ARCHIVE had already been replaced" in ex and "STATE file was NOT replaced" in ex and "handover: written" not in ox
+              and body(t) == S1 and arch(t).count(S1) == 1 and arch(t).count(S0) == 1 and S2 not in arch(t))
+    rc, o, e = write(r, S3)
+    check("R11b", "the lock moved away between the two renames: rc 5 saying exactly what was renamed; the old block is in BOTH files; "
+                  "the next write succeeds with one duplicate archive entry, never a gap",
+          mid_ok and rc == 0 and body(t) == S3 and arch(t).count(S1) == 2 and arch(t).count(S0) == 1, "rc %s %s | next rc %s %s" % (rcx, ex[:300], rc, e[:200]))
+
+    # R12: the lock directory stays but its owner file becomes ANOTHER writer's during the write: the owner re-read stops it
+    r, t = tree("foreignowner")
+    write(r, S0)
+    write(r, S1)
+    s_before, a_before = rb(os.path.join(t, "STATE-wednesday.md")), arch(t)
+    lock = os.path.join(t, "STATE-wednesday.lock.d")
+    px = engine("foreign-owner-at-fsync2:" + lock, t, S2, r=r)
+    rcx = px.wait()
+    ox, ex = px.stdout.read().decode(), px.stderr.read().decode()
+    own12 = rb(os.path.join(lock, "owner")) if os.path.isfile(os.path.join(lock, "owner")) else b"(the owner file is gone)"
+    in12 = sorted(os.listdir(lock)) if os.path.isdir(lock) else ["(the lock directory is gone)"]
+    aside12 = sorted(f for f in os.listdir(t) if ".md.tmp." in f)
+    check("R12", "the owner file is re-read before each rename: when it is another writer's, rc 5 and nothing is renamed; the other "
+                 "writer's lock is left with its owner file and with NOTHING of this writer's inside it (its temp files are moved out)",
+          rcx == 5 and "before the archive rename the lock was no longer this process's" in ex and "NOTHING was renamed" in ex
+          and rb(os.path.join(t, "STATE-wednesday.md")) == s_before and arch(t) == a_before
+          and b"FOREIGN-TOKEN" in own12 and in12 == ["owner"] and len(aside12) == 2 and "moved out of the lock directory" in ex,
+          "rc %s; in the lock: %s; set aside: %s; owner: %r; %s" % (rcx, in12, aside12, own12[:60], ex[:300]))
+
+    # R13: the lock is gone at RELEASE (moved away after the second rename): the writer must not say 'written' and must exit non-zero
+    r, t = tree("gone_at_release")
+    write(r, S0)
+    write(r, S1)
+    lock = os.path.join(t, "STATE-wednesday.lock.d")
+    px = engine("steal-lock-after:2:" + lock, t, S2, r=r)
+    rcx = px.wait()
+    ox, ex = px.stdout.read().decode(), px.stderr.read().decode()
+    check("R13", "a writer that finds its lock gone at release exits NON-ZERO (rc 6), says NOT ACKNOWLEDGED, and never prints 'written'",
+          rcx == 6 and "NOT ACKNOWLEDGED" in ex and "handover: written" not in ox and ox.strip() == "" and body(t) == S2, "rc %s out %r err %s" % (rcx, ox[:80], ex[:300]))
+
+    # R14 (the checker's mutant Y01): release removes ONLY its own lock. Another owner's lock stands at the path at release.
+    r, t = tree("foreign_at_release")
+    write(r, S0)
+    write(r, S1)
+    lock = os.path.join(t, "STATE-wednesday.lock.d")
+    px = engine("swap-lock-after:2:" + lock, t, S2, r=r)
+    rcx = px.wait()
+    ox, ex = px.stdout.read().decode(), px.stderr.read().decode()
+    check("R14", "release removes ONLY its own lock: another owner's lock standing at the path is left with its owner file, and the "
+                 "writer exits non-zero (Y01)",
+          rcx == 6 and os.path.isdir(lock) and os.path.isfile(os.path.join(lock, "owner")) and b"FOREIGN-TOKEN" in rb(os.path.join(lock, "owner"))
+          and "not this process's any more" in ex and "handover: written" not in ox, "rc %s %s" % (rcx, ex[:300]))
+
+
     # R08: N trials of two handover.sh writes started together (the checker's natural race: 23 of 150 lost before the lock)
     n = int(os.environ.get("WAKE_RACE_TRIALS", "200"))
     lost = both = refused = dup = 0
@@ -1418,7 +1702,15 @@ from mutants import M as MUTANTS  # noqa: E402
 
 def run_mutants(scratch):
     caught = 0
+    # WAKE_MUTANT_RANGE=<first>-<last> runs only those mutants (1-based, inclusive), so a long run can be done in parts.
+    lo, hi = 1, len(MUTANTS)
+    if os.environ.get("WAKE_MUTANT_RANGE"):
+        lo, hi = (int(x) for x in os.environ["WAKE_MUTANT_RANGE"].split("-"))
+    ran = 0
     for n, (name, edits, group, must) in enumerate(MUTANTS, 1):
+        if not lo <= n <= hi:
+            continue
+        ran += 1
         mroot = os.path.join(scratch, "mut", "m%02d" % n, "2_Project_Files")
         mlane = os.path.join(mroot, "wake")
         os.makedirs(mlane)
@@ -1458,8 +1750,11 @@ def run_mutants(scratch):
             print("RED-AS-EXPECTED m%02d %s :: went red: %s" % (n, name, " ".join(red)))
         else:
             print("NOT-CAUGHT m%02d %s :: expected red %s, got red %s" % (n, name, must, red))
-    print("mutants: %d of %d caught (each tool broken in a scratch copy; the lane's files are untouched)" % (caught, len(MUTANTS)))
-    return 0 if caught == len(MUTANTS) else 1
+        sys.stdout.flush()
+    print("mutants: %d of %d caught (each tool broken in a scratch copy; the lane's files are untouched)%s"
+          % (caught, ran, "" if ran == len(MUTANTS) else "; this run covered mutants %d to %d of %d" % (lo, hi, len(MUTANTS))))
+    sys.stdout.flush()
+    return 0 if caught == ran and ran else 1
 
 
 def main():

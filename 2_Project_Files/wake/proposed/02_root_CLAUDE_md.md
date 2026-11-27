@@ -12,6 +12,8 @@ Rewritten in round 3 (the checker's M4). Round 2's version reworded the session-
 
 ## Replacement A: one scoped paragraph above the session-start steps
 
+Round 4 (the second checker's N9): the paragraph said the pack is read "in place of steps 1 to 3". Step 2 is Kam's full-lesson-load sentence, so that told the pack seat not to do what the untouched sentence says, before he has answered `FOR-KAM_lesson-load-ruling.md`. It now says "in place of steps 1 and 3" and points step 2 at the question. Also round 4: "the seat's live grants" is now "the grants register whole", which is what the pack carries.
+
 ```old
 ## Session start (done automatically by `Launch_Wednesday.command`)
 
@@ -24,9 +26,10 @@ Rewritten in round 3 (the checker's M4). Round 2's version reworded the session-
 **On a seat that boots on a wake pack** (the Wednesday seat, from WED-170 step 1; only when
 the launcher built the pack at that launch): the launcher's boot prompt is the read list.
 After this file and `0_Brain/CLAUDE.md`, such a seat reads `0_Brain/wake/WAKE-<seat>.md`
-whole in place of steps 1 to 3 below: the pack holds persona, voice protocol and
+whole in place of steps 1 and 3 below; for step 2 see the question put to Kam (it is his
+sentence, and this paragraph does not change it). The pack holds persona, voice protocol and
 `people/kam.md` verbatim, the most reinforced rules, the one-block handover
-(`0_Brain/tasks/STATE-<seat>.md`), the seat's live grants and its own ledger in reduced form.
+(`0_Brain/tasks/STATE-<seat>.md`), the grants register whole and its own ledger in reduced form.
 On such a seat `TASKS.md`, `INDEX.md`, `projects_index/entries/` and the scoreboard head are
 read on demand. Step 4 (the daily notes) and step 5 apply to it unchanged. **A seat that is
 not on a pack, and the Wednesday seat on a launch where the pack failed, follow their prompt

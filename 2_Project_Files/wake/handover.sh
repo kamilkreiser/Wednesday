@@ -25,10 +25,16 @@
 # QUOTING text that already carries an x-digit clock (a grant's name, an older block): the owned override,
 # in note_entry.sh's shape:  HANDOVER_ALLOW_XCLOCK='<why, 15 characters or more>' handover.sh write --stdin
 # The reason is recorded in the block's header and, when the block is archived, in its archive heading.
-# rc 2: seat or usage. rc 4: conservation or I/O fault. rc 5: the write lock is held or stale.
+# rc 2: seat or usage. rc 4: conservation or I/O fault. rc 5: the write lock is held, stale, or was
+# taken away before a rename. rc 6: the files were replaced but the lock was not this process's at
+# release, so the write is NOT acknowledged (look with `show`, write again if it is not your block).
 # ONE WRITER AT A TIME: the whole write runs under a lock directory (0_Brain/tasks/STATE-<seat>.lock.d).
-# A second writer waits HANDOVER_LOCK_WAIT seconds (default 20), then refuses; a stale lock is reported
-# with the exact recovery line and is never removed by this tool.
+# A second writer waits HANDOVER_LOCK_WAIT seconds (default 20), then refuses.
+#   LOCK BUSY  = a write is running: run the command again.
+#   STALE LOCK = a write died and left its lock (reported only after a second look): run the `mv -n`
+#                recovery line the message prints (a seat may run it itself), then the write again.
+# The tool never removes a lock it did not take. Its temp files live inside the lock directory, so a
+# writer whose lock was moved away cannot rename anything into place.
 # Inside a block the ONLY heading lines are the five parts, written exactly; any other heading, of any
 # level or indented, is refused (write it as a bold line or a bullet).
 #

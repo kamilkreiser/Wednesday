@@ -5,7 +5,9 @@ handover.sh resolves the seat and reads the clock; this file validates the block
 conservation and writes. Standard library only. Never discards stderr.
 
 Exit codes: 0 ok; 1 nothing to show / check found a fault; 2 usage or seat; 3 the block was refused;
-4 conservation or I/O fault (nothing renamed into place); 5 the write lock is held or stale (nothing written).
+4 conservation or I/O fault (nothing renamed into place); 5 the write lock is held, stale, or was taken away
+before a rename (the message says what, if anything, was renamed); 6 both files were replaced but the lock was
+no longer this process's at release: the write is NOT acknowledged.
 
 THE LOCK (round 3, the checker's Blocker B1): two writes at once could both pass the changed-on-disk check
 and the second pair of renames then overwrote the first writer's block. The WHOLE write, from the first read
@@ -14,8 +16,22 @@ at 0_Brain/tasks/STATE-<seat>.lock.d, holding an `owner` file with the pid, host
 writer WAITS (HANDOVER_LOCK_WAIT seconds, default 20) and then REFUSES with rc 5; it never proceeds unlocked.
 A lock whose holder is no longer running is reported at once with the exact recovery line; this tool never
 removes a lock it did not take.
+
+ROUND 4 (the second checker's N2, N3, N4), what the lock now guarantees and how:
+  (a) STALE is reported only after a SECOND LOOK: the mkdir is retried, the lock is read again, and the very
+      same thing (same owner file, same dead pid, same directory) must still be there. A holder that finished
+      normally between "read the owner" and "is that pid alive" is therefore never called dead.
+  (b) Both temp files are written INSIDE the lock directory, under this call's token. A rename out of a lock
+      directory that has been moved away (the recovery line run while this writer is alive) fails in the
+      kernel, so a displaced writer renames nothing; before each rename the owner file is also re-read and
+      must still carry this call's token. Either way: rc 5.
+  (c) A writer whose lock is not its own at release exits rc 6 and does not print "written".
+  An OWNER-LESS lock (no usable owner file) older than OWNERLESS_STALE_SECONDS is reported as stale with the
+  recovery line (a writer killed between mkdir and the owner file, or between removing it and rmdir).
+  An owner pid that is not a pid (0, or beyond a C int) is "no usable owner": a plain refusal, no traceback.
 """
 import argparse
+import binascii
 import hashlib
 import os
 import re
@@ -38,6 +54,8 @@ XCLOCK_MIN_REASON = 15
 LEGACY_PICKUP = {"wednesday": "NEXT-PICKUP.md", "tuesday": "NEXT-PICKUP-TUESDAY.md", "friday": "NEXT-PICKUP-FRIDAY.md"}
 SEED_REASON = "seeded verbatim from the legacy pickup's newest block"
 LOCK_WAIT_DEFAULT = 20.0
+OWNERLESS_STALE_SECONDS = 60.0
+PID_MAX = 2 ** 31 - 1
 # Test seams (HANDOVER_TREE, HANDOVER_TEST_STAMP, HANDOVER_TEST_BREAK) are honoured ONLY when the target tree is
 # under one of these system temp / scratch roots. The list is fixed here on purpose: TMPDIR is not consulted,
 # because a variable the caller sets must not be able to switch a seam on for a real tree.
@@ -77,6 +95,13 @@ class LockBusy(Exception):
     pass
 
 
+class LockLost(Exception):
+    """The lock stopped being this call's while the write ran. .renamed: what had been renamed by then."""
+    def __init__(self, when, renamed):
+        Exception.__init__(self, when)
+        self.renamed = renamed
+
+
 def under_temp(path):
     rp = os.path.realpath(path)
     for r in TEMP_ROOTS:
@@ -112,6 +137,16 @@ def lock_owner(lock):
     return out
 
 
+def owner_pid(o):
+    """-> the owner's pid as an int, or None when the owner file gives no usable one: missing, not a plain
+    number, 0, or beyond a C int (N4: such a number is not a pid; asking the kernel about it is a traceback)."""
+    v = o.get("pid", "")
+    if not re.fullmatch(r"[0-9]{1,10}", v):
+        return None
+    n = int(v)
+    return n if 0 < n <= PID_MAX else None
+
+
 def pid_alive(pid):
     try:
         os.kill(pid, 0)
@@ -126,44 +161,103 @@ def recovery_line(lock):
     return "mv -n '%s' '%s.stale-%s'" % (lock, lock, time.strftime("%Y%m%d-%H%M%S"))
 
 
+def stale_look(lock, host):
+    """ONE look at a lock this call did not take. -> None when nothing proves it stale, else a tuple naming
+    exactly what was seen: (kind, owner fields, directory inode, directory mtime). Two looks that return the
+    same tuple saw the same lock, untouched, both times.
+      'dead'       the owner file names a pid on THIS host and that process is not running
+      'ownerless'  no usable owner file, and the directory has not changed for OWNERLESS_STALE_SECONDS
+    The owner is read BEFORE the pid is tested, so a 'dead' answer says only "the pid I read is dead now";
+    whether that pid still OWNS the lock is what the second look in acquire_lock settles."""
+    o = lock_owner(lock)
+    try:
+        st = os.lstat(lock)
+    except OSError:
+        return None  # gone: the caller's next mkdir decides
+    seen = (tuple(sorted(o.items())), st.st_ino, st.st_mtime_ns)
+    pid = owner_pid(o)
+    if pid is not None:
+        if o.get("host") == host and not pid_alive(pid):
+            return ("dead",) + seen
+        return None
+    if time.time() - st.st_mtime > OWNERLESS_STALE_SECONDS:
+        return ("ownerless",) + seen
+    return None
+
+
+def take(lock, host, stamp):
+    """mkdir is the lock. -> this call's token, or None when the directory is already there."""
+    try:
+        os.mkdir(lock)
+    except FileExistsError:
+        return None
+    token = "%d-%s" % (os.getpid(), binascii.hexlify(os.urandom(8)).decode("ascii"))
+    with open(os.path.join(lock, "owner"), "w", encoding="utf-8") as f:
+        f.write("pid: %d\nhost: %s\nstarted: %s\nepoch: %d\ntoken: %s\n" % (os.getpid(), host, stamp, int(time.time()), token))
+    return token
+
+
 def acquire_lock(lock, stamp):
-    """mkdir is the lock. Waits a bounded time; raises LockBusy (never proceeds unlocked, never removes a lock)."""
+    """-> this call's token. Waits a bounded time; raises LockBusy (never proceeds unlocked, never removes a lock)."""
     deadline = time.monotonic() + lock_wait()
     host = socket.gethostname()
     while True:
-        try:
-            os.mkdir(lock)
-        except FileExistsError:
+        token = take(lock, host, stamp)
+        if token:
+            return token
+        seen = stale_look(lock, host)
+        if seen is not None:
+            # THE SECOND LOOK (N2a). The pid read a moment ago is dead, or the lock is owner-less and old. That
+            # alone is not "stale": the holder may have finished normally in between and the path may now be
+            # another writer's live lock. So: try the mkdir again, and only if the SAME thing is still there
+            # (same owner file with the same token, same directory, unchanged) is it reported.
+            token = take(lock, host, stamp)
+            if token:
+                return token
+            if stale_look(lock, host) == seen:
+                o = dict(seen[1])
+                if seen[0] == "dead":
+                    what = ("is held by pid %s on %s since %s, and that process is no longer running (looked twice: the "
+                            "same owner file was still there after the pid was found dead). A write died part-way"
+                            % (o.get("pid"), o.get("host"), o.get("started")))
+                else:
+                    what = ("has no usable owner file and has not changed for over %d s (a write was killed just after "
+                            "taking the lock or just before removing it; looked twice). A write died" % OWNERLESS_STALE_SECONDS)
+                raise LockBusy("STALE LOCK — the write lock %s %s; the state file and the archive are each whole, because "
+                               "both are replaced by rename. Nothing was written by this call. Recovery (a seat may run it "
+                               "itself; no person is needed), once you have checked that no handover write is running "
+                               "(pgrep -fl handover_core.py):\n  %s\nthen run the write again." % (lock, what, recovery_line(lock)))
+        if time.monotonic() >= deadline:
             o = lock_owner(lock)
-            pid = int(o["pid"]) if o.get("pid", "").isdigit() else None
-            who = ("pid %s on %s since %s" % (o.get("pid"), o.get("host"), o.get("started"))) if o else "no owner file"
-            if pid is not None and o.get("host") == host and not pid_alive(pid):
-                raise LockBusy("STALE LOCK — the write lock %s is held by %s, and that process is no longer running "
-                               "(a write died part-way; the state file and the archive are each whole, because both are "
-                               "replaced by rename). Nothing was written by this call. Recovery, once you have checked that "
-                               "no handover write is running:\n  %s\nthen run the write again." % (lock, who, recovery_line(lock)))
-            if time.monotonic() >= deadline:
-                raise LockBusy("LOCK BUSY — another handover write holds %s (%s) and did not finish within %.0f s "
-                               "(HANDOVER_LOCK_WAIT). Nothing was written by this call; run it again. If no write is "
-                               "running, the lock is stale; recovery:\n  %s" % (lock, who, lock_wait(), recovery_line(lock)))
-            time.sleep(0.05)
-            continue
-        with open(os.path.join(lock, "owner"), "w", encoding="utf-8") as f:
-            f.write("pid: %d\nhost: %s\nstarted: %s\nepoch: %d\n" % (os.getpid(), host, stamp, int(time.time())))
-        return
+            who = (("pid %s on %s since %s" % (o.get("pid"), o.get("host"), o.get("started"))) if owner_pid(o) is not None
+                   else "no usable owner file")
+            raise LockBusy("LOCK BUSY — another handover write holds %s (%s) and did not finish within %.0f s "
+                           "(HANDOVER_LOCK_WAIT). Nothing was written by this call; run it again. ONLY if no handover "
+                           "write is running anywhere (pgrep -fl handover_core.py; a lock from another machine cannot be "
+                           "judged from here) is the lock stale; recovery then:\n  %s" % (lock, who, lock_wait(), recovery_line(lock)))
+        time.sleep(0.05)
 
 
-def release_lock(lock):
-    """Remove the lock THIS call took (its own owner file, then the directory)."""
+def holds(lock, token):
+    """Is the lock at this path still the one THIS call took? (the owner file carries this call's token)"""
+    return bool(token) and lock_owner(lock).get("token") == token
+
+
+def release_lock(lock, token):
+    """Remove the lock THIS call took (its own owner file, then the directory). -> True when it was still this
+    call's and is now gone; False when it was not (moved away, or another owner's: left exactly as it is)."""
     try:
         o = lock_owner(lock)
-        if o.get("pid") != str(os.getpid()):
-            eprint("handover: WARNING — the lock at %s is not this process's (owner %r); left in place" % (lock, o.get("pid")))
-            return
+        if not token or o.get("token") != token:
+            eprint("handover: WARNING — the lock at %s is not this process's any more (%s); left in place"
+                   % (lock, ("owner pid %s" % o.get("pid")) if o else "no lock or no owner file there"))
+            return False
         os.remove(os.path.join(lock, "owner"))
         os.rmdir(lock)
+        return True
     except OSError as e:
         eprint("handover: WARNING — could not release the lock at %s: %s" % (lock, e))
+        return False
 
 
 def split_header(data):
@@ -350,8 +444,7 @@ def assert_conserved(new_archive, prev, old_body, prefix_len, entry_head, sep):
     return ""
 
 
-def write_tmp(path, data):
-    tmp = "%s.tmp.%d" % (path, os.getpid())
+def write_tmp(tmp, data):
     with open(tmp, "wb") as f:
         f.write(data)
         f.flush()
@@ -373,24 +466,39 @@ def cmd_write(a, state_path, arch_path, block=None, reason=None, must_be_first=F
             eprint("  - " + f)
         return 3
     if a.dry:  # a dry run reads and prints; it takes no lock and writes nothing
-        return write_locked(a, state_path, arch_path, block, sizes, used, must_be_first)
+        return write_locked(a, state_path, arch_path, block, sizes, used, must_be_first, None, None)
     lock = lock_dir(a.tasks_dir, a.seat)
     try:
-        acquire_lock(lock, a.stamp)
+        token = acquire_lock(lock, a.stamp)
     except LockBusy as e:
         eprint("handover: REFUSED — %s" % e)
         return 5
     except OSError as e:
         eprint("handover: REFUSED — cannot take the write lock at %s: %s. Nothing written." % (lock, e))
         return 4
+    if not token:  # cannot happen through acquire_lock; stated so that "no lock, no write" does not rest on that
+        eprint("handover: REFUSED (rc 5) — no write lock was taken for this call. Nothing written.")
+        return 5
+    a.said = []
+    rc = 4
     try:
-        return write_locked(a, state_path, arch_path, block, sizes, used, must_be_first)
+        rc = write_locked(a, state_path, arch_path, block, sizes, used, must_be_first, lock, token)
     finally:
-        release_lock(lock)
+        released = release_lock(lock, token)
+    if rc == 0 and not released:
+        # (c) both renames were made while the lock was this call's, but it is not this call's now: another
+        # write may have run beside the end of this one. Never say "written" for that.
+        eprint("handover: NOT ACKNOWLEDGED (rc 6) — the state file was replaced by this call, but the write lock was no "
+               "longer this process's at release (it was moved away or retaken while this write ran), so another write "
+               "may have overlapped it. Look: handover.sh show. If the block shown is not the one you just gave, write it again.")
+        return 6
+    if rc == 0:
+        print("\n".join(a.said))
+    return rc
 
 
-def write_locked(a, state_path, arch_path, block, sizes, used, must_be_first):
-    """Everything from the first read to the second rename. Called with the lock held (or dry)."""
+def write_locked(a, state_path, arch_path, block, sizes, used, must_be_first, lock, token):
+    """Everything from the first read to the second rename. Called with the lock held (or dry: lock None)."""
     cur = read_bytes(state_path)
     prev_arch = read_bytes(arch_path)
     if must_be_first and cur is not None:
@@ -431,15 +539,47 @@ def write_locked(a, state_path, arch_path, block, sizes, used, must_be_first):
         print("\n".join(plan))
         print("handover: DRY — nothing written")
         return 0
-    tmps = []
+    # THE TEMP FILES LIVE INSIDE THE LOCK DIRECTORY (N2b), under this call's token. If the lock directory is moved
+    # away while this writer is alive (the recovery line run by mistake), the temp files go with it and the
+    # rename below fails in the kernel: a displaced writer cannot rename anything into place.
+    tmps = []          # (temp path inside the lock, where it is moved for inspection after a fault)
+    renamed = []
+
+    def guarded_replace(tmp, dest, what):
+        if not holds(lock, token):
+            raise LockLost("before the %s rename the lock was no longer this process's" % what, list(renamed))
+        try:
+            os.replace(tmp, dest)
+        except FileNotFoundError:
+            if holds(lock, token):
+                raise
+            raise LockLost("the %s rename found the lock directory gone" % what, list(renamed))
+        renamed.append(what)
+
+    def set_aside():
+        """Move this call's temp files out of the lock directory (to STATE-*.md.tmp.<pid> beside the state file), so
+        the lock can be released, and so nothing of this call's is left inside a directory another writer may now own.
+        -> where they are now. When the lock directory was moved away they went with it and there is nothing to move."""
+        left = []
+        for t, aside in tmps:
+            if os.path.exists(t):
+                try:
+                    os.replace(t, aside)
+                    left.append(aside)
+                except OSError:
+                    left.append(t)
+        return left
+
     try:
         if new_arch is not None:
-            t = write_tmp(arch_path, new_arch)
-            tmps.append(t)
+            t = os.path.join(lock, "archive.tmp." + token)
+            tmps.append((t, "%s.tmp.%d" % (arch_path, os.getpid())))
+            write_tmp(t, new_arch)
             if read_bytes(t) != new_arch:
                 raise IOError("archive temp file %s does not read back as written" % t)
-        t2 = write_tmp(state_path, new_state)
-        tmps.append(t2)
+        t2 = os.path.join(lock, "state.tmp." + token)
+        tmps.append((t2, "%s.tmp.%d" % (state_path, os.getpid())))
+        write_tmp(t2, new_state)
         if read_bytes(t2) != new_state:
             raise IOError("state temp file %s does not read back as written" % t2)
         if read_bytes(state_path) != cur or read_bytes(arch_path) != prev_arch:
@@ -447,16 +587,27 @@ def write_locked(a, state_path, arch_path, block, sizes, used, must_be_first):
                           "(an edit made outside this tool; the lock keeps other handover writes out)")
         # ARCHIVE FIRST, STATE SECOND: a death between the two leaves the old block in BOTH files, never in neither.
         if new_arch is not None:
-            os.replace(tmps[0], arch_path)
-        os.replace(t2, state_path)
+            guarded_replace(tmps[0][0], arch_path, "archive")
+        guarded_replace(t2, state_path, "state")
+    except LockLost as e:
+        if e.renamed:
+            done = ("The ARCHIVE had already been replaced (it now also holds the block that is still the state block: "
+                    "one duplicate archive entry after the next write, never a gap); the STATE file was NOT replaced")
+        else:
+            done = "NOTHING was renamed: the state file and the archive are exactly as they were"
+        eprint("handover: REFUSED (rc 5) — LOCK LOST: %s (it was moved away or retaken while this write ran: the recovery "
+               "line was run while this writer was alive). %s. This block is NOT written; run the write again." % (e, done))
+        left = set_aside()
+        if left:
+            eprint("  this call's temp file(s) were moved out of the lock directory, for inspection (never deleted by this tool): " + ", ".join(left))
+        return 5
     except (IOError, OSError, ReadFault) as e:
-        left = [t for t in tmps if os.path.exists(t)]
+        left = set_aside()
         eprint("handover: REFUSED — I/O fault, the state file was not replaced: %s" % e)
         if left:
             eprint("  temp file(s) left for inspection (never deleted by this tool): " + ", ".join(left))
         return 4
-    print("\n".join(plan))
-    print("handover: written %s" % a.stamp)
+    a.said = plan + ["handover: written %s" % a.stamp]
     return 0
 
 
@@ -631,11 +782,9 @@ def cmd_show(state_path):
     return 0
 
 
-def cmd_check(a, state_path):
-    cur = read_bytes(state_path)
-    if cur is None:
-        print("handover: ABSENT — no state file at %s (not a fault before the cut-over)" % state_path)
-        return 0
+def check_faults(cur, seat, cap):
+    """What `handover.sh check` refuses in a state file's bytes. -> (faults, body, fields). The wake pack's state
+    part calls this same function (N6), so the pack cannot carry a state file that `check` would refuse."""
     head, body, fields = split_header(cur)
     faults = []
     if head is None:
@@ -645,10 +794,19 @@ def cmd_check(a, state_path):
             faults.append("the block does not match the header's sha256: it was edited or appended to outside the tool")
         if fields.get("block_bytes") != str(len(body)):
             faults.append("the block is %d bytes, the header says %s" % (len(body), fields.get("block_bytes")))
-        if fields.get("seat") != a.seat:
-            faults.append("the header names seat %r, this tree is %r" % (fields.get("seat"), a.seat))
-    f2, _, _ = validate(body, a.cap, fields.get("xclock_override", "") if head is not None else "")
+        if fields.get("seat") != seat:
+            faults.append("the header names seat %r, this tree is %r" % (fields.get("seat"), seat))
+    f2, _, _ = validate(body, cap, fields.get("xclock_override", "") if head is not None else "")
     faults.extend(f2)
+    return faults, body, fields
+
+
+def cmd_check(a, state_path):
+    cur = read_bytes(state_path)
+    if cur is None:
+        print("handover: ABSENT — no state file at %s (not a fault before the cut-over)" % state_path)
+        return 0
+    faults, body, fields = check_faults(cur, a.seat, a.cap)
     if faults:
         for f in faults:
             print("FAULT: " + f)

@@ -26,7 +26,14 @@ Round 3 (the checker's N8): the step no longer carries Kam's name and date. His 
    checkpoint and rotation. Such a seat adds nothing to `NEXT-PICKUP*.md`. Then
    `handover.sh check` must print OK, and both STATE files go in the wrap commit.
    One writer at a time: the tool takes a lock for the whole write; a second write
-   waits, then refuses (rc 5) and is simply run again.
+   waits, then refuses (rc 5) and says which of two things it met. **LOCK BUSY**: a
+   write is running; run the command again. **STALE LOCK**: a write died and left
+   its lock; run the `mv -n` recovery line the message prints first (the seat may
+   run it itself once `pgrep -fl handover_core.py` prints nothing), then write
+   again. rc 6 means the lock was taken away while the write ran: look with
+   `handover.sh show` and write again if the block shown is not yours.
 ```
+
+Round 4 (the second checker's N3): the last sentence said a refused write "is simply run again". That is true for LOCK BUSY only; a STALE lock refuses every time until its recovery line has been run. The sentence now tells the two apart and names rc 6.
 
 ROLLBACK: `git revert` of the commit; the seat then hands over as before. Blocks already written stay in the STATE files and lose nothing.

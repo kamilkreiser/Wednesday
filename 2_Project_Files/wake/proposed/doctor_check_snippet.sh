@@ -13,6 +13,15 @@
 WP="$PROJECT_DIR/2_Project_Files/wake/wake_pack.py"
 HO="$PROJECT_DIR/2_Project_Files/wake/handover.sh"
 if [ -f "$HO" ]; then
+  # A STANDING WRITE LOCK IS SEEN AT BOOT (round 4, the second checker's N3). A handover write that died
+  # leaves 0_Brain/tasks/STATE-<seat>.lock.d behind, and every later write is refused (rc 5) until it is
+  # set aside. Without this line that is first met at the 85% handover. Any seat's lock in this tree is
+  # reported; the tool never removes one, and neither does doctor: it prints the line to run.
+  for WK_LOCK in "$PROJECT_DIR"/0_Brain/tasks/STATE-*.lock.d; do
+    [ -e "$WK_LOCK" ] || [ -L "$WK_LOCK" ] || continue
+    if [ -f "$WK_LOCK/owner" ]; then WK_OWNER="$(tr '\n' ' ' < "$WK_LOCK/owner" | cut -c1-160)"; else WK_OWNER="no owner file"; fi
+    warn "a handover write lock is standing: $(basename "$WK_LOCK")" "owner: ${WK_OWNER} — either a handover write is running this second, or one died and left it. While it stands every handover write is REFUSED (rc 5). If no write is running (pgrep -fl handover_core.py prints nothing), the seat may run this itself, no person is needed, and then write again: mv -n '$WK_LOCK' '$WK_LOCK.stale-$(date +%Y%m%d-%H%M%S)'"
+  done
   WK_OUT="$(bash "$HO" --where 2>&1)"; WK_RC=$?
   WK_SEAT="$(printf '%s\n' "$WK_OUT" | sed -n 's/^seat: *//p')"
   if [ "$WK_RC" -ne 0 ] || [ -z "$WK_SEAT" ]; then

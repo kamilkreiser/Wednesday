@@ -2,8 +2,8 @@
 """wake_pack.py — build (or check) ONE fixed-budget wake pack for a coordinator seat (WED-170 step 1).
 
 WHY: the boot prompt mandated ~917 KB of whole-file reads for the Wednesday seat (census 2026-11-27).
-Most of it was handover history and dead grant rows. The pack is one generated file with a hard
-token budget; over budget it writes nothing and says which part grew.
+Most of it was handover history. The pack is one generated file with a hard token budget; over budget
+it writes nothing and says which part grew.
 
 Usage:
   wake_pack.py --seat <wednesday|tuesday|friday> [--budget-tokens 60000] [--out <path>]
@@ -11,45 +11,32 @@ Usage:
   wake_pack.py --seat <seat> --check [--out <path>]
       exit 1 with one line per fault when the pack is missing, older than a source, built on an
       earlier date, or different from what would be built now; 0 with an OK line
-  --trust-expired-heading   also drop grant rows that sit under the grants file's '## Expired' heading
   --root <dir>              tree root (default: derived from this file's location)   [tests]
-  --today YYYY-MM-DD        the date the grant filter compares against (default: today)   [tests]
+  --today YYYY-MM-DD        the date stamped into the pack (default: today)   [tests]
 
 Parts, in order (each section has a row in the manifest table at the top of the pack):
   a. identity   persona, voice protocol, Kam: verbatim
   b. rules      the rules card's "Most reinforced" section verbatim, then family headings with counts
   c. state      the seat's STATE block (handover.sh); if none yet, the legacy pickup's first block
-  d. grants     rows of EXPIRING-GRANTS.md that are not PROVABLY dead or another seat's
+  d. grants     EXPIRING-GRANTS.md WHOLE: the file's own bytes, every row verbatim, in file order
   e. ledger     each row of the seat's own ledger as date, headline, Rule sentence
   f. pointers   paths only
 
-The grant filter fails toward inclusion (rules tightened in round 3 after the checker's 15 hostile rows).
-A row is dropped only when ONE of these is proven from its own text; everything else is kept:
-  1. DEAD MARKER  the first cell, after emphasis marks, starts with DEAD, EXPIRED, ENDED, LAPSED, CLOSED,
-     RETIRED or END EVENT REACHED, the marker is followed by a DATE (optionally "since", "end of", a
-     weekday), it is not struck through, and the cell carries no REOPENED / REVIVED / RENEWED /
-     RE-AFFIRMED / REINSTATED / RESTORED / EXTENDED / RESUMED. A marker word used as the row's subject
-     ("CLOSED PRs may be reopened") has no date after it and is kept.
-  2. OTHER SEAT   the first cell leads with one or more OTHER seats' names and a separator, this seat is not
-     among them, and NO cell of the row names this seat, all seats / every seat / both seats / the fleet,
-     or this seat's client. A seat that serves every client (friday) never drops a row by this class.
-     The seat's short name in capitals (WED) counts as naming it, except as a ticket id (WED-170).
-     Two idioms are not "naming the seat" because they are a weekday by construction: the name directly
-     followed by a date, and the register's clock stamp (`date`: Wednesday).
-  3. PAST END     the row has exactly four cells; the EXPIRES cell STARTS with an explicit end form (END OF,
-     until / through / ends / expires, or a weekday with the date), holds exactly one date, that date is
-     before today, and the row carries none of: EVENT, until further notice, extended, renewed, no end
-     stated, later, continued, kept alive, moved, stands, onwards, at first, whichever. A bare date at
-     the start of the cell is a given or start date, not an end.
-A kept row that leads with this seat's name is "this seat's"; any other kept row is "unclassified".
-Every dropped row is listed in a sidecar beside the pack, <pack name>.dropped.txt: one line with its
-class, its line in the grants file, the proof, and the first 80 characters of its first cell. The
-sidecar is not part of the pack and is not counted in the budget; the pack names it.
+THE GRANTS REGISTER IS CARRIED WHOLE (round 4; Kam's ruling on card wed-wake-pack-second-nogo-whole-register-1127:
+"One more round: whole grants list, lock fixed"). Rounds 1 to 3 dropped rows the tool judged dead, another
+seat's or past their date. Two independent checks showed that a recogniser of wording cannot be finished:
+each one dropped live rows it had not been taught. So this tool no longer judges any row. No row is dropped
+for any reason, there is no dropped-rows sidecar, and no flag switches a filter on. Tidying dead rows out
+of the register is a deliberate housekeeping act by a seat, on the register itself; the pack never guesses
+it. If the register makes the pack exceed its budget the build REFUSES; the register is never trimmed to fit.
 
 A PART NEVER SHRINKS TO A PLACEHOLDER (round 3, M2): a missing, empty or unreadable source, a rules card
-without its "Most reinforced" section, a grants file or ledger whose table header is not found, or a
-state source with no block, is a FAILED BUILD: exit 2, nothing written, the part named, and a last
-line that starts "wake_pack: FAILED" for the launcher to show the seat.
+without its "Most reinforced" section, a grants file or ledger whose table header is not found, a grants
+file that is not valid UTF-8 (it could not be carried verbatim), or a state source with no block, is a
+FAILED BUILD: exit 2, nothing written, the part named, and a last line that starts "wake_pack: FAILED"
+for the launcher to show the seat. THE STATE PART REFUSES WHAT `handover.sh check` REFUSES (round 4, N6):
+a state file with no tool header, a block that does not match its header's sha256 or size, a header
+naming another seat, a missing part or a stack is a FAILED BUILD too (the same function decides both).
 
 Exit codes: 0 ok; 1 --check found a fault; 2 usage or a failed build (a source missing, empty, unreadable
 or without its expected structure); 3 over budget.
@@ -59,9 +46,12 @@ import argparse
 import datetime
 import glob
 import hashlib
+import importlib.util
 import os
 import re
 import sys
+
+sys.dont_write_bytecode = True   # the handover engine is loaded from this directory; leave no cache beside it
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
@@ -77,40 +67,6 @@ SEAT_FILES = {
 IDENTITY = ["0_Brain/identity/persona.md", "0_Brain/identity/voice-protocol.md", "0_Brain/people/kam.md"]
 SKIP = ("(conflict_on_", ".pre-")
 
-# Leading words of a row's FIRST cell that mark the grant dead, when followed by a date (see DEAD_FORM).
-# PREMISE ENDED was removed in round 3 (Wednesday's ANSWER-3): a premise ending is not the row ending.
-DEAD_WORDS = ("DEAD", "EXPIRED", "ENDED", "LAPSED", "CLOSED", "RETIRED", "END EVENT REACHED")
-DROP_CLASS = {"dead": "dead marker", "other": "other seat", "past": "past date", "expired_heading": "expired heading"}
-EMPH = " \t*_`\u26a0\u2705\U0001F534\U0001F7E1\U0001F7E2\ufe0f"      # emphasis and signs; NOT the strike-through
-MARKUP = EMPH + "~"
-ISO = re.compile(r"\b(\d{4}-\d{2}-\d{2})\b")
-WEEKDAY = r"(?:mon|tues?|wed(?:nes)?|thu(?:rs)?|fri|sat(?:ur)?|sun)(?:day)?"
-DEAD_FORM = re.compile(
-    r"(%s)(?i:\s+(?:since\s+)?(?:(?:the\s+)?end\s+of\s+)?(?:%s,?\s+)?)(\d{4}-\d{2}-\d{2})\b"
-    % ("|".join(re.escape(w) for w in sorted(DEAD_WORDS, key=len, reverse=True)), WEEKDAY))
-REVIVED = re.compile(r"\b(?:REOPENED|RE-OPENED|REVIVED|RENEWED|RE-AFFIRMED|REAFFIRMED|REINSTATED|RESTORED|EXTENDED|RESUMED|"
-                     r"REACTIVATED|RE-GRANTED|REGRANTED|REISSUED|RE-ISSUED|CONTINUED|STILL LIVE|LIVE AGAIN|NOT DEAD|BACK ON)\b")
-SEAT_ALT = "|".join(x.upper() for x in ("wednesday", "tuesday", "friday"))
-OWNERS = re.compile(r"((?:%s)(?:\s*(?:,|\+|/|&|(?i:and))\s*(?:%s))*)\b\s*(?::|\(|\u2014|\u2013|-(?![\w])|,)" % (SEAT_ALT, SEAT_ALT))
-# Words that make another seat's row bind this seat too.
-ALL_SEATS = re.compile(r"\b(?:all|every|each|both|any|other|the\s+other|sister)\s+(?:the\s+|three\s+|two\s+)?(?:seats?|coordinators?|agents?)\b|"
-                       r"\bfleet\b|\ball\s+three\b|\beveryone\b|\beverybody\b", re.I)
-# A seat's short name in capitals (TUESDAY + WED), but not a ticket id (WED-170) and not a day (WED 2026-11-25).
-SEAT_SHORT = {"wednesday": "WED", "tuesday": "TUES?", "friday": "FRI"}
-# A seat's client(s): another seat's row that names it is kept. None = the seat serves every client, so the
-# other-seat class never drops a row for it (friday; the checker's N3, the register's line 26).
-SEAT_CLIENTS = {"wednesday": ("secuura",), "tuesday": ("datasec",), "friday": None}
-END_FORM = re.compile(
-    r"(?:(until|through|thru|ends?(?:\s+(?:on|at))?|expires?(?:\s+on)?)\s+)?(?:the\s+)?(?:(end\s+of)\s+)?(?:(%s),?\s+)?(\d{4}-\d{2}-\d{2})\b" % WEEKDAY, re.I)
-WORD_DATE = re.compile(r"\b\d{1,2}(?:st|nd|rd|th)?\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b|"
-                       r"\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{1,2}\b|\bthe\s+\d{1,2}(?:st|nd|rd|th)\b", re.I)
-NEGATED = re.compile(r"\b(?:not|never|nor)\s+(?:renewed|extended)\b|\bnot\s+renewed\s+and\s+not\s+extended\b", re.I)
-ROW_KEEPS = re.compile(r"until\s+further\s+notice|extend|renew|no\s+end\b|no\s+expiry|no\s+date|open-ended|\blater\b|continu|"
-                       r"kept\s+alive|\bmoved\b|\bstands\b|onwards?\b|\bat\s+first\b|whichever|re-?affirm|re-?read|\bchang|"
-                       r"reopen|re-open|reviv|reinstat|restor|resum|\bunless\b|\bat\s+least\b|\bat\s+the\s+earliest\b|provisional|"
-                       r"\bpending\b|\bongoing\b|indefinite|permanent|\brolling\b|\bor\s+until\b|\bor\s+when\b|\btbc\b|"
-                       r"to\s+be\s+confirmed|still\s+(?:live|in\s+force)", re.I)
-EVENT = re.compile(r"\bEVENT\b")
 GRANTS_HEADER = re.compile(r"^\|\s*grant\s*\|\s*given\s*\|\s*EXPIRES\s*\|", re.I)
 LEDGER_HEADER = re.compile(r"^\|\s*Date\s*\|\s*What happened", re.I)
 LEDGER_ROW = re.compile(r"^\|\s*(\d{4}-\d{2}-\d{2})\s*\|(.*)$")
@@ -118,6 +74,8 @@ BOLD = re.compile(r"\*\*(.+?)\*\*")
 RULE = re.compile(r"\b(Rule|RULE)(\s*\([^)|]{1,60}\))?:\s*")
 SENT_END = re.compile(r"[.!?](?=\s+[A-Z\[(*\U0001F511]|\s*$)")
 RULE_MAX = 700
+# The 'generated:' stamp this tool writes (N5): --check refuses any other text on that line.
+STAMP = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?: [A-Za-z0-9+:-]{1,12})?")
 
 
 def eprint(*a):
@@ -141,12 +99,12 @@ class BuildFail(Exception):
 
 
 class Build:
-    def __init__(self, root, seat, today, trust_expired):
-        self.root, self.seat, self.today, self.trust_expired = root, seat, today, trust_expired
+    def __init__(self, root, seat, today):
+        self.root, self.seat, self.today = root, seat, today
         self.sources = []  # absolute paths actually read
         self.parts = []    # (title, [section dict])
         self.stats = {}
-        self.dropped = []  # (class key, grants-file line number, proof, first 80 chars of the first cell)
+        self.raw = {}      # rel -> the bytes read
 
     def p(self, rel):
         return os.path.join(self.root, rel)
@@ -170,6 +128,7 @@ class Build:
             raise BuildFail(part, "source is empty: %s" % rel)
         if path not in self.sources:
             self.sources.append(path)
+        self.raw[rel] = data
         return data.decode("utf-8", "replace")
 
     def size(self, rel):
@@ -252,14 +211,41 @@ def part_rules(b):
     b.add("b. Rules (most reinforced verbatim; families by heading)", out)
 
 
+
 # ── c. state ───────────────────────────────────────────────────────────────────────────────────
+def state_cap(part):
+    """The same cap handover.sh uses (HANDOVER_CAP_BYTES, default 10000)."""
+    v = os.environ.get("HANDOVER_CAP_BYTES", "10000")
+    if not re.fullmatch(r"[0-9]+", v):
+        raise BuildFail(part, "HANDOVER_CAP_BYTES must be a whole number, got %r" % v)
+    return int(v)
+
+
+def handover_engine(part):
+    """The handover engine that sits beside this file: its check_faults() is what `handover.sh check` runs."""
+    path = os.path.join(HERE, "handover_core.py")
+    try:
+        spec = importlib.util.spec_from_file_location("wake_handover_core", path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        mod.check_faults
+        return mod
+    except Exception as e:  # missing, unreadable, or an older engine without check_faults
+        raise BuildFail(part, "a state file exists but the handover engine at %s cannot be loaded to check it (%s: %s)"
+                        % (path, type(e).__name__, e))
+
+
 def part_state(b):
     part = "c (state)"
     rel = "0_Brain/tasks/STATE-%s.md" % b.seat
     state = b.read(rel, part, must_exist=False)
     if state is not None:
-        if not re.search(r"^## FLOOR\s*$", state, re.M):
-            raise BuildFail(part, "%s holds no '## FLOOR' part: it is not a block written by handover.sh" % rel)
+        # N6: the pack refuses what `handover.sh check` refuses, by calling the same function.
+        faults, _, _ = handover_engine(part).check_faults(b.raw[rel], b.seat, state_cap(part))
+        if faults:
+            raise BuildFail(part, "%s is not one clean tool-written block (`handover.sh check` refuses it too): %s%s. "
+                                  "Rewrite it through 2_Project_Files/wake/handover.sh write --stdin"
+                            % (rel, faults[0], ("; and %d more fault(s)" % (len(faults) - 1)) if len(faults) > 1 else ""))
         b.stats["state"] = "STATE file"
         b.add("c. State (the one-block handover)",
               [sec(rel, b.size(rel),
@@ -287,122 +273,40 @@ def part_state(b):
     b.add("c. State (legacy pickup, first block only)", [sec(prel, b.size(prel), text, label=prel + " (first block)")])
 
 
-# ── d. grants ──────────────────────────────────────────────────────────────────────────────────
-def lead(cell):
-    return cell.strip().lstrip(MARKUP)
-
-
-WEEKDAY_IDIOM = r"(?:`date[^`]*`:\s*(?:%s)\b)|(?:\b(?:%s)\b,?\s+\d{4}-\d{2}-\d{2})"
-
-
-def names_seat(row, seat):
-    """Does the row name this seat as a seat? The seats are named after weekdays, so two forms that are a weekday
-    by construction are removed first: the register's clock stamp (`date -j`: Wednesday) and the name directly
-    followed by a date. Any other occurrence, in any case, counts: fail toward inclusion."""
-    text = re.sub(WEEKDAY_IDIOM % (seat, seat), " ", row, flags=re.I)
-    if re.search(r"\b%s\b" % re.escape(seat), text, re.I):
-        return True
-    short = SEAT_SHORT.get(seat)
-    return bool(short) and re.search(r"\b(?:%s)\b(?!-\d)(?!,?\s+\d)" % short, text) is not None
-
-
-def classify_grant(line, seat, today):
-    """-> (verdict, why). verdict: 'mine' | 'unclassified' | 'dead' | 'other' | 'past'. Drops need proof."""
-    cells = line.split("|")[1:-1]
-    first = cells[0] if cells else ""
-    # 1. dead marker: the row's status, followed by a date, not struck through, not revived
-    struck = first.strip().lstrip(EMPH).startswith("~~")
-    dm = DEAD_FORM.match(lead(first))
-    if dm and not struck and not REVIVED.search(first):
-        return "dead", "first cell starts with %s %s" % (dm.group(1), dm.group(2))
-    # 2. another seat's: leading owner list without this seat, and no cell that binds this seat
-    om = OWNERS.match(lead(first))
-    owners = [o.lower() for o in re.findall(SEAT_ALT, om.group(1))] if om else []
-    if owners and seat not in owners:
-        clients = SEAT_CLIENTS.get(seat)
-        if (clients is not None and not names_seat(line, seat) and not ALL_SEATS.search(line)
-                and not any(re.search(r"\b%s\b" % re.escape(c), line, re.I) for c in clients)):
-            return "other", "first cell starts with " + " + ".join(o.upper() for o in owners)
-    # 3. past end date: an explicit end form, exactly one date, nothing in the row that keeps it alive
-    if len(cells) == 4:
-        exp = cells[2]
-        em = END_FORM.match(lead(exp))
-        if em and (em.group(1) or em.group(2) or em.group(3)):
-            try:
-                end = datetime.date.fromisoformat(em.group(4))
-            except ValueError:
-                end = None
-            isos = set(ISO.findall(exp))
-            plain = NEGATED.sub(" ", line)
-            if (end is not None and end < today and isos == set([em.group(4)]) and not WORD_DATE.search(exp)
-                    and not EVENT.search(line) and not ROW_KEEPS.search(plain)):
-                return "past", "EXPIRES cell starts with end date %s" % end.isoformat()
-    return ("mine" if seat in owners else "unclassified"), ""
-
-
+# ── d. grants: the register, WHOLE ─────────────────────────────────────────────────────────────
 def part_grants(b):
+    """The file's own text, start to end. No row is judged, dropped, moved or reworded (see the module text)."""
     part = "d (grants)"
     rel = "0_Brain/tasks/EXPIRING-GRANTS.md"
     text = b.read(rel, part)
-    all_lines = text.split("\n")
-    if not any(GRANTS_HEADER.match(l) for l in all_lines):
-        piped = sum(1 for l in all_lines if l.lstrip().startswith("|"))
+    raw = b.raw[rel]
+    if text.encode("utf-8") != raw:
+        raise BuildFail(part, "%s is not valid UTF-8, so it cannot be carried verbatim; fix the file's encoding" % rel)
+    lines = text.split("\n")
+    if not any(GRANTS_HEADER.match(l) for l in lines):
+        piped = sum(1 for l in lines if l.lstrip().startswith("|"))
         raise BuildFail(part, "no grants table header ('| grant | given | EXPIRES | ...' at the left margin) found in %s, "
-                              "although %d line(s) there start with a pipe: the table cannot be read, so no row can be proven dead or kept"
+                              "although %d line(s) there start with a pipe: this is not the register this part expects"
                         % (rel, piped))
-    counts = {"rows": 0, "mine": 0, "unclassified": 0, "dead": 0, "other": 0, "past": 0,
-              "expired_heading_kept": 0, "expired_heading_dropped": 0}
-    mine, uncl, under = [], [], []
-    header = "| grant | given | EXPIRES | scope, exactly |\n|---|---|---|---|"
-    in_expired = False
-    for lineno, line in enumerate(text.split("\n"), 1):
-        if line.startswith("## "):
-            in_expired = line[3:].strip().lower().startswith("expired")
+    rows = 0
+    for l in lines:  # counted for the reader only; nothing is selected by this loop
+        if not l.lstrip().startswith("|"):
             continue
-        if not line.startswith("|"):
-            continue
-        cells = line.split("|")[1:-1]
+        cells = l.strip().split("|")[1:-1]
         c0 = cells[0].strip() if cells else ""
         if c0.lower() == "grant" or (c0 and set(c0) <= set("-: ")):
-            continue  # table header or separator
-        counts["rows"] += 1
-        verdict, why = classify_grant(line, b.seat, b.today)
-        if verdict in ("dead", "other", "past"):
-            counts[verdict] += 1
-            b.dropped.append((verdict, lineno, why, c0[:80]))
             continue
-        if in_expired:
-            if b.trust_expired:
-                counts["expired_heading_dropped"] += 1
-                b.dropped.append(("expired_heading", lineno, "under the file's '## Expired' heading (--trust-expired-heading)", c0[:80]))
-                continue
-            counts["expired_heading_kept"] += 1
-            under.append(line)
-            continue
-        counts[verdict] += 1
-        (mine if verdict == "mine" else uncl).append(line)
-    indented = sum(1 for l in all_lines if l.startswith((" |", "\t|")))
-    if indented:
-        raise BuildFail(part, "%d table line(s) in %s are indented, so they were not read as rows; fix the file's table" % (indented, rel))
-    b.stats["grants"] = counts
-    kept = len(mine) + len(uncl) + len(under)
-    out = ["From `%s` as of %s: %d rows in the file, %d kept here." % (rel, b.today.isoformat(), counts["rows"], kept),
-           "Kept: %d this seat's, %d unclassified, %d unclassified under the file's Expired heading. "
-           "Dropped on proof: %d marked dead, %d another seat's, %d past their end date%s."
-           % (len(mine), len(uncl), len(under), counts["dead"], counts["other"], counts["past"],
-              (", %d under the Expired heading" % counts["expired_heading_dropped"]) if b.trust_expired else ""),
-           "A row is dropped only on proof, so some rows kept here are dead in fact: read the EXPIRES cell before relying on one. "
-           "A grant past its date is DEAD and is re-asked, never assumed. A grant NOT shown here is not thereby dead: read the file.",
-           ""]
-    for title, rows in (("### This seat's (%d)" % len(mine), mine),
-                        ("### Unclassified: kept because nothing proves them dead or another seat's (%d)" % len(uncl), uncl),
-                        ("### Unclassified, under the file's '## Expired' heading (%d)" % len(under), under)):
-        if rows:
-            out += [title, "", header] + rows + [""]
-    if not kept:
-        out.append("(no row kept)")
-    b.add("d. Live grants (not provably dead, not provably another seat's)",
-          [sec(rel, b.size(rel), "\n".join(out) + "\n", label=rel + " (filtered rows)")])
+        rows += 1
+    b.stats["grants_rows"] = rows
+    head = ("From `%s`: the WHOLE register, verbatim and in file order (%d bytes, %d table rows, sha256 %s). "
+            "Nothing is left out, moved or reworded, and this pack does NOT judge which grants are live. "
+            "Some rows are dead, spent or another seat's: each row's own first cell and EXPIRES cell say so, and the "
+            "file's own headings (an Expired section among them) are carried as they stand. Read a row's EXPIRES cell "
+            "before relying on it. A grant past its date is DEAD and is re-asked, never assumed.\n\n"
+            "<<< BEGIN %s (verbatim) >>>\n" % (rel, len(raw), rows, hashlib.sha256(raw).hexdigest()[:16], rel))
+    tail = "%s<<< END %s (verbatim) >>>\n" % ("" if text.endswith("\n") else "\n", rel)
+    b.add("d. Grants register (WHOLE, verbatim: every row, in file order)",
+          [sec(rel, b.size(rel), head + text + tail, label=rel + " (whole, verbatim)")])
 
 
 # ── e. ledger ──────────────────────────────────────────────────────────────────────────────────
@@ -460,22 +364,7 @@ def part_pointers(b):
 
 
 # ── render ─────────────────────────────────────────────────────────────────────────────────────
-def sidecar_path(out):
-    return (out[:-3] if out.endswith(".md") else out) + ".dropped.txt"
-
-
-def sidecar_text(b, generated, pack_label):
-    L = ["# Grant rows DROPPED from the wake pack %s (%s seat). Not part of the pack; not counted in its budget." % (pack_label, b.seat),
-         "generated: " + generated,
-         "# built for %s from 0_Brain/tasks/EXPIRING-GRANTS.md by %s. %d rows dropped." % (b.today.isoformat(), SELF_REL, len(b.dropped)),
-         "# A live grant listed here was dropped by mistake: say so, and read it in the grants file at the line given.",
-         "# class | line in the grants file | proof | first 80 characters of the row's first cell"]
-    for key, lineno, why, cell in b.dropped:
-        L.append("%s | line %d | %s | %s" % (DROP_CLASS[key], lineno, why, cell))
-    return "\n".join(L) + "\n"
-
-
-def render(b, budget, generated, side_label):
+def render(b, budget, generated):
     body_parts = []
     rows = []
     for title, sections in b.parts:
@@ -493,8 +382,8 @@ def render(b, budget, generated, side_label):
                "source: GENERATED by %s --seat %s. Never hand-edit: a fix written here lasts until the next build." % (SELF_REL, b.seat),
                "---", "",
                "# Wake pack: %s seat" % b.seat, "",
-               "Read this whole at boot. It replaces the whole reads of the rules card, the ledger, the pickup file, the grants file, "
-               "the project index and its entries. It is a working model: the source named beside each part is the truth, and a "
+               "Read this whole at boot. It replaces the whole reads of the rules card, the ledger, the pickup file, the grants file "
+               "(carried here whole, part d), the project index and its entries. It is a working model: the source named beside each part is the truth, and a "
                "fact from here is checked at its source before it is acted on.", "",
                "## Manifest", "",
                "| part | source | source bytes | bytes in pack | est. tokens (bytes/4) |", "|---|---|---|---|---|"]
@@ -502,9 +391,6 @@ def render(b, budget, generated, side_label):
             man.append("| %s | `%s` | %s | %d | %d |" % (part, label, "-" if sb is None else str(sb), pb, tok(pb)))
         man.append("| - | headings, manifest, this header | - | %d | %d |" % (total - sect_b, tok(total - sect_b)))
         man.append("| **total** | | | **%d** | **%d** of %d |" % (total, tok(total), budget))
-        man.append("")
-        man.append("Grant rows dropped from part d (%d): listed one per line, with class and proof, in `%s`. That file is not part of this "
-                   "pack and not in its budget; look there before concluding a grant is gone." % (len(b.dropped), side_label))
         man.append("")
         head = "\n".join(man) + "\n"
         new_total = len(head.encode("utf-8")) + body_b
@@ -514,8 +400,8 @@ def render(b, budget, generated, side_label):
     return head + body, rows, total
 
 
-def build(root, seat, today, trust_expired):
-    b = Build(root, seat, today, trust_expired)
+def build(root, seat, today):
+    b = Build(root, seat, today)
     part_identity(b)
     part_rules(b)
     part_state(b)
@@ -542,17 +428,11 @@ def header_stamp(text):
     return None
 
 
-def sidecar_stamp(text):
-    """The sidecar's own 'generated:' value: its SECOND line and no other."""
-    lines = text.split("\n")
-    if len(lines) > 1 and lines[1].startswith("generated: "):
-        return lines[1][len("generated: "):]
-    return None
-
 
 def read_text(path):
     with open(path, "rb") as f:
         return f.read().decode("utf-8", "replace")
+
 
 
 def main():
@@ -561,7 +441,6 @@ def main():
     ap.add_argument("--budget-tokens", type=int, default=60000)
     ap.add_argument("--out")
     ap.add_argument("--check", action="store_true")
-    ap.add_argument("--trust-expired-heading", action="store_true")
     ap.add_argument("--root")
     ap.add_argument("--today")
     a = ap.parse_args()
@@ -576,7 +455,7 @@ def main():
         return 2
     out = os.path.abspath(a.out) if a.out else os.path.join(root, "0_Brain", "wake", "WAKE-%s.md" % a.seat)
     try:
-        b = build(root, a.seat, today, a.trust_expired_heading)
+        b = build(root, a.seat, today)
     except BuildFail as e:
         if a.check:
             print("FAULT: a build now would FAIL: %s" % e)
@@ -585,16 +464,12 @@ def main():
         eprint("wake_pack: BUILD FAILED — nothing written (root %s). A part is never replaced by a placeholder." % root)
         eprint("wake_pack: FAILED — %s" % e)
         return 2
-    side = sidecar_path(out)
-    inside = os.path.commonpath([root, side]) == root
-    side_label = os.path.relpath(side, root) if inside else os.path.basename(side)
 
     def make(stamp):
-        text, rows, total = render(b, a.budget_tokens, stamp, side_label)
-        return text, rows, total, sidecar_text(b, stamp, os.path.basename(out))
+        return render(b, a.budget_tokens, stamp)
 
-    generated = datetime.datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
-    text, rows, total, side_text = make(generated)
+    generated = datetime.datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z").strip()
+    text, rows, total = make(generated)
     over = tok(total) > a.budget_tokens
 
     def by_part():
@@ -616,30 +491,22 @@ def main():
             have = read_text(out)
             m = re.search(r"^built_for_date: (\S+)$", have, re.M)
             if not m or m.group(1) != today.isoformat():
-                faults.append("pack was built for %s, today is %s (the grant filter depends on the date)"
+                faults.append("pack was built for %s, today is %s (a pack is built at each launch; yesterday's is stale)"
                               % (m.group(1) if m else "an unknown date", today.isoformat()))
             # CONTENT HASH (m1): rebuild with the pack's OWN header stamp and compare sha256 of the whole file.
             # No line is skipped, so a line added by hand cannot hide behind a 'generated:' prefix.
+            # THE STAMP'S FORMAT IS CHECKED FIRST (N5): the rebuild copies the stamp from the pack, so any text
+            # written on that line would otherwise be rebuilt as it stands and read as current.
             stamp = header_stamp(have)
             if stamp is None:
                 faults.append("the pack's front matter has no 'generated:' line: it was not written by this tool, or was edited")
+            elif not STAMP.fullmatch(stamp):
+                faults.append("the pack's 'generated:' line is not a timestamp this tool writes (%r): edited by hand" % stamp[:80])
             else:
                 want = make(stamp)[0]
                 if sha(have) != sha(want):
                     faults.append("pack content differs from what would be built now (sha256 %s on disk, %s expected)"
                                   % (sha(have)[:12], sha(want)[:12]))
-            if not os.path.isfile(side):
-                faults.append("dropped-rows sidecar missing: %s" % side)
-            else:
-                shave = read_text(side)
-                sstamp = sidecar_stamp(shave)
-                if sstamp is None:
-                    faults.append("the sidecar's second line is not its 'generated:' line: edited or not this tool's (%s)" % side)
-                else:
-                    swant = make(sstamp)[3]
-                    if sha(shave) != sha(swant):
-                        faults.append("dropped-rows sidecar differs from what would be built now (sha256 %s on disk, %s expected): %s"
-                                      % (sha(shave)[:12], sha(swant)[:12], side))
         if over:
             faults.append("a build now would be over budget: ~%d tokens of %d" % (tok(total), a.budget_tokens))
         if faults:
@@ -660,28 +527,28 @@ def main():
             eprint("  %8d B  ~%6d tokens  %s" % (pb, tok(pb), name))
             for p2, label, sb, pb2 in sorted((r for r in rows if r[0] == part), key=lambda r: -r[3]):
                 eprint("            %8d B  %s" % (pb2, label))
-        eprint("Shrink the largest SOURCE (its own rule: one handover block, dead grants marked DEAD, ledger rows archived), "
-               "not the pack; or raise --budget-tokens on Kam's word.")
+        eprint("Shrink the largest SOURCE (its own rule: one handover block, ledger rows archived, the grants register "
+               "tidied by a deliberate housekeeping step on the register itself), not the pack; or raise --budget-tokens "
+               "on Kam's word. The pack never trims a source to fit.")
         eprint("wake_pack: FAILED — over budget: ~%d tokens of %d; the largest part is '%s' (%d bytes)"
                % (tok(total), a.budget_tokens, parts[0][0], parts[0][2]))
         return 3
+    if os.path.isdir(out):
+        eprint("wake_pack: FAILED — the pack path %s is a directory; nothing written" % out)
+        return 2
+    tmp = "%s.tmp.%d" % (out, os.getpid())
     try:
         os.makedirs(os.path.dirname(out), exist_ok=True)
-        for path, body in ((side, side_text), (out, text)):  # the sidecar first, so the pack is never the older of the two
-            tmp = "%s.tmp.%d" % (path, os.getpid())
-            with open(tmp, "w", encoding="utf-8") as f:
-                f.write(body)
-                f.flush()
-                os.fsync(f.fileno())
-            os.replace(tmp, path)
+        with open(tmp, "w", encoding="utf-8") as f:
+            f.write(text)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, out)
     except OSError as e:
         eprint("wake_pack: FAILED — cannot write the pack at %s: %s" % (out, e))
         return 2
-    g = b.stats["grants"]
-    gs = "grants kept %d of %d (%d unclassified)" % (g["mine"] + g["unclassified"] + g["expired_heading_kept"], g["rows"],
-                                                     g["unclassified"] + g["expired_heading_kept"])
-    print("%s  bytes: %d  ~tokens: %d of %d  state: %s  %s  dropped rows listed in %s  ledger rows: %d"
-          % (out, total, tok(total), a.budget_tokens, b.stats.get("state"), gs, os.path.basename(side), b.stats.get("ledger_rows", 0)))
+    print("%s  bytes: %d  ~tokens: %d of %d  state: %s  grants: the whole register, %d rows  ledger rows: %d"
+          % (out, total, tok(total), a.budget_tokens, b.stats.get("state"), b.stats.get("grants_rows", 0), b.stats.get("ledger_rows", 0)))
     return 0
 
 
