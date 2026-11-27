@@ -1,0 +1,110 @@
+Measurements on the drive cluster, 2026-11-27 12:06:11 AEDT
+
+== size on the drive
+156M	/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/brain-db/pgdata-wednesday
+159948	/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/brain-db/pgdata-wednesday
+database braindb: 117 MB
+chunks: 76 MB
+daily_rows: 21 MB
+lexeme_df: 7104 kB
+ledger_rows: 4368 kB
+lessons: 1096 kB
+rules: 296 kB
+files: 160 kB
+meta: 48 kB
+
+== source bytes indexed (kind|files|bytes)
+daily|115|15046343
+ledger|2|2927519
+lesson|281|1199681
+architecture|21|276778
+rules_index|1|134264
+skill|9|41138
+people|2|5925
+identity|2|5583
+total|433|19637231
+
+== rebuild time, three runs
+NOTICE:  drop cascades to 9 other objects
+DETAIL:  drop cascades to table brain.meta
+drop cascades to table brain.files
+drop cascades to table brain.lessons
+drop cascades to table brain.rules
+drop cascades to table brain.ledger_rows
+drop cascades to table brain.daily_rows
+drop cascades to table brain.chunks
+drop cascades to view brain.lesson_rules
+drop cascades to table brain.lexeme_df
+  time: 4.72 s (read and parse 0.48 s, load and index 4.24 s)
+NOTICE:  drop cascades to 9 other objects
+DETAIL:  drop cascades to table brain.meta
+drop cascades to table brain.files
+drop cascades to table brain.lessons
+drop cascades to table brain.rules
+drop cascades to table brain.ledger_rows
+drop cascades to table brain.daily_rows
+drop cascades to table brain.chunks
+drop cascades to view brain.lesson_rules
+drop cascades to table brain.lexeme_df
+  time: 4.72 s (read and parse 0.55 s, load and index 4.16 s)
+NOTICE:  drop cascades to 9 other objects
+DETAIL:  drop cascades to table brain.meta
+drop cascades to table brain.files
+drop cascades to table brain.lessons
+drop cascades to table brain.rules
+drop cascades to table brain.ledger_rows
+drop cascades to table brain.daily_rows
+drop cascades to table brain.chunks
+drop cascades to view brain.lesson_rules
+drop cascades to table brain.lexeme_df
+  time: 4.56 s (read and parse 0.48 s, load and index 4.08 s)
+
+== check
+check: GREEN, 433 files on disk match the index (built 2026-11-27T12:06:21+11:00)
+
+real	0m0.198s
+user	0m0.119s
+sys	0m0.053s
+
+== query latency: the ms figure search prints (python's wall time around one psql call), each query 3 times, all kinds then --kind lesson
+(5 results, 136 ms)
+(5 results, 128 ms)
+(5 results, 118 ms)
+(5 results, 29 ms)
+(5 results, 31 ms)
+(5 results, 30 ms)
+(5 results, 148 ms)
+(5 results, 143 ms)
+(5 results, 143 ms)
+(5 results, 33 ms)
+(5 results, 34 ms)
+(5 results, 33 ms)
+(5 results, 233 ms)
+(5 results, 223 ms)
+(5 results, 229 ms)
+(5 results, 34 ms)
+(5 results, 32 ms)
+(5 results, 32 ms)
+
+== whole-command wall time (bash + seat resolve + python + psql)
+
+real	0m0.128s
+user	0m0.071s
+sys	0m0.026s
+
+real	0m0.112s
+user	0m0.072s
+sys	0m0.027s
+
+== the other client's name inside the index (kind|rows naming datasec|rows|files naming datasec)
+daily|815|19290|103
+ledger|79|1938|1
+architecture|56|237|10
+lesson|54|685|52
+people|1|2|1
+identity|0|6|0
+skill|0|47|0
+control, rows naming secuura: 6478
+lessons (whole body) naming datasec: 53 of 281
+rule lines naming datasec: 11 of 364
+lessons by tier: W=227, M=43, MIXED=5, (untagged)=5, P-General/Claude to Claude=1

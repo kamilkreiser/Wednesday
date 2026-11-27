@@ -1,0 +1,27 @@
+# PROPOSED brain-db scope for the TUESDAY seat (Datasec). NOT live: braindb.sh
+# reads only scope/<seat>.scope. Tuesday's coordinator reviews this file and
+# copies it to scope/tuesday.scope to adopt it (see INSTRUCTIONS-for-other-seats.md).
+# Exercised on fixtures only by tests/run.sh; never run against a real tree.
+
+seat tuesday
+own_clients datasec general
+deny_clients secuura
+
+allow rules        CLAUDE.md
+allow rules        0_Brain/CLAUDE.md
+allow lesson       0_Brain/learnings/20*.md
+allow rules_index  0_Brain/learnings/_rules_index.tsv
+allow ledger       0_Brain/learnings/_ledger_laptop_datasec.md
+allow ledger       0_Brain/learnings/_ledger_laptop_datasec_archive.md
+allow daily        0_Brain/daily_tuesday/20*.md
+allow skill        0_Brain/skills/*.md
+allow identity     0_Brain/identity/*.md
+allow people       0_Brain/people/*.md
+allow architecture 1_Project_Definition/Architecture/*.md
+
+deny_path (conflict_on_
+deny_path .pre-
+
+# another seat's own records (a folder name of any kind; the file name of a ledger or daily note)
+deny_seat_word friday
+deny_seat_word wednesday

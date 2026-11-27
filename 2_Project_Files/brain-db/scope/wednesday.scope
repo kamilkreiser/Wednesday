@@ -1,0 +1,41 @@
+# brain-db scope for the WEDNESDAY seat (Secuura + general).
+# This file IS the allow-list: a path enters the index only if an `allow` line
+# matches it. Each allow line is: allow <kind> <directory>/<file-name pattern>
+# (one directory, no recursion, no symlinks; .md only, .tsv for the rules index).
+# Paths are relative to the tree root. Lines starting with # are comments.
+
+seat wednesday
+own_clients secuura general wednesday wed
+deny_clients datasec
+
+# The seat's own rules files, one row per numbered rule or heading section. A file at
+# the tree root is named exactly (no pattern).
+allow rules        CLAUDE.md
+allow rules        0_Brain/CLAUDE.md
+allow lesson       0_Brain/learnings/20*.md
+allow rules_index  0_Brain/learnings/_rules_index.tsv
+allow ledger       0_Brain/learnings/_ledger.md
+allow ledger       0_Brain/learnings/_ledger_archive.md
+allow daily        0_Brain/daily/20*.md
+allow skill        0_Brain/skills/*.md
+allow identity     0_Brain/identity/*.md
+allow people       0_Brain/people/*.md
+allow architecture 1_Project_Definition/Architecture/*.md
+
+# LESSONS are decided by content, not by name (Wednesday's ruling, ANSWER-1 item 2):
+#   - excluded when the frontmatter tier names a deny_clients client (or is a
+#     project tier naming none of own_clients);
+#   - excluded when the lesson has rows in the rules index and EVERY row's seats
+#     column names only other seats; a lesson with no row is decided by tier alone.
+
+# Sync leftovers: excluded wherever the text appears in the tree-relative path.
+deny_path (conflict_on_
+deny_path .pre-
+
+# Another seat's own RECORDS: the word excludes a path when it is in a FOLDER
+# name (any kind: daily_tuesday/, 2_Project_Files/tuesday/), or in the FILE name
+# of a record kind (ledger, daily). It never excludes a lesson, skill or
+# architecture file by its name.
+deny_seat_word tuesday
+deny_seat_word friday
+deny_seat_word laptop_datasec

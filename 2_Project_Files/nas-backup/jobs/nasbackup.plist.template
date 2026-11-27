@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- NIGHTLY COPY-ONLY NAS BACKUP (WED-170; Kam 2026-11-27 12:03: "in the middle of the night (you decide timing but about 2 hours
+     apart) so agents don't all do it at once, each agent backs up / syncs their folder and the working projects to the NAS").
+     TEMPLATE, NOT INSTALLED: it lives in 2_Project_Files/nas-backup/jobs/ on purpose. scheduler/install_all_jobs.sh installs every
+     template in scheduler/jobs/, so copying this file there IS the arming step, and that is the coordinator's on Kam's word
+     (proposed/install_all_jobs.proposed.md). Same shape as scheduler/jobs/naspush.plist.template; placeholders @PROJECT_DIR@, @SEAT@,
+     @HOME@ as there, plus four fire times @NBH0@:@NBM0@ .. @NBH3@:@NBM3@ rendered per seat:
+       wednesday 00:30 01:40 02:50 04:00 (window 00:30-05:30)   tuesday 02:30 03:20 04:10 05:00 (window 02:30-05:30)
+       friday    04:30 05:40 06:50 08:10 (window 04:30-09:30)
+     WHY FOUR FIRES: nas_backup_nightly.sh runs at most ONE backup per window (it skips when one is good or running), so the later
+     fires only matter when the first could not run: the Mac was asleep, or the NAS was away. launchd also runs a missed fire once
+     on wake. A fire outside the window is logged and skipped by the script. Logs in ~/Library/Logs (PORTABILITY 22: launchd cannot
+     open paths on the drive); the script's own logs are on the drive in nas-backup/logs/<seat>/. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.@SEAT@.nasbackup</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>@PROJECT_DIR@/2_Project_Files/nas-backup/nas_backup_nightly.sh</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Hour</key><integer>@NBH0@</integer><key>Minute</key><integer>@NBM0@</integer></dict>
+    <dict><key>Hour</key><integer>@NBH1@</integer><key>Minute</key><integer>@NBM1@</integer></dict>
+    <dict><key>Hour</key><integer>@NBH2@</integer><key>Minute</key><integer>@NBM2@</integer></dict>
+    <dict><key>Hour</key><integer>@NBH3@</integer><key>Minute</key><integer>@NBM3@</integer></dict>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>WED_AGENT</key><string>@SEAT@</string>
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+  <key>RunAtLoad</key><false/>
+  <key>StandardOutPath</key><string>@HOME@/Library/Logs/@SEAT@_nasbackup.out</string>
+  <key>StandardErrorPath</key><string>@HOME@/Library/Logs/@SEAT@_nasbackup.err</string>
+</dict>
+</plist>
