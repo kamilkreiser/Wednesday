@@ -1,4 +1,4 @@
-# PROPOSED item for `PORTABILITY.md` (round 2). Nothing here is applied.
+# PROPOSED item for `PORTABILITY.md` (round 3). Nothing here is applied.
 
 The section number is **NN**: Wednesday numbers it (the brain-db lane proposes an item too). Round 1 said "the last one today is 30" and proposed 31; section 31 already exists (the Monday Stuart list, line 566). My slip: I read the list of sections from an earlier grep that stopped at 30.
 
@@ -17,7 +17,7 @@ Kam 2026-11-27 12:03: each seat backs up its folder and working projects to the 
 - **Editing `seats/<seat>.conf`:** its last line is `END lines=<N>`. Recount after any edit; a file whose count is wrong is refused.
 - **Where the copy lives:** `/Volumes/DEV-Working/<Client>/<Seat>/nightly-backup/` (`current/`, `versions/<run stamp>/`, `manifests/`, `runs/`). Wednesday: `Secuura/Wednesday/` and `General/Wednesday/`. Nothing there is ever removed by the tool; clean-up is Kam's word.
 - **Not in the backup, by design:** anything secret-shaped by NAME, in any case (`4_Credentials`, `3_Access_Keys` and decorated copies of them, `.env*`, `*.env`, key and certificate files, deploy keys, `.ssh`, `.aws`, `.azure`, `.gh-config`, `.npmrc`, terraform state): re-create by re-login on a new machine. This over-excludes on purpose (`.envrc`, `.env.example`, a Keynote `.key` file). Also: files with more than one hard link; `.git` directories (repos travel by git push: UNPUSHED commits are not on the NAS); `node_modules`, virtualenvs and caches; `_quarantine_*`; the brain-db `pgdata-*` directory; names containing another client's name; other seats' folders inside the shared tree.
-- **Degrades to:** no backup that night; the reason is in `nas-backup/state/<seat>.json` and `logs/<seat>/nightly.log`; after 72 hours doctor prints a hard failure naming `nas_backup_watch.sh --card` until a seat has raised the one card for Kam.
+- **Degrades to:** no backup that night; the reason is in `nas-backup/state/<seat>.json` and `logs/<seat>/nightly.log`; after 72 hours doctor prints a hard failure naming `nas_backup_watch.sh --card` until a seat has raised the one card for Kam. A damaged state file or index is moved aside and doctor prints `NAS BACKUP STATE WAS FOUND DAMAGED` at every boot until a seat runs `nas_backup_watch.sh --ack-damage`.
 - **Verify:** `bash 2_Project_Files/nas-backup/tests/run.sh` (all PASS, fake NAS only), then `bash 2_Project_Files/nas-backup/nas_backup.sh` (a dry run; it lists the real share and writes nothing to it).
 ```
 

@@ -1,4 +1,15 @@
-READY FOR QA
+WORKING
+
+# ROUND 3 (2026-11-27): in progress, under ANSWER-4.md. Fresh build seat, started 2026-11-27 16:50 AEDT.
+
+Placeholder, updated 2026-11-27 17:47 AEDT. If you read this and the pane is idle, the seat stopped before finishing.
+
+- TASK 1 is DONE: `RESULT-secrets-move-2.md` (first line DONE). All 37 folders moved by same-share rename, counts equal for all 37, the second sweep found 0 such folders left under the mirror, the quarantine holds 2 + 37.
+- TASK 2: the round 3 code, tests and README are written and final. The suite passes 562 of 562. The one real dry run is done (1,012,110 files, 68.27 GiB, exit 0, NAS unchanged) and both independent scans read 0 on its lists. STILL RUNNING: the final mutant run (126 mutants, about an hour from 17:43). The full ROUND 3 status is drafted and replaces this placeholder when that run ends.
+
+---
+
+(ROUND 2's status follows as that seat wrote it; its first line was `READY FOR QA`.)
 
 # ROUND 2 (2026-11-27): answer to the NO GO verdict, under the rulings in ANSWER-2.md
 

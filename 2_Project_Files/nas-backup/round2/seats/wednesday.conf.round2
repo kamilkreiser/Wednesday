@@ -1,0 +1,104 @@
+# seats/wednesday.conf — what the WEDNESDAY seat backs up, and when. Read by nb_core.py.
+# THE LAST LINE MUST BE the END marker with the line count: the number of lines before it that are neither blank
+# nor a comment. After ANY edit, recount (the tool prints both numbers when they disagree). A file that lost a
+# line, or its tail, no longer adds up and is REFUSED: a damaged conf must never silently widen what is copied.
+# An exclude_path that names nothing at the source is refused by name, for the same reason.
+# The allow-list of client folders (Secuura, General) and the fixed exclusions (secrets, .git, node_modules,
+# _quarantine_*, pgdata-*, other seats' names ...) are in nb_core.py and cannot be changed from here: this file
+# can ADD exclusions and name sources, nothing more.
+status=confirmed
+source_volume=/Volumes/DevMASTER
+
+# Kam 2026-11-27: "in the middle of the night ... about 2 hours apart". Wednesday 00:30, Tuesday 02:30, Friday 04:30.
+# The window is 5 hours: it closes at 05:30, when the fleet shift change starts on this Mac.
+fire=00:30
+window_hours=5
+# refuse = a fire outside the window is logged and skipped (the stricter reading of the brief; see STATUS QUESTIONS).
+late_fire=refuse
+min_free_gib=200
+# run-time cap: the window's length. A capped run wrote whole files only; the next night resumes.
+max_seconds=18000
+card_client_project=WED
+# Ceiling on files per set (default 400,000). Raised for this seat because the Secuura folder holds 587,095 files
+# after the exclusions below, 593,000 of the original total being session evidence that is not regenerable.
+# What it costs, measured on this NAS box 2026-11-27: the share lists about 390 entries a second, so counting a
+# 587,000-file set at the destination takes about 25 minutes of every night's run.
+max_files=700000
+
+# ── sets: <Client folder on the NAS>|<name under current/>|<absolute source> ──────────────────────────────────
+# The seat's own tree.
+set=General|WEDNESDAY|/Volumes/DevMASTER/WEDNESDAY
+# Secuura (this seat's client): the whole client folder, so the coupled Blockchain + Extranet pair travels together.
+set=Secuura|Secuura|/Volumes/DevMASTER/!CODING/Secuura
+# General projects under !CODING. Listed BY NAME so a new folder is never swept in silently (fail closed);
+# the dry run reports any !CODING folder that is not listed here.
+set=General|CODING/Agentic Coding|/Volumes/DevMASTER/!CODING/Agentic Coding
+set=General|CODING/Cardano Best Practice|/Volumes/DevMASTER/!CODING/Cardano Best Practice
+set=General|CODING/Claude to Claude|/Volumes/DevMASTER/!CODING/Claude to Claude
+set=General|CODING/DESIGN_AGENT|/Volumes/DevMASTER/!CODING/DESIGN_AGENT
+set=General|CODING/Docker - Containers|/Volumes/DevMASTER/!CODING/Docker - Containers
+set=General|CODING/MultiAgent Coordination|/Volumes/DevMASTER/!CODING/MultiAgent Coordination
+set=General|CODING/Paperclip|/Volumes/DevMASTER/!CODING/Paperclip
+set=General|CODING/Personal Projects|/Volumes/DevMASTER/!CODING/Personal Projects
+set=General|CODING/Security Testing Agent|/Volumes/DevMASTER/!CODING/Security Testing Agent
+set=General|CODING/Side Projects|/Volumes/DevMASTER/!CODING/Side Projects
+set=General|CODING/Testing Agent MAIN|/Volumes/DevMASTER/!CODING/Testing Agent MAIN
+# Secuura's test material inside that general folder goes under the SECUURA client folder on the NAS, not General
+# (QA finding 3: 166,196 paths). It is its own set, and is excluded from the General set by the exclude_path below.
+set=Secuura|CODING/Testing Agent MAIN/projects/secuura|/Volumes/DevMASTER/!CODING/Testing Agent MAIN/projects/secuura
+set=General|CODING/_New_Project|/Volumes/DevMASTER/!CODING/_New_Project
+
+# ── exclusions added for this seat ────────────────────────────────────────────────────────────────────────────
+# 0_Brain/reference: 279 GB and 5.9 million files by the 2026-11-27 census (section B1). Left OUT until Kam says
+# whether it belongs in a nightly copy (STATUS QUESTIONS).
+exclude_path=WEDNESDAY|0_Brain/reference
+
+# Regenerable bulk inside the seat's own tree. Without these lines the tree is 6,425,033 files and 627 GiB
+# (measured 2026-11-27 12:24 by `nas_backup.sh --scan`), which no nightly job finishes: the armed nas_push leg
+# has been stopped by its 4-hour cap every night since 2026-11-14. Precedent: Kam 2026-09-11 07:23 `narrow-hard`
+# ("Cut node_modules, worktrees and regenerable bulk from the synced set"). Every path below is git-ignored in
+# this repo (git check-ignore, 2026-11-27) and holds caches, model weights or throw-away work clones. Sizes are
+# the in-scope files measured under each path. Listed for Kam in STATUS QUESTIONS: remove a line to bring it back.
+#   237.66 GiB, 3,898,595 files: build/test cache of the local-model box
+exclude_path=WEDNESDAY|2_Project_Files/local-model/spark/cache
+#   141.98 GiB, 2,006,459 files: A/B work clones
+exclude_path=WEDNESDAY|2_Project_Files/local-model/spark-ab/work
+#   198.18 GiB, 237 files: model weights (re-downloadable; PORTABILITY 23)
+exclude_path=WEDNESDAY|2_Project_Files/tools/omlx/models
+#   1.01 GiB, 19,438 files and 225 MiB, 4 files: package caches of the same tool
+exclude_path=WEDNESDAY|2_Project_Files/tools/omlx/uv-cache
+exclude_path=WEDNESDAY|2_Project_Files/tools/omlx/cache
+#   20.18 GiB, 229,507 files: per-run work clones of the night runner
+exclude_path=WEDNESDAY|2_Project_Files/local-model/runs
+#   436 MiB, 5,587 files: work clones
+exclude_path=WEDNESDAY|2_Project_Files/local-model/hosted/work
+#   464 MiB, 13 files: speech-model download (PORTABILITY 11); 654 MiB, 46 files: local-model runtime
+exclude_path=WEDNESDAY|2_Project_Files/tools/media/models
+exclude_path=WEDNESDAY|2_Project_Files/tools/ollama
+# KEPT IN on purpose (not regenerable, or partly tracked): fleet/qa-agent/gatesets (10.56 GiB, 193,238 files;
+# 19,207 of them tracked), fleet/state (3.95 GiB), local-model/omlx/state (2.01 GiB), scheduler/state and logs
+# (1.5 GiB), 5_Project_History (7.5 GiB, one 7.16 GB copy log).
+
+# The Secuura client folder: 2,464,447 files and 93.6 GiB in scope before these lines (measured 2026-11-27 12:54),
+# 2,098,046 of them under Blockchain/5_Project_History (1,045 dated session folders holding work clones).
+# Left out BY NAME, only inside this set: worktrees, quarantine folders (the brief: nothing under a quarantine
+# folder travels), copies of node_modules, clones, compile caches, per-seat temp folders, the session scratchpad.
+exclude_name_in=Secuura|wt
+exclude_name_in=Secuura|wt_*
+exclude_name_in=Secuura|quarantine
+exclude_name_in=Secuura|_quarantine
+exclude_name_in=Secuura|quarantine_*
+exclude_name_in=Secuura|*node_modules*
+exclude_name_in=Secuura|node-compile-cache
+exclude_name_in=Secuura|clone
+exclude_name_in=Secuura|deploy-clones
+exclude_name_in=Secuura|.[a-z][0-9][0-9]t
+exclude_name_in=Secuura|.[a-z][0-9][0-9][0-9]t
+exclude_path=Secuura|Blockchain/scratchpad
+exclude_path=CODING/Testing Agent MAIN|projects/secuura
+
+# Folders under !CODING that no set= line names are reported at every run, never swept in.
+report_unlisted_under=/Volumes/DevMASTER/!CODING
+
+# ── end marker: keep it LAST and keep the count right ──
+END lines=48

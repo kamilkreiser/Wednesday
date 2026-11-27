@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- NIGHTLY COPY-ONLY NAS BACKUP (WED-170; Kam 2026-11-27 12:03). ROUND 2 TEMPLATE.
+     TEMPLATE, NOT INSTALLED: it lives in 2_Project_Files/nas-backup/jobs/ on purpose. scheduler/install_all_jobs.sh installs every
+     template in scheduler/jobs/, so copying this file there is part of arming, and that is Wednesday's on Kam's word.
+     IT USES ONLY THE THREE PLACEHOLDERS THE INSTALLER ALREADY RENDERS (PROJECT_DIR, SEAT, HOME, each between @ signs), so an
+     installer that has not been edited yet still writes a VALID plist (QA finding 11: round 1's template had eight placeholders the
+     unedited installer left in, and it would have loaded past the hold).
+     THE SCHEDULE IS NOT IN THIS FILE. It fires at minute 30 of every hour; nas_backup_nightly.sh reads the seat's window from
+     seats/<seat>.conf (Wednesday 00:30 for 5 hours, Tuesday 02:30, Friday 04:30) and does nothing outside it but log one line. Inside
+     the window it runs at most ONE backup, so the later fires only matter when the first could not run (Mac asleep, NAS away).
+     THE HOLD IS NOT IN THE INSTALLER EITHER: the script launchd calls refuses while nas-backup/HOLD_<seat> exists (exit 3, one
+     line in logs/<seat>/nightly.log), whatever order anything was installed in.
+     Logs in ~/Library/Logs (PORTABILITY 22: launchd cannot open paths on the drive). -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.@SEAT@.nasbackup</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>@PROJECT_DIR@/2_Project_Files/nas-backup/nas_backup_nightly.sh</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Hour</key><integer>0</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>1</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>2</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>3</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>4</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>5</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>6</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>7</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>8</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>9</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>10</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>11</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>12</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>13</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>14</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>15</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>16</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>17</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>18</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>19</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>20</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>21</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>22</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Hour</key><integer>23</integer><key>Minute</key><integer>30</integer></dict>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>WED_AGENT</key><string>@SEAT@</string>
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+  <key>RunAtLoad</key><false/>
+  <key>StandardOutPath</key><string>@HOME@/Library/Logs/@SEAT@_nasbackup.out</string>
+  <key>StandardErrorPath</key><string>@HOME@/Library/Logs/@SEAT@_nasbackup.err</string>
+</dict>
+</plist>

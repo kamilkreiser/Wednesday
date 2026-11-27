@@ -1,0 +1,93 @@
+### N6a CONTROL: last good day 0; the NAS away on nights 1, 2, 3. What a seat's boot (doctor) sees on day 3 at 08:00.
+doctor day 3 08:00 ->   ✗ NO GOOD NAS BACKUP FOR 3 DAYS          RUN: bash 2_Project_Files/nas-backup/nas_backup_watch.sh --card   then add the ONE card it prints for Kam and run --mark-raised <its id>. Do NOT run a backup outside the window without his ruling. [nas-backup watch[wednesday]: OVERDUE; 79.5 h since the last good backup (2026-12-01 00:31
+   as the launcher cuts it for a rotation prompt: [  ✗ NO GOOD NAS BACKUP FOR 3 DAYS          RUN: bash 2_Project_Files/nas-backup/nas_backup_watch.sh --card   then add the ONE card it prints for Kam and run --mark-raised <its id>. Do NOT run a backup outside the window without his ruling. [nas-backup watch[wednesday]: OVERDUE; 79.5 h since the last good backup (2026-12-01 00:31:00 AEDT); last attempt 2026-12-04 00:31 refused]]
+   card commands printed by the three nightly fires (a launchd log): 0
+
+### N6b the SAME, but the state file is damaged on day 2 at noon and the next reader is the NIGHTLY job (launchd, a log no seat reads).
+nightly day 3 00:31: rc=2 ; DAMAGED lines in ITS output: 3
+doctor day 3 08:00 ->   ✗ NAS BACKUP STATE WAS FOUND DAMAGED     RUN: bash 2_Project_Files/nas-backup/nas_backup_watch.sh --check   It says what was damaged, who found it and where it was moved (nothing deleted); the record of the last good backup may be gone and the three-day clock restarted then. Once read: nas_backup_watch.sh --ack-damage~  [block
+doctor day 5 08:00 (5 days without a backup) ->   ✗ NAS BACKUP STATE WAS FOUND DAMAGED     RUN: bash 2_Project_Files/nas-backup/nas_backup_watch.sh --check   It says what was damaged, who found it and where it was moved (nothing deleted); the record of the last good backup may be gone and the three-day cloc
+doctor day 6 08:00 ->   ✗ NO GOOD NAS BACKUP FOR 3 DAYS          RUN: bash 2_Project_Files/nas-backup/nas_backup_watch.sh --card   then add the ONE card it prints for Kam and run --mark-raised <its id>. Do NOT run a backup outside the window without his ruling. [nas-backup watch[we
+   quarantined state files: 1
+
+### N6c the state file damaged, and the FIRST reader is doctor (a seat's boot).
+doctor ->   ✗ NAS BACKUP STATE WAS FOUND DAMAGED     RUN: bash 2_Project_Files/nas-backup/nas_backup_watch.sh --check   It says what was damaged, who found it and where it was moved (nothing deleted); the record of the last good backup may be gone and the three-day clock restarted then. Once read: nas_backup_watch.sh --ack-damage~  [block done: HARD_FAIL=1 WARNS=0]~
+then the command it names -> rc=5 nas-backup watch[wednesday]: DAMAGE NOTICE, not yet acknowledged by a seat: the state file was found damaged at 2026-12-02 08:00:00 by the watch (doctor at a seat's boot, or a hand run) and moved to /private/tmp/claude-501/-Volume
+doctor at the next boot ->   ✗ NAS BACKUP STATE WAS FOUND DAMAGED     RUN: bash 2_Project_Files/nas-backup/nas_backup_watch.sh --check   It says what was damaged, who found it and where it was moved (nothing deleted); the recor
+
+### N6d the REAL lane's state as it is today (one refused attempt, first_attempt_at 2026-11-27 14:46, no good backup), hold lifted on 2026-12-01 09:00 for the first full copy.
+held:   rc=0 nas-backup watch[wednesday]: HELD: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f14e52ac-5be2-4a26-ad53-8a7559071523/scratchpad/qa2/r1/fx/N6d_98056/lane/HOLD_wednesday exists, so real runs are refused by design and the thr
+lifted: rc=0 nas-backup watch[wednesday]: the hold is no longer in place and nothing but the hold is on record since: the three-day clock starts now, 2026-12-01 09:00:00 AEDT
+doctor at a boot that morning ->   [block done: HARD_FAIL=0 WARNS=0]~
+with a first copy RUNNING (live lock): rc=0 nas-backup watch[wednesday]: ok; 3.0 h since the hold was lifted (the clock does not run while real runs are held) (2026-12-01 09:00:00 AEDT); last attempt 2026-11-27 14:46 refused | lock: pid 2238 RUNNING since 2026-12-01 09:10:0
+doctor during that run ->   [block done: HARD_FAIL=0 WARNS=0]~
+/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f14e52ac-5be2-4a26-ad53-8a7559071523/scratchpad/qa2/scripts/N6_flag_lock_seats.sh: line 52:  2238 Terminated: 15          bash -c 'exec -a nas_backup_fakeholder sleep 60'
+
+### N6e --mark-raised: can a caller mark a card raised when nothing is overdue, or pre-mark a future gap?
+not overdue: rc=2 nas-backup watch[wednesday]: ok; 32.5 h since the last good backup (2026-12-01 00:31:00 AEDT); last attempt 2026-12-01 00:31 good
+
+### N7a SIGKILL of the tool while its engine is copying (stub engine: sleeps 12 s, then the real copy).
+tool python pid: 3829 ; engine group recorded in the lock: 4128
+clear-stale-lock beside the orphan engine: rc=6 (nas-backup: REFUSED — the holder (pid 3829) is gone but 2 copy-engine process(es) of this seat are STILL RUNNING (4128 /)
+a second run beside it: rc=6 (REFUSED — the run that held the lock /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f14e52ac-5be2-4a26-ad53-8a7559)
+a nightly fire beside it: nightly[wednesday]: SKIP: a run is in progress (pid 3829, started 2026-11-27 17:27:27 AEDT; its copy engine is still running)
+state while the orphan runs: last_attempt=refused last_good=None
+after the orphan engine ended: files it delivered unrecorded: 2 ; COMPLETE markers: 0
+clear-stale-lock now: rc=0
+rerun: rc=0 GOOD=1 | compared by sha256 (same size, source changed or not yet proven): 2 files, 2 identical
+
+### N7b SIGHUP (the terminal that started a hand-run first copy is closed) versus SIGTERM, mid-engine.
+SIGTERM: tool alive=no | engine processes still alive=0 | lock left=no | state last_attempt=failed | last output line: log: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f14e52ac-5be2-4a26-ad53-8a755907
+SIGHUP: tool alive=no | engine processes still alive=0 | lock left=no | state last_attempt=failed | last output line: log: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f14e52ac-5be2-4a26-ad53-8a755907
+
+### N7c lock shapes: an owner-less lock (old and fresh), a reused pid, a reused ENGINE GROUP id.
+owner-less lock, seconds old: rc=6 (REFUSED — another run holds the lock /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/)
+owner-less lock, old: rc=6 (REFUSED — STALE lock at /private/tmp/claude-501/-Volumes-Dev)
+   clear: rc=0
+live pid, different start time (pid reuse): rc=6 (REFUSED — STALE lock at /private/tmp/claude-501/-Volumes-Dev)
+   clear: rc=0
+dead holder, engine_pgid = the group of an UNRELATED live process (a reused group id, e.g. after a reboot): clear rc=6 (nas-backup: REFUSED — the holder (pid 999999) is gone but 4 copy-engine process(es) of this seat are STILL RUNNING (25065 sleep 30; 25649 /bin/ps -axo)
+/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f14e52ac-5be2-4a26-ad53-8a7559071523/scratchpad/qa2/scripts/N6_flag_lock_seats.sh: line 81: 25065 Terminated: 15          sleep 30
+   after that process ended: clear rc=6
+
+### N9a only Wednesday can run: every command from a TUESDAY and a FRIDAY tree
+     2    friday   nas_backup_nightly.sh                  rc=2
+     2    friday   nas_backup_nightly.sh --decide-only    rc=2
+     2    friday   nas_backup_watch.sh --card             rc=2
+     2    friday   nas_backup_watch.sh --check            rc=2
+     2    friday   nas_backup_watch.sh --mark-armed       rc=2
+     2    friday   nas_backup.sh --clear-stale-lock       rc=2
+     2    friday   nas_backup.sh --dry                    rc=2
+     2    friday   nas_backup.sh --run                    rc=2
+     2    friday   nas_backup.sh --scan                   rc=2
+     2    Tuesday  nas_backup_nightly.sh                  rc=2
+     2    Tuesday  nas_backup_nightly.sh --decide-only    rc=2
+     2    Tuesday  nas_backup_watch.sh --card             rc=2
+     2    Tuesday  nas_backup_watch.sh --check            rc=2
+     2    Tuesday  nas_backup_watch.sh --mark-armed       rc=2
+     2    Tuesday  nas_backup.sh --clear-stale-lock       rc=2
+     2    Tuesday  nas_backup.sh --dry                    rc=2
+     2    Tuesday  nas_backup.sh --run                    rc=2
+     2    Tuesday  nas_backup.sh --scan                   rc=2
+   files written under the fake NAS by all of that: 0 ; state files created: 0
+### N9b other routes to run as another seat or from a wrongly named tree
+   rc=2  WED_AGENT=wednesday on a TUESDAY tree                                                        | nas-backup: REFUSED — the tree says 'tuesday' and WED_AGENT says 'wednesday'. Two independent sources disagree
+   rc=2  WED_AGENT=tuesday on the WEDNESDAY tree                                                      | nas-backup: REFUSED — the tree says 'wednesday' and WED_AGENT says 'tuesday'. Two independent sources disagree
+   rc=2  a symlink NAMED WEDNESDAY that points at the TUESDAY tree                                    | nas-backup: the tree /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f14e52ac-5be2-4a26-ad53-8a7559071523
+   rc=2  engine called directly: --seat wednesday --tree <TUESDAY tree>                               | nas-backup: the tree /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f14e52ac-5be2-4a26-ad53-8a7559071523
+   rc=2  engine called directly: --seat tuesday --tree <TUESDAY tree>                                 | nas-backup: REFUSED — seat 'tuesday' has no confirmed scope in this lane: only wednesday can run. Tuesday and 
+   rc=2  engine called directly: --seat tuesday --tree <WEDNESDAY tree>                               | nas-backup: REFUSED — seat 'tuesday' has no confirmed scope in this lane: only wednesday can run. Tuesday and 
+   rc=2  engine called directly: --seat WEDNESDAY (upper case)                                        | nas-backup: REFUSED — seat 'WEDNESDAY' has no confirmed scope in this lane: only wednesday can run. Tuesday an
+   rc=2  a tree named WeDnEsDaY                                                                       | nas-backup: REFUSED — cannot tell which seat this tree is: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDA
+   rc=2  engine called directly, no test mode, --tree = the scratch copy's own tree (not the real lane) | nas-backup: REFUSED — seat 'tuesday' has no confirmed scope in this lane: only wednesday can run. Tuesday and 
+   rc=2  a set= naming a folder called WEDNESDAY inside the TUESDAY tree                              | === nas-backup seat=wednesday mode=RUN 2026-11-27 17:28:44 AEDT ===
+
+### N9c ROOT ISOLATION by an ANCESTOR: a set= whose source is a PARENT of the other seats' trees and of the Datasec folder (the drive root; the folder that holds the seat trees).
+set=General|DRIVE|<drive root>: rc=2 GOOD=0
+   TUE-SEAT-MARK      copies on the fake NAS: 0 
+   TUE-SEAT-MARK-2    copies on the fake NAS: 0 
+   FRI-SEAT-MARK      copies on the fake NAS: 0 
+   DATASEC-MARK       copies on the fake NAS: 0 
+   VAULT-MARK         copies on the fake NAS: 0 
+   (VAULT-MARK is the positive control: an ordinary folder under the same root must arrive)
+set=General|CODINGALL|<the folder that holds the client folders>: rc=2 | DATASEC-MARK on NAS: 0 | a 'tuesday-handover' folder beside the clients on NAS: 0

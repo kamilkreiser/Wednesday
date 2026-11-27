@@ -1,6 +1,6 @@
 #!/bin/bash
 # nas_backup_watch.sh — the THREE-DAY check (Kam 2026-11-27: "Flag it with me if backup not done for 3 days so I
-# can approve an out of sequence backup"). ROUND 2.
+# can approve an out of sequence backup"). ROUND 3.
 #
 # WHY IT IS ITS OWN SCRIPT (2026-09-20_a-guard-inside-the-thing-it-guards): a backup job that never fires cannot
 # report that it never fired. This reads only state/<seat>.json on the drive and the clock; it needs neither the
@@ -17,11 +17,15 @@
 #                                  THIS TOOL PRINTS THE COMMAND AND NEVER RUNS IT.
 #   nas_backup_watch.sh --mark-raised <card id>   record that the card is on Kam's board (the seat that added it)
 #   nas_backup_watch.sh --mark-armed              optional: start the clock explicitly
+#   nas_backup_watch.sh --ack-damage              a SEAT has read the damage notice (a state file or index was found
+#                                  damaged and moved aside): move the notice aside too. Until then every call of
+#                                  this script by anyone says so and exits 5, and doctor's block fails hard.
 # THE CHANNEL TO A SEAT: doctor.sh (proposed/doctor_nasbackup_block.sh) prints a hard-failure line naming
 # `nas_backup_watch.sh --card` while a card is due and not raised; the launcher carries doctor's hard-failure
 # lines into the boot prompt.
-# Exit: 0 ok, held, or nothing on record · 3 OVERDUE and no card recorded as raised, or the state file was found
-#       damaged (it is moved aside, never deleted) · 4 overdue, card recorded as raised · 2 refused.
+# Exit: 0 ok, held, or nothing on record · 3 OVERDUE and no card recorded as raised · 4 overdue, card recorded as
+#       raised · 5 a state file or index was found damaged (moved aside, never deleted) and no seat has acknowledged
+#       it yet · 2 refused.
 # NEVER add >/dev/null here.
 set -u
 . "$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)/nb_common.sh"
@@ -30,7 +34,7 @@ nb_find_python || exit $?
 EXTRA=()
 while [ $# -gt 0 ]; do
   case "$1" in
-    --check|--card|--mark-armed) EXTRA+=( "$1" ); shift ;;
+    --check|--card|--mark-armed|--ack-damage) EXTRA+=( "$1" ); shift ;;
     --mark-raised|--now) [ $# -ge 2 ] || { echo "nas_backup_watch: $1 needs a value" >&2; exit 2; }; EXTRA+=( "$1" "$2" ); shift 2 ;;
     *) echo "nas_backup_watch: REFUSED — unknown argument '$1'; nothing done" >&2; exit 2 ;;
   esac

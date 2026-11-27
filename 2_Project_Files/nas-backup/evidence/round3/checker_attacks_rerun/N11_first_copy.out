@@ -1,0 +1,74 @@
+### N11a a first copy INTERRUPTED (SIGTERM) in the middle of pass 1. 1,500 files; the engine is throttled.
+after SIGTERM: delivered to the destination: 359 of 1500 | index rows: 200 | state last_attempt=failed last_good=None | lock left: no | COMPLETE markers: 0
+   its last lines: manifest: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f14e52ac-5be2-4a26-ad53-8a7559071523/scratchpad/qa2/r1/fx/N11a_36139/lane/manifests/wednesday/2026-12-01_140000_46709_run_manifest.json~F
+the resume: rc=0 GOOD=1 | to copy: 1142 files, 1.49 MiB (1142 new, 0 cha | compared by sha256 (same size, source changed or not yet proven): 160 files, 160 identical | index rows now: 1503
+
+### N11b the same copy stopped by the CAP (--max-seconds 8).
+rc=4 | delivered: 373 of 1500 | index rows: 200 | state last_attempt=killed-cap last_good=None | NOT DELIVERED count in state: 1302
+second capped run: rc=4 | delivered: 747 | index rows: 574 | to copy: 1128 files, 1.47 MiB (1128 new, 0 cha
+finishing run: rc=0 GOOD=1 | to copy: 754 files, 1008.03 KiB (754 new, 0 ch
+
+### N11c the WATCHDOG fires while the proof loop is still reading files back (INSTRUMENT: a patched COPY of the engine — the 900 s margin made 2 s and each sha256 slowed by 20 ms — so the case fits in seconds; the real margin is 900 s after the cap).
+Traceback (most recent call last):
+  File "<stdin>", line 4, in <module>
+AssertionError
+rc=4 | delivered: 370 of 1500 | index rows: 200 | WATCHDOG lines: 0 | state last_attempt=killed-cap
+the next capped run (must first re-read everything delivered, at plan time): rc=4 | delivered: 744 | index rows: 571 | WATCHDOG lines: 0 | engine passes started: 2
+and the next: rc=4 | delivered: 1118 | index rows: 945 | WATCHDOG lines: 0 | engine passes started: 2
+
+### N3e ONE destination file altered behind the tool's back in a 12-file set (hash_sample=10): once the sample has CAUGHT it, is it repaired, and what do the following nights say?
+   night 1: rc=0 GOOD=1 | destination f3 = [filler 00003] | to copy: 0 files,  | 
+   night 2: rc=0 GOOD=1 | destination f3 = [filler 00003] | to copy: 0 files,  | 
+   night 3: rc=0 GOOD=1 | destination f3 = [filler 00003] | to copy: 0 files,  | 
+   night 4: rc=0 GOOD=1 | destination f3 = [filler 00003] | to copy: 0 files,  | 
+   night 5: rc=0 GOOD=1 | destination f3 = [filler 00003] | to copy: 0 files,  | 
+   night 6: rc=0 GOOD=1 | destination f3 = [filler 00003] | to copy: 0 files,  | 
+   night 7: rc=0 GOOD=1 | destination f3 = [filler 00003] | to copy: 0 files,  | 
+   night 8: rc=0 GOOD=1 | destination f3 = [filler 00003] | to copy: 0 files,  | 
+
+### N2e (redo; my first try used a tool this Mac lacks) a 2.2 GiB sparse file: copy and proof above 2^31 bytes.
+rc=0 GOOD=1 in 24 s | destination size 2306867200 vs source 2306867200
+
+### N12 CONVENTIONAL credential names: does each travel? (marker = arrived on the fake NAS)
+run rc=0 GOOD=1
+   kept out   .netrc                                   c01
+   kept out   .pgpass                                  c02
+   kept out   credentials.json                         c03
+   kept out   service-account.json                     c04
+   kept out   service-account-prod-1234.json           c05
+   kept out   .aws/credentials                         c06
+   kept out   .kube/config                             c07
+   kept out   release.keystore                         c08
+   kept out   upload.jks                               c09
+   kept out   .htpasswd                                c10
+   kept out   secrets.yml                              c11
+   kept out   .npmrc                                   c12
+   kept out   terraform.tfvars                         c13
+   kept out   prod.auto.tfvars                         c14
+   kept out   .docker/config.json                      c15
+   kept out   api/local.settings.json                  c16
+   kept out   playwright/.auth/token.json              c17
+   kept out   application_default_credentials.json     c18
+   kept out   serviceAccountKey.json                   c19
+   kept out   .git-credentials                         c20
+   kept out   id_ed25519                               c21
+   kept out   payment.skey                             c22
+   kept out   mnemonic.txt                             c23
+   kept out   wallet/seed-phrase.txt                   c24
+   kept out   .vault-token                             c25
+   kept out   kubeconfig                               c26
+   kept out   auth.json                                c27
+   kept out   secrets.toml                             c28
+   kept out   AuthKey_ABC123.p8                        c29
+   kept out   private_key.txt                          c30
+   kept out   .dockercfg                               c31
+   kept out   .boto                                    c32
+   kept out   credentials                              c33
+   kept out   htpasswd                                 c34
+   kept out   key.der                                  c35
+   kept out   backup.kdbx                              c36
+   kept out   terraform.tfstate                        c37
+   kept out   .env.production                          c38
+   kept out   client_secret_123.json                   c39
+   kept out   .pypirc                                  c40
+   TRAVELS    ordinary-neighbour.md                    x01

@@ -1,4 +1,4 @@
-# doctor_nasbackup_block.sh — the nightly NAS backup's block for doctor.sh (WED-170, round 2). SOURCED by doctor.sh:
+# doctor_nasbackup_block.sh — the nightly NAS backup's block for doctor.sh (WED-170, round 3). SOURCED by doctor.sh:
 #     . "$PROJECT_DIR/2_Project_Files/nas-backup/proposed/doctor_nasbackup_block.sh"
 # It needs doctor's own ok / warn / fail helpers and PROJECT_DIR, nothing else. It is a FILE, not pasted lines,
 # so tests/run.sh exercises exactly what doctor will run (T8, T16, T24).
@@ -8,6 +8,11 @@
 # The launcher carries doctor's hard-failure lines into the boot prompt on a rotation and stops a human launch
 # to show them; it cuts each line at 400 characters, so the line is kept short and the command comes first.
 # Once a seat has added the card and run --mark-raised it drops to a warning.
+#
+# A DAMAGED STATE FILE OR INDEX (round 3, second check findings 6 and 15): whoever finds one, the nightly job
+# included, leaves state/DAMAGE_NOTICE_<seat>.jsonl. While that file exists this block prints its OWN hard-failure
+# line, held or not, at every boot, until a seat runs nas_backup_watch.sh --ack-damage. It no longer borrows the
+# "no backup for 3 days" text.
 #
 # THE SEAT comes from the TREE (tools/seat_note.sh), never from a default (QA minor: doctor's own default made a
 # TUESDAY tree look at HOLD_wednesday). HELD is reported at most ONCE A DAY per seat.
@@ -36,8 +41,12 @@ else
   _nb_line="$(printf '%s\n' "$_nb_out" | head -1 | cut -c1-200)"
   case "$_nb_rc" in
     0) ok "nightly NAS backup: $_nb_line" ;;
+    5) : ;;   # a damage notice is waiting: reported by the line below, which is printed held or not
     3) fail "NO GOOD NAS BACKUP FOR 3 DAYS" "RUN: bash 2_Project_Files/nas-backup/nas_backup_watch.sh --card   then add the ONE card it prints for Kam and run --mark-raised <its id>. Do NOT run a backup outside the window without his ruling. [$_nb_line]" ;;
     4) warn "no good NAS backup for 3 days" "the card for Kam is recorded as raised; nothing more until he rules or a backup completes. [$_nb_line]" ;;
     *) warn "nas_backup_watch.sh exited $_nb_rc" "$_nb_line" ;;
   esac
+fi
+if [ -n "$_nb_seat" ] && [ -e "$_nb_lane/state/DAMAGE_NOTICE_$_nb_seat.jsonl" ]; then
+  fail "NAS BACKUP STATE WAS FOUND DAMAGED" "RUN: bash 2_Project_Files/nas-backup/nas_backup_watch.sh --check   It says what was damaged, who found it and where it was moved (nothing deleted); the record of the last good backup may be gone and the three-day clock restarted then. Once read: nas_backup_watch.sh --ack-damage"
 fi

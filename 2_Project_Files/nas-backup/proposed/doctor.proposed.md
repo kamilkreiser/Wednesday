@@ -1,4 +1,4 @@
-# PROPOSED line for `2_Project_Files/doctor.sh` (round 2). Nothing here is applied.
+# PROPOSED line for `2_Project_Files/doctor.sh` (round 3; the line itself is unchanged since round 2). Nothing here is applied.
 
 ## The change: one sourced file
 After the "NAS replica staleness" block (ends near line 548):
@@ -18,7 +18,7 @@ Rollback: remove the line.
 | Held (`HOLD_<seat>` exists) | a warning, **once a day at most**; `ok` on later boots that day | QA minor: round 1 warned at every boot on every held seat |
 | 72 hours without a good backup, card **not** recorded as raised | **a hard failure (`fail`, the `✗` line)** whose text starts with the command to run: `bash 2_Project_Files/nas-backup/nas_backup_watch.sh --card` | This is the channel (QA finding 6) |
 | Same, card recorded as raised | a warning | Nothing more for a seat to do |
-| State file damaged | the same hard failure; the watch has already moved the file aside | QA finding 9: round 1 showed a Python traceback here |
+| A state file or the index was found damaged, by anyone, and no seat has acknowledged it | **its own hard failure: `NAS BACKUP STATE WAS FOUND DAMAGED`**, naming `nas_backup_watch.sh --check` and then `--ack-damage`. Printed at every boot, held or not, until a seat acknowledges | Second check, findings 6 and 15: the notice was spent on the nightly job's log, and doctor borrowed the "3 DAYS" text for it |
 | Seat of the tree unknown | a warning; the check is not run | |
 
 ## Why a hard failure, and why that is the channel
@@ -34,3 +34,9 @@ The block calls `tools/seat_note.sh` (`seat_note_dir "$PROJECT_DIR"`), never doc
 ## Tested, and not
 - Tested in `tests/run.sh` with doctor's own three helpers copied from doctor.sh lines 16 to 18: T8 (three failed nights end with the `✗` line; cut at 400 characters it still names the command; running the command prints the card; once raised, no `✗`), T9 (held: warned once, not twice the same day), T16 (an empty state file gives the `✗` line, not a traceback).
 - **NOT tested:** the block inside the real `doctor.sh` (doctor was not edited or run with it), and the launcher carrying the line into a real boot prompt. That path was read, not exercised.
+
+## Round 3: what changed in the block
+- **The damage notice.** Whoever finds a damaged state file or index (the nightly job included) leaves `state/DAMAGE_NOTICE_<seat>.jsonl`. The block checks for that file itself, after the watch call and also when the seat is held, and prints one hard-failure line in its own words. The watch exits 5 while the notice exists; the block maps 5 to nothing more than that line. A seat clears it with `nas_backup_watch.sh --ack-damage` (the notice is moved into the lane's quarantine).
+- **The hold no longer starts the three-day clock.** With the real lane's state of 2026-11-27 (one refusal under the hold), lifting the hold starts the clock then; the block does not fail hard during a first copy that starts on the day the hold is lifted.
+- Tested in `tests/run.sh`: T25 (the nightly job finds the damage on night 3, doctor fails hard at the next boot and the one after, also while held, until `--ack-damage`), T16 (an empty state file gives the damage line, not a traceback), T27 (the hold lifted: no `✗` that morning).
+- **Still NOT tested:** the block inside the real `doctor.sh`, and the launcher carrying the line into a real boot prompt.

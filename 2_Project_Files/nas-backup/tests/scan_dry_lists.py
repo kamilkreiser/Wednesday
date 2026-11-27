@@ -3,6 +3,7 @@
 # the exact NUL-separated paths the engine would be handed). Names only; no file on the drive is opened.
 # It does NOT call nb_core.secret_shape: the patterns below are written separately (after the QA checker's
 # B2_scan_real_dry_lists.py), so a hole in the tool's own rule is not hidden by asking the tool.
+# ROUND 3: the SECRET list below also carries the conventional names of ANSWER-4 item 7.
 # ANSWER-2 ruling 2: "the real DRY list must show 0 secret-shaped names by a scan with a positive control".
 #   scan_dry_lists.py <logs dir> <stamp>
 import glob, os, re, sys
@@ -15,6 +16,16 @@ SECRET = [
  ("deploy keys and credential files (github_deploy*, *deploy_key*, .git-credentials, .netrc, .npmrc, .pypirc, .pgpass, client_secret*, credentials.json, secrets.json)", re.compile(r"(?i)(^|/)(github_deploy[^/]*|[^/]*deploy[_-]key[^/]*|\.git-credentials|\.netrc|\.npmrc|\.pypirc|\.pgpass|client_secret[^/]*|credentials\.json|secrets\.json)(/|$)")),
  ("credential stores as a component (.ssh .aws .azure .gh-config .gnupg .kube), any case", re.compile(r"(?i)(^|/)\.(ssh|aws|azure|gh-config|gnupg|kube)(/|$)")),
  ("terraform state", re.compile(r"(?i)\.tfstate")),
+ # ── ROUND 3 (ANSWER-4 item 7): the conventional credential names the second checker tried, and the two real files it
+ # found in the travel list, BY THEIR PATTERNS. Written here by hand, apart from nb_core.secret_shape. ──
+ ("the two real files of the second check: local.settings.json, and anything under a .auth folder", re.compile(r"(?i)(^|/)(local\.settings\.json|\.auth)(/|$)")),
+ ("service account keys (service-account*.json, serviceAccount*.json, *-sa.json)", re.compile(r"(?i)(^|/)(service[-_ ]?account[^/]*\.json|[^/]*-sa\.json)(/|$)")),
+ ("htpasswd, tfvars, docker auth, vault token, kubeconfig, boto, s3cfg", re.compile(r"(?i)(^|/)(\.?htpasswd[^/]*|[^/]*\.tfvars(\.json)?|\.docker|\.dockercfg|\.vault-token|([^/]*\.)?kubeconfig[^/]*|\.boto|\.s3cfg)(/|$)")),
+ ("token and credential stores by exact name (auth.json token.json tokens.json accessTokens.json azureProfile.json application_default_credentials.json, a bare credentials)", re.compile(r"(?i)(^|/)(auth\.json|tokens?\.json|accessTokens\.json|azureProfile\.json|application_default_credentials\.json|credentials)(/|$)")),
+ ("secrets.<ext> other than the three listed above (secrets.toml, secrets.ts ...), .secret, .secrets", re.compile(r"(?i)(^|/)(secrets?\.[a-z0-9]+|\.secrets?)(/|$)")),
+ ("more key and certificate containers by extension (.p8 .der .pkcs12 .ovpn .mobileprovision .kdb .agekey .gpg .asc .cer .crt .vkey .addr)", re.compile(r"(?i)\.(p8|der|pkcs12|ovpn|mobileprovision|kdb|agekey|gpg|asc|cer|crt|vkey|addr)(/|$)")),
+ ("private-key, signing-key, mnemonic and seed-phrase names", re.compile(r"(?i)(^|/)[^/]*(priv(ate)?[-_. ]?key|signing[-_.]?key|mnemonic|seed[-_ ]?phrase|recovery[-_ ]?phrase)[^/]*(/|$)")),
+ ("names containing 'credential' with a data extension (json yaml yml csv ini xml)", re.compile(r"(?i)(^|/)[^/]*credentials?[^/]*\.(json|ya?ml|csv|ini|xml)(/|$)")),
 ]
 OTHER = [
  ("a component containing datasec (any case)", re.compile(r"(?i)datasec")),

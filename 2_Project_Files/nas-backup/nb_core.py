@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
-# nb_core.py — the engine behind nas_backup.sh / nas_backup_nightly.sh / nas_backup_watch.sh.  ROUND 2 (2026-11-27).
+# nb_core.py — the engine behind nas_backup.sh / nas_backup_nightly.sh / nas_backup_watch.sh.  ROUND 3 (2026-11-27).
+#
+# THE ONE RULE (Kam, card wed-nas-backup-second-nogo-round3-1127, 2026-11-27 16:40: "unproven means failed").
+# A night is GOOD only if every file in the plan made when its set starts is PROVEN at the destination with the
+# source's content. Anything else fails the night and is named. There is no special case that counts toward GOOD:
+#   - a planned file that cannot be read at proof time, for ANY reason, is NOT DELIVERED. The one exception is a
+#     file DELETED from the source: its parent folder must be listable and the name absent from that listing, twice;
+#     such files are counted and named, and above a small stated limit the night fails (deleted_allowed below);
+#   - a set whose plan holds zero files fails the night, on a first run too;
+#   - a destination copy the nightly sample finds wrong loses its index row at once and is re-sent in the same run;
+#     if the repair is not proven the night fails, and it keeps failing until the file is proven;
+#   - proof is saved as it goes (the engine works in chunks; each chunk is proven and indexed before the next).
+# Round 2's file is kept at round2/nb_core.py.round2, round 1's at round1/nb_core.py.round1.
 #
 # WED-170, Kam 2026-11-27 12:03: a NIGHTLY, STAGGERED, COPY-ONLY backup of one coordinator seat's folder and its
 # working projects to the DEV-Working NAS, with next-night catch-up and a three-day flag.
@@ -37,18 +49,23 @@ import re
 import shlex
 import signal
 import sqlite3
+import stat
 import subprocess
 import sys
 import time
 import unicodedata
 
-SCHEMA = 2
+SCHEMA = 3
 LANE = os.path.dirname(os.path.realpath(__file__))
 REAL_NAS_ROOT = "/Volumes/DEV-Working"
 BACKUP_FOLDER = "nightly-backup"
 FLAG_AFTER_HOURS = 72
-MAX_PASSES = 3            # engine passes per set: one copy, then up to two re-sends of files that changed meanwhile
+MAX_PASSES = 3            # engine passes per chunk: one copy, then up to two re-sends of files that changed meanwhile
 RECENT_ATTEMPTS = 40      # ten nights of four fires
+PROOF_BATCH = 200         # proven files are committed to the index at least every this many (finding 8, round 2 check)
+CHUNK_BYTES = 2 << 30     # an engine chunk ends at chunk_files files (conf) or this many bytes, whichever comes first
+WATCHDOG_MARGIN = 900     # seconds after the cap at which the whole run is stopped (a blocked read on the share)
+FUTURE_SLACK = 300        # a recorded time more than this far ahead of the clock makes the state file DAMAGED
 
 # ── THE ALLOW-LIST. Only seats listed here can run at all. Tuesday and Friday are NOT listed: each gets an entry
 # only when her own coordinator has confirmed her scope (proposed/INSTRUCTIONS-for-other-seats.md, step 1).
@@ -69,10 +86,22 @@ SEATS = {
 
 # ── SECRETS, BY SHAPE (finding 2). Every test is on the lower-cased name of ONE path component. ────────────────
 KEY_EXTENSIONS = (".pem", ".key", ".p12", ".pfx", ".ppk", ".jks", ".keystore", ".kdbx", ".skey")
-SECRET_STORE_NAMES = (".ssh", ".aws", ".azure", ".gh-config", ".gnupg", ".kube")
+# ROUND 3 (second check, finding 2): more key and certificate containers, matched at the END of the name only.
+KEY_EXTENSIONS_END = (".p8", ".der", ".pkcs12", ".ovpn", ".mobileprovision", ".kdb", ".agekey", ".gpg", ".asc", ".cer",
+                      ".crt", ".vkey", ".addr", ".wallet", ".priv")
+SECRET_STORE_NAMES = (".ssh", ".aws", ".azure", ".gh-config", ".gnupg", ".kube",
+                      ".docker", ".auth", "gcloud", ".secret", ".secrets")
 SECRET_FILE_NAMES = (".netrc", ".npmrc", ".pypirc", ".pgpass", ".git-credentials", "credentials.json",
-                     "secrets.json", "secrets.yaml", "secrets.yml", "service_principal_entries.json")
+                     "secrets.json", "secrets.yaml", "secrets.yml", "service_principal_entries.json",
+                     # round 3: the conventional names that still travelled, and the two real files by their names
+                     "local.settings.json", "application_default_credentials.json", ".dockercfg", ".vault-token",
+                     ".boto", ".s3cfg", ".terraformrc", ".yarnrc.yml", "credentials", "auth.json", "token.json",
+                     "tokens.json", "accesstokens.json", "azureprofile.json", "wallet.dat", "env.backup", "env.bak")
 SSH_KEY_PREFIXES = ("id_rsa", "id_ed25519", "id_ecdsa", "id_dsa")
+CREDENTIAL_DATA_EXT = (".json", ".yaml", ".yml", ".csv", ".ini", ".xml", ".txt", ".toml", ".db")
+_RX_SERVICE_ACCOUNT = re.compile(r"^service[-_ ]?account.*\.json$|-sa\.json$|sa[-_]key.*\.json$")
+_RX_PRIVATE_KEY = re.compile(r"priv(ate)?[-_. ]?key|signing[-_.]?key|seed[-_ ]?phrase|recovery[-_ ]?phrase|mnemonic")
+_RX_SECRET_DOT = re.compile(r"^secrets?\.[a-z0-9]+$")
 
 
 def secret_shape(name):
@@ -97,6 +126,17 @@ def secret_shape(name):
             or n.startswith("github_deploy") or "deploy_key" in n or "deploy-key" in n
             or n.endswith("_deploy_rw") or n.endswith("_deploy_ro")):
         return "credential-file"
+    # ── ROUND 3: conventional credential names (BEST-EFFORT by ruling: a name rule cannot be complete) ──
+    if n.endswith(KEY_EXTENSIONS_END) or n.startswith("keystore") or n.startswith("utc--"):
+        return "key-or-certificate"
+    if ".tfvars" in n:
+        return "terraform-variables"
+    if _RX_PRIVATE_KEY.search(n):
+        return "private-key-or-wallet-name"
+    if (n.startswith("htpasswd") or n.startswith(".htpasswd") or n.startswith("kubeconfig") or ".kubeconfig" in n
+            or _RX_SERVICE_ACCOUNT.search(n) or _RX_SECRET_DOT.match(n)
+            or ("credential" in n and n.endswith(CREDENTIAL_DATA_EXT))):
+        return "credential-file"
     return None
 
 
@@ -117,7 +157,7 @@ FORBIDDEN_RSYNC = ("--del", "--delete", "--remove-source-files", "--force", "--i
                    "--existing", "--ignore-existing")
 
 RC_OK, RC_REFUSED, RC_HELD, RC_CAP, RC_ENGINE, RC_LOCKED, RC_STALLED, RC_VERIFY, RC_DELETING = 0, 2, 3, 4, 5, 6, 7, 8, 9
-RC_OVERDUE, RC_OVERDUE_RAISED = 3, 4
+RC_OVERDUE, RC_OVERDUE_RAISED, RC_DAMAGE_NOTICE = 3, 4, 5
 
 
 class Refused(Exception):
@@ -157,9 +197,25 @@ def under(path, root):
     return rp == rr or rp.startswith(rr.rstrip("/") + "/")
 
 
+_PROBE_PLAIN = ("a", "readme", "1", "x_y-z", "makefile", "src", "notes")
+_PROBE_DOTTED = ("a.txt", "readme.md", "x.y.z", "1.0", "index.html", "run.sh", "data.json")
+
+
 def match_everything(pattern):
-    """True for a glob that excludes everything (finding 4: exclude_name=* emptied the backup and said GOOD)."""
-    return pattern.strip() == "" or all(ch in "*?" for ch in pattern.strip())
+    """True for a glob that excludes (nearly) every name: `*`, `?*`, `**`, `*.*`, `[!~]*`, `*[a-z0-9]*` (finding 4
+    of both checks: such a line emptied the backup and the run said GOOD). Tested against ordinary probe names: a
+    pattern that matches every plain probe, or every dotted one, is refused. What a pattern does to the real tree
+    is caught by the other rule: a set whose plan holds zero files fails the night."""
+    pt = pattern.strip().lower()
+    if pt == "" or all(ch in "*?" for ch in pt):
+        return True
+    return (all(fnmatch.fnmatchcase(x, pt) for x in _PROBE_PLAIN)
+            or all(fnmatch.fnmatchcase(x, pt) for x in _PROBE_DOTTED))
+
+
+def contains(outer, inner):
+    """True when realpath `inner` is `outer` or lies inside it."""
+    return inner == outer or inner.startswith(outer.rstrip("/") + "/")
 
 
 class Ctx(object):
@@ -197,6 +253,9 @@ class Ctx(object):
         self.tokens_file = os.path.join(self.lane, "seats", seat + ".tokens")
         self.conf = None
         self.state_note = None
+        self.readonly = False          # a dry run: a damaged state file or index is REPORTED, never moved or rewritten
+        self.found_by = "unknown caller"
+        self.damage_file = os.path.join(self.state_dir, "DAMAGE_NOTICE_" + seat + ".jsonl")
 
     def mkdirs(self):
         for d in (self.state_dir, self.log_dir, self.manifest_dir):
@@ -206,11 +265,13 @@ class Ctx(object):
     def load_conf(self):
         if not os.path.isfile(self.conf_file):
             raise Refused("no seat configuration at %s" % self.conf_file)
-        c = {"sets": [], "exclude_name": [], "exclude_name_in": [], "exclude_path": [], "status": "unconfirmed",
+        c = {"sets": [], "exclude_name": [], "exclude_name_in": [], "exclude_path": [], "allow_empty": [], "status": "unconfirmed",
              "fire": None, "window_hours": "5", "late_fire": "refuse", "min_free_gib": "200", "max_seconds": "18000",
              "stall_seconds": "900", "io_timeout": "1800", "hash_sample": "40", "rsync": "/opt/homebrew/bin/rsync",
              "card_client_project": "WED", "source_volume": None, "nas_root": None, "report_unlisted_under": None,
-             "max_files": "400000", "max_drop_fraction": "0.5", "est_files_per_s": "8.9", "est_list_per_s": "390"}
+             "max_files": "400000", "max_drop_fraction": "0.5", "est_files_per_s": "8.9", "est_list_per_s": "390",
+             "chunk_files": "200", "max_deleted_files": "5", "max_deleted_fraction": "0.001"}
+        scalar_seen = {}
         with open(self.conf_file, "r", encoding="utf-8") as fh:
             raw_lines = fh.read().split("\n")
         content = [(n, ln.strip()) for n, ln in enumerate(raw_lines, 1) if ln.strip() and not ln.strip().startswith("#")]
@@ -237,6 +298,8 @@ class Ctx(object):
                 c["sets"].append({"client": parts[0], "dest": parts[1], "src": parts[2]})
             elif k == "exclude_name":
                 c["exclude_name"].append(v)
+            elif k == "allow_empty":
+                c["allow_empty"].append(v)
             elif k == "exclude_name_in":
                 parts = v.split("|")
                 if len(parts) != 2 or "/" in parts[1]:
@@ -248,6 +311,12 @@ class Ctx(object):
                     raise Refused("%s line %d: exclude_path=<dest name>|<path inside the set>" % (self.conf_file, n))
                 c["exclude_path"].append((parts[0], parts[1].strip("/")))
             elif k in c:
+                # A KEY GIVEN TWICE is refused (second check, finding 14: `status=unconfirmed` followed by
+                # `status=confirmed` ran, with no warning; which line wins must never be a guess).
+                if k in scalar_seen:
+                    raise Refused("REFUSED — %s gives the key '%s' twice (lines %d and %d): which one wins is never "
+                                  "guessed; nothing run" % (self.conf_file, k, scalar_seen[k], n))
+                scalar_seen[k] = n
                 c[k] = v
             else:
                 raise Refused("%s line %d: unknown key '%s'" % (self.conf_file, n, k))
@@ -259,11 +328,15 @@ class Ctx(object):
             hh, mm = c["fire"].split(":")
             c["fire_h"], c["fire_m"] = int(hh), int(mm)
             assert 0 <= c["fire_h"] <= 23 and 0 <= c["fire_m"] <= 59
-            for k in ("window_hours", "min_free_gib", "max_drop_fraction", "est_files_per_s", "est_list_per_s"):
+            for k in ("window_hours", "min_free_gib", "max_drop_fraction", "est_files_per_s", "est_list_per_s",
+                      "max_deleted_fraction"):
                 c[k] = float(c[k])
-            for k in ("max_seconds", "stall_seconds", "io_timeout", "hash_sample", "max_files"):
+            for k in ("max_seconds", "stall_seconds", "io_timeout", "hash_sample", "max_files", "chunk_files",
+                      "max_deleted_files"):
                 c[k] = int(c[k])
             assert c["est_files_per_s"] > 0 and c["est_list_per_s"] > 0 and 0 < c["max_drop_fraction"] <= 1
+            assert c["chunk_files"] >= 1 and c["hash_sample"] >= 0
+            assert 0 <= c["max_deleted_files"] <= 100 and 0 <= c["max_deleted_fraction"] <= 0.01
         except Exception:
             raise Refused("%s: fire must be HH:MM and the numeric keys must be numbers in range" % self.conf_file)
         if not (0 < c["window_hours"] <= 12):
@@ -312,7 +385,34 @@ class Ctx(object):
                             raise Refused("REFUSED — source %s (real path %s) has the component '%s', which contains '%s': "
                                           "that is another seat's or another client's material, never backed up by seat %s"
                                           % (s["src"], s["real"], comp, f, self.seat))
+        # FORBIDDEN ROOTS, BOTH DIRECTIONS (second check, finding 3: a set= naming the PARENT of the seat trees
+        # carried TUESDAY and FRIDAY to the NAS). A source is refused when it IS a forbidden root, lies INSIDE one,
+        # or is an ANCESTOR of one, by real path.
+        roots = self.forbidden_roots(c["source_volume"])
+        for s in c["sets"]:
+            for r, why in roots:
+                if contains(r, s["real"]) or contains(s["real"], r):
+                    raise Refused("REFUSED — source %s (real path %s) %s the forbidden root %s (%s): never backed up by "
+                                  "seat %s. Name the folders you mean one by one; nothing run"
+                                  % (s["src"], s["real"], "is, or is inside," if contains(r, s["real"]) else "is an ANCESTOR of",
+                                     r, why, self.seat))
+            if s["real"] != self.tree and contains(s["real"], self.tree):
+                raise Refused("REFUSED — source %s is an ANCESTOR of this seat's own tree %s: a set that wide sweeps in "
+                              "whatever lies beside the tree; nothing run" % (s["src"], self.tree))
+        # One set inside another is allowed only when the outer set excludes exactly that path (so nothing is
+        # copied twice, and nothing arrives by a second route under another client's folder).
+        for a in c["sets"]:
+            for b in c["sets"]:
+                if a is not b and contains(a["real"], b["real"]):
+                    relp = os.path.relpath(b["real"], a["real"])
+                    if a["real"] == b["real"] or (a["dest"], relp) not in c["exclude_path"]:
+                        raise Refused("REFUSED — the set %s (%s) lies inside the set %s (%s) and that set has no "
+                                      "exclude_path=%s|%s line: the same files would travel twice; nothing run"
+                                      % (b["dest"], b["src"], a["dest"], a["src"], a["dest"], relp))
         dests = [s["dest"] for s in c["sets"]]
+        for dest in c["allow_empty"]:
+            if dest not in dests:
+                raise Refused("allow_empty names the set '%s', which is not defined" % dest)
         for dest, p in c["exclude_name_in"]:
             if dest not in dests:
                 raise Refused("exclude_name_in names the set '%s', which is not defined" % dest)
@@ -328,6 +428,52 @@ class Ctx(object):
                               % (dest, p, os.path.join(src, p)))
         self.conf = c
         return c
+
+    def forbidden_roots(self, volume):
+        """The folders this seat must never back up, as REAL paths with the reason: the other seats' trees (the
+        folders beside this seat's tree, and at the top of the drive, whose names contain another seat's name) and
+        the other client's folders (a name containing the client's name at the top of the drive or one level
+        below it, where the client folders live: `!CODING/Datasec`, `Notes (MASTER)/Datasec`). The seat's own tree
+        is not searched: inside it those names are excluded by the walker, at every depth."""
+        info, roots, seen = self.info, [], set()
+
+        def consider(parent, tokens_why):
+            try:
+                names = sorted(os.listdir(parent))
+            except OSError as e:
+                raise Refused("REFUSED — cannot list %s to find the forbidden roots (%s); nothing run" % (parent, e))
+            subs = []
+            for name in names:
+                full = os.path.join(parent, name)
+                if not os.path.isdir(full):
+                    continue
+                real = os.path.realpath(full)
+                hit = None
+                for tokens, why in tokens_why:
+                    for t in tokens:
+                        if t in name.casefold():
+                            hit = "%s: its name contains '%s'" % (why, t)
+                if hit:
+                    if real not in seen and real != self.tree:
+                        seen.add(real)
+                        roots.append((real, hit))
+                elif not os.path.islink(full):
+                    subs.append(full)
+            return subs
+
+        both = [(info["other_seat_tokens"], "another seat's tree"), (info["other_client_tokens"], "another client's folder")]
+        vol = os.path.realpath(volume)
+        level1 = consider(vol, both) if os.path.isdir(vol) else []
+        parent = os.path.dirname(self.tree)
+        if os.path.realpath(parent) != vol and os.path.isdir(parent):
+            consider(parent, both)
+        for d in level1:
+            if os.path.realpath(d) != self.tree and not os.path.basename(d).startswith("."):
+                try:
+                    consider(d, both)
+                except Refused:
+                    pass          # a top-level folder this user cannot list holds nothing this seat could name as a source
+        return roots
 
     def load_tokens(self):
         """seats/<seat>.tokens: the OTHER clients' project names, for REPORTING. token=<text> is matched as a
@@ -356,7 +502,80 @@ class Ctx(object):
     # ── state: ONE json file per seat on the drive. A damaged one is MOVED aside and said out loud (finding 9) ──
     def fresh_state(self):
         return {"schema": SCHEMA, "seat": self.seat, "armed_at": None, "first_attempt_at": None, "last_good": None,
-                "last_attempt": None, "last_fire": None, "recent_attempts": [], "flag": None, "damage": None}
+                "last_attempt": None, "last_fire": None, "recent_attempts": [], "flag": None, "damage": None,
+                "held_seen": False, "clock_floor": None}
+
+    def validate_state(self, st):
+        """Raises ValueError unless `st` is a state this tool could have written (second check, finding 13: valid
+        JSON that is not a valid state gave a traceback; a last_good in the FUTURE made every night a skip and the
+        watch say ok with negative hours). A time ahead of the clock by more than FUTURE_SLACK is damage."""
+        def num(v):
+            return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+        def when(v, what, future=True):
+            if not num(v):
+                raise ValueError("%s is not a time" % what)
+            if future and v > self.now + FUTURE_SLACK:
+                raise ValueError("%s is in the FUTURE (%s; the clock says %s)" % (what, now_local_str(v), now_local_str(self.now)))
+
+        if not isinstance(st, dict) or not isinstance(st.get("seat"), str):
+            raise ValueError("not a state object")
+        for k in ("armed_at", "first_attempt_at", "clock_floor"):
+            if st.get(k) is not None:
+                when(st[k], k)
+        for k in ("last_good", "last_attempt", "last_fire"):
+            v = st.get(k)
+            if v is None:
+                continue
+            if not isinstance(v, dict) or not isinstance(v.get("time_local"), str):
+                raise ValueError("%s lacks its fields" % k)
+            when(v.get("time"), k + ".time", future=(k == "last_good"))
+            if k == "last_attempt" and not isinstance(v.get("status"), str):
+                raise ValueError("last_attempt has no status")
+            if k == "last_fire" and not isinstance(v.get("reason"), str):
+                raise ValueError("last_fire has no reason")
+        ra = st.get("recent_attempts", [])
+        if not isinstance(ra, list):
+            raise ValueError("recent_attempts is not a list")
+        for a in ra:
+            if (not isinstance(a, dict) or not num(a.get("time")) or not isinstance(a.get("time_local"), str)
+                    or not isinstance(a.get("status"), str) or not isinstance(a.get("reason"), str)):
+                raise ValueError("an entry of recent_attempts lacks its fields")
+        lg = st.get("last_good")
+        if lg is not None and lg.get("set_counts") is not None and not isinstance(lg.get("set_counts"), dict):
+            raise ValueError("last_good.set_counts is not a table")
+        for k in ("flag", "damage"):
+            if st.get(k) is not None and not isinstance(st[k], dict):
+                raise ValueError("%s is not a record" % k)
+
+    def note_damage(self, what, moved_to, error):
+        """THE DAMAGE NOTICE (second check, finding 6: a damaged state file found first by the nightly job spent its
+        flag-worthy exit on a log no seat reads, and doctor said nothing for three more days). Whoever finds damage
+        appends one line here. The watch exits 5 and doctor's block fails hard while this file exists; only a seat
+        clears it, with `nas_backup_watch.sh --ack-damage` (it is moved aside, never deleted)."""
+        os.makedirs(self.state_dir, exist_ok=True)
+        with open(self.damage_file, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"time": self.now, "time_local": now_local_str(self.now), "what": what,
+                                 "moved_to": moved_to, "error": str(error)[:200], "found_by": self.found_by},
+                                sort_keys=True) + "\n")
+
+    def damage_notices(self):
+        """The unacknowledged damage notices, oldest first. An unreadable notice file is itself a notice."""
+        if not os.path.lexists(self.damage_file):
+            return []
+        res = []
+        try:
+            with open(self.damage_file, "r", encoding="utf-8") as fh:
+                for ln in fh:
+                    if ln.strip():
+                        try:
+                            d = json.loads(ln)
+                            res.append(d if isinstance(d, dict) else {"what": "unreadable notice line"})
+                        except ValueError:
+                            res.append({"what": "unreadable notice line"})
+        except OSError as e:
+            res.append({"what": "the damage notice file itself could not be read", "error": str(e)[:120]})
+        return res or [{"what": "an empty damage notice file"}]
 
     def read_state(self):
         if not os.path.exists(self.state_file):
@@ -364,9 +583,14 @@ class Ctx(object):
         try:
             with open(self.state_file, "r", encoding="utf-8") as fh:
                 st = json.load(fh)
-            if not isinstance(st, dict) or "seat" not in st:
-                raise ValueError("not a state object")
+            self.validate_state(st)
         except (ValueError, OSError) as e:
+            if self.readonly:
+                # A dry run writes nothing: the damaged file stays where it is and the run SAYS so.
+                self.state_note = ("STATE FILE DAMAGED: %s could not be used (%s). This dry run leaves it where it is and "
+                                   "reads on with an empty state; the next real caller will move it aside"
+                                   % (self.state_file, str(e)[:120]))
+                return self.fresh_state()
             q = os.path.join(self.state_dir, "_quarantine_%s" % time.strftime("%Y-%m-%d"))
             os.makedirs(q, exist_ok=True)
             dst = os.path.join(q, "%s.json.damaged.%s.%d" % (self.seat, time.strftime("%H%M%S"), os.getpid()))
@@ -376,9 +600,11 @@ class Ctx(object):
                             "error": str(e)[:160]}
             st["first_attempt_at"] = self.now
             self.write_state(st)
-            self.state_note = ("STATE FILE DAMAGED: %s could not be read (%s). It was MOVED to %s (not deleted) and a "
+            self.note_damage("state file", dst, e)
+            self.state_note = ("STATE FILE DAMAGED: %s could not be used (%s). It was MOVED to %s (not deleted) and a "
                                "clean state was started: the record of the last good backup is gone, so the three-day "
-                               "clock restarts now" % (self.state_file, str(e)[:80], dst))
+                               "clock restarts now. A damage notice is kept for doctor until a seat acknowledges it"
+                               % (self.state_file, str(e)[:120], dst))
             return st
         if st.get("seat") != self.seat:
             raise Refused("REFUSED — state file %s belongs to seat '%s', not '%s'" % (self.state_file, st.get("seat"), self.seat))
@@ -392,6 +618,21 @@ class Ctx(object):
             fh.write("\n")
         os.replace(tmp, self.state_file)
 
+    def hold_lifted(self, st):
+        """Called by anything that runs with NO hold file in place. If all the state has seen so far is the hold,
+        the three-day clock starts NOW, once (second check, finding 10: refusals under the hold started the
+        clock, so lifting the hold for the first copy would have raised OVERDUE at once). Returns True if it did."""
+        if not (st.get("held_seen") or legacy_held(st)):
+            return False
+        st["held_seen"] = False
+        for a in st.get("recent_attempts") or []:
+            if a.get("status") == "refused" and "HOLD_" in a.get("reason", "") and "HELD" in a.get("reason", ""):
+                a["status"] = "held"          # a pre-round-3 record of a refusal under the hold, relabelled
+        st["clock_floor"] = self.now
+        if not st.get("last_good"):
+            st["first_attempt_at"] = self.now
+        return True
+
     def note_attempt(self, status, reason, extra=None):
         st = self.read_state()
         a = {"time": self.now, "time_local": now_local_str(self.now), "status": status, "reason": reason,
@@ -399,8 +640,14 @@ class Ctx(object):
         if extra:
             a.update(extra)
         st["last_attempt"] = a
-        if not st.get("first_attempt_at"):
-            st["first_attempt_at"] = self.now          # stored ONCE, never rolled (finding 5)
+        if status == "held":
+            # A refusal under the HOLD is not an attempt at a backup: it never starts the three-day clock
+            # (second check, finding 10), and the first un-held attempt or check restarts it (clock_floor).
+            st["held_seen"] = True
+        else:
+            self.hold_lifted(st)
+            if not st.get("first_attempt_at"):
+                st["first_attempt_at"] = self.now      # stored ONCE, never rolled (finding 5)
         if status != "running":
             st["recent_attempts"] = ([{"time_local": a["time_local"], "time": a["time"], "status": status,
                                        "reason": reason}] + st.get("recent_attempts", []))[:RECENT_ATTEMPTS]
@@ -408,6 +655,14 @@ class Ctx(object):
             st["last_good"] = a
             st["damage"] = None
         self.write_state(st)
+
+
+def legacy_held(st):
+    """True when everything a pre-round-3 state file has on record is refusals under the HOLD (they were stored as
+    `refused` and they started the clock: the real lane's state of 2026-11-27 is exactly this)."""
+    ra = st.get("recent_attempts") or []
+    return (bool(ra) and not st.get("last_good") and any(a.get("status") == "refused" for a in ra) and all(
+        a.get("status") in ("refused", "held") and "HOLD_" in a.get("reason", "") and "HELD" in a.get("reason", "") for a in ra))
 
 
 # ── mounts, free space, names ─────────────────────────────────────────────────────────────────────────────────
@@ -498,11 +753,19 @@ class Rules(object):
     def __init__(self, ctx, s):
         self.fixed = [(cat, kind, p) for cat, kind, pl in EXCLUDES for p in pl]
         self.tokens = [("other-client", t) for t in ctx.info["other_client_tokens"]]
+        self.seat_names = set(ctx.info["other_seat_tokens"])
         if os.path.realpath(s["src"]) == ctx.tree:
             self.tokens += [("other-seat", t) for t in ctx.info["other_seat_tokens"]]
         self.conf_names = [p.lower() for p in ctx.conf["exclude_name"]]
         self.conf_names += [p.lower() for d, p in ctx.conf["exclude_name_in"] if d == s["dest"]]
         self.paths = set(p for d, p in ctx.conf["exclude_path"] if d == s["dest"])
+        # THIS TOOL'S OWN RUN STATE (the lock, the index, their quarantine) is never part of a backup: the index is
+        # rewritten while the run proves files, so as a planned file it could only be chased, and it is a cache.
+        # logs/ and manifests/ are records and stay in.
+        self.own_state = None
+        sd, root = os.path.realpath(ctx.state_dir), os.path.realpath(s["src"])
+        if sd != root and contains(root, sd):
+            self.own_state = os.path.relpath(sd, root)
 
     def match(self, name, rel, is_dir):
         shape = secret_shape(name)
@@ -515,11 +778,17 @@ class Rules(object):
         for cat, t in self.tokens:
             if t in n:
                 return (cat, "*%s*" % t)
+        if is_dir and n in self.seat_names:
+            # In EVERY set a FOLDER named exactly as another seat is that seat's (round 3; inside project folders
+            # the looser contained-word rule is not applied, because there those words are library file names).
+            return ("other-seat", "a folder named exactly %s" % n)
         for p in self.conf_names:
             if fnmatch.fnmatchcase(n, p):
                 return ("conf-name", p)
         if rel in self.paths:
             return ("conf-path", rel)
+        if self.own_state is not None and rel == self.own_state:
+            return ("own-run-state", rel)
         return None
 
 
@@ -630,11 +899,23 @@ def pid_alive(owner):
     return proc_started(pid) == owner.get("pid_started")
 
 
+def pid_exists(pid):
+    try:
+        os.kill(int(pid), 0)
+    except (OSError, ValueError, TypeError):
+        return False
+    return True
+
+
 def engine_processes(ctx, owner):
     """Engine processes of THIS seat still alive: the recorded process group, plus any rsync whose command line
     names this seat's destination folder. Returns a list of 'pid command' strings."""
     hits = []
     pg = (owner or {}).get("engine_pgid")
+    # A REUSED GROUP ID (second check, finding 15): the group leader's pid is the group id. If a process with that
+    # pid is alive but started at another time than the lock recorded, the id now belongs to something unrelated.
+    if pg and (owner or {}).get("engine_started") and pid_exists(pg) and proc_started(pg) != owner.get("engine_started"):
+        pg = None
     r = subprocess.run(["/bin/ps", "-axo", "pid=,pgid=,command="], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                        universal_newlines=True)
     needles = []
@@ -681,7 +962,7 @@ def write_owner(ctx, mode, engine_pgid=None):
     with open(tmp, "w") as fh:
         json.dump({"pid": os.getpid(), "pid_started": proc_started(os.getpid()), "started": time.time(),
                    "started_local": now_local_str(time.time()), "mode": mode, "seat": ctx.seat,
-                   "engine_pgid": engine_pgid}, fh)
+                   "engine_pgid": engine_pgid, "engine_started": proc_started(engine_pgid) if engine_pgid else None}, fh)
     os.replace(tmp, os.path.join(ctx.lock_dir, "owner.json"))
 
 
@@ -737,31 +1018,90 @@ def cmd_clear_stale_lock(ctx):
 
 # ── index: a cache of PROVEN arrivals. Rebuildable: losing it costs one night of sha256 comparison. ───────────
 class Index(object):
-    def __init__(self, path, readonly):
+    """note: one plain line when the index file was found damaged (None otherwise)."""
+
+    def __init__(self, ctx, readonly):
+        path = ctx.index_file
         self.readonly = readonly
         self.db = None
+        self.note = None
         if readonly and not os.path.exists(path):
             return
+        try:
+            self._open(path)
+        except sqlite3.Error as e:
+            # A DAMAGED INDEX (second check, finding 7: a traceback, the lock left behind, every night until a
+            # person moved the file). It is a cache: move it aside, say so in one line, start an empty one.
+            if self.db is not None:
+                self.db.close()
+            self.db = None
+            if readonly:
+                self.note = ("INDEX DAMAGED: %s could not be read (%s). This dry run leaves it where it is and treats "
+                             "it as empty" % (path, str(e)[:80]))
+                return
+            q = os.path.join(ctx.state_dir, "_quarantine_%s" % time.strftime("%Y-%m-%d"))
+            os.makedirs(q, exist_ok=True)
+            dst = os.path.join(q, "%s.index.sqlite.damaged.%s.%d" % (ctx.seat, time.strftime("%H%M%S"), os.getpid()))
+            os.rename(path, dst)
+            ctx.note_damage("index", dst, e)
+            self.note = ("INDEX DAMAGED: %s could not be read (%s). It was MOVED to %s (not deleted) and an empty one "
+                         "was started: tonight every file already on the NAS is compared by sha256 again"
+                         % (path, str(e)[:80], dst))
+            self._open(path)
+
+    def _open(self, path):
         self.db = sqlite3.connect(path)
-        if not readonly:
+        self.db.execute("SELECT count(*) FROM sqlite_master").fetchone()        # a file that is not a database fails HERE
+        if not self.readonly:
             self.db.execute("CREATE TABLE IF NOT EXISTS files (setname TEXT, rel TEXT, size INTEGER, mtime_ns INTEGER, "
                             "ctime_ns INTEGER, copied_at REAL, PRIMARY KEY (setname, rel))")
+            self.db.execute("CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT)")
             self.db.commit()
+        if not self.readonly:
+            row = self.db.execute("PRAGMA quick_check").fetchone()
+            if not row or row[0] != "ok":
+                raise sqlite3.DatabaseError("quick_check says: %s" % (row[0] if row else "nothing"))
+
+    def _has(self, table):
+        return self.db.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name=?", (table,)).fetchone()[0] == 1
 
     def load(self, setname):
-        if self.db is None:
+        if self.db is None or not self._has("files"):
             return {}
-        try:
-            return dict((r[0], (r[1], r[2], r[3])) for r in
-                        self.db.execute("SELECT rel,size,mtime_ns,ctime_ns FROM files WHERE setname=?", (setname,)))
-        except sqlite3.Error:
-            return {}
+        return dict((r[0], (r[1], r[2], r[3])) for r in
+                    self.db.execute("SELECT rel,size,mtime_ns,ctime_ns FROM files WHERE setname=?", (setname,)))
 
     def put_many(self, setname, rows, when):
         if self.db is None or self.readonly or not rows:
             return
         self.db.executemany("INSERT OR REPLACE INTO files (setname,rel,size,mtime_ns,ctime_ns,copied_at) VALUES (?,?,?,?,?,?)",
                             [(setname, rel, s[0], s[1], s[2], when) for rel, s in rows])
+        self.db.commit()
+
+    def drop(self, setname, rels):
+        """Forget earlier proofs (a sample found the destination copy wrong): committed at once, so the file can
+        never again rest on that proof, whatever happens to the rest of this run."""
+        if self.db is None or self.readonly or not rels:
+            return
+        self.db.executemany("DELETE FROM files WHERE setname=? AND rel=?", [(setname, r) for r in rels])
+        self.db.commit()
+
+    def baseline(self):
+        """The per-set file counts of the last good run: a SECOND copy of what the state file holds, so a damaged
+        state file does not take the fall rule's baseline with it (second check, finding 4)."""
+        if self.db is None or not self._has("meta"):
+            return {}
+        row = self.db.execute("SELECT v FROM meta WHERE k='set_counts'").fetchone()
+        try:
+            d = json.loads(row[0]) if row else {}
+            return d if isinstance(d, dict) else {}
+        except ValueError:
+            return {}
+
+    def set_baseline(self, set_counts):
+        if self.db is None or self.readonly:
+            return
+        self.db.execute("INSERT OR REPLACE INTO meta (k,v) VALUES ('set_counts',?)", (json.dumps(set_counts, sort_keys=True),))
         self.db.commit()
 
     def close(self):
@@ -923,13 +1263,16 @@ def preflight(ctx, mode, out_of_sequence, lines):
                           % (now_local_str(ctx.now), wstr(o), wstr(cl)))
 
 
-def plan_set(ctx, s, index_rows, last_count, accept_shrink, do_hash=True):
-    """Lists the source and the destination and decides what must be copied. READS ONLY."""
+def plan_set(ctx, s, index_rows, last_count, accept_shrink, do_hash=True, on_proven=None, deadline=None):
+    """Lists the source and the destination and decides what must be copied. READS ONLY (a real run passes
+    on_proven, which saves each file found identical by sha256 into the index as it goes)."""
     rules = Rules(ctx, s)
+    rs = os.stat(s["src"])
     src = walk(s["src"], rules)
     c = ctx.conf
     plan = {"set": s, "src": src, "problems": [], "copy": [], "copy_dirs": [], "reason": {}, "proven_unsent": [],
-            "type_changes": [], "collisions": [], "collision_skipped": {}, "nas_listed": []}
+            "type_changes": [], "collisions": [], "collision_skipped": {}, "nas_listed": [], "notes": [],
+            "root_id": (rs.st_dev, rs.st_ino), "cap_hit": False}
     n_src = len(src["files"])
     if n_src > c["max_files"]:
         tops = {}
@@ -944,16 +1287,6 @@ def plan_set(ctx, s, index_rows, last_count, accept_shrink, do_hash=True):
                       % (s["dest"], n_src, c["max_files"], "; ".join("%s (%d files, %s)" % (k, v[0], fmt_bytes(v[1])) for k, v in worst)))
     if src["errors"]:
         plan["problems"].append("source could not be fully read: %d error(s), first: %s" % (len(src["errors"]), src["errors"][0]))
-    # AN EMPTIED OR COLLAPSED SCOPE IS NOT GOOD (finding 4): zero files, or a sharp fall against the last good run.
-    if n_src == 0 and not src["dirs"]:
-        plan["problems"].append("EMPTY SCOPE: 0 files in scope for this set (last good run: %s). A backup of nothing is "
-                                "never recorded as good" % (last_count if last_count is not None else "no record"))
-    elif n_src == 0 and last_count:
-        plan["problems"].append("EMPTY SCOPE: 0 files in scope now, %d at the last good run" % last_count)
-    elif last_count and n_src < last_count * (1.0 - c["max_drop_fraction"]) and not accept_shrink:
-        plan["problems"].append("SCOPE FELL SHARPLY: %d files in scope now, %d at the last good run (more than a %d%% fall). "
-                                "If the source really shrank, run once with --accept-shrink \"<card id>\""
-                                % (n_src, last_count, int(c["max_drop_fraction"] * 100)))
     croot = ctx.client_root(s["client"])
     dest_dir = os.path.join(croot, "current", *s["dest"].split("/"))
     _, dest_exists, deepest = ensure_dest_chain(os.path.join(c["nas_root"], s["client"]),
@@ -987,6 +1320,24 @@ def plan_set(ctx, s, index_rows, last_count, accept_shrink, do_hash=True):
         for rel in list(src["dirs"]):
             if rel in clashset or rel.startswith(clash_dirs):
                 src["dirs"].discard(rel)
+    # THE PLAN IS WHAT IS LEFT NOW (after the names that differ only in case were taken out): the rules about an
+    # empty or collapsed plan are applied to THAT number, the same number the good run records as its baseline.
+    n_src = len(src["files"])
+    # AN EMPTY PLAN IS NEVER GOOD (the one rule; both checks' finding 4): zero files fails the night, with or
+    # without folders, on a first run too. The ONE exception is a set the conf names in an allow_empty= line.
+    if n_src == 0 and s["dest"] not in c["allow_empty"]:
+        plan["problems"].append("EMPTY SCOPE: 0 files in the plan for this set (%d folders; last good run: %s). A backup "
+                                "of nothing is never recorded as good; if this set is really empty, the conf must say "
+                                "allow_empty=%s" % (len(src["dirs"]), last_count if last_count is not None else "no record", s["dest"]))
+    elif n_src == 0:
+        plan["notes"].append("this set holds 0 files and the conf allows it to be empty (allow_empty=%s)" % s["dest"])
+    elif last_count is None:
+        plan["notes"].append("NO BASELINE: there is no earlier good run to compare this set's %d files with, so a wrong "
+                             "exclusion could not be noticed by the fall rule tonight" % n_src)
+    elif last_count and n_src < last_count * (1.0 - c["max_drop_fraction"]) and not accept_shrink:
+        plan["problems"].append("SCOPE FELL SHARPLY: %d files in scope now, %d at the last good run (more than a %d%% fall). "
+                                "If the source really shrank, run once with --accept-shrink \"<card id>\""
+                                % (n_src, last_count, int(c["max_drop_fraction"] * 100)))
     dfiles = dict((ckey(r), (r, v)) for r, v in dst["files"].items())
     ddirs = dict((ckey(r), r) for r in dst["dirs"])
     # TYPE CHANGES (finding 7): a folder that became a file, or a file that became a folder. The old destination
@@ -1033,13 +1384,22 @@ def plan_set(ctx, s, index_rows, last_count, accept_shrink, do_hash=True):
     plan["hash_equal"] = []
     plan["unverified_same_size"] = []
     if do_hash:
-        for rel, drel in to_hash:
+        for i, (rel, drel) in enumerate(to_hash):
+            if deadline is not None and time.time() >= deadline:
+                # The cap is honoured HERE, between files, not left to the watchdog (second check, finding 8).
+                plan["cap_hit"] = True
+                plan["problems"].append("stopped by the run-time cap while comparing files already at the destination: "
+                                        "%d of %d compared; what was found identical is saved, so the next run goes on "
+                                        "from there" % (i, len(to_hash)))
+                break
             try:
                 same = sha256_of(os.path.join(s["src"], rel)) == sha256_of(os.path.join(dest_dir, drel))
             except OSError:
                 same = False
             if same:
                 plan["hash_equal"].append(rel)
+                if on_proven is not None:
+                    on_proven(rel, src["files"][rel])
             else:
                 plan["copy"].append(rel)
                 plan["reason"][rel] = "content"
@@ -1049,37 +1409,113 @@ def plan_set(ctx, s, index_rows, last_count, accept_shrink, do_hash=True):
     return plan
 
 
+DELETE_RECHECK_SECONDS = 0.2
+_TEST = {"hash_delay": 0.0}
+
+
 def prove_arrival(src_path, dst_path):
-    """THE ARRIVAL PROOF (finding 1). Returns (verdict, stat): verdict in
-       proven    sha256(source) == sha256(destination), the source unchanged across the read
-       vanished  the source file is gone (nothing left to back up)
-       unstable  the source changed while it was being read (send it again)
-       differs   the destination is absent, unreadable, or holds other content."""
+    """THE ARRIVAL PROOF. Returns (verdict, stat, why):
+       proven      sha256(source) == sha256(destination), the source unchanged across the read
+       unstable    the source changed while it was being read (send it again)
+       unreadable  the source could not be read, for ANY reason (permission, I/O error, a privacy refusal, no such
+                   file, no longer a regular file). This is NOT 'gone': the caller treats it as NOT DELIVERED
+                   unless source_deleted() then proves the file was deleted.
+       differs     the destination is absent, unreadable, or holds other content."""
     try:
         s1 = stat3(src_path)
-    except OSError:
-        return ("vanished", None)
-    try:
+        if not stat.S_ISREG(os.lstat(src_path).st_mode):
+            return ("unreadable", None, "the source is no longer a regular file")
+        if _TEST["hash_delay"]:
+            time.sleep(_TEST["hash_delay"])
         hs = sha256_of(src_path)
         s2 = stat3(src_path)
-    except OSError:
-        return ("vanished", None)
+    except OSError as e:
+        return ("unreadable", None, "the source could not be read (%s)" % (e.strerror or e))
     if s1 != s2:
-        return ("unstable", None)
+        return ("unstable", None, "the source changed while it was being read")
     try:
         if os.stat(dst_path).st_size != s1[0]:
-            return ("differs", s1)
+            return ("differs", s1, "the destination copy has another size")
         hd = sha256_of(dst_path)
-    except OSError:
-        return ("differs", s1)
-    return ("proven", s1) if hs == hd else ("differs", s1)
+    except OSError as e:
+        return ("differs", s1, "the destination copy is absent or could not be read (%s)" % (e.strerror or e))
+    return ("proven", s1, "") if hs == hd else ("differs", s1, "the destination copy holds other content")
 
 
-def folder_table(plan, proven):
+def source_deleted(root, root_id, rel):
+    """True ONLY when the planned file is provably DELETED from the source: the set's root is still the very folder
+    that was listed, the file's PARENT folder can be listed, and the name is absent from that listing; checked
+    twice. A folder that cannot be listed, a parent that is itself gone, a root that was moved or unmounted: False
+    (the file is then NOT DELIVERED). 'Could not read it' is never taken to mean 'it was deleted'."""
+    parent = os.path.dirname(os.path.join(root, rel))
+    name = os.path.basename(rel)
+    for attempt in (1, 2):
+        try:
+            rs = os.stat(root)
+            if (rs.st_dev, rs.st_ino) != tuple(root_id) or not stat.S_ISDIR(rs.st_mode):
+                return False
+            names = os.listdir(parent)
+        except OSError:
+            return False
+        if name in names:
+            return False
+        if attempt == 1:
+            time.sleep(DELETE_RECHECK_SECONDS)
+    return True
+
+
+def deleted_allowed(conf, planned):
+    """How many planned files may be deleted from the source during a run before the night fails: the larger of
+    max_deleted_files (default 5) and max_deleted_fraction of the plan (default 0.1%)."""
+    return max(conf["max_deleted_files"], int(planned * conf["max_deleted_fraction"]))
+
+
+class Saver(object):
+    """Proven files are committed to the index AS THE PROOF GOES, at least every PROOF_BATCH files, so an
+    interrupted first copy does not re-read what it had already proven (second check, finding 8)."""
+
+    def __init__(self, index, setname):
+        self.index, self.setname, self.rows, self.saved = index, setname, [], 0
+
+    def add(self, rel, st3):
+        self.rows.append((rel, st3))
+        if len(self.rows) >= PROOF_BATCH:
+            self.flush()
+
+    def flush(self):
+        if self.rows:
+            self.index.put_many(self.setname, self.rows, time.time())
+            self.saved += len(self.rows)
+            self.rows = []
+
+
+def make_chunks(rels, sizes, chunk_files):
+    chunks, cur, nbytes = [], [], 0
+    for rel in rels:
+        cur.append(rel)
+        nbytes += sizes[rel][0]
+        if len(cur) >= chunk_files or nbytes >= CHUNK_BYTES:
+            chunks.append(cur)
+            cur, nbytes = [], 0
+    if cur:
+        chunks.append(cur)
+    return chunks
+
+
+def watchdog_margin(ctx):
+    """900 s after the cap. TEST MODE ONLY: NB_TEST_WATCHDOG_MARGIN shortens it so the watchdog can be exercised."""
+    if ctx.troot and os.environ.get("NB_TEST_WATCHDOG_MARGIN"):
+        return int(os.environ["NB_TEST_WATCHDOG_MARGIN"])
+    return WATCHDOG_MARGIN
+
+
+def folder_table(plan, proven, deleted=()):
     t = {}
     blank = {"src_files": 0, "src_bytes": 0, "dst_files": 0, "dst_bytes": 0, "dst_only_files": 0, "dst_only_bytes": 0}
     src = plan["src"]["files"]
     for rel, sv in src.items():
+        if rel in deleted:
+            continue          # provably deleted at the source during the run: on neither side of tonight's count
         row = t.setdefault(top_of(rel), dict(blank))
         row["src_files"] += 1
         row["src_bytes"] += sv[0]
@@ -1118,6 +1554,9 @@ def cmd_backup(ctx, mode, scheduled=False, out_of_sequence=None, max_seconds=Non
         lines.append(msg)
         out(msg)
 
+    ctx.readonly = (mode != "run")
+    if ctx.found_by == "unknown caller":
+        ctx.found_by = "a real run (nas_backup.sh --run)" if mode == "run" else "a dry run"
     ctx.mkdirs()
     run_log = os.path.join(ctx.log_dir, "%s_%s.log" % (stamp, mode))
     say("=== nas-backup seat=%s mode=%s %s ===" % (ctx.seat, mode.upper(), now_local_str(time.time())))
@@ -1146,16 +1585,41 @@ def cmd_backup(ctx, mode, scheduled=False, out_of_sequence=None, max_seconds=Non
         say(str(e))
         if mode == "run":
             try:
-                ctx.note_attempt("refused", str(e))
+                # A refusal under the HOLD is recorded as `held`: it is not an attempt and never starts the clock.
+                ctx.note_attempt("held" if e.rc == RC_HELD else "refused", str(e))
             except Exception as ex:
                 err("nas-backup: could not record the refusal in the state file: %s" % ex)
         with open(run_log, "w", encoding="utf-8") as fh:
             fh.write("\n".join(lines) + "\n")
         return e.rc
+    # FROM HERE THE LOCK IS HELD (a real run). Whatever happens below, it is released: a damaged index, a full
+    # disk, a bug. A lock left behind by a crash stopped every later night (second check, finding 7).
+    try:
+        return backup_body(ctx, mode, stamp, lines, say, st0, run_log, scheduled, out_of_sequence, max_seconds,
+                           no_hash, accept_shrink)
+    except Exception as e:
+        msg = "the run stopped on an unexpected error: %s: %s" % (type(e).__name__, str(e)[:300])
+        say("FAILED: %s" % msg)
+        if mode == "run":
+            try:
+                ctx.note_attempt("failed", msg, {"stamp": stamp})
+            except Exception as ex:
+                err("nas-backup: could not record the failure in the state file: %s" % ex)
+        try:
+            with open(run_log, "w", encoding="utf-8", errors="surrogateescape") as fh:
+                fh.write("\n".join(lines) + "\n")
+        except OSError as ex:
+            err("nas-backup: could not write the run log: %s" % ex)
+        return RC_ENGINE
+    finally:
+        signal.alarm(0)
+        if mode == "run":
+            lock_release(ctx)
 
+
+def backup_body(ctx, mode, stamp, lines, say, st0, run_log, scheduled, out_of_sequence, max_seconds, no_hash, accept_shrink):
     c = ctx.conf
     tokens = ctx.load_tokens()
-    last_counts = ((st0.get("last_good") or {}).get("set_counts")) or {}
     result = {"rc": RC_VERIFY}
     manifest = {"schema": SCHEMA, "seat": ctx.seat, "mode": mode, "stamp": stamp, "started": time.time(),
                 "started_local": now_local_str(time.time()), "host": os.uname().nodename,
@@ -1164,7 +1628,7 @@ def cmd_backup(ctx, mode, scheduled=False, out_of_sequence=None, max_seconds=Non
     started = time.time()
     cap = max_seconds if max_seconds is not None else c["max_seconds"]
     deadline = started + cap
-    index = Index(ctx.index_file, readonly=(mode != "run"))
+    margin = watchdog_margin(ctx)
     interrupted = {"sig": None}
 
     def on_signal(signum, frame):
@@ -1174,25 +1638,42 @@ def cmd_backup(ctx, mode, scheduled=False, out_of_sequence=None, max_seconds=Non
 
     def on_alarm(signum, frame):
         kill_child()
-        raise Refused("WATCHDOG: the run was still going 900 s after its %d s cap (a blocked read or write on the NAS, "
-                      "or a macOS privacy prompt waiting on this Mac's screen); stopped" % cap, RC_CAP)
+        raise Refused("WATCHDOG: the run was still going %d s after its %d s cap (a blocked read or write on the NAS, "
+                      "or a macOS privacy prompt waiting on this Mac's screen); stopped" % (margin, cap), RC_CAP)
 
     if mode == "run":
-        signal.signal(signal.SIGTERM, on_signal)
-        signal.signal(signal.SIGINT, on_signal)
+        # SIGHUP too (second check, finding 11): closing the terminal of a hand-run first copy killed the tool,
+        # left the engine copying, the lock in place and the state saying `running`.
+        for sg in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+            signal.signal(sg, on_signal)
         signal.signal(signal.SIGALRM, on_alarm)
-        signal.alarm(int(cap) + 900)
+        signal.alarm(int(cap) + margin)
+        if ctx.troot and os.environ.get("NB_TEST_HASH_DELAY"):
+            _TEST["hash_delay"] = float(os.environ["NB_TEST_HASH_DELAY"])
         ctx.note_attempt("running", "started %s" % stamp, {"stamp": stamp})
     problems = []
     undelivered_all = []
+    deleted_all = []
     totals = {"src_files": 0, "src_bytes": 0, "copy_files": 0, "copy_bytes": 0, "new": 0, "changed": 0,
-              "dst_files": 0, "dst_bytes": 0, "dst_only_files": 0, "versioned": 0, "vanished": 0, "resent": 0,
+              "dst_files": 0, "dst_bytes": 0, "dst_only_files": 0, "versioned": 0, "deleted": 0, "resent": 0,
               "symlinks": 0, "excluded_entries": 0, "case_collision_files": 0, "hard_link_files": 0,
-              "type_changes": 0, "undelivered": 0, "proven_by_sha256": 0}
+              "type_changes": 0, "undelivered": 0, "proven_by_sha256": 0, "repaired": 0, "sampled": 0}
     secret_counts, token_counts, set_counts = {}, dict((t[0], 0) for t in tokens), {}
     client_roots = {}
+    index = None
     try:
+        index = Index(ctx, readonly=(mode != "run"))
+        if index.note:
+            say(index.note)
+        # THE BASELINE of the fall rule: the last good run's per-set counts, from the state file, and from the
+        # index's own copy for any set the state does not know (a damaged state file must not take it away).
+        last_counts = dict(index.baseline())
+        last_counts.update(((st0.get("last_good") or {}).get("set_counts")) or {})
         for s in c["sets"]:
+            # THE MOUNT IS CHECKED BEFORE EVERY SET, not once (second check, finding 12).
+            if not nas_is_smb_mounted(ctx):
+                raise Refused("REFUSED — %s is no longer mounted as a network share (it was when this run started); "
+                              "stopped before set %s" % (c["nas_root"], s["dest"]))
             say("--- set %s/%s  <-  %s" % (s["client"], s["dest"], s["src"]))
             croot = ctx.client_root(s["client"])
             if mode == "run":
@@ -1215,9 +1696,15 @@ def cmd_backup(ctx, mode, scheduled=False, out_of_sequence=None, max_seconds=Non
                         fh.write("started %s by seat %s (pid %d). Without RUN_%s_COMPLETE.txt beside this file the copy did "
                                  "NOT finish: do not trust current/ as complete.\n" % (now_local_str(time.time()), ctx.seat, os.getpid(), stamp))
             index_rows = index.load(s["dest"])
+            saver = Saver(index, s["dest"])
             t0 = time.time()
-            plan = plan_set(ctx, s, index_rows, last_counts.get(s["dest"]), accept_shrink,
-                            do_hash=not (mode == "dry" and no_hash))
+            try:
+                plan = plan_set(ctx, s, index_rows, last_counts.get(s["dest"]), accept_shrink,
+                                do_hash=not (mode == "dry" and no_hash),
+                                on_proven=(saver.add if mode == "run" else None),
+                                deadline=(deadline if mode == "run" else None))
+            finally:
+                saver.flush()          # whatever was found identical so far is kept, also when the plan is interrupted
             src = plan["src"]
             dest_dir = plan["dest_dir"]
             n_src = len(src["files"])
@@ -1258,6 +1745,8 @@ def cmd_backup(ctx, mode, scheduled=False, out_of_sequence=None, max_seconds=Non
                 say("    TYPE CHANGE: %s (%s): the old destination entry %s into versions/%s/, then the new one is copied"
                     % (rel, what, "is MOVED" if mode == "run" else "WOULD BE MOVED", stamp))
             say("    planning took %.1f s" % (time.time() - t0))
+            for note in plan["notes"]:
+                say("    note: %s" % note)
             for p in plan["problems"]:
                 say("    PROBLEM: %s" % p)
                 problems.append("%s: %s" % (s["dest"], p))
@@ -1270,7 +1759,8 @@ def cmd_backup(ctx, mode, scheduled=False, out_of_sequence=None, max_seconds=Non
                     "case_collision_names": plan["collisions"][:200],
                     "case_collision_files_not_backed_up": len(plan["collision_skipped"]),
                     "type_changes": [list(x) for x in plan["type_changes"]],
-                    "nas_listed": plan["nas_listed"], "problems": list(plan["problems"]), "engine_passes": []}
+                    "nas_listed": plan["nas_listed"], "notes": list(plan["notes"]), "problems": list(plan["problems"]),
+                    "engine_passes": []}
             for k, v in (("src_files", n_src), ("src_bytes", src_bytes), ("copy_files", len(plan["copy"])), ("copy_bytes", copy_bytes),
                          ("new", n_new), ("changed", n_chg), ("symlinks", len(src["links"])), ("excluded_entries", exc_entries),
                          ("case_collision_files", len(plan["collision_skipped"])), ("hard_link_files", len(src["hardlinks"])),
@@ -1279,6 +1769,7 @@ def cmd_backup(ctx, mode, scheduled=False, out_of_sequence=None, max_seconds=Non
             proven = set(plan["proven_unsent"]) | set(plan["hash_equal"])
             if mode == "dry":
                 proven |= set(plan["unverified_same_size"])
+            deleted = []
             safe = s["dest"].replace("/", "__")
             scope_broken = any(p.startswith(("EMPTY SCOPE", "SCOPE FELL")) for p in plan["problems"])
 
@@ -1305,130 +1796,249 @@ def cmd_backup(ctx, mode, scheduled=False, out_of_sequence=None, max_seconds=Non
                                         % (s["dest"], pl["new"] + pl["updated"], status, rc, len(plan["copy"])))
             elif scope_broken:
                 say("    NOT COPIED: the scope of this set is broken (above); nothing was sent for it")
+            elif plan["cap_hit"]:
+                say("    NOT COPIED: the run-time cap was reached while this set was being compared (above)")
+                result["rc"] = RC_CAP
             else:
-                # 1. type changes: MOVE the old destination entry into versions/<stamp>/ (never deleted)
-                for rel, drel, what in plan["type_changes"]:
-                    vpath = os.path.join(croot, "versions", stamp, *(s["dest"].split("/") + drel.split("/")))
-                    os.makedirs(os.path.dirname(vpath), exist_ok=True)
-                    os.rename(os.path.join(dest_dir, drel), vpath)
-                # 2. engine passes. Pass 1 sends the plan; a later pass re-sends only files that changed meanwhile.
-                todo = list(plan["copy"])
-                todo_dirs = list(plan["copy_dirs"])
-                undelivered, vanished = [], []
-                for npass in range(1, MAX_PASSES + 1):
-                    if not todo and not todo_dirs:
-                        break
-                    tag = "" if npass == 1 else "_pass%d" % npass
-                    list_path = os.path.join(ctx.log_dir, "%s_run_%s%s.files0" % (stamp, safe, tag))
-                    with open(list_path, "wb") as fh:
-                        for rel in todo_dirs + todo:
-                            fh.write(rel.encode("utf-8", "surrogateescape") + b"\0")
-                    eng_log = os.path.join(ctx.log_dir, "%s_run_%s%s.rsync.log" % (stamp, safe, tag))
-                    eng_err = eng_log[:-4] + ".err"
-                    # a separate versions folder per pass: a re-send must never overwrite the previous copy pass 1 kept
-                    bdir = os.path.join(croot, "versions", stamp + tag, *s["dest"].split("/"))
-                    argv = [c["rsync"], "-t", "-O", "-I", "--from0", "--files-from=" + list_path, "--backup",
-                            "--backup-dir=" + bdir, "--timeout=%d" % c["io_timeout"], "--out-format=%i %n%L", "--stats", "--no-h",
-                            "--temp-dir=" + os.path.join(croot, "_tmp_incoming"), s["src"].rstrip("/") + "/", dest_dir.rstrip("/") + "/"]
-                    if npass == 1:
-                        say("    engine: %s" % " ".join(shlex.quote(a) for a in argv))
-                    status, rc = run_rsync(ctx, argv, eng_log, eng_err, deadline, c["stall_seconds"], record_group=True)
-                    pl = parse_engine_log(eng_log)
-                    with open(eng_err, "rb") as fh:
-                        etxt = fh.read().decode("utf-8", "replace").strip()
-                    say("    engine pass %d: %s rc=%s; its log lists %d new + %d replaced files; deleting lines: %d%s"
-                        % (npass, status, rc, pl["new"], pl["updated"], len(pl["deleting"]),
-                           ("; stderr (%d lines), first: %s" % (len(etxt.splitlines()), etxt.splitlines()[0][:200])) if etxt else ""))
-                    mset["engine_passes"].append({"pass": npass, "status": status, "rc": rc, "sent": len(todo), "log": eng_log,
-                                                  "deleting_lines": len(pl["deleting"]), "stderr_lines": len(etxt.splitlines())})
-                    if pl["deleting"]:
-                        problems.append("%s: the engine's log holds %d DELETING line(s) (first: %s): that must be impossible"
-                                        % (s["dest"], len(pl["deleting"]), pl["deleting"][0][:200]))
-                        result["rc"] = RC_DELETING
-                    for pth in pl["paths"]:
-                        if any(secret_shape(part) for part in pth.split("/")):
-                            problems.append("%s: a secret-shaped name travelled: %s" % (s["dest"], pth))
+                # THE PLAN. Every one of these files must end PROVEN at the destination, or provably deleted at
+                # the source; whatever is neither is NOT DELIVERED and fails the night. This set is the ONLY
+                # accounting: nothing below can take a file out of it.
+                planned = set(src["files"])
+                why = {}                    # rel -> why it is not proven (printed with its name)
+                missing_dirs = []
+                stop = None                 # set when the engine was stopped (cap, stall) or the cap passed mid-proof
+                try:
+                    # 1. THE SAMPLE of files NOT sent tonight (they rest on an earlier proof), taken FIRST. One that
+                    #    is no longer proven loses its index row AT ONCE and joins tonight's copy list, so it is
+                    #    repaired in this run (the old destination content is kept in versions/), or the night fails
+                    #    and every later night compares it by content again: a sample finding never ages out.
+                    pool = sorted(plan["proven_unsent"])
+                    random.seed(stamp + s["dest"])
+                    sample = random.sample(pool, min(c["hash_sample"], len(pool)))
+                    repair = []
+                    wrong_at_dest = 0
+                    for rel in sample:
+                        drel = plan["dfiles"][ckey(rel)][0]
+                        verdict, _, note = prove_arrival(os.path.join(s["src"], rel), os.path.join(dest_dir, drel))
+                        if verdict != "proven":
+                            repair.append(rel)
+                            why[rel] = "the nightly sample: " + note
+                            wrong_at_dest += 1 if verdict == "differs" else 0
+                    if repair:
+                        index.drop(s["dest"], repair)
+                        for rel in repair:
+                            proven.discard(rel)
+                            plan["reason"][rel] = "repair"
+                        say("    SAMPLE: %d of %d files not sent tonight are NO LONGER PROVEN at the destination (first: %s: %s). "
+                            "Their earlier proof is withdrawn and they are sent again now; the destination's present "
+                            "content goes to versions/%s/" % (len(repair), len(sample), repair[0], why[repair[0]], stamp))
+                    totals["sampled"] += len(sample)
+                    if wrong_at_dest:
+                        # ONE WRONG DESTINATION COPY WITHDRAWS EVERY EARLIER PROOF OF THIS SET. The sample looked at
+                        # a few files; the rest rest on proofs of exactly the kind that just turned out false (the
+                        # second check's N3d: 30 copies altered, the 10 sampled repaired, the night said GOOD over
+                        # 20 it had not looked at). So every other unsent file of the set is read back NOW; what
+                        # agrees is proven again, what does not joins the repair. If the cap passes first, the
+                        # night fails and the next run goes on with the comparison: nothing is trusted meanwhile.
+                        sampled = set(sample)
+                        rest = [r for r in pool if r not in sampled]
+                        index.drop(s["dest"], rest)
+                        for rel in rest:
+                            proven.discard(rel)
+                        n_again = 0
+                        for i, rel in enumerate(rest):
+                            if time.time() >= deadline:
+                                for r2 in rest[i:]:
+                                    why.setdefault(r2, "its earlier proof was withdrawn after the sample found a wrong copy, and the "
+                                                       "run-time cap passed before it was read back")
+                                problems.append("%s: the run-time cap (%ds) passed during the full read-back that follows a sample "
+                                                "finding: %d of %d files read back; the next run goes on" % (s["dest"], cap, i, len(rest)))
+                                result["rc"] = RC_CAP
+                                stop = "the cap"
+                                break
+                            drel = plan["dfiles"][ckey(rel)][0]
+                            verdict, st3, note = prove_arrival(os.path.join(s["src"], rel), os.path.join(dest_dir, drel))
+                            if verdict == "proven":
+                                proven.add(rel)
+                                saver.add(rel, st3)
+                            else:
+                                repair.append(rel)
+                                why[rel] = "read back after the sample finding: " + note
+                                plan["reason"][rel] = "repair"
+                                n_again += 1
+                        saver.flush()
+                        say("    FULL READ-BACK after the sample finding: the earlier proofs of all %d other unsent files of this "
+                            "set were withdrawn and each file was compared with its source again: %d more are wrong and are "
+                            "sent again now" % (len(rest), n_again))
+                    # 2. type changes: MOVE the old destination entry into versions/<stamp>/ (never deleted)
+                    for rel, drel, what in plan["type_changes"]:
+                        vpath = os.path.join(croot, "versions", stamp, *(s["dest"].split("/") + drel.split("/")))
+                        os.makedirs(os.path.dirname(vpath), exist_ok=True)
+                        os.rename(os.path.join(dest_dir, drel), vpath)
+                    # 3. THE COPY, IN CHUNKS. Each chunk is sent, then every file of it is proven and the proof is
+                    #    saved, before the next chunk starts: an interruption loses at most one chunk's proof.
+                    todo_all = sorted(set(plan["copy"]) | set(repair))
+                    chunks = make_chunks(todo_all, src["files"], c["chunk_files"])
+                    if not chunks and plan["copy_dirs"]:
+                        chunks = [[]]
+                    base = os.path.join(ctx.log_dir, "%s_run_%s" % (stamp, safe))
+                    if chunks:
+                        with open(base + ".files0", "wb") as fh:          # everything this set sends tonight, once
+                            for rel in plan["copy_dirs"] + todo_all:
+                                fh.write(rel.encode("utf-8", "surrogateescape") + b"\0")
+                    for ci, chunk in enumerate(chunks, 1):
+                        if stop:
                             break
-                    if status == "stalled":
-                        problems.append("%s: STALLED: after %ds the engine had written nothing and used no CPU. Most likely a "
-                                        "macOS privacy prompt for rsync is waiting on this Mac's screen (PORTABILITY 15a)" % (s["dest"], c["stall_seconds"]))
-                        result["rc"] = RC_STALLED
-                    elif status == "killed-cap":
-                        problems.append("%s: stopped by the run-time cap (%ds); whole files only were written and the next run resumes" % (s["dest"], cap))
-                        result["rc"] = RC_CAP
-                    elif rc not in (0, 23, 24):
-                        problems.append("%s: engine exit code %s (%s)" % (s["dest"], rc, (etxt.splitlines() or ["no stderr"])[-1][:200]))
-                        if result["rc"] == RC_VERIFY:
-                            result["rc"] = RC_ENGINE
-                    # 3. THE ARRIVAL PROOF, for every file this pass was given. Exit 23/24 is survived ONLY through it.
-                    again, good_rows = [], []
-                    for rel in todo:
-                        drel = plan["dfiles"][ckey(rel)][0] if ckey(rel) in plan["dfiles"] else rel
-                        verdict, st3 = prove_arrival(os.path.join(s["src"], rel), os.path.join(dest_dir, drel))
-                        if verdict == "proven":
-                            proven.add(rel)
-                            good_rows.append((rel, st3))
-                        elif verdict == "vanished":
-                            vanished.append(rel)
-                        elif verdict == "unstable" or (st3 is not None and st3 != tuple(src["files"][rel])):
-                            again.append(rel)            # the source moved on since it was listed: send it again
-                            src["files"][rel] = st3 if st3 is not None else src["files"][rel]
-                        else:
-                            undelivered.append(rel)
-                    index.put_many(s["dest"], good_rows, time.time())      # ONLY what was proven
-                    totals["proven_by_sha256"] += len(good_rows)
-                    for rel in todo_dirs:
-                        if not os.path.isdir(os.path.join(dest_dir, rel)) and os.path.isdir(os.path.join(s["src"], rel)):
-                            undelivered.append(rel + "/")
-                    todo_dirs = []
-                    if status != "ok" or npass == MAX_PASSES:
-                        undelivered += again
-                        todo = []
-                    else:
-                        if again:
-                            totals["resent"] += len(again)
-                        todo = again
-                index.put_many(s["dest"], [(rel, src["files"][rel]) for rel in plan["hash_equal"]], time.time())
-                for rel in vanished:
-                    src["files"].pop(rel, None)          # gone from the source: no longer in scope
-                totals["vanished"] += len(vanished)
-                # 4. a sha256 sample of files this run did NOT send (they rest on an earlier proof)
-                pool = [r for r in plan["proven_unsent"] if r in src["files"]]
-                random.seed(stamp + s["dest"])
-                sample = random.sample(pool, min(c["hash_sample"], len(pool)))
-                bad_hash = []
-                for rel in sample:
-                    drel = plan["dfiles"][ckey(rel)][0]
-                    verdict, _ = prove_arrival(os.path.join(s["src"], rel), os.path.join(dest_dir, drel))
-                    if verdict == "differs":
-                        bad_hash.append(rel)
-                        proven.discard(rel)
-                if bad_hash:
-                    problems.append("%s: sha256 sample of files not sent tonight: %d of %d DIFFER from the source (first: %s)"
-                                    % (s["dest"], len(bad_hash), len(sample), bad_hash[0]))
-                    undelivered += bad_hash
+                        if not nas_is_smb_mounted(ctx):
+                            raise Refused("REFUSED — %s is no longer mounted as a network share; stopped in set %s before "
+                                          "chunk %d of %d" % (c["nas_root"], s["dest"], ci, len(chunks)))
+                        todo = list(chunk)
+                        todo_dirs = list(plan["copy_dirs"]) if ci == 1 else []
+                        for npass in range(1, MAX_PASSES + 1):
+                            if not todo and not todo_dirs:
+                                break
+                            tag = "" if npass == 1 else "_pass%d" % npass
+                            # the chunk's own three files are overwritten by the next chunk; what the engine said
+                            # is appended to ONE log and ONE error file per set (a first copy has thousands of chunks)
+                            list_path, eng_log, eng_err = base + ".chunk.files0", base + ".chunk.rsync.log", base + ".chunk.rsync.err"
+                            with open(list_path, "wb") as fh:
+                                for rel in todo_dirs + todo:
+                                    fh.write(rel.encode("utf-8", "surrogateescape") + b"\0")
+                            # a separate versions folder per pass: a re-send must never overwrite the previous copy pass 1 kept
+                            bdir = os.path.join(croot, "versions", stamp + tag, *s["dest"].split("/"))
+                            argv = [c["rsync"], "-t", "-O", "-I", "--from0", "--files-from=" + list_path, "--backup",
+                                    "--backup-dir=" + bdir, "--timeout=%d" % c["io_timeout"], "--out-format=%i %n%L", "--stats", "--no-h",
+                                    "--temp-dir=" + os.path.join(croot, "_tmp_incoming"), s["src"].rstrip("/") + "/", dest_dir.rstrip("/") + "/"]
+                            if ci == 1 and npass == 1:
+                                say("    engine: %s" % " ".join(shlex.quote(a) for a in argv))
+                            status, rc = run_rsync(ctx, argv, eng_log, eng_err, deadline, c["stall_seconds"], record_group=True)
+                            pl = parse_engine_log(eng_log)
+                            with open(eng_err, "rb") as fh:
+                                etxt = fh.read().decode("utf-8", "replace").strip()
+                            for part, whole in ((eng_log, base + ".rsync.log"), (eng_err, base + ".rsync.err")):
+                                with open(part, "rb") as a, open(whole, "ab") as b:
+                                    b.write(("## chunk %d of %d, pass %d: %s rc=%s\n" % (ci, len(chunks), npass, status, rc)).encode("utf-8"))
+                                    b.write(a.read())
+                            say("    chunk %d of %d, engine pass %d: %s rc=%s; its log lists %d new + %d replaced files; deleting lines: %d%s"
+                                % (ci, len(chunks), npass, status, rc, pl["new"], pl["updated"], len(pl["deleting"]),
+                                   ("; stderr (%d lines), first: %s" % (len(etxt.splitlines()), etxt.splitlines()[0][:200])) if etxt else ""))
+                            if len(mset["engine_passes"]) < 400:
+                                mset["engine_passes"].append({"chunk": ci, "pass": npass, "status": status, "rc": rc, "sent": len(todo), "log": base + ".rsync.log",
+                                                              "deleting_lines": len(pl["deleting"]), "stderr_lines": len(etxt.splitlines())})
+                            if pl["deleting"]:
+                                problems.append("%s: the engine's log holds %d DELETING line(s) (first: %s): that must be impossible"
+                                                % (s["dest"], len(pl["deleting"]), pl["deleting"][0][:200]))
+                                result["rc"] = RC_DELETING
+                            for pth in pl["paths"]:
+                                if any(secret_shape(part) for part in pth.split("/")):
+                                    problems.append("%s: a secret-shaped name travelled: %s" % (s["dest"], pth))
+                                    break
+                            if status == "stalled":
+                                problems.append("%s: STALLED: after %ds the engine had written nothing and used no CPU. Most likely a "
+                                                "macOS privacy prompt for rsync is waiting on this Mac's screen (PORTABILITY 15a)" % (s["dest"], c["stall_seconds"]))
+                                result["rc"] = RC_STALLED
+                                stop = "stalled"
+                            elif status == "killed-cap":
+                                problems.append("%s: stopped by the run-time cap (%ds); whole files only were written, what was "
+                                                "proven is saved, and the next run goes on from there" % (s["dest"], cap))
+                                result["rc"] = RC_CAP
+                                stop = "the cap"
+                            elif rc not in (0, 23, 24):
+                                problems.append("%s: engine exit code %s (%s)" % (s["dest"], rc, (etxt.splitlines() or ["no stderr"])[-1][:200]))
+                                if result["rc"] == RC_VERIFY:
+                                    result["rc"] = RC_ENGINE
+                            # THE ARRIVAL PROOF, for every file this pass was given. The engine's exit code decides nothing.
+                            again = []
+                            for i, rel in enumerate(todo):
+                                if time.time() >= deadline:
+                                    for r2 in todo[i:]:
+                                        why.setdefault(r2, "not proven before the run-time cap")
+                                    if not stop:
+                                        problems.append("%s: the run-time cap (%ds) passed while files were being proven; what was "
+                                                        "proven is saved, and the next run goes on from there" % (s["dest"], cap))
+                                        result["rc"] = RC_CAP
+                                        stop = "the cap"
+                                    break
+                                drel = plan["dfiles"][ckey(rel)][0] if ckey(rel) in plan["dfiles"] else rel
+                                verdict, st3, note = prove_arrival(os.path.join(s["src"], rel), os.path.join(dest_dir, drel))
+                                if verdict == "proven":
+                                    proven.add(rel)
+                                    why.pop(rel, None)
+                                    saver.add(rel, st3)              # into the index ONLY when proven, and as it goes
+                                    totals["proven_by_sha256"] += 1
+                                    if plan["reason"].get(rel) == "repair":
+                                        totals["repaired"] += 1
+                                elif verdict == "unreadable":
+                                    if source_deleted(s["src"], plan["root_id"], rel):
+                                        deleted.append(rel)
+                                        why.pop(rel, None)
+                                    else:
+                                        why[rel] = note
+                                elif verdict == "unstable" or (st3 is not None and st3 != tuple(src["files"][rel])):
+                                    again.append(rel)                # the source moved on since it was listed: send it again
+                                    src["files"][rel] = st3 if st3 is not None else src["files"][rel]
+                                    why[rel] = "the source kept changing while it was being copied"
+                                else:
+                                    why[rel] = note
+                            saver.flush()
+                            for rel in todo_dirs:
+                                if not os.path.isdir(os.path.join(dest_dir, rel)) and os.path.isdir(os.path.join(s["src"], rel)):
+                                    missing_dirs.append(rel + "/")
+                            todo_dirs = []
+                            if stop or status != "ok" or npass == MAX_PASSES:
+                                todo = []
+                            else:
+                                if again:
+                                    totals["resent"] += len(again)
+                                todo = again
+                        if len(chunks) > 1:
+                            say("    after chunk %d of %d: %d of %d planned files proven and saved" % (ci, len(chunks), len(proven & planned), len(planned)))
+                    if stop:
+                        for rel in todo_all:
+                            if rel not in proven and rel not in deleted:
+                                why.setdefault(rel, "not sent: the run was stopped by %s first" % stop)
+                finally:
+                    saver.flush()          # an interruption keeps every proof made so far
                 versioned = 0
                 for d in os.listdir(os.path.join(croot, "versions")):
                     if d == stamp or d.startswith(stamp + "_pass"):
                         vd = os.path.join(croot, "versions", d, *s["dest"].split("/"))
                         if os.path.isdir(vd):
                             versioned += len(walk(vd)["files"])
-                unaccounted = [rel for rel in src["files"] if rel not in proven and rel not in undelivered]
-                undelivered += unaccounted
+                # THE ACCOUNTING: planned, minus proven, minus provably deleted. Whatever is left is NOT DELIVERED.
+                gone = set(deleted)
+                not_proven = sorted(rel for rel in planned if rel not in proven and rel not in gone)
+                undelivered = not_proven + missing_dirs
+                allowed = deleted_allowed(c, len(planned))
+                if deleted:
+                    say("    DELETED at the source during the run: %d planned file(s). Each one's folder was listed twice and "
+                        "the name was absent both times; they are not at the destination from tonight. Allowed before the "
+                        "night fails: %d. First: %s" % (len(deleted), allowed, ", ".join(sorted(deleted)[:5])))
+                    deleted_all += ["%s/%s" % (s["dest"], r) for r in sorted(deleted)]
+                if len(deleted) > allowed:
+                    problems.append("%s: %d planned files were deleted from the source during the run, above the %d allowed "
+                                    "(max_deleted_files=%d, max_deleted_fraction=%g of %d planned): that many is not a few "
+                                    "temporary files" % (s["dest"], len(deleted), allowed, c["max_deleted_files"],
+                                                         c["max_deleted_fraction"], len(planned)))
                 if undelivered:
-                    problems.append("%s: %d file(s) NOT PROVEN at the destination with the source's content (first: %s)"
-                                    % (s["dest"], len(undelivered), undelivered[0]))
-                    undelivered_all += ["%s/%s" % (s["dest"], r) for r in undelivered]
+                    first = undelivered[0]
+                    problems.append("%s: %d file(s) NOT PROVEN at the destination with the source's content (first: %s: %s)"
+                                    % (s["dest"], len(undelivered), first, why.get(first, "the folder is missing at the destination"
+                                                                                  if first.endswith("/") else "not proven")))
+                    undelivered_all += [("%s/%s" % (s["dest"], r), why.get(r, "the folder is missing at the destination"
+                                                                           if r.endswith("/") else "not proven")) for r in undelivered]
                 say("    proven at the destination: %d of %d source files (%d compared by sha256 tonight, %d re-sent because the "
-                    "source changed meanwhile); gone from the source during the run: %d; previous copies kept: %d; "
+                    "source changed meanwhile); deleted at the source and confirmed absent: %d; previous copies kept: %d; "
                     "sample of unsent files %d/%d agree; NOT PROVEN: %d"
-                    % (len(proven & set(src["files"])), len(src["files"]), totals["proven_by_sha256"], totals["resent"], len(vanished),
-                       versioned, len(sample) - len(bad_hash), len(sample), len(undelivered)))
-                mset.update({"vanished_during_run": len(vanished), "undelivered": undelivered[:100], "versioned": versioned,
-                             "hash_sample": len(sample), "hash_sample_bad": bad_hash[:20]})
+                    % (len(proven & planned), len(planned), totals["proven_by_sha256"], totals["resent"], len(deleted),
+                       versioned, len(sample) - len(repair), len(sample), len(undelivered)))
+                mset.update({"deleted_during_run": sorted(deleted)[:5000], "deleted_count": len(deleted),
+                             "undelivered": undelivered[:100], "versioned": versioned,
+                             "hash_sample": len(sample), "hash_sample_repaired": repair[:20]})
                 totals["versioned"] += versioned
+                totals["deleted"] += len(deleted)
                 totals["undelivered"] += len(undelivered)
-            tbl = folder_table(plan, proven)
+            tbl = folder_table(plan, proven, set(deleted))
             mset["folders"] = tbl
             say("    %-34s %10s %14s | %10s %14s | %s" % ("top-level folder", "src files", "src bytes", "dst files", "dst bytes", "dst-only (kept)"))
             for top in sorted(tbl):
@@ -1448,6 +2058,13 @@ def cmd_backup(ctx, mode, scheduled=False, out_of_sequence=None, max_seconds=Non
             manifest["sets"].append(mset)
             if result["rc"] in (RC_STALLED, RC_CAP):
                 break
+        # ... AND BEFORE GOOD: a run must not say GOOD about a share that has gone away meanwhile.
+        if mode == "run" and not nas_is_smb_mounted(ctx):
+            problems.append("%s is no longer mounted as a network share at the end of the run" % c["nas_root"])
+        done_sets = set(m["dest"] for m in manifest["sets"])
+        for s in c["sets"]:
+            if s["dest"] not in done_sets:
+                problems.append("%s: this set was not reached (the run stopped before it): nothing of it is proven tonight" % s["dest"])
     except KeyboardInterrupt:
         problems.append("interrupted by signal %s" % interrupted["sig"])
         result["rc"] = RC_ENGINE
@@ -1459,7 +2076,8 @@ def cmd_backup(ctx, mode, scheduled=False, out_of_sequence=None, max_seconds=Non
         result["rc"] = RC_ENGINE
     finally:
         signal.alarm(0)
-        index.close()
+        if index is not None:
+            index.close()
 
     unlisted = []
     parent = c.get("report_unlisted_under")
@@ -1480,11 +2098,11 @@ def cmd_backup(ctx, mode, scheduled=False, out_of_sequence=None, max_seconds=Non
     manifest.update({"unlisted_folders": unlisted, "totals": totals, "problems": problems, "finished": time.time(),
                      "finished_local": now_local_str(time.time()), "seconds": round(time.time() - started, 1),
                      "secret_shape_counts": secret_counts, "other_client_token_counts": token_counts,
-                     "undelivered": undelivered_all[:500]})
+                     "undelivered": [u for u, _ in undelivered_all[:500]], "deleted_during_run": deleted_all[:5000]})
     good = not problems
     manifest["good"] = good if mode == "run" else None
     mpath = os.path.join(ctx.manifest_dir, "%s_%s_manifest.json" % (stamp, mode))
-    with open(mpath, "w", encoding="utf-8") as fh:
+    with open(mpath, "w", encoding="utf-8", errors="surrogateescape") as fh:
         json.dump(manifest, fh, indent=1, sort_keys=True)
         fh.write("\n")
     say("--- totals: source in scope %d files, %s; to copy %d files, %s (%d new, %d changed); %d symlinks recorded; "
@@ -1499,6 +2117,13 @@ def cmd_backup(ctx, mode, scheduled=False, out_of_sequence=None, max_seconds=Non
         say("in-scope paths that carry another client's project name (REPORTED, not excluded; seats/%s.tokens): %s"
             % (ctx.seat, ", ".join("%s=%d" % kv for kv in sorted(token_counts.items()))))
     say("manifest: %s" % mpath)
+    if deleted_all:
+        say("DELETED AT THE SOURCE during the run (%d file(s); each one's folder was listed twice and the name was absent "
+            "both times; not backed up tonight):" % len(deleted_all))
+        for d in deleted_all[:600]:
+            say("  DELETED AT SOURCE: %s" % d)
+        if len(deleted_all) > 600:
+            say("  ... and %d more, all in the manifest" % (len(deleted_all) - 600))
     if mode == "dry":
         est_copy_h = totals["copy_files"] / c["est_files_per_s"] / 3600.0
         est_list_min = (totals["src_files"] / c["est_list_per_s"]) / 60.0
@@ -1519,7 +2144,7 @@ def cmd_backup(ctx, mode, scheduled=False, out_of_sequence=None, max_seconds=Non
             for client, croot in client_roots.items():
                 cm = dict(manifest)
                 cm["sets"] = [m for m in manifest["sets"] if m["client"] == client]
-                with open(os.path.join(croot, "manifests", "%s_manifest.json" % stamp), "w", encoding="utf-8") as fh:
+                with open(os.path.join(croot, "manifests", "%s_manifest.json" % stamp), "w", encoding="utf-8", errors="surrogateescape") as fh:
                     json.dump(cm, fh, indent=1, sort_keys=True)
                 for m in cm["sets"]:
                     if m.get("symlink_list_file"):
@@ -1532,12 +2157,21 @@ def cmd_backup(ctx, mode, scheduled=False, out_of_sequence=None, max_seconds=Non
             problems.append("could not write the manifest or the completion marker on the NAS: %s" % e)
             good = False
         if good:
-            say("GOOD: every in-scope source file is PROVEN at the destination with the source's content. Nothing was "
-                "deleted on either side.%s"
-                % ((" NOTE, not backed up and named in the manifest: %d file(s) whose names differ only in case, %d with more than one hard link."
+            say("GOOD: every in-scope source file is PROVEN at the destination with the source's content (every file of "
+                "the plan made when its set started). Nothing was deleted on either side by this tool.%s%s"
+                % ((" DELETED at the source during the run, confirmed absent twice, so not backed up tonight: %d file(s), named above "
+                    "and in the manifest." % totals["deleted"]) if totals["deleted"] else "",
+                   (" NOTE, not backed up and named in the manifest: %d file(s) whose names differ only in case, %d with more than one hard link."
                     % (totals["case_collision_files"], totals["hard_link_files"])) if (totals["case_collision_files"] or totals["hard_link_files"]) else ""))
-            ctx.note_attempt("good", "every in-scope file proven", {"stamp": stamp, "manifest": mpath, "trigger": manifest["trigger"],
-                                                                    "counts": totals, "seconds": manifest["seconds"], "set_counts": set_counts})
+            ctx.note_attempt("good", "every planned file proven", {"stamp": stamp, "manifest": mpath, "trigger": manifest["trigger"],
+                                                                  "counts": totals, "seconds": manifest["seconds"], "set_counts": set_counts,
+                                                                  "deleted_during_run": deleted_all[:20]})
+            try:
+                ix = Index(ctx, readonly=False)
+                ix.set_baseline(set_counts)          # the fall rule's baseline, kept a second time beside the proofs
+                ix.close()
+            except sqlite3.Error as e:
+                say("note: the baseline could not be written into the index (%s); the state file holds it" % e)
             rcode = RC_OK
         else:
             say("FAILED (the exit code of the engine is never success; the proof is):")
@@ -1545,14 +2179,13 @@ def cmd_backup(ctx, mode, scheduled=False, out_of_sequence=None, max_seconds=Non
                 say("  - %s" % p)
             if undelivered_all:
                 say("NOT DELIVERED (%d file(s)), the first %d:" % (len(undelivered_all), min(20, len(undelivered_all))))
-                for u in undelivered_all[:20]:
-                    say("  NOT DELIVERED: %s" % u)
+                for u, reason in undelivered_all[:20]:
+                    say("  NOT DELIVERED: %s (%s)" % (u, reason))
             status = {RC_CAP: "killed-cap", RC_STALLED: "stalled"}.get(result["rc"], "failed")
             ctx.note_attempt(status, "; ".join(problems)[:900], {"stamp": stamp, "manifest": mpath,
                                                                  "undelivered_count": len(undelivered_all),
-                                                                 "undelivered": undelivered_all[:20]})
+                                                                 "undelivered": [u for u, _ in undelivered_all[:20]]})
             rcode = result["rc"]
-        lock_release(ctx)
     with open(run_log, "w", encoding="utf-8", errors="surrogateescape") as fh:
         fh.write("\n".join(lines) + "\n")
     out("log: %s" % run_log)
@@ -1590,6 +2223,7 @@ def cmd_nightly(ctx, decide_only=False):
         with open(nlog, "a", encoding="utf-8") as fh:
             fh.write("%s %s\n" % (now_local_str(ctx.now), msg))
 
+    ctx.found_by = "the nightly job (launchd; its output is a log no seat reads)"
     try:
         if os.path.exists(ctx.hold_file):
             record("nightly[%s]: HELD: %s exists; nothing run" % (ctx.seat, ctx.hold_file))
@@ -1606,6 +2240,7 @@ def cmd_nightly(ctx, decide_only=False):
     if decide_only:
         return RC_OK
     st["last_fire"] = {"time": ctx.now, "time_local": now_local_str(ctx.now), "decision": action, "reason": reason}
+    ctx.hold_lifted(st)
     if not st.get("first_attempt_at"):
         st["first_attempt_at"] = ctx.now
     ctx.write_state(st)
@@ -1641,13 +2276,33 @@ def card_argv(ctx, st, ref, ref_what, hours, reasons):
 
 
 def cmd_watch(ctx, action, card_id=None):
-    """action: check (read-only status), card (print the card command; consumes nothing), mark-raised, mark-armed.
-    Exit: 0 ok, held or nothing on record; 3 OVERDUE and the card is not recorded as raised (or the state file was
-    damaged); 4 overdue, card recorded as raised."""
+    """action: check (read-only status), card (print the card command; consumes nothing), mark-raised, mark-armed,
+    ack-damage. Exit: 0 ok, held or nothing on record; 3 OVERDUE and the card is not recorded as raised; 4 overdue,
+    card recorded as raised; 5 a state file or index was found DAMAGED and no seat has acknowledged it yet (said at
+    EVERY call by EVERY caller until `--ack-damage`: the nightly job can find the damage, it cannot use the notice up)."""
+    if ctx.found_by == "unknown caller":
+        ctx.found_by = "the watch (doctor at a seat's boot, or a hand run)"
+    if action == "ack-damage":
+        notices = ctx.damage_notices()
+        if not notices:
+            out("no damage notice to acknowledge")
+            return RC_OK
+        q = os.path.join(ctx.state_dir, "_quarantine_%s" % time.strftime("%Y-%m-%d"))
+        os.makedirs(q, exist_ok=True)
+        dst = os.path.join(q, "DAMAGE_NOTICE_%s.acknowledged.%s.%d.jsonl" % (ctx.seat, time.strftime("%H%M%S"), os.getpid()))
+        os.rename(ctx.damage_file, dst)
+        out("acknowledged %d damage notice(s); the notice file was MOVED to %s (not deleted)" % (len(notices), dst))
+        return RC_OK
     st = ctx.read_state()
     if ctx.state_note:
         out("nas-backup watch[%s]: %s" % (ctx.seat, ctx.state_note))
-        return RC_OVERDUE
+    notices = ctx.damage_notices()
+    for d in notices:
+        out("nas-backup watch[%s]: DAMAGE NOTICE, not yet acknowledged by a seat: the %s was found damaged at %s by %s and "
+            "moved to %s (%s). The three-day clock restarted then. Once read: nas_backup_watch.sh --ack-damage"
+            % (ctx.seat, d.get("what", "?"), str(d.get("time_local", "an unknown time"))[:19], d.get("found_by", "?"),
+               d.get("moved_to", "?"), str(d.get("error", ""))[:80]))
+    rc_quiet = RC_DAMAGE_NOTICE if notices else RC_OK
     if action == "mark-armed":
         if st.get("armed_at"):
             out("already marked armed at %s; unchanged" % now_local_str(st["armed_at"]))
@@ -1660,7 +2315,11 @@ def cmd_watch(ctx, action, card_id=None):
     if os.path.exists(ctx.hold_file) and action in ("check", "card"):
         out("nas-backup watch[%s]: HELD: %s exists, so real runs are refused by design and the three-day flag is not raised%s"
             % (ctx.seat, ctx.hold_file, "; last good backup %s" % lg["time_local"] if lg else "; no good backup on record"))
-        return RC_OK
+        return rc_quiet
+    if not os.path.exists(ctx.hold_file) and ctx.hold_lifted(st):
+        ctx.write_state(st)
+        out("nas-backup watch[%s]: the hold is no longer in place and nothing but the hold is on record since: the "
+            "three-day clock starts now, %s" % (ctx.seat, now_local_str(ctx.now)))
     # THE CLOCK (finding 5). It starts at the last good backup; before the first good backup, at the EARLIEST thing
     # on record: an arming mark, the first attempt or fire ever (stored once, never rolled), or a damage recovery.
     ref, ref_what = None, None
@@ -1679,11 +2338,13 @@ def cmd_watch(ctx, action, card_id=None):
         ctx.write_state(st)
         out("nas-backup watch[%s]: nothing on record for this seat (no attempt, no fire, no good backup) and it is not held: "
             "the three-day clock starts now, %s" % (ctx.seat, now_local_str(ctx.now)))
-        return RC_OK
+        return rc_quiet
+    if st.get("clock_floor") and st["clock_floor"] >= ref:
+        ref, ref_what = st["clock_floor"], "the hold was lifted (the clock does not run while real runs are held)"
     hours = (ctx.now - ref) / 3600.0
     reasons, grouped, order = [], {}, []
     for a in st.get("recent_attempts", []):
-        if a["time"] > ref and a["status"] != "good":
+        if a["time"] > ref and a["status"] not in ("good", "held"):
             why = a["reason"].replace("REFUSED — ", "").replace("; nothing run", "")[:400]
             if why not in grouped:
                 grouped[why] = [0, a["time_local"][:16]]
@@ -1725,10 +2386,10 @@ def cmd_watch(ctx, action, card_id=None):
         out("marked: card %s raised for the gap since %s" % (card_id or cid, now_local_str(ref)))
         return RC_OK
     if not overdue:
-        return RC_OK
+        return rc_quiet
     if raised:
         out("  the card for this gap is recorded as raised (%s). Nothing more to do until Kam rules or a backup completes." % flag.get("card_id"))
-        return RC_OVERDUE_RAISED
+        return RC_DAMAGE_NOTICE if notices else RC_OVERDUE_RAISED
     if action == "card":
         # Printing the command CONSUMES NOTHING: it is printed at every call until a seat records --mark-raised.
         # The card id is fixed per gap and decision_queue.sh refuses a second card with the same id, so the card
@@ -1782,6 +2443,7 @@ def main(argv):
     ap.add_argument("--card", action="store_true")
     ap.add_argument("--mark-raised", default=None)
     ap.add_argument("--mark-armed", action="store_true")
+    ap.add_argument("--ack-damage", action="store_true")
     a = ap.parse_args(argv)
     try:
         ctx = Ctx(a.seat, a.tree, a.now)
@@ -1793,12 +2455,15 @@ def main(argv):
         if a.command == "nightly":
             return cmd_nightly(ctx, decide_only=a.decide_only)
         if a.command == "watch":
+            if a.ack_damage:
+                return cmd_watch(ctx, "ack-damage")
             if a.mark_armed:
                 return cmd_watch(ctx, "mark-armed")
             if a.mark_raised:
                 return cmd_watch(ctx, "mark-raised", a.mark_raised)
             return cmd_watch(ctx, "card" if a.card else "check")
         if a.command == "scan":
+            ctx.readonly = True
             return cmd_scan(ctx)
         if a.command == "clear-stale-lock":
             return cmd_clear_stale_lock(ctx)

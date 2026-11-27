@@ -1,4 +1,4 @@
-# Nightly copy-only NAS backup: what the TUESDAY and FRIDAY seats do (round 2)
+# Nightly copy-only NAS backup: what the TUESDAY and FRIDAY seats do (round 3)
 
 For: the Tuesday and Friday coordinator seats. Sent only when Wednesday says go. Until then it is a proposal.
 
@@ -24,7 +24,7 @@ What you send Wednesday (a QUESTION mail, topic `nas-backup scope`), each item c
 
 ## Step 2: after Wednesday has added your seat (her commit, pulled into your tree)
 
-1. **Run the tests** (fake NAS in a scratch folder, never the real share): `bash 2_Project_Files/nas-backup/tests/run.sh`. Every line PASS, `0 failed`. Then `bash 2_Project_Files/nas-backup/tests/mutants.sh` (about 20 minutes): `0 survived or broken`. If either fails on your machine, STOP and report it.
+1. **Run the tests** (fake NAS in a scratch folder, never the real share): `bash 2_Project_Files/nas-backup/tests/run.sh`. Every line PASS, `0 failed`. Then `bash 2_Project_Files/nas-backup/tests/mutants.sh` (long: one suite run per mutant, about an hour): `0 survived or broken`. If either fails on your machine, STOP and report it.
 2. **Check the prerequisites:** the share is mounted as a network share (`mount | /usr/bin/grep -i 'DEV-Working'` shows `(smbfs`; if not, ask Kam to mount it, never create the path); `/opt/homebrew/bin/rsync --version | head -1` says `version 3.`; your tree's folder name is `TUESDAY` or `FRIDAY` and `WED_AGENT` agrees with it.
 3. **Size your scope:** `bash 2_Project_Files/nas-backup/nas_backup.sh --scan` (reads your drive only). The Wednesday tree held 6.4 million files of caches and clones before it was narrowed. Propose `exclude_path=` lines for regenerable bulk to Wednesday until each set is under 400,000 files; say what and why. A path that does not exist is refused by name, and the conf's last line `END lines=<N>` must be recounted after every edit.
 4. **Dry run against the real share (reads only):** `bash 2_Project_Files/nas-backup/nas_backup.sh`. Read all of it. It must end `DRY RUN finished` with no PROBLEM line. Send Wednesday the totals line, the "excluded as secret-shaped" line and the "another client's project name" line.
@@ -43,7 +43,7 @@ bash 2_Project_Files/nas-backup/nas_backup.sh --run --out-of-sequence <card id> 
 You do nothing. Wednesday applies the one shared change (`proposed/install_all_jobs.proposed.md`); you then run `bash 2_Project_Files/scheduler/install_all_jobs.sh` from your own tree with `WED_AGENT` unset, as for any other job.
 
 ## How to prove the first run (send these, with the commands' own output)
-1. The run's last lines: `GOOD: every in-scope source file is PROVEN at the destination with the source's content.` and the `--- totals:` line.
+1. The run's last lines: the line starting `GOOD: every in-scope source file is PROVEN at the destination with the source's content` and the `--- totals:` line. If the GOOD line names files DELETED at the source during the run, send those lines too.
 2. The per-folder table: for every top-level folder `src files` equals `dst files` and `src bytes` equals `dst bytes`.
 3. `deleting lines: 0` on every `engine pass` line, and `NOT PROVEN: 0` on every set.
 4. On the share: a `runs/RUN_<stamp>_COMPLETE.txt` beside the `RUN_<stamp>_STARTED.txt`.
@@ -60,3 +60,10 @@ Every refusal says why and writes nothing. A FAILED run names each file it could
 - Never delete anything under `nightly-backup/` on the share. Clean-up is Kam's word.
 
 Nothing in these instructions writes or deletes on the share except step 3's approved run.
+
+## Round 3: what is different for you
+- **One rule: a night is good only if every planned file is proven on the share.** A file that cannot be read fails the night and is named; so does a set whose plan holds no file at all (if one of your sets is really empty, say so in your scope mail: Wednesday adds an `allow_empty=` line, you do not).
+- **A set= line cannot name a folder that holds another seat's tree or another client's folder.** Name your folders one by one. The tool refuses the wider line and says which forbidden folder it would have reached.
+- **The copy goes in chunks of 200 files and saves its proofs as it goes.** If the first copy is interrupted (a closed terminal, a reboot, the cap), start the same command again: it sends only what is not proven.
+- **If doctor says `NAS BACKUP STATE WAS FOUND DAMAGED`:** run `bash 2_Project_Files/nas-backup/nas_backup_watch.sh --check`, read what it says was damaged and where it was moved, tell Wednesday, then `nas_backup_watch.sh --ack-damage`.
+- **More names stay out of the backup** (token and key files by their usual names, `.auth` and `.docker` folders, public certificates too). The list is in the lane's README, with the plain statement that a name rule cannot be complete.

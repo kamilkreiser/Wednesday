@@ -1,0 +1,46 @@
+Fri 27 Nov 2026 17:15:16 AEDT
+--- mount line for the Backup share
+//DotORG@192.168.20.154/Backup on /Volumes/Backup (smbfs, nodev, nosuid, mounted by kamil)
+--- pgrep -fl nas_push
+rc=1
+--- pgrep -fl rsync
+549 /usr/libexec/colorsync.displayservices
+554 /usr/libexec/colorsyncd
+797 /System/Library/Frameworks/Contacts.framework/Support/postersyncd
+883 /System/Library/CoreServices/appplaceholdersyncd
+18998 /System/Library/Frameworks/ColorSync.framework/Support/colorsync.useragent
+rc=0
+--- pgrep -fl unison
+rc=1
+--- pgrep -fl nb_core
+79846 /bin/zsh -c source /Users/kamil/.claude/shell-snapshots/snapshot-zsh-1795758220499-rs6jsh.sh 2>/dev/null || true && \builtin setopt NO_EXTENDED_GLOB NO_BARE_GLOB_QUAL NO_BRACE_CCL NO_MAGIC_EQUAL_SUBST NO_RC_QUOTES NO_EQUALS 2>/dev/null || true && { \builtin unalias -- 'which'; \builtin unset -f -- 'which'; } >/dev/null 2>&1 || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'SP=/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/f14e52ac-5be2-4a26-ad53-8a7559071523/scratchpad; L=/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/nas-backup; mkdir -p "$SP/filtered"; python3 - "$L" "$SP/filtered" <<'"'"'EOF'"'"'
+import glob, os, sys, collections
+sys.path.insert(0, sys.argv[1]); import nb_core
+logs = sys.argv[1] + "/logs/wednesday"; stamp = "2026-11-27_143103_5517"; outd = sys.argv[2]
+tot = kept = 0; by = collections.Counter(); files_by = collections.Counter()
+cache = {}
+def shape(comp):
+    if comp not in cache: cache[comp] = nb_core.secret_shape(comp)
+    return cache[comp]
+for f in sorted(glob.glob(os.path.join(logs, stamp + "_dry_*.files0"))):
+    keep = []
+    for d in open(f, "rb").read().split(b"\0"):
+        if not d: continue
+        tot += 1
+        n = d.decode("utf-8", "surrogateescape")
+        sh = None
+        for comp in n.split("/"):
+            sh = shape(comp)
+            if sh: break
+        if sh: by[sh] += 1
+        else: keep.append(d); kept += 1
+    open(os.path.join(outd, os.path.basename(f)), "wb").write(b"\0".join(keep) + (b"\0" if keep else b""))
+print("round 2 real dry lists: %d paths; newly excluded by the round 3 name rule: %d; kept: %d" % (tot, tot - kept, kept))
+for k, v in sorted(by.items()): print("   %-32s %6d paths (files and folders, and what lies under an excluded folder)" % (k, v))
+EOF
+python3 /Volumes/DevMASTER/WEDNESDAY/0_Brain/reference/2026-11-27_qa-nasbackup-r2/scripts/S_scan_real_lists.py "$SP/filtered" 2026-11-27_143103_5517 > "$SP/filtered_checker_scan.txt" 2>&1; echo "checker scan rc=$?"; /usr/bin/grep -E '"'"'^(TIER [ABDZ]|UNIT|lists|paths)'"'"' "$SP/filtered_checker_scan.txt"; python3 "$L/tests/scan_dry_lists.py" "$SP/filtered" 2026-11-27_143103_5517 > "$SP/filtered_seat_scan.txt" 2>&1; echo "seat scan rc=$?"; tail -1 "$SP/filtered_seat_scan.txt"' && pwd -P >| /tmp/claude-2213-cwd
+rc=0
+--- launchctl list, rows naming nas (read-only verb)
+-	0	com.wednesday.naspush
+--- control: rows naming wednesday in the same listing
+10
