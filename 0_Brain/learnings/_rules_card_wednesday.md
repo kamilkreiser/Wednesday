@@ -12,7 +12,7 @@ status: live
 - Open the family file in families/ or the lesson itself the moment a rule fires or a diagnosis needs its cases.
 - Lessons that say the same thing are merged into one line; the count carries their combined reinforcement.
 
-Counts: 293 lessons, 380 rule lines, 316 on this card, 1 enforced, 12 dead, 25 superseded, 26 other-seat-only
+Counts: 294 lessons, 381 rule lines, 317 on this card, 1 enforced, 12 dead, 25 superseded, 26 other-seat-only
 
 ## Most reinforced (read these first)
 - [×788] Before stating any fact in a brief, score, report or ack: take it from a read made in the same action, never a widget, board column, error string, capped query or my earlier prose; name the instrument inline. Never state a mechanism I have not read. — `2026-08-14_i-read-representations-they-read-sources.md`
@@ -70,6 +70,7 @@ Counts: 293 lessons, 380 rule lines, 316 on this card, 1 enforced, 12 dead, 25 s
 - [×2] When relying on or writing a guard: read its exclusion list against its subject (a conflict-marker hook that skipped .json missed the files that carry markers). Plant the defect in an excluded file type, and install the hook in each seat's .git/hooks. — `2026-09-09_a-guard-whose-exclusion-list-contains-its-own-subject.md`
 - [×1] Never commission "recognise the safe cases" of a shell or interpreter as a security boundary: commission the conservative rule (all of it dangerous). If gate round 2 fails on a new dimension, ask "can this be sound at all?" and remove it, no third patch. — `2026-11-17_a-recogniser-of-safe-shell-commands-cannot-be-finished.md`
 - [new] When writing a sweep that emits a list of suspect tests or sites: give it a self-test that ABORTS (a known-changed path is in, a known-unchanged path is out, the population is non-empty). State exclusions as 'by construction' with the reason. — `2026-09-20_an-early-return-disarms-tests-outside-the-diff.md` (rule 2)
+- [new] When a clause makes a guarantee depend on code sorting free text (filter, skip, exception, name list, fix each shape): it is a recogniser. Commission the conservative rule (carry whole, qualify or stay out, unproven fails); remove it at the FIRST NO GO. — `2026-11-27_a-rule-that-sorts-free-text-into-safe-and-not-is-a-recogniser-whatever-i-call-it.md`
 
 ## sources-not-representations
 - [×788] Before stating any fact in a brief, score, report or ack: take it from a read made in the same action, never a widget, board column, error string, capped query or my earlier prose; name the instrument inline. Never state a mechanism I have not read. — `2026-08-14_i-read-representations-they-read-sources.md`

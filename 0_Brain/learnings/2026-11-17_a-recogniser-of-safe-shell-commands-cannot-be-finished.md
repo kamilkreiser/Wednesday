@@ -18,3 +18,5 @@ tier: M
 2. **At a gate return:** if round 2 fails on a different dimension from round 1, ask the gate the direct question "can this approach be made sound at all?" in the round-2 commission, so the answer arrives with the verdict. (Done here; it saved a third round.)
 3. **The two-NO-GO cap is the trigger, and removal is not a third round.** Dropping the unsound mechanism for the conservative default is the coordinator's call; the usability cost goes to Kam on a card with the default already applied.
 4. **Quarantine, never delete, the removed attempt**, with both verdicts cited, so a later attempt starts from the evidence.
+
+**Widened 2026-11-27 (Wednesday seat):** the same mechanism outside any shell (a dead-row filter, shape-by-shape fixes, an untested exception, a client-name word list) failed four times in one day while this lesson sat filed under "shell commands". The general rule and the cases: [[2026-11-27_a-rule-that-sorts-free-text-into-safe-and-not-is-a-recogniser-whatever-i-call-it]].

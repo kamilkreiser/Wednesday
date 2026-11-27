@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-27 19:22 from 293 lesson files (1,234,666 B). M 43 · MIXED 5 · P (Datasec/OXPd) 1 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 6 · W 236. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-27 19:32 from 294 lesson files (1,239,510 B). M 44 · MIXED 5 · P (Datasec/OXPd) 1 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 6 · W 236. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (6) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md · 2026-11-21_a-holding-helper-gets-the-next-useful-job.md · 2026-11-21_friday-runs-on-opus-fable-only-when-flagged.md · 2026-11-21_windows-helper-launches-without-permission-prompts.md
 
@@ -7977,6 +7977,8 @@ sections (open the file for these): How to apply · First application (same minu
 3. **The two-NO-GO cap is the trigger, and removal is not a third round.** Dropping the unsound mechanism for the conservative default is the coordinator's call; the usability cost goes to Kam on a card with the default already applied.
 4. **Quarantine, never delete, the removed attempt**, with both verdicts cited, so a later attempt starts from the evidence.
 
+**Widened 2026-11-27 (Wednesday seat):** the same mechanism outside any shell (a dead-row filter, shape-by-shape fixes, an untested exception, a client-name word list) failed four times in one day while this lesson sat filed under "shell commands". The general rule and the cases: [[2026-11-27_a-rule-that-sorts-free-text-into-safe-and-not-is-a-recogniser-whatever-i-call-it]].
+
 
 ## A recorded test fixture is made from a scratch tree the seat builds, never from the real drive: raw tool output carries whatever the drive holds, and a repository's history keeps it
 `2026-11-17_recorded-fixtures-come-from-a-scratch-tree-never-the-real-drive.md` · lesson · 2026-11-17 · status: live · tier: M
@@ -8185,6 +8187,20 @@ sections (open the file for these): The rule · Why · The failure behind it (le
 4. Corrections are named for what they are, never minimised ("small", "minor") in a message to Kam.
 5. One Kam thread answered at a time; agent wakes wait behind his message.
 6. **Test, don't hedge (Kam, live board 11:53, verbatim: "You should have tested. I did. It works").** When a fact can be measured quickly and safely (a GET of a sign-in page, a read-only list), measure it before the message; "I haven't tested it" is acceptable only when the test is unsafe, approval-class or out of reach, and the message says why.
+
+
+## A rule that sorts free text into "safe" and "not" is a recogniser, whatever I call it: filter, exception, name list, shape fix
+`2026-11-27_a-rule-that-sorts-free-text-into-safe-and-not-is-a-recogniser-whatever-i-call-it.md` · correction · 2026-11-27 · status: live · tier: M
+
+**The lesson:** When a safety property (nothing dropped, nothing leaked, nothing lost) is made to depend on code that reads free text and decides which items the rule applies to, that code is a recogniser and it cannot be finished. Commission the conservative rule instead: carry the whole thing, qualify or stay out, unproven means failed. This is the 2026-11-17 lesson with its handle widened; that lesson did not fire today because I had filed it under "safe shell commands".
+
+**How to apply.**
+
+1. **Before a brief or answer leaves me, read each clause and ask: does a guarantee here depend on code deciding which free-text items count?** Words that mark it: filter, skip, except when, unless it looks like, leave out those that mention, recognise, detect, fix each shape. If yes, rewrite the clause as the conservative rule and state the cost (bytes carried, lessons left out, runs failed) as a number for Kam, not as a reason to classify.
+2. **A check's NO GO that lists new shapes is the signal to remove the mechanism, at the FIRST such verdict, not the second.** Asking for the listed shapes to be fixed is the patch the lesson forbids.
+3. **An exception to a hard rule is a recogniser of the exempt case.** It ships only with a test that plants the non-exempt look-alike and shows it refused; otherwise it is withdrawn.
+4. **Convenience may still classify, as long as nothing is guaranteed by it.** Name-shape rules are best effort and are said to be so (the severity ruling given to the NAS checker: hard guarantees are Blockers on any input, name-shape rules best effort).
+5. **Credit where it was caught:** the build seat that measured clause 4 against the brief's own figure and asked, and the fresh checkers. A seat that questions my clause is the system working.
 
 
 ## Before handing Kam a step, check whether we can do it ourselves with an identity we already hold
