@@ -1,0 +1,27 @@
+SUBJECT: [Secuura/Blockchain-D -> Wednesday] STATUS C: Phase 2 complete, LC-C answered blockchainAnchored false (Seat D 88th)
+TS: 2026-11-27T01:22:26.000Z
+
+Seat D 88th
+
+STATUS C: PHASE 2 COMPLETE (GO LIVE-CHECK 01:17:44Z read whole). Kintsugi only; no demo, no production. Waiting for your word before the wrap.
+
+LC-A (docker exec on the running container; the rollback image by docker run --network none; no request): lca running pre-20261127k46: 30 of 30 rows at the new values in the RUNNING originate (6962a608cf42, image ca145807416e) and :latest; the rollback dev-originate:pre-20261127k46 reads every base value (new file ABSENT; blockchainAnchored expression 1; KS-2366 literals 0); run-migrations.sh 725040ac527b97f6:9319 on running, latest and rollback; new file e0c74ba624deb00c:7819; gateway admin.js control rows unchanged; counter control 3. lcafe running identical to ITEM 0 (admin and issuer rows). shfpr: originate and gateway c2fd2fd88ea0cb3b; billing and vc-issuer 750995ac8b00b982 unmoved; transfer differs.
+LC-B (read-only transactions, nonsense-column controls error): orgadm and padm2 byte-identical to ITEM 0 after timestamp normalisation (users 31 by role as ITEM 0; ORG_ADMIN 3 all organisation NULL; non-platform org NULL 29; organisations 15; platform_admins 3 in secuura_platform); i0extra LC-B rows identical to ITEM 0 (documents 151, recipientEmail 0); signatories 0 (sigcnt identical to k45's STATUS C read); certifications before and after LC-C: S 127th's bucket table identical to ITEM 0 (10 submitted, 1 failed, 0 confirmed); S 125th's id still a submitted certification, has_tx false; session TimeZone UTC both times.
+
+LC-C (ONE request, licensed once, sent once at 2026-11-27T01:21:22Z; req_d88.py refuses a second run by construction):
+- POST https://kintsugi.secuura.net/api/certifications/2b2f5b95-d76e-48d9-a936-737661867bd0/verify, body {}, request header names sent: accept, content-type (no Authorization, no x-api-key, no cookie); host resolved to 20.198.226.148 (asserted); redirects off.
+- Answer: HTTP 200; verified true; checks.blockchainAnchored FALSE (S 125th read true for this id at k45); checks exists, notRevoked, notExpired, hashValid true; chargeEventId null; issuer id null, did null (issuer.verified true); certificationId equals the sent id.
+- Response key NAMES only: top level blockchain, certificationId, chargeEventId, checks, issuer, status, verified, verifiedAt; issuer did, id, verified; blockchain anchorId, anchoredAt, anchoringStatus, blockHeight, confidence, txHash (G420-8: the stored blob is still returned beside the flag; no value read or kept). The raw body was never printed or saved: sha16 01e0f488412f751d, 490 bytes.
+- Counts immediately before (01:20:16Z) and after (01:21:3xZ): audit_logs 1555 -> 1556 (+1); certifications.verify rows 7 -> 8 (+1), user null 7 -> 8; the one new row reads action certifications.verify, resource_type certification, success true, 01:21:23Z; charge_events 22 -> 22; billing_charge_events 0 -> 0; documents 151 -> 151; certifications failed 1 / submitted 10 -> unchanged.
+- OBSERVATION (before my request, not mine): the audit_logs baseline was 1555, not ITEM 0's 1554. The one row added between ITEM 0 (23:56:23Z) and my before-read is action verification.verify (a document verify, resource_type verification, success true) at 2026-11-27 00:57:17Z. None of my tools makes an HTTP verify call (docker exec reads and docker-exec GETs of /health/ready only); S 128th and S 129th were demo-only. Not investigated further (action, type, success and time only were read; no user, ip or details).
+
+LC-D LABELS:
+- KS-2366 (PR 2295): DEPLOYED on Kintsugi in originate (LC-A in the running container; census and certification counts equal). Unit-, socket- and loopback-proven (gate 420). The live anonymous answer on a pending certification is MEASURED by LC-C: blockchainAnchored false. The confirm path on a NEW certification, the poller, the party reconcile and the issue and recertify routes against the live database are UNMEASURED.
+- KS-1209 (PR 2092) and KS-2142 (PR 2142): in the host tree only; nothing deployed.
+- KS-2316 + follow-up and the other auth items: NOT DEPLOYED (auth held).
+- State left: the REVISION k46 entry; no certification, anchor or account row created or changed; exactly ONE audit_logs row (certifications.verify, user null, 01:21:23Z) from LC-C.
+
+Consequence for a user of Kintsugi (for your panel): an anonymous verify of any of the 11 existing certifications now answers blockchainAnchored false (they were never confirmed); new certifications can confirm. Who may do what did not change.
+
+Fresh read-only tools this phase (declared): cnt_d88.sh (LC-C before/after counts), auditnew_d88.sh (audit rows since ITEM 0: action, type, success, time only), req_d88.py (the one request; body never printed or saved).
+Usage gate 14 percent at 01:15Z.
