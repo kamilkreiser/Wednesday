@@ -1,0 +1,28 @@
+MyDriveFiles.UploadAsync puts a file into the root of My Drive or into
+one folder by its item id through ONE upload session: every argument is
+checked before any request; the session call (conflict rule "fail")
+goes through GraphClient.SendAsync with the token; its uploadUrl must be
+absolute https with no user info and at most 8192 characters, else no
+piece is sent; the pieces go through the existing GraphClient.UploadAsync
+with no Authorization header; the stored item must be a file whose size,
+when given, is the length sent.
+
+MyDriveFiles.DownloadAsync reads a file's item through
+GraphClient.SendAsync, refuses a folder, a size above the bound (100 MiB
+by default) or a download address outside the same rule before any
+fetch, then sends ONE plain GET of @microsoft.graph.downloadUrl through
+the HttpClient the caller hands in, with no header added, under the
+attempt time-out; the body is read to at most the bound plus one byte
+and must match the item's size when given.
+
+DriveFileException (seven kinds; its text holds the kind and the status
+only) and DriveFileBytes (its text holds the length only) are new;
+MyDriveBrowser.ReadItem is now internal so both calls read items by the
+browse rules. Cells F01 to F13 (43 cases) run against a fake handler
+that records every request; the module README names the call shapes
+(from the source app's analysis, not measured against Microsoft Graph),
+the rules and the limits: no download retry, no DELETE of an abandoned
+session, a host's download client must carry no default Authorization
+header. Nothing ran against a tenant or a device. Nothing is deployed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

@@ -1,0 +1,373 @@
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using Datasec.Suite.Graph;
+
+namespace Datasec.Suite.OneDrive.Tests;
+
+// GATE B2193 PROBE ONLY: never committed. Copied into the gate's scratch clone after the pin run and moved out after.
+// Every cell records what it saw into the gate's results file and asserts nothing (the record is the evidence).
+public class GateProbeTests
+{
+    private const string Out = "/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/fleet/state/s336/g2193/probe-results.txt";
+    private static readonly object Sync = new();
+
+    private static void Note(string line)
+    {
+        lock (Sync)
+        {
+            System.IO.File.AppendAllText(Out, line + "\n");
+        }
+    }
+
+    private static string Outcome(Exception? e) => e switch
+    {
+        null => "RETURNED",
+        DriveFileException d => "DriveFileException " + d.Kind + " status " + d.Status,
+        GraphCallException g => "GraphCallException " + g.Kind + " " + (int?)g.StatusCode,
+        _ => e.GetType().Name,
+    };
+
+    private static string Item(string address, string size = ",\"size\":5") =>
+        "{\"id\":\"SYNTHETICFILE0001\",\"name\":\"file-a.pdf\"" + size + ",\"file\":{},\"@microsoft.graph.downloadUrl\":\"" + address + "\"}";
+
+    // ---- G01: the address helper (Tuesday's point c), through the download with the fake ----
+    [Fact]
+    public async Task G01_address_shapes()
+    {
+        string pad8192 = "https://files.example.test/" + new string('a', 8192 - 27);
+        (string Label, string Json)[] shapes =
+        [
+            ("control-good", "https://files.example.test/download/0001"),
+            ("ipv6-literal-port", "https://[::1]:8443/download/0001"),
+            ("ipv6-zone", "https://[fe80::1%25en0]/download/0001"),
+            ("ipv4-loopback", "https://127.0.0.1/download/0001"),
+            ("link-local-169.254", "https://169.254.169.254/latest"),
+            ("port", "https://files.example.test:4443/download/0001"),
+            ("dotdot", "https://files.example.test/a/../../download/0001"),
+            ("encoded-dotdot", "https://files.example.test/a/%2e%2e/download/0001"),
+            ("pct-userinfo", "https://%75ser@files.example.test/download/0001"),
+            ("pct-at-in-host", "https://files.example.test%40other.example.test/download/0001"),
+            ("empty-userinfo", "https://@files.example.test/download/0001"),
+            ("colon-userinfo", "https://:@files.example.test/download/0001"),
+            ("backslash-at", "https://files.example.test\\\\@other.example.test/x"),
+            ("upper-scheme", "HTTPS://FILES.EXAMPLE.TEST/download/0001"),
+            ("leading-space", " https://files.example.test/download/0001"),
+            ("trailing-lf", "https://files.example.test/download/0001\\n"),
+            ("tab-in-host", "https://files.exa\\tmple.test/download/0001"),
+            ("unpaired-surrogate", "\\uD800"),
+            ("fragment", "https://files.example.test/download/0001#frag"),
+            ("idn", "https://f\\u00e4les.example.test/download/0001"),
+            ("graph-host", "https://graph.example.test/v1.0/me/drive"),
+            ("len-8192", pad8192),
+            ("len-8193", pad8192 + "a"),
+            ("ftp", "ftp://files.example.test/x"),
+            ("file", "file:///etc/hosts"),
+        ];
+        foreach ((string label, string json) in shapes)
+        {
+            using CancellationTokenSource guard = Guard.TenSeconds();
+            using FileRig rig = new((index, _) => index == 0 ? Synthetic.Json(Item(json)) : FileRig.Raw(FileRig.Bytes(5)));
+            Exception? error = await Record.ExceptionAsync(() => rig.Files.DownloadAsync(FileRig.FileId, rig.Tokens, guard.Token));
+            List<Recorded> seen = rig.Drive.Seen;
+            string second = seen.Count > 1 ? seen[1].Address.AbsoluteUri : "-";
+            string auth = seen.Count > 1 ? (seen[1].Authorization is null ? "null" : "PRESENT") : "-";
+            Note($"G01 {label} | {Outcome(error)} | requests {seen.Count} | fetched {(second.Length > 120 ? second[..60] + "...(" + second.Length + " chars)" : second)} | auth {auth}");
+        }
+    }
+
+    // ---- G02: P1, arguments ----
+    [Fact]
+    public async Task G02_argument_shapes()
+    {
+        async Task Up(string label, string? folder, string name, Stream content, long length)
+        {
+            using CancellationTokenSource guard = Guard.TenSeconds();
+            using FileRig rig = new((index, _) => index == 0 ? FileRig.Session() : FileRig.Stored(length));
+            Exception? error = await Record.ExceptionAsync(() => rig.Files.UploadAsync(folder, name, content, length, rig.Tokens, guard.Token));
+            List<Recorded> seen = rig.Drive.Seen;
+            string first = seen.Count > 0 ? seen[0].Address.AbsoluteUri : "-";
+            string msg = error?.Message ?? "-";
+            Note($"G02 {label} | {Outcome(error)} | requests {seen.Count} | first {first} | message {msg}");
+        }
+
+        await Up("name-trailing-lf", null, "scan-0001.pdf\n", new MemoryStream(FileRig.Bytes(100)), 100);
+        await Up("name-unicode", null, "sc\u00e4n.pdf", new MemoryStream(FileRig.Bytes(100)), 100);
+        await Up("name-128", null, new string('A', 128), new MemoryStream(FileRig.Bytes(100)), 100);
+        await Up("name-space-carries-word", null, "namesynthetic0001 x", new MemoryStream(FileRig.Bytes(100)), 100);
+        await Up("folder-trailing-lf", "SYNTHETICFOLDER0001\n", FileRig.FileName, new MemoryStream(FileRig.Bytes(100)), 100);
+        await Up("folder-slash-carries-word", "SYNTHETICFOLDER0001/x", FileRig.FileName, new MemoryStream(FileRig.Bytes(100)), 100);
+        await Up("folder-bang", "SYNTHETIC!0001", FileRig.FileName, new MemoryStream(FileRig.Bytes(100)), 100);
+
+        // A stream positioned at 50: what bytes go?
+        {
+            byte[] bytes = FileRig.Bytes(100);
+            using CancellationTokenSource guard = Guard.TenSeconds();
+            using FileRig rig = new((index, _) => index == 0 ? FileRig.Session() : FileRig.Stored(100));
+            using MemoryStream content = new(bytes) { Position = 50 };
+            Exception? error = await Record.ExceptionAsync(() => rig.Files.UploadAsync(null, FileRig.FileName, content, 100, rig.Tokens, guard.Token));
+            List<Recorded> seen = rig.Drive.Seen;
+            Note($"G02 stream-position-50 | {Outcome(error)} | requests {seen.Count} | piece equals the whole content {(seen.Count > 1 && seen[1].Body.SequenceEqual(bytes))} | range {(seen.Count > 1 ? seen[1].ContentRange : "-")}");
+        }
+
+        // The download id with a trailing line feed, and an already-cancelled token.
+        foreach ((string label, string id) in new[] { ("download-id-trailing-lf", "SYNTHETICFILE0001\n"), ("download-id-bang", "SYNTHETIC!0001") })
+        {
+            using CancellationTokenSource guard = Guard.TenSeconds();
+            using FileRig rig = new((index, _) => index == 0 ? Synthetic.Json(Item(FileRig.DownloadAddress)) : FileRig.Raw(FileRig.Bytes(5)));
+            Exception? error = await Record.ExceptionAsync(() => rig.Files.DownloadAsync(id, rig.Tokens, guard.Token));
+            List<Recorded> seen = rig.Drive.Seen;
+            Note($"G02 {label} | {Outcome(error)} | requests {seen.Count} | first {(seen.Count > 0 ? seen[0].Address.AbsoluteUri : "-")}");
+        }
+
+        {
+            using CancellationTokenSource cancelled = new();
+            await cancelled.CancelAsync();
+            using FileRig rig = new((index, _) => index == 0 ? Synthetic.Json(Item(FileRig.DownloadAddress)) : FileRig.Raw(FileRig.Bytes(5)));
+            Exception? error = await Record.ExceptionAsync(() => rig.Files.DownloadAsync(FileRig.FileId, rig.Tokens, cancelled.Token));
+            Note($"G02 download-cancelled-before | {Outcome(error)} | requests {rig.Drive.Seen.Count}");
+        }
+
+        {
+            using CancellationTokenSource cancelled = new();
+            await cancelled.CancelAsync();
+            using FileRig rig = new((index, _) => index == 0 ? FileRig.Session() : FileRig.Stored(100));
+            using MemoryStream content = new(FileRig.Bytes(100));
+            Exception? error = await Record.ExceptionAsync(() => rig.Files.UploadAsync(null, FileRig.FileName, content, 100, rig.Tokens, cancelled.Token));
+            Note($"G02 upload-cancelled-before | {Outcome(error)} | requests {rig.Drive.Seen.Count}");
+        }
+    }
+
+    // ---- G03: P2 and P3, the session and the stored item ----
+    [Fact]
+    public async Task G03_session_and_item_shapes()
+    {
+        (string Label, string Session)[] sessions =
+        [
+            ("dup-http-then-https", "{\"uploadUrl\":\"http://upload.example.test/s\",\"uploadUrl\":\"https://upload.example.test/session/0001\"}"),
+            ("dup-https-then-http", "{\"uploadUrl\":\"https://upload.example.test/session/0001\",\"uploadUrl\":\"http://upload.example.test/s\"}"),
+            ("empty-body", string.Empty),
+            ("null-url", "{\"uploadUrl\":null}"),
+            ("url-object", "{\"uploadUrl\":{\"href\":\"https://upload.example.test/session/0001\"}}"),
+            ("unpaired-surrogate", "{\"uploadUrl\":\"\\uD800\"}"),
+            ("graph-host", "{\"uploadUrl\":\"https://graph.example.test/v1.0/session\"}"),
+        ];
+        foreach ((string label, string body) in sessions)
+        {
+            using CancellationTokenSource guard = Guard.TenSeconds();
+            using FileRig rig = new((index, _) => index == 0 ? Synthetic.Json(body) : FileRig.Stored(100));
+            using MemoryStream content = new(FileRig.Bytes(100));
+            Exception? error = await Record.ExceptionAsync(() => rig.Files.UploadAsync(null, FileRig.FileName, content, 100, rig.Tokens, guard.Token));
+            List<Recorded> seen = rig.Drive.Seen;
+            Note($"G03 session {label} | {Outcome(error)} | requests {seen.Count} | piece to {(seen.Count > 1 ? seen[1].Address.AbsoluteUri : "-")} | piece auth {(seen.Count > 1 ? (seen[1].Authorization is null ? "null" : "PRESENT") : "-")}");
+        }
+
+        (string Label, string Final, HttpStatusCode Status)[] finals =
+        [
+            ("no-size", "{\"id\":\"SYNTHETICFILE0001\",\"name\":\"scan-0001.pdf\",\"file\":{}}", HttpStatusCode.Created),
+            ("size-as-string", "{\"id\":\"SYNTHETICFILE0001\",\"name\":\"scan-0001.pdf\",\"size\":\"100\",\"file\":{}}", HttpStatusCode.Created),
+            ("other-name", "{\"id\":\"SYNTHETICFILE0001\",\"name\":\"other-0001.pdf\",\"size\":100,\"file\":{}}", HttpStatusCode.Created),
+            ("status-200", "{\"id\":\"SYNTHETICFILE0001\",\"name\":\"scan-0001.pdf\",\"size\":100,\"file\":{}}", HttpStatusCode.OK),
+            ("remote-item", "{\"id\":\"SYNTHETICFILE0001\",\"name\":\"scan-0001.pdf\",\"size\":100,\"remoteItem\":{\"id\":\"R1\"}}", HttpStatusCode.Created),
+            ("file-and-folder", "{\"id\":\"SYNTHETICFILE0001\",\"name\":\"scan-0001.pdf\",\"size\":100,\"file\":{},\"folder\":{}}", HttpStatusCode.Created),
+        ];
+        foreach ((string label, string final, HttpStatusCode status) in finals)
+        {
+            using CancellationTokenSource guard = Guard.TenSeconds();
+            using FileRig rig = new((index, _) => index == 0 ? FileRig.Session() : Synthetic.Json(final, status));
+            using MemoryStream content = new(FileRig.Bytes(100));
+            DriveEntry? entry = null;
+            Exception? error = await Record.ExceptionAsync(async () => entry = await rig.Files.UploadAsync(null, FileRig.FileName, content, 100, rig.Tokens, guard.Token));
+            Note($"G03 final {label} | {Outcome(error)} | requests {rig.Drive.Seen.Count} | entry {entry}");
+        }
+
+        // The download item: size absent, size 0, size negative, size above int range.
+        foreach ((string label, string size) in new[] { ("dl-no-size", string.Empty), ("dl-size-0", ",\"size\":0"), ("dl-size-neg", ",\"size\":-1"), ("dl-size-huge", ",\"size\":99999999999") })
+        {
+            using CancellationTokenSource guard = Guard.TenSeconds();
+            using FileRig rig = new((index, _) => index == 0 ? Synthetic.Json(Item(FileRig.DownloadAddress, size)) : FileRig.Raw(FileRig.Bytes(5)), maxDownloadBytes: 16);
+            Exception? error = await Record.ExceptionAsync(() => rig.Files.DownloadAsync(FileRig.FileId, rig.Tokens, guard.Token));
+            Note($"G03 {label} | {Outcome(error)} | requests {rig.Drive.Seen.Count}");
+        }
+
+        // A caller's download client WITH a default Authorization header (the host lane's concern, README named).
+        {
+            using CancellationTokenSource guard = Guard.TenSeconds();
+            using FileRig rig = new((index, _) => index == 0 ? Synthetic.Json(Item(FileRig.DownloadAddress)) : FileRig.Raw(FileRig.Bytes(5)));
+            rig.DownloadHttp.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "gate-synthetic-0001");
+            Exception? error = await Record.ExceptionAsync(() => rig.Files.DownloadAsync(FileRig.FileId, rig.Tokens, guard.Token));
+            List<Recorded> seen = rig.Drive.Seen;
+            Note($"G03 caller-default-auth | {Outcome(error)} | requests {seen.Count} | download auth {(seen.Count > 1 ? (seen[1].Authorization is null ? "null" : "PRESENT") : "-")}");
+        }
+
+        // The SAME HttpClient handed in as the Graph client and the download client (a host might): does the token leak?
+        {
+            using CancellationTokenSource guard = Guard.TenSeconds();
+            FakeDrive drive = new((index, _) => index == 0 ? Synthetic.Json(Item(FileRig.DownloadAddress)) : FileRig.Raw(FileRig.Bytes(5)));
+            using HttpClient one = new(drive);
+            GraphOptions options = new(Synthetic.Base);
+            MyDriveFiles files = new(new GraphClient(one, options), options, one);
+            Exception? error = await Record.ExceptionAsync(() => files.DownloadAsync(FileRig.FileId, new FakeTokens(), guard.Token));
+            List<Recorded> seen = drive.Seen;
+            Note($"G03 same-client-for-both | {Outcome(error)} | requests {seen.Count} | item auth {(seen.Count > 0 ? (seen[0].Authorization is null ? "null" : "PRESENT") : "-")} | download auth {(seen.Count > 1 ? (seen[1].Authorization is null ? "null" : "PRESENT") : "-")}");
+        }
+    }
+
+    // ---- G04: the download over a REAL SocketsHttpHandler on loopback (Tuesday's point b; redirects) ----
+    private sealed class ToLoopback(int port, HttpMessageHandler inner) : DelegatingHandler(inner)
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            request.RequestUri = new Uri("http://127.0.0.1:" + port.ToString(System.Globalization.CultureInfo.InvariantCulture) + request.RequestUri!.PathAndQuery);
+            return base.SendAsync(request, cancellationToken);
+        }
+    }
+
+    private sealed class Server : IDisposable
+    {
+        private readonly TcpListener _listener = new(IPAddress.Loopback, 0);
+        internal readonly List<string> Seen = [];
+        internal long Sent;
+
+        internal Server() => _listener.Start();
+
+        internal int Port => ((IPEndPoint)_listener.LocalEndpoint).Port;
+
+        internal Task Serve(int connections, Func<int, NetworkStream, Task> script, CancellationToken ct) => Task.Run(async () =>
+        {
+            for (int n = 0; n < connections; n++)
+            {
+                using TcpClient client = await _listener.AcceptTcpClientAsync(ct);
+                using NetworkStream stream = client.GetStream();
+                byte[] buf = new byte[8192];
+                StringBuilder head = new();
+                while (!head.ToString().Contains("\r\n\r\n", StringComparison.Ordinal))
+                {
+                    int r = await stream.ReadAsync(buf, ct);
+                    if (r == 0)
+                    {
+                        break;
+                    }
+
+                    head.Append(Encoding.ASCII.GetString(buf, 0, r));
+                }
+
+                string[] lines = head.ToString().Split("\r\n");
+                bool auth = lines.Any(l => l.StartsWith("Authorization:", StringComparison.OrdinalIgnoreCase));
+                lock (Seen)
+                {
+                    Seen.Add(lines[0] + " | Authorization " + (auth ? "PRESENT" : "absent") + " | Host " + (lines.FirstOrDefault(l => l.StartsWith("Host:", StringComparison.OrdinalIgnoreCase)) ?? "-"));
+                }
+
+                try
+                {
+                    await script(n, stream);
+                }
+                catch (Exception)
+                {
+                    // the client went away
+                }
+            }
+        }, ct);
+
+        internal async Task Write(NetworkStream s, string text) => await s.WriteAsync(Encoding.ASCII.GetBytes(text));
+
+        internal async Task WriteBytes(NetworkStream s, int count)
+        {
+            await s.WriteAsync(FileRig.Bytes(count));
+            Interlocked.Add(ref Sent, count);
+        }
+
+        public void Dispose() => _listener.Stop();
+    }
+
+    private static async Task Loop(string label, Func<Server, int, NetworkStream, Task> script, string size, int bound, int connections = 1, Action<HttpClient>? setup = null, bool follow = true, TimeSpan? attempt = null)
+    {
+        using CancellationTokenSource guard = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        guard.CancelAfter(TimeSpan.FromSeconds(60));
+        using Server server = new();
+        Task serving = server.Serve(connections, (n, s) => script(server, n, s), guard.Token);
+        FakeDrive drive = new((index, _) => Synthetic.Json(Item(FileRig.DownloadAddress, size)));
+        using HttpClient graphHttp = new(drive);
+        GraphOptions options = attempt is null ? new(Synthetic.Base) : new(Synthetic.Base) { AttemptTimeout = attempt.Value };
+        using HttpClient download = new(new ToLoopback(server.Port, new SocketsHttpHandler { AllowAutoRedirect = follow, UseProxy = false }));
+        setup?.Invoke(download);
+        MyDriveFiles files = new(new GraphClient(graphHttp, options), options, download, bound);
+        long alloc0 = GC.GetTotalAllocatedBytes(true);
+        System.Diagnostics.Stopwatch clock = System.Diagnostics.Stopwatch.StartNew();
+        DriveFileBytes? got = null;
+        Exception? error = await Record.ExceptionAsync(async () => got = await files.DownloadAsync(FileRig.FileId, new FakeTokens(), guard.Token));
+        clock.Stop();
+        long alloc = GC.GetTotalAllocatedBytes(true) - alloc0;
+        await guard.CancelAsync();
+        await Task.WhenAny(serving, Task.Delay(1000));
+        string seen;
+        lock (server.Seen)
+        {
+            seen = string.Join(" || ", server.Seen);
+        }
+
+        Note($"G04 {label} | {Outcome(error)} | bytes {(got is null ? "-" : got.Bytes.Length.ToString(System.Globalization.CultureInfo.InvariantCulture))} | ms {clock.ElapsedMilliseconds} | server sent {Interlocked.Read(ref server.Sent)} | allocated ~{alloc / 1048576} MiB (process-wide) | requests {seen}");
+    }
+
+    private static async Task Endless(Server server, NetworkStream s, bool chunked)
+    {
+        await server.Write(s, chunked ? "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n" : "HTTP/1.1 200 OK\r\nConnection: close\r\n\r\n");
+        for (long sent = 0; sent < 400L * 1048576; sent += 65536)
+        {
+            if (chunked)
+            {
+                await server.Write(s, "10000\r\n");
+            }
+
+            await server.WriteBytes(s, 65536);
+            if (chunked)
+            {
+                await server.Write(s, "\r\n");
+            }
+        }
+    }
+
+    [Fact]
+    public async Task G04_download_over_loopback()
+    {
+        await Loop("plain-200-no-default-auth", async (sv, _, s) => { await sv.Write(s, "HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\n"); await sv.WriteBytes(s, 5); }, ",\"size\":5", 16);
+        await Loop("cl-5-body-17-size-5", async (sv, _, s) => { await sv.Write(s, "HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\n"); await sv.WriteBytes(s, 17); }, ",\"size\":5", 16);
+        await Loop("cl-5-body-17-no-size", async (sv, _, s) => { await sv.Write(s, "HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\n"); await sv.WriteBytes(s, 17); }, string.Empty, 16);
+        await Loop("cl-1000-body-17-close-bound-64", async (sv, _, s) => { await sv.Write(s, "HTTP/1.1 200 OK\r\nContent-Length: 1000\r\n\r\n"); await sv.WriteBytes(s, 17); }, string.Empty, 64);
+        await Loop("cl-200MiB-declared-17-then-stall-bound-16", async (sv, _, s) => { await sv.Write(s, "HTTP/1.1 200 OK\r\nContent-Length: 209715200\r\n\r\n"); await sv.WriteBytes(s, 17); await Task.Delay(30000); }, string.Empty, 16);
+        await Loop("cl-200MiB-declared-size-200MiB-default-bound", async (sv, _, s) => { await sv.Write(s, "HTTP/1.1 200 OK\r\nContent-Length: 209715200\r\n\r\n"); await sv.WriteBytes(s, 17); }, ",\"size\":209715200", MyDriveFiles.DefaultMaxDownloadBytes);
+        await Loop("chunked-endless-bound-1MiB", (sv, _, s) => Endless(sv, s, chunked: true), string.Empty, 1048576);
+        await Loop("close-delimited-endless-bound-1MiB", (sv, _, s) => Endless(sv, s, chunked: false), string.Empty, 1048576);
+        await Loop("chunked-endless-default-bound-100MiB", (sv, _, s) => Endless(sv, s, chunked: true), string.Empty, MyDriveFiles.DefaultMaxDownloadBytes);
+        await Loop("exactly-100MiB-default-bound", async (sv, _, s) => { await sv.Write(s, "HTTP/1.1 200 OK\r\nContent-Length: 104857600\r\n\r\n"); for (int i = 0; i < 1600; i++) { await sv.WriteBytes(s, 65536); } }, ",\"size\":104857600", MyDriveFiles.DefaultMaxDownloadBytes);
+        await Loop("stall-after-headers-attempt-2s", async (sv, _, s) => { await sv.Write(s, "HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\n"); await sv.WriteBytes(s, 2); await Task.Delay(30000); }, ",\"size\":5", 16, attempt: TimeSpan.FromSeconds(2));
+        await Loop("stall-before-headers-attempt-2s", async (sv, _, s) => await Task.Delay(30000), ",\"size\":5", 16, attempt: TimeSpan.FromSeconds(2));
+        await Loop("redirect-302-not-followed", async (sv, _, s) => await sv.Write(s, "HTTP/1.1 302 Found\r\nLocation: /next\r\nContent-Length: 0\r\n\r\n"), ",\"size\":5", 16, follow: false);
+        await Loop("redirect-302-followed-same-origin-default-auth", async (sv, n, s) =>
+        {
+            if (n == 0)
+            {
+                await sv.Write(s, "HTTP/1.1 302 Found\r\nLocation: /next\r\nContent-Length: 0\r\nConnection: close\r\n\r\n");
+            }
+            else
+            {
+                await sv.Write(s, "HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\n");
+                await sv.WriteBytes(s, 5);
+            }
+        }, ",\"size\":5", 16, connections: 2, setup: c => c.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "gate-synthetic-0001"));
+        await Loop("redirect-302-followed-other-host-default-auth", async (sv, n, s) =>
+        {
+            if (n == 0)
+            {
+                await sv.Write(s, "HTTP/1.1 302 Found\r\nLocation: http://localhost:" + sv.Port.ToString(System.Globalization.CultureInfo.InvariantCulture) + "/next\r\nContent-Length: 0\r\nConnection: close\r\n\r\n");
+            }
+            else
+            {
+                await sv.Write(s, "HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\n");
+                await sv.WriteBytes(s, 5);
+            }
+        }, ",\"size\":5", 16, connections: 2, setup: c => c.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "gate-synthetic-0001"));
+        await Loop("429-from-download-host", async (sv, _, s) => await sv.Write(s, "HTTP/1.1 429 Too Many Requests\r\nRetry-After: 1\r\nContent-Length: 0\r\n\r\n"), ",\"size\":5", 16);
+    }
+}

@@ -1,0 +1,146 @@
+==== probe run a 01:44:59
+G01 control-good | RETURNED | requests 2 | fetched https://files.example.test/download/0001 | auth null
+G01 ipv6-literal-port | RETURNED | requests 2 | fetched https://[::1]:8443/download/0001 | auth null
+G01 ipv6-zone | RETURNED | requests 2 | fetched https://[fe80::1]/download/0001 | auth null
+G01 ipv4-loopback | RETURNED | requests 2 | fetched https://127.0.0.1/download/0001 | auth null
+G01 link-local-169.254 | RETURNED | requests 2 | fetched https://169.254.169.254/latest | auth null
+G01 port | RETURNED | requests 2 | fetched https://files.example.test:4443/download/0001 | auth null
+G01 dotdot | RETURNED | requests 2 | fetched https://files.example.test/download/0001 | auth null
+G01 encoded-dotdot | RETURNED | requests 2 | fetched https://files.example.test/download/0001 | auth null
+G01 pct-userinfo | DriveFileException MalformedItem status 200 | requests 1 | fetched - | auth -
+G01 pct-at-in-host | DriveFileException MalformedItem status 200 | requests 1 | fetched - | auth -
+G01 empty-userinfo | RETURNED | requests 2 | fetched https://@files.example.test/download/0001 | auth null
+G01 colon-userinfo | DriveFileException MalformedItem status 200 | requests 1 | fetched - | auth -
+G01 backslash-at | DriveFileException MalformedItem status 200 | requests 1 | fetched - | auth -
+G01 upper-scheme | RETURNED | requests 2 | fetched https://files.example.test/download/0001 | auth null
+G01 leading-space | RETURNED | requests 2 | fetched https://files.example.test/download/0001 | auth null
+G01 trailing-lf | RETURNED | requests 2 | fetched https://files.example.test/download/0001 | auth null
+G01 tab-in-host | DriveFileException MalformedItem status 200 | requests 1 | fetched - | auth -
+G01 unpaired-surrogate | DriveFileException MalformedItem status 200 | requests 1 | fetched - | auth -
+G01 fragment | RETURNED | requests 2 | fetched https://files.example.test/download/0001#frag | auth null
+G01 idn | RETURNED | requests 2 | fetched https://fäles.example.test/download/0001 | auth null
+G01 graph-host | RETURNED | requests 2 | fetched https://graph.example.test/v1.0/me/drive | auth null
+G01 len-8192 | RETURNED | requests 2 | fetched https://files.example.test/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...(8192 chars) | auth null
+G01 len-8193 | DriveFileException MalformedItem status 200 | requests 1 | fetched - | auth -
+G01 ftp | DriveFileException MalformedItem status 200 | requests 1 | fetched - | auth -
+G01 file | DriveFileException MalformedItem status 200 | requests 1 | fetched - | auth -
+G03 session dup-http-then-https | RETURNED | requests 2 | piece to https://upload.example.test/session/0001 | piece auth null
+G03 session dup-https-then-http | DriveFileException MalformedSession status 200 | requests 1 | piece to - | piece auth -
+G03 session empty-body | DriveFileException MalformedSession status 200 | requests 1 | piece to - | piece auth -
+G03 session null-url | DriveFileException MalformedSession status 200 | requests 1 | piece to - | piece auth -
+G03 session url-object | DriveFileException MalformedSession status 200 | requests 1 | piece to - | piece auth -
+G03 session unpaired-surrogate | DriveFileException MalformedSession status 200 | requests 1 | piece to - | piece auth -
+G03 session graph-host | RETURNED | requests 2 | piece to https://graph.example.test/v1.0/session | piece auth null
+G03 final no-size | RETURNED | requests 2 | entry DriveEntry[File, size none]
+G03 final size-as-string | DriveFileException MalformedItem status 201 | requests 2 | entry 
+G03 final other-name | RETURNED | requests 2 | entry DriveEntry[File, size 100]
+G03 final status-200 | RETURNED | requests 2 | entry DriveEntry[File, size 100]
+G03 final remote-item | DriveFileException MalformedItem status 201 | requests 2 | entry 
+G03 final file-and-folder | DriveFileException MalformedItem status 201 | requests 2 | entry 
+G03 dl-no-size | RETURNED | requests 2
+G03 dl-size-0 | DriveFileException DownloadLength status 200 | requests 2
+G03 dl-size-neg | DriveFileException MalformedItem status 200 | requests 1
+G03 dl-size-huge | DriveFileException TooLarge status 200 | requests 1
+G03 caller-default-auth | RETURNED | requests 2 | download auth PRESENT
+G03 same-client-for-both | RETURNED | requests 2 | item auth PRESENT | download auth null
+G02 name-trailing-lf | ArgumentException | requests 0 | first - | message The file name is not one this module takes. (Parameter 'fileName')
+G02 name-unicode | ArgumentException | requests 0 | first - | message The file name is not one this module takes. (Parameter 'fileName')
+G02 name-128 | RETURNED | requests 2 | first https://graph.example.test/v1.0/me/drive/root:/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:/createUploadSession | message -
+G02 name-space-carries-word | ArgumentException | requests 0 | first - | message The file name is not one this module takes. (Parameter 'fileName')
+G02 folder-trailing-lf | RETURNED | requests 2 | first https://graph.example.test/v1.0/me/drive/items/SYNTHETICFOLDER0001%0A:/scan-0001.pdf:/createUploadSession | message -
+G02 folder-slash-carries-word | ArgumentException | requests 0 | first - | message The folder id is not one this module takes. (Parameter 'folderId')
+G02 folder-bang | RETURNED | requests 2 | first https://graph.example.test/v1.0/me/drive/items/SYNTHETIC!0001:/scan-0001.pdf:/createUploadSession | message -
+G02 stream-position-50 | RETURNED | requests 2 | piece equals the whole content True | range bytes 0-99/100
+G02 download-id-trailing-lf | RETURNED | requests 2 | first https://graph.example.test/v1.0/me/drive/items/SYNTHETICFILE0001
+G02 download-id-bang | RETURNED | requests 2 | first https://graph.example.test/v1.0/me/drive/items/SYNTHETIC!0001
+G02 download-cancelled-before | TaskCanceledException | requests 1
+G02 upload-cancelled-before | TaskCanceledException | requests 1
+G04 plain-200-no-default-auth | DriveFileException DownloadTransport status 0 | bytes - | ms 10 | server sent 0 | allocated ~3 MiB (process-wide) | requests 
+G04 cl-5-body-17-size-5 | DriveFileException DownloadTransport status 0 | bytes - | ms 0 | server sent 0 | allocated ~0 MiB (process-wide) | requests 
+G04 cl-5-body-17-no-size | DriveFileException DownloadTransport status 0 | bytes - | ms 0 | server sent 0 | allocated ~0 MiB (process-wide) | requests 
+G04 cl-1000-body-17-close-bound-64 | DriveFileException DownloadTransport status 0 | bytes - | ms 0 | server sent 0 | allocated ~0 MiB (process-wide) | requests 
+G04 cl-200MiB-declared-17-then-stall-bound-16 | DriveFileException DownloadTransport status 0 | bytes - | ms 0 | server sent 0 | allocated ~0 MiB (process-wide) | requests 
+G04 cl-200MiB-declared-size-200MiB-default-bound | DriveFileException TooLarge status 200 | bytes - | ms 0 | server sent 0 | allocated ~0 MiB (process-wide) | requests 
+G04 chunked-endless-bound-1MiB | DriveFileException DownloadTransport status 0 | bytes - | ms 0 | server sent 0 | allocated ~0 MiB (process-wide) | requests 
+G04 close-delimited-endless-bound-1MiB | DriveFileException DownloadTransport status 0 | bytes - | ms 0 | server sent 0 | allocated ~0 MiB (process-wide) | requests 
+G04 chunked-endless-default-bound-100MiB | DriveFileException DownloadTransport status 0 | bytes - | ms 0 | server sent 0 | allocated ~0 MiB (process-wide) | requests 
+G04 exactly-100MiB-default-bound | DriveFileException DownloadTransport status 0 | bytes - | ms 0 | server sent 0 | allocated ~0 MiB (process-wide) | requests 
+G04 stall-after-headers-attempt-2s | DriveFileException DownloadTransport status 0 | bytes - | ms 0 | server sent 0 | allocated ~0 MiB (process-wide) | requests 
+G04 stall-before-headers-attempt-2s | DriveFileException DownloadTransport status 0 | bytes - | ms 0 | server sent 0 | allocated ~0 MiB (process-wide) | requests 
+G04 redirect-302-not-followed | DriveFileException DownloadTransport status 0 | bytes - | ms 0 | server sent 0 | allocated ~0 MiB (process-wide) | requests 
+G04 redirect-302-followed-same-origin-default-auth | DriveFileException DownloadTransport status 0 | bytes - | ms 0 | server sent 0 | allocated ~0 MiB (process-wide) | requests 
+G04 redirect-302-followed-other-host-default-auth | DriveFileException DownloadTransport status 0 | bytes - | ms 0 | server sent 0 | allocated ~0 MiB (process-wide) | requests 
+G04 429-from-download-host | DriveFileException DownloadTransport status 0 | bytes - | ms 0 | server sent 0 | allocated ~0 MiB (process-wide) | requests 
+==== probe run b 01:46:38
+G01 control-good | RETURNED | requests 2 | fetched https://files.example.test/download/0001 | auth null
+G01 ipv6-literal-port | RETURNED | requests 2 | fetched https://[::1]:8443/download/0001 | auth null
+G01 ipv6-zone | RETURNED | requests 2 | fetched https://[fe80::1]/download/0001 | auth null
+G01 ipv4-loopback | RETURNED | requests 2 | fetched https://127.0.0.1/download/0001 | auth null
+G01 link-local-169.254 | RETURNED | requests 2 | fetched https://169.254.169.254/latest | auth null
+G01 port | RETURNED | requests 2 | fetched https://files.example.test:4443/download/0001 | auth null
+G01 dotdot | RETURNED | requests 2 | fetched https://files.example.test/download/0001 | auth null
+G01 encoded-dotdot | RETURNED | requests 2 | fetched https://files.example.test/download/0001 | auth null
+G01 pct-userinfo | DriveFileException MalformedItem status 200 | requests 1 | fetched - | auth -
+G01 pct-at-in-host | DriveFileException MalformedItem status 200 | requests 1 | fetched - | auth -
+G01 empty-userinfo | RETURNED | requests 2 | fetched https://@files.example.test/download/0001 | auth null
+G01 colon-userinfo | DriveFileException MalformedItem status 200 | requests 1 | fetched - | auth -
+G01 backslash-at | DriveFileException MalformedItem status 200 | requests 1 | fetched - | auth -
+G01 upper-scheme | RETURNED | requests 2 | fetched https://files.example.test/download/0001 | auth null
+G01 leading-space | RETURNED | requests 2 | fetched https://files.example.test/download/0001 | auth null
+G01 trailing-lf | RETURNED | requests 2 | fetched https://files.example.test/download/0001 | auth null
+G01 tab-in-host | DriveFileException MalformedItem status 200 | requests 1 | fetched - | auth -
+G01 unpaired-surrogate | DriveFileException MalformedItem status 200 | requests 1 | fetched - | auth -
+G01 fragment | RETURNED | requests 2 | fetched https://files.example.test/download/0001#frag | auth null
+G01 idn | RETURNED | requests 2 | fetched https://fäles.example.test/download/0001 | auth null
+G01 graph-host | RETURNED | requests 2 | fetched https://graph.example.test/v1.0/me/drive | auth null
+G01 len-8192 | RETURNED | requests 2 | fetched https://files.example.test/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...(8192 chars) | auth null
+G01 len-8193 | DriveFileException MalformedItem status 200 | requests 1 | fetched - | auth -
+G01 ftp | DriveFileException MalformedItem status 200 | requests 1 | fetched - | auth -
+G01 file | DriveFileException MalformedItem status 200 | requests 1 | fetched - | auth -
+G03 session dup-http-then-https | RETURNED | requests 2 | piece to https://upload.example.test/session/0001 | piece auth null
+G03 session dup-https-then-http | DriveFileException MalformedSession status 200 | requests 1 | piece to - | piece auth -
+G03 session empty-body | DriveFileException MalformedSession status 200 | requests 1 | piece to - | piece auth -
+G03 session null-url | DriveFileException MalformedSession status 200 | requests 1 | piece to - | piece auth -
+G03 session url-object | DriveFileException MalformedSession status 200 | requests 1 | piece to - | piece auth -
+G03 session unpaired-surrogate | DriveFileException MalformedSession status 200 | requests 1 | piece to - | piece auth -
+G03 session graph-host | RETURNED | requests 2 | piece to https://graph.example.test/v1.0/session | piece auth null
+G03 final no-size | RETURNED | requests 2 | entry DriveEntry[File, size none]
+G03 final size-as-string | DriveFileException MalformedItem status 201 | requests 2 | entry 
+G03 final other-name | RETURNED | requests 2 | entry DriveEntry[File, size 100]
+G03 final status-200 | RETURNED | requests 2 | entry DriveEntry[File, size 100]
+G03 final remote-item | DriveFileException MalformedItem status 201 | requests 2 | entry 
+G03 final file-and-folder | DriveFileException MalformedItem status 201 | requests 2 | entry 
+G03 dl-no-size | RETURNED | requests 2
+G03 dl-size-0 | DriveFileException DownloadLength status 200 | requests 2
+G03 dl-size-neg | DriveFileException MalformedItem status 200 | requests 1
+G03 dl-size-huge | DriveFileException TooLarge status 200 | requests 1
+G03 caller-default-auth | RETURNED | requests 2 | download auth PRESENT
+G03 same-client-for-both | RETURNED | requests 2 | item auth PRESENT | download auth null
+G02 name-trailing-lf | ArgumentException | requests 0 | first - | message The file name is not one this module takes. (Parameter 'fileName')
+G02 name-unicode | ArgumentException | requests 0 | first - | message The file name is not one this module takes. (Parameter 'fileName')
+G02 name-128 | RETURNED | requests 2 | first https://graph.example.test/v1.0/me/drive/root:/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:/createUploadSession | message -
+G02 name-space-carries-word | ArgumentException | requests 0 | first - | message The file name is not one this module takes. (Parameter 'fileName')
+G02 folder-trailing-lf | RETURNED | requests 2 | first https://graph.example.test/v1.0/me/drive/items/SYNTHETICFOLDER0001%0A:/scan-0001.pdf:/createUploadSession | message -
+G02 folder-slash-carries-word | ArgumentException | requests 0 | first - | message The folder id is not one this module takes. (Parameter 'folderId')
+G02 folder-bang | RETURNED | requests 2 | first https://graph.example.test/v1.0/me/drive/items/SYNTHETIC!0001:/scan-0001.pdf:/createUploadSession | message -
+G02 stream-position-50 | RETURNED | requests 2 | piece equals the whole content True | range bytes 0-99/100
+G02 download-id-trailing-lf | RETURNED | requests 2 | first https://graph.example.test/v1.0/me/drive/items/SYNTHETICFILE0001
+G02 download-id-bang | RETURNED | requests 2 | first https://graph.example.test/v1.0/me/drive/items/SYNTHETIC!0001
+G02 download-cancelled-before | TaskCanceledException | requests 1
+G02 upload-cancelled-before | TaskCanceledException | requests 1
+G04 plain-200-no-default-auth | RETURNED | bytes 5 | ms 11 | server sent 5 | allocated ~3 MiB (process-wide) | requests GET /download/0001 HTTP/1.1 | Authorization absent | Host Host: 127.0.0.1:63629
+G04 cl-5-body-17-size-5 | RETURNED | bytes 5 | ms 0 | server sent 17 | allocated ~0 MiB (process-wide) | requests GET /download/0001 HTTP/1.1 | Authorization absent | Host Host: 127.0.0.1:63631
+G04 cl-5-body-17-no-size | RETURNED | bytes 5 | ms 0 | server sent 17 | allocated ~0 MiB (process-wide) | requests GET /download/0001 HTTP/1.1 | Authorization absent | Host Host: 127.0.0.1:63633
+G04 cl-1000-body-17-close-bound-64 | DriveFileException DownloadTransport status 0 | bytes - | ms 0 | server sent 17 | allocated ~0 MiB (process-wide) | requests GET /download/0001 HTTP/1.1 | Authorization absent | Host Host: 127.0.0.1:63635
+G04 cl-200MiB-declared-17-then-stall-bound-16 | DriveFileException TooLarge status 200 | bytes - | ms 0 | server sent 17 | allocated ~0 MiB (process-wide) | requests GET /download/0001 HTTP/1.1 | Authorization absent | Host Host: 127.0.0.1:63637
+G04 cl-200MiB-declared-size-200MiB-default-bound | DriveFileException TooLarge status 200 | bytes - | ms 0 | server sent 0 | allocated ~0 MiB (process-wide) | requests 
+G04 chunked-endless-bound-1MiB | DriveFileException TooLarge status 200 | bytes - | ms 9 | server sent 2293760 | allocated ~4 MiB (process-wide) | requests GET /download/0001 HTTP/1.1 | Authorization absent | Host Host: 127.0.0.1:63643
+G04 close-delimited-endless-bound-1MiB | DriveFileException TooLarge status 200 | bytes - | ms 1 | server sent 1245184 | allocated ~3 MiB (process-wide) | requests GET /download/0001 HTTP/1.1 | Authorization absent | Host Host: 127.0.0.1:63645
+G04 chunked-endless-default-bound-100MiB | DriveFileException TooLarge status 200 | bytes - | ms 86 | server sent 105971712 | allocated ~357 MiB (process-wide) | requests GET /download/0001 HTTP/1.1 | Authorization absent | Host Host: 127.0.0.1:63647
+G04 exactly-100MiB-default-bound | RETURNED | bytes 104857600 | ms 84 | server sent 104857600 | allocated ~488 MiB (process-wide) | requests GET /download/0001 HTTP/1.1 | Authorization absent | Host Host: 127.0.0.1:63649
+G04 stall-after-headers-attempt-2s | DriveFileException DownloadTransport status 0 | bytes - | ms 2003 | server sent 2 | allocated ~0 MiB (process-wide) | requests GET /download/0001 HTTP/1.1 | Authorization absent | Host Host: 127.0.0.1:63651
+G04 stall-before-headers-attempt-2s | DriveFileException DownloadTransport status 0 | bytes - | ms 2003 | server sent 0 | allocated ~0 MiB (process-wide) | requests GET /download/0001 HTTP/1.1 | Authorization absent | Host Host: 127.0.0.1:63653
+G04 redirect-302-not-followed | DriveFileException DownloadStatus status 302 | bytes - | ms 2 | server sent 0 | allocated ~0 MiB (process-wide) | requests GET /download/0001 HTTP/1.1 | Authorization absent | Host Host: 127.0.0.1:63655
+G04 redirect-302-followed-same-origin-default-auth | RETURNED | bytes 5 | ms 2 | server sent 5 | allocated ~0 MiB (process-wide) | requests GET /download/0001 HTTP/1.1 | Authorization PRESENT | Host Host: 127.0.0.1:63657 || GET /next HTTP/1.1 | Authorization absent | Host Host: 127.0.0.1:63657
+G04 redirect-302-followed-other-host-default-auth | RETURNED | bytes 5 | ms 7 | server sent 5 | allocated ~0 MiB (process-wide) | requests GET /download/0001 HTTP/1.1 | Authorization PRESENT | Host Host: 127.0.0.1:63660 || GET /next HTTP/1.1 | Authorization absent | Host Host: localhost:63660
+G04 429-from-download-host | DriveFileException DownloadStatus status 429 | bytes - | ms 1 | server sent 0 | allocated ~0 MiB (process-wide) | requests GET /download/0001 HTTP/1.1 | Authorization absent | Host Host: 127.0.0.1:63664

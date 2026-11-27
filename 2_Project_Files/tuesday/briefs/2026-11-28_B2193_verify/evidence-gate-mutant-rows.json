@@ -1,0 +1,98 @@
+{
+ "suites": {
+  "onedrive": {
+   "project": "tests/Datasec.Suite.OneDrive.Tests/Datasec.Suite.OneDrive.Tests.csproj",
+   "exe": "tests/Datasec.Suite.OneDrive.Tests/bin/Release/net10.0/Datasec.Suite.OneDrive.Tests",
+   "prefix": "src/Datasec.Suite.OneDrive/",
+   "cells": [
+    "FileTests.F01",
+    "FileTests.F02",
+    "FileTests.F03",
+    "FileTests.F04",
+    "FileTests.F05",
+    "FileTests.F06",
+    "FileTests.F07",
+    "FileTests.F08",
+    "FileTests.F09",
+    "FileTests.F10",
+    "FileTests.F11",
+    "FileTests.F12",
+    "FileTests.F13"
+   ]
+  }
+ },
+ "rows": [
+  [
+   "gUserInfoTaken",
+   "onedrive",
+   "src/Datasec.Suite.OneDrive/MyDriveFiles.cs",
+   "\n                && address.UserInfo.Length == 0",
+   "",
+   "FileTests.F06 FileTests.F11"
+  ],
+  [
+   "gReadBoundDropped",
+   "onedrive",
+   "src/Datasec.Suite.OneDrive/MyDriveFiles.cs",
+   "if (total > _maxDownloadBytes)",
+   "if (total < 0)",
+   "FileTests.F12"
+  ],
+  [
+   "gUploadLengthUnchecked",
+   "onedrive",
+   "src/Datasec.Suite.OneDrive/MyDriveFiles.cs",
+   "if (content.Length != length)",
+   "if (content.Length < 0)",
+   "FileTests.F05"
+  ],
+  [
+   "gSeekUnchecked",
+   "onedrive",
+   "src/Datasec.Suite.OneDrive/MyDriveFiles.cs",
+   "if (!content.CanRead || !content.CanSeek)",
+   "if (!content.CanRead)",
+   "FileTests.F05"
+  ],
+  [
+   "gFolderIdUnchecked",
+   "onedrive",
+   "src/Datasec.Suite.OneDrive/MyDriveFiles.cs",
+   "if (folderId is not null && !MyDriveBrowser.IsItemId(folderId))",
+   "if (folderId is not null && folderId.Length < 0)",
+   "FileTests.F05"
+  ],
+  [
+   "gDownloadIdUnchecked",
+   "onedrive",
+   "src/Datasec.Suite.OneDrive/MyDriveFiles.cs",
+   "if (!MyDriveBrowser.IsItemId(itemId))",
+   "if (itemId.Length < 0)",
+   "FileTests.F10"
+  ],
+  [
+   "gSessionAddressUnread",
+   "onedrive",
+   "src/Datasec.Suite.OneDrive/MyDriveFiles.cs",
+   "return ReadAddress(document.RootElement, UploadUrlProperty);",
+   "return ReadAddress(document.RootElement, UploadUrlProperty) ?? new Uri(\"https://upload.example.test/gate\");",
+   "FileTests.F06"
+  ],
+  [
+   "gTimeoutDropped",
+   "onedrive",
+   "src/Datasec.Suite.OneDrive/MyDriveFiles.cs",
+   "using CancellationTokenSource timeout = new(_attemptTimeout);",
+   "using CancellationTokenSource timeout = new();",
+   "FileTests.F12"
+  ],
+  [
+   "gTransportInnerKept",
+   "onedrive",
+   "src/Datasec.Suite.OneDrive/MyDriveFiles.cs",
+   "catch (Exception)\n        {\n            throw new DriveFileException(DriveFileFailure.DownloadTransport, 0);",
+   "catch (Exception failure)\n        {\n            throw new InvalidOperationException(failure.Message, failure);",
+   "FileTests.F12 FileTests.F13"
+  ]
+ ]
+}
