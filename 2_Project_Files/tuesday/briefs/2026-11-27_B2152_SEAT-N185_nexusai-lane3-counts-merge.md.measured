@@ -1,0 +1,141 @@
+4f47ccb9 | gh api -X GET under the NexusAI GH_CONFIG_DIR (15:08:43 AEDT) ref heads/main --jq .object.sha -> de39619cac31e475fe46350e29bdb3047b86e046
+a7eea035 | every gh read of the drafting used `gh api -X GET` under GH_CONFIG_DIR (ref main, ref b2143, matching-refs records, pulls?state=open, commits/M1, compare, contents x3) -> each printed an answer, rc 0; login count of 'datasec' -> 1
+54349f8d | gh api -X GET under the NexusAI GH_CONFIG_DIR (15:08:43 AEDT) git/ref/heads/main --jq .object.sha -> de39619cac31e475fe46350e29bdb3047b86e046
+9cbc1481 | gh api -X GET under the NexusAI GH_CONFIG_DIR (15:08:43 AEDT) ref heads/main --jq .object.sha -> de39619cac31e475fe46350e29bdb3047b86e046 (also the literal's own appearances in the kit are copies of that print)
+d5bd134c | gh api -X GET under the NexusAI GH_CONFIG_DIR (15:08:43 AEDT) commits/de39619cac31e475fe46350e29bdb3047b86e046 --jq '[.parents[].sha, .commit.message[0:80]]' -> [BASE, 52040f2ed92734a450f64d39fb5610451a135bd5, "Merge pull request #267 from datasecau/b2133/lane2-erasure ..."]
+d3e3d93c | gh api -X GET under the NexusAI GH_CONFIG_DIR (15:08:43 AEDT) same commits read, first parent -> 279b22352dbcbd85664534395aeb366fec719a50
+e4e8d96b | gh api -X GET under the NexusAI GH_CONFIG_DIR (15:08:43 AEDT) compare/279b22352dbcbd85664534395aeb366fec719a50...de39619cac31e475fe46350e29bdb3047b86e046 --jq '[.ahead_by,.behind_by,.status]' -> [10,0,"ahead"]; --jq '.files[]|.filename' -> 9 paths
+024e0439 | same compare read, .ahead_by -> 10
+f6375e22 | same compare read, .behind_by -> 0
+d08fb10a | same compare file list: /usr/bin/grep -c -F rd745-non-normalised-data-dir-names-do-not-refuse-each-other over the 9 names -> 1
+61ac1d39 | same compare file list: /usr/bin/grep -c -F rd824-a-lexical-null-is-confirmed-by-the-kernel over the 9 names -> 1 (rd824-link-through-a-file-resolves-to-nothing is the other rd824 path)
+3da909ae | gh api -X GET under the NexusAI GH_CONFIG_DIR (15:08:43 AEDT) git/ref/heads/b2143/lane3-kit1 --jq .object.sha -> 895da3f4630e170e038a1b5b2c78008ae7633b93
+0b37fabf | same read -> 895da3f4630e170e038a1b5b2c78008ae7633b93 (also matching-refs/heads/b2143 -> one ref, same sha)
+282d21f1 | gh api -X GET under the NexusAI GH_CONFIG_DIR (15:08:43 AEDT) git/matching-refs/heads/records --jq length -> 58
+c23e9102 | git rev-parse 895da3f4630e170e038a1b5b2c78008ae7633b93^{tree} in the drafter's scratch clone -> 115dd91a6888e33e6725a57b767c21abf8108efa
+2f94851c | awk NR==2067 over the project's 1_Project_Definition/CLARIFICATIONS.md -> a line beginning '  2. Merge path: open a PR from the gated branch, wait for CodeQL ... Never squash, never rebase ([[C-68]]).'
+d7eff292 | scratch clone: git checkout --detach K then git merge --no-ff --no-commit de39619c... -> rc 1; git diff --name-only --diff-filter=U -> scripts/verify-expected-counts.json only (run twice, 15:09 and 15:12)
+6352339c | awk NR==237 over verify-suite.sh at M1 (blob eb9731f5...) -> `    if [ ! -s "$EXPECTED_FILE" ]; then`
+e209dbc0 | awk NR==237 over verify-suite.sh at M1 -> `    if [ ! -s "$EXPECTED_FILE" ]; then`
+de63428f | awk NR==256 over verify-suite.sh at M1 -> `        fail "the committed test-count expectation is $EXP_OK ...` (em dash in the rest)
+3658d14e | awk NR==256 over verify-suite.sh at M1 -> begins `fail "the committed test-count expectation is $EXP_OK`
+7bb9aa30 | awk NR==256 over verify-suite.sh at M1 -> holds $EXP_OK
+d880b65d | awk NR==237 -> holds "$EXPECTED_FILE"
+a39d0a1c | git rev-list --parents -n 1 of the scratch merge commit -> first parent 895da3f4630e170e038a1b5b2c78008ae7633b93
+45e11153 | same print -> second parent de39619cac31e475fe46350e29bdb3047b86e046
+07d343cd | gitleaks stdin --no-banner over git diff M1 HEAD of the scratch merge (538 lines) -> `no leaks found`, rc 0
+118e0b17 | gitleaks stdin --no-banner over a planted diff (random AKIA-shaped key id and 40-char secret) -> `leaks found: 1`, rc 1 (kit tells the seat to match the words, not the number)
+e19995c2 | node program over worktreeSlot's formula (sha256 of the real path, first 4 bytes mod 19) -> b2143-nodot/chk slot 17 (30880-31519), b2143-nodot/run slot 7; b2152-nodot/mg slot 15 (29600-30239)
+472475c3 | word-boundary scan of the 30 non-pre, non-measured SEAT kits of 26 and 27 Nov for the port 22560 -> 6 kits (the control); 29600 and 30239 -> 0 kits each
+2d9decff | RELAYED from the gate's landing text line 52 (`build` job name, workflow build.yml); /usr/bin/grep -c -F 'build:' over build.yml at M1 -> 1
+ac5a014f | template word `<HEAD>` quoted from the gate's landing text line 46 (not a seat-matched output) | UNMEASURED as a literal
+cf8f2f42 | [ -e <project>/.tools/b2143 ] -> yes (and .tools/b2152 -> no)
+e6d24b1e | [ -e <project>/b2143-nodot ] -> yes (and b2152-nodot -> no)
+4ae4b512 | gh matching-refs/heads/b2143 --jq '.[]|[.ref,.object.sha]|@tsv' -> refs/heads/b2143/lane3-kit1<TAB>895da3f4... (one ref)
+4726d61f | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 44: count of the literal in the kit -> 1 | UNMEASURED
+070175e1 | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 44: count of the literal in the kit -> 1 | UNMEASURED
+f05e1cec | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 47: count of the literal in the kit -> 1 | UNMEASURED
+35047922 | NOT a literal a seat matches: a prose fragment the tool picked at line 47 (kind output); count of the fragment in the kit -> 53 | UNMEASURED-AS-LITERAL
+a2ead631 | NOT a literal a seat matches: a prose fragment the tool picked at line 47 (kind output); count of the fragment in the kit -> 1 | UNMEASURED-AS-LITERAL
+703aa327 | python3 -I -B names2142.py <scanlib1114.py> <scratch out file> (sha256 b0ae9573...) -> `names 4 found [True, True, True, True]`, rc 0; out file 4 lines, 4 words
+4d33e095 | merge2152.py post at drafting printed PASS with names read from names.txt by `$(cat names.txt)` -> 'no ban-list name in the message' OK, control OK
+81d137e0 | names2142.py wrote 4 names to the drafter's scratch names.txt (wc -w 4, wc -l 4); the seat's path .tools/b2152/raw/names.txt is its own | UNMEASURED at that path
+bb036437 | /usr/bin/grep -o -F 'STOPPED: NEEDS TUESDAY <one question>' over this kit | wc -l ->        4 (the form line of the kits)
+938677af | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 62: count of the literal in the kit -> 1 | UNMEASURED
+7d9daaa0 | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 62: count of the literal in the kit -> 1 | UNMEASURED
+eea03f24 | [ -e <project>/.tools/b2143 ] -> yes (the control of REFUSE 3)
+08eff501 | gh matching-refs/heads/b2143 --jq '.[]|[.ref,.object.sha]|@tsv' -> one line, refs/heads/b2143/lane3-kit1 at 895da3f4630e170e038a1b5b2c78008ae7633b93
+b2c54e57 | gh api -X GET under the NexusAI GH_CONFIG_DIR (15:08:43 AEDT) git/matching-refs/heads/records --jq length -> 58
+e5e830be | the GH_CONFIG_DIR path ls -d exists; gh api user under it answers -> login count of datasec 1
+24d6ec0e | gh api user --jq .login piped to /usr/bin/grep -c -i datasec -> 1 (value never shown)
+8b5c449e | lsof -nP -iTCP:29600-30239 -sTCP:LISTEN | wc -l -> 0 (control: all listeners -> 15)
+11ae4aaa | `os.path.realpath` of a tree split on / for a dot segment: the drafter ran the same idea over b2152-nodot/mg's computed path (no dot segment) and `.tools/b2152/clone` (1) by reading the path text, not by the seat's command | UNMEASURED as typed
+8372224a | NOT a literal a seat matches: a prose fragment the tool picked at line 68 (kind count); count of the fragment in the kit -> 1 | UNMEASURED-AS-LITERAL
+d3689b1d | NOT a literal a seat matches: a prose fragment the tool picked at line 68 (kind count); count of the fragment in the kit -> 7 | UNMEASURED-AS-LITERAL
+49f71483 | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 69: count of the literal in the kit -> 2 | UNMEASURED
+0ae924bb | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 69: count of the literal in the kit -> 2 | UNMEASURED
+37b8bf87 | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 69: count of the literal in the kit -> 2 | UNMEASURED
+f4c5d0d1 | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 69: count of the literal in the kit -> 1 | UNMEASURED
+31168e41 | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 69: count of the literal in the kit -> 4 | UNMEASURED
+9f049009 | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 69: count of the literal in the kit -> 1 | UNMEASURED
+52557606 | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 69: count of the literal in the kit -> 1 | UNMEASURED
+7139ca2e | NOT a literal a seat matches: a prose fragment the tool picked at line 73 (kind output); count of the fragment in the kit -> 1 | UNMEASURED-AS-LITERAL
+b9e6e1d5 | NOT a match target: a hook rule copied from kit B2143's HOLDS (count in this kit: 1) | UNMEASURED
+532c1935 | NOT a literal a seat matches: a prose fragment the tool picked at line 73 (kind count); count of the fragment in the kit -> 1 | UNMEASURED-AS-LITERAL
+6bd205bc | copied from DRAFTER_RULES identity line | UNMEASURED as an instruction
+91cf6e6d | copied from DRAFTER_RULES identity line; scanned by program in the kit: count -> 1 | UNMEASURED as an instruction
+d092967a | copied from DRAFTER_RULES identity line; scanned by program in the kit: count -> 1 | UNMEASURED as an instruction
+96d07a14 | git log --format='%h %ae | %ce' -1 on the scratch merge commit (inside merge2152.py post: ae|ce vs git config user.email) -> OK, lengths 23 23 23 (scratch identity)
+83a6a754 | NOT run by the drafter (a command for a moved main) | UNMEASURED
+4219884b | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 77: count of the literal in the kit -> 41 | UNMEASURED
+f2ba4f26 | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 77: count of the literal in the kit -> 28 | UNMEASURED
+20bb5962 | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 77: count of the literal in the kit -> 3 | UNMEASURED
+77c3d5c2 | NOT a literal a seat matches: a prose fragment the tool picked at line 77 (kind output); count of the fragment in the kit -> 1 | UNMEASURED-AS-LITERAL
+f9574c95 | NOT a literal a seat matches: a prose fragment the tool picked at line 77 (kind output); count of the fragment in the kit -> 1 | UNMEASURED-AS-LITERAL
+f6707a87 | NOT a literal a seat matches: a prose fragment the tool picked at line 78 (kind output); count of the fragment in the kit -> 143 | UNMEASURED-AS-LITERAL
+d5277ee1 | NOT a literal a seat matches: a prose fragment the tool picked at line 78 (kind output); count of the fragment in the kit -> 2 | UNMEASURED-AS-LITERAL
+0c61430c | node -v after exporting the Node 24 bin first on PATH -> v24.22.2
+de1d4382 | export PATH node-v24.22.2 bin; node -v -> v24.22.2
+2d11cf08 | git -C .tools/b2143/clone config --get user.email | tr -d '\n' | wc -c -> 46
+b1729d5d | git -C .tools/b2143/clone config --get user.name | tr -d '\n' | wc -c -> 12 (a name is configured; value not shown)
+42423866 | git -C .tools/b2143/clone config --get user.email | tr -d '\n' | wc -c -> 46; same on .tools/b2133/clone -> 46
+5d65dfb3 | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 86: count of the literal in the kit -> 2 | UNMEASURED
+3f9d5dbd | git -C .tools/b2133/clone config --get user.email | tr -d '\n' | wc -c -> 46 (the control)
+11de2b67 | scratch clone: git fetch origin +refs/heads/main:refs/remotes/origin/main then git rev-parse origin/main -> de39619cac31e475fe46350e29bdb3047b86e046
+dee87aca | scratch clone: same fetch, git rev-parse origin/b2143/lane3-kit1 -> 895da3f4630e170e038a1b5b2c78008ae7633b93
+be28bf03 | scratch clone: git branch --list -> `main` only (no local b2143/lane3-kit1); git branch -r lists origin/b2143/lane3-kit1
+9b511b1b | scratch clone: git rev-parse 895da3f4630e170e038a1b5b2c78008ae7633b93~3 -> 279b22352dbcbd85664534395aeb366fec719a50
+39f2cd1c | scratch clone: git rev-list --count BASE..K -> 3
+388dc0ca | gh api contents?ref=<sha> of the counts file for BASE, K, M1 (decoded) -> 6530/411, 6558/413, 6606/417
+0264026f | node -e used by the drafter over the decoded counts file -> printed tests and suites; the seat's own node -e line is its own | UNMEASURED as typed
+31759bf5 | decoded counts file at BASE, K, M1 -> key tests present (6530, 6558, 6606)
+44d3cce9 | decoded counts file at BASE, K, M1 -> key suites present (411, 413, 417)
+6fb5a040 | gh compare BASE...M1 file list, count -> 9
+9bf5ac13 | NOT run as written (git merge-base K M1): the gh compare BASE...M1 read printed status ahead, behind_by 0, so BASE is the merge base by reading; the seat's own print is the instrument | UNMEASURED as a command
+7f1e5782 | NOT a literal a seat matches: a prose fragment the tool picked at line 96 (kind output); count of the fragment in the kit -> 1 | UNMEASURED-AS-LITERAL
+17474267 | NOT run by the drafter (seat-typed; the drafter's scratch HEAD was K after checkout, rev-parse printed 895da3f4...) | UNMEASURED at the seat's worktree
+6b70ed45 | NOT run by the drafter (a worktree made by `-b`; no such tree exists yet) | UNMEASURED
+501d0807 | the tree is made by `worktree add -b b2143/lane3-kit1`; the drafter's own scratch used a detached tree | UNMEASURED as typed
+5651ecac | NOT a literal a seat matches: a prose fragment the tool picked at line 98 (kind count); count of the fragment in the kit -> 71 | UNMEASURED-AS-LITERAL
+9ca9203f | NOT a literal a seat matches: a prose fragment the tool picked at line 99 (kind count); count of the fragment in the kit -> 71 | UNMEASURED-AS-LITERAL
+c3cab40a | NOT a literal a seat matches: a prose fragment the tool picked at line 99 (kind count); count of the fragment in the kit -> 1 | UNMEASURED-AS-LITERAL
+bce959a0 | scratch clone after the merge: /usr/bin/grep -c -F '<<<<<<<' over scripts/verify-expected-counts.json BEFORE writing main's version -> above 0 (the file is UU); after `git show M1:... >` -> 0
+7be5f9d4 | NOT a literal a seat matches: a prose fragment the tool picked at line 99 (kind output); count of the fragment in the kit -> 1 | UNMEASURED-AS-LITERAL
+62692f2b | NOT a literal a seat matches: a prose fragment the tool picked at line 99 (kind output); count of the fragment in the kit -> 143 | UNMEASURED-AS-LITERAL
+ab5d87a8 | /usr/bin/grep -c -F 'VERDICT: PASS' over .tools/b2143/logs/verify-linux-update.log -> 1 (the lane's real log, path of the same form)
+a5365e35 | /usr/bin/grep -c -F 'VERDICT: PASS' over .tools/b2143/logs/verify-linux-update.log -> 1 and verify-plain.log -> 1
+0c66060f | /usr/bin/grep -c -F 'expectation UPDATED' over .tools/b2143/logs/verify-linux-update.log -> 1; verify-plain.log -> 0
+776ea2cd | /usr/bin/grep -c -F 'tests=6558 suites=413' over the lane's real update log -> 1 (the kit's 6634/419 form is PREDICTED, unmeasured)
+99a88105 | /usr/bin/grep -c -F EADDRINUSE over the lane's real verify-linux-update.log -> 0 and verify-plain.log -> 0 (control: /usr/bin/grep -c '^PASS ' -> 413 in each)
+6b689a8d | /usr/bin/grep -c '^PASS ' over the lane's real update log -> 413 and plain log -> 413 (the kit says above 400)
+69b41937 | NOT a literal a seat matches: a prose fragment the tool picked at line 102 (kind count); count of the fragment in the kit -> 6 | UNMEASURED-AS-LITERAL
+c0205f51 | NOT a literal a seat matches: a prose fragment the tool picked at line 102 (kind count); count of the fragment in the kit -> 1 | UNMEASURED-AS-LITERAL
+66c10b02 | NOT a literal a seat matches: a prose fragment the tool picked at line 103 (kind count); count of the fragment in the kit -> 71 | UNMEASURED-AS-LITERAL
+f4403624 | NOT a literal a seat matches: a prose fragment the tool picked at line 103 (kind output); count of the fragment in the kit -> 1 | UNMEASURED-AS-LITERAL
+f8af8199 | NOT a literal a seat matches: a prose fragment the tool picked at line 103 (kind count); count of the fragment in the kit -> 1 | UNMEASURED-AS-LITERAL
+bbef0c37 | ls of .tools/b2143/logs -> verify-plain.log present (same name form in this kit's logs)
+bb213db2 | /usr/bin/grep -c -F 'VERDICT: PASS' over the lane's real verify-plain.log -> 1
+7686efd1 | /usr/bin/grep -c -F 'tests passed across 413 suites' over the lane's real update and plain logs -> 1 and 1 (the kit's 6634/6634 form is PREDICTED)
+4900a1d9 | /usr/bin/grep -c -F EADDRINUSE over the lane's real verify-plain.log -> 0 (control: '^PASS ' count 413)
+085367ed | NOT run by the drafter as typed (merge2152.py checks the parents; git merge-base --is-ancestor is the seat's) | UNMEASURED
+ad4598c4 | ls of .tools/b2143/logs -> verify-linux-update.log present
+68bd574a | ls of .tools/b2143/logs -> verify-plain.log present
+65ef1a76 | /usr/bin/grep -c -F 'verify-suite: expectation' -> 2 in the lane's real update log (the expectation line and the UPDATED line), 1 in the plain log
+2ad70f12 | PREDICTED: the update log's line 6 form `verify-suite: expectation <dash> tests=6530 suites=411` was measured (count of 'tests=6530 suites=411' -> 1); the 6606/417 form is the value of main's file, NOT run | UNMEASURED
+66e5f819 | /usr/bin/grep -c -F 'Test Suites: 413 passed, 413 total' over the lane's real update and plain logs -> 1 and 1
+88f5323d | /usr/bin/grep -c -F 'Tests:       6558 passed, 6558 total' (7 spaces) over the lane's real update and plain logs -> 1 and 1
+88ea77b9 | gh matching-refs/heads/b2143 --jq '.[]|[.ref,.object.sha]|@tsv' -> one line; the push-step form (--jq '.[]|.object.sha') is the same jq family, NOT run as typed | UNMEASURED as typed
+9f314369 | gh matching-refs/heads/b2143 --jq '.[]|.object.sha' -> 895da3f4630e170e038a1b5b2c78008ae7633b93 (the sha a push must find)
+acc1750c | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 118: count of the literal in the kit -> 1 | UNMEASURED
+c7d694ba | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 118: count of the literal in the kit -> 1 | UNMEASURED
+116a079c | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 118: count of the literal in the kit -> 1 | UNMEASURED
+ddd58266 | git -C <scratch> diff K HEAD of the scratch merge -> 9 changed paths; the seat's own diff is its own | UNMEASURED as typed
+6d11b966 | gitleaks stdin --no-banner -> `no leaks found` (see 07d343cd)
+a2abfa85 | NOT a literal a seat matches: a prose fragment the tool picked at line 121 (kind output); count of the fragment in the kit -> 1 | UNMEASURED-AS-LITERAL
+8c019fcb | python3 -I -B merge2152.py conflicts <scratch tree> -> MERGE2152 conflicts PASS (rc 0)
+f86febb9 | python3 -I -B merge2152.py counts <scratch tree> -> FAIL before the pair was set, PASS after (a node line of the same shape as verify-suite.sh 321-335 wrote the pair)
+712ca53f | python3 -I -B merge2152.py post <scratch tree> msg-M.txt <4 names> -> MERGE2152 post PASS (23 OK lines); control on a wrong earlier commit -> FAIL
+50e1976b | NOT run by the drafter (a command the seat types, a tool line it prints or a name it writes; its behaviour is UNMEASURED); present in the kit at line 121: count of the literal in the kit -> 7 | UNMEASURED
+d4226b72 | the STATUS section name `## READY` copied from kit B2143 | UNMEASURED as a literal
+755987d8 | /usr/bin/grep -c -w SEAT-N185 -> a count of this kit's own text; the rule is the stamp-time control of the form of kit B2143's slot | UNMEASURED
+8b669436 | the stamp-time `.pre-stamp` copy is Tuesday's; control row of the kit's REFUSE 1 | UNMEASURED
