@@ -1,0 +1,934 @@
+brain-db tests: run directory /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/mymut-204129/K07_many_boms/scr/braindb-test-20261127-204442-10088
+started 2026-11-27 20:44:42 AEDT
+
+== 0. fixtures, and the tool copied into a tree named WEDNESDAY
+fixtures written under /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/mymut-204129/K07_many_boms/scr/braindb-test-20261127-204442-10088/tree (45 lessons must qualify, 117 must be left out)
+  PASS  expectation tables written by the fixture builder (151 absent, 75 present, 58 paths, 117 lessons to be left out)
+
+== 1. guards before any cluster exists
+  PASS  BRAINDB_ROOT without BRAINDB_PGDATA is refused (a fixture tree can never reach the drive cluster) (rc 1)
+  PASS    and says why
+  PASS  status on a cluster that does not exist reports STOPPED (rc 3)
+  PASS  start with no cluster is refused (rc 1)
+  PASS  WED_AGENT=tuesday on a tree named WEDNESDAY is refused with rc 2 (the tree decides the seat; the variable may only agree) (rc 2)
+  PASS    and says REFUSED
+  PASS  (can fail) WED_AGENT=wednesday on the same tree is accepted (rc 3)
+  PASS  a tree whose folder is not WEDNESDAY, TUESDAY or FRIDAY is refused with rc 2, never defaulted to a seat (rc 2)
+  PASS    and says REFUSED
+  PASS  none of the refused commands created a cluster
+
+== 2. init
+  PASS  init creates the cluster (rc 0)
+  PASS  data directory is mode 700
+  PASS  postgresql.conf carries listen_addresses = ''
+  PASS  a second init is refused (rc 1)
+  PASS    and says REFUSED
+  PASS  (can fail) init refusal: the first init did not report REFUSED
+  PASS  stop on a never-started cluster is a clean no-op (rc 0)
+
+== 3. start, socket only
+  PASS  start (rc 0)
+  PASS  exactly one process runs with -D <scratch data directory> (pid 10815)
+  PASS  the server holds no network socket (lsof -i: nothing, rc 1)
+  PASS  (control) the same lsof does see the Unix socket
+  PASS  a second start is a no-op (rc 0)
+  PASS    and says already running
+  PASS  status reports RUNNING (rc 0)
+  PASS    and names the data directory the answering server serves
+
+== 4. check before any rebuild is RED, rebuild makes it GREEN
+  PASS  check with no index is red (rc 1)
+  PASS  rebuild (rc 0)
+        NOTICE:  schema "brain" does not exist, skipping
+        rebuild: seat wednesday, tree /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/mymut-204129/K07_many_boms/scr/braindb-test-20261127-204442-10088/tree
+          data directory: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/mymut-204129/K07_many_boms/scr/braindb-test-20261127-204442-10088/pgdata-test
+          kind            files     rows
+          rules               2        8
+          lesson             45       52
+          rules_index         1       47   (rule lines)
+          ledger              2        5
+          daily               1        3
+          skill               3        3
+          identity            1        1
+          people              1        1
+          architecture        2        2
+          total              58       75   (search rows)
+          rules index: 151 row(s) read, 47 joined to an indexed lesson for this seat, 104 not joined (the lesson is left out or missing, or the row is scoped to other seats)
+          rules index: 24 line(s) could NOT be read as a row (line 15, 16, 18, 19, 20, 22, 23, 24, 25, 26, 27, 29, 35, 37, 39, 41, 42, 43, 44, 45); every lesson such a line names is left out under clause (a)
+          rules index: 5 row(s) name no lesson file on disk: 2026-01-05_beta (conflict_on_2026-01-06).md, 2026-01-06_gamma.pre-0101.md, 2026-01-99_missing-lesson.md, 2026-03-04_A-KEY-CASE.md, 2026-03-08_a-key-tpyo.md
+          matched an allow line but NOT indexed (files that are not lessons): 9
+              1  a file whose name starts with '_' is a ledger, digest or index, never a skill  (_ledger_copy.md)
+              4  not a daily-note file name (a plain date, nothing more)  (2026-06-01-TUESDAY-handover.md, 2026-06-02_tuеsday.md, 2026-06-03_fri-day.md, 2026-06-04_ｆｒｉｄａｙ.md)
+              2  path contains '(conflict_on_'  (2026-01-05_beta (conflict_on_2026-01-06).md, 2026-01-20 (conflict_on_2026-01-21).md)
+              1  path contains '.pre-'  (2026-01-06_gamma.pre-0101.md)
+              1  symlink
+                   0_Brain/skills/abs-link.md  [symlink]
+          LESSONS: 162 file(s) matched the allow line; 45 qualified and are indexed; 117 LEFT OUT, each named with the clause it failed:
+            clause (a) no single well-read rules-index row for it: 31
+                   2026-03-01_a-no-row.md  [it has no rules-index row whose key is exactly its file name]
+                   2026-03-02_a-key-no-ext.md  [a rules-index line that could not be read names it (line 15)]
+                   2026-03-03_a-key-quoted.md  [a rules-index line that could not be read names it (line 16)]
+                   2026-03-04_a-key-case.md  [it has no rules-index row whose key is exactly its file name]
+                   2026-03-05_a-key-path.md  [a rules-index line that could not be read names it (line 18)]
+                   2026-03-06_a-key-trailing-space.md  [a rules-index line that could not be read names it (line 19)]
+                   2026-03-07_a-key-leading-space.md  [a rules-index line that could not be read names it (line 20)]
+                   2026-03-08_a-key-typo.md  [it has no rules-index row whose key is exactly its file name]
+                   2026-03-09_a-key-wikilink.md  [a rules-index line that could not be read names it (line 22)]
+                   2026-03-10_a-tabs-to-spaces.md  [a rules-index line that could not be read names it (line 23)]
+                   2026-03-11_a-eight-fields.md  [a rules-index line that could not be read names it (line 24)]
+                   2026-03-12_a-six-fields.md  [a rules-index line that could not be read names it (line 25)]
+                   2026-03-13_a-row-cr.md  [a rules-index line that could not be read names it (line 26)]
+                   2026-03-14_a-hash1.md  [a rules-index line that could not be read names it (line 27)]
+                   2026-03-15_a-good-and-damaged.md  [a rules-index line that could not be read names it (line 29)]
+                   2026-03-16_a-two-plain-rows.md  [it has 2 rules-index rows with the same key]
+                   2026-03-17_a-two-hash2-rows.md  [two of its rules-index rows have the same '#n' key]
+                   2026-03-18_a-commented-row.md  [a rules-index line that could not be read names it (line 35)]
+                   2026-03-19_a-comment-names-it.md  [a rules-index line that could not be read names it (line 37)]
+                   2026-03-20_a-free-text-names-it.md  [a rules-index line that could not be read names it (line 39)]
+                   2026-03-21_a-hash2-only.md  [it has no rules-index row whose key is exactly its file name]
+                   2026-03-22_a-seat-caps.md  [a rules-index line that could not be read names it (line 41)]
+                   2026-03-23_a-seat-allcaps.md  [a rules-index line that could not be read names it (line 42)]
+                   2026-03-24_a-seat-semicolon.md  [a rules-index line that could not be read names it (line 43)]
+                   2026-03-25_a-seat-space.md  [a rules-index line that could not be read names it (line 44)]
+                   2026-03-26_a-seat-empty.md  [a rules-index line that could not be read names it (line 45)]
+                   2026-03-27_a-seat-not.md  [a rules-index line that could not be read names it (line 46)]
+                   2026-03-28_a-seat-all-plus.md  [a rules-index line that could not be read names it (line 47)]
+                   2026-03-29_a-seat-twice.md  [a rules-index line that could not be read names it (line 48)]
+                   2026-03-30_a-status-caps.md  [a rules-index line that could not be read names it (line 49)]
+                   2026-03-31_a-key-zwsp-other.md  [it has 2 rules-index rows with the same key]
+            clause (b) its rules-index row is scoped to other seats: 5
+                   2026-01-03_what-friday-does.md  [its rules-index row is scoped to friday]
+                   2026-01-17_other-seat-only.md  [its rules-index row is scoped to tuesday]
+                   2026-03-42_café-other.md  [its rules-index row is scoped to tuesday]
+                   2026-04-01_b-tuesday-friday.md  [its rules-index row is scoped to tuesday,friday]
+                   2026-04-02_b-plain-other-hash2-mine.md  [its rules-index row is scoped to tuesday]
+            clause (c) frontmatter or tier does not qualify: 45
+                   2026-01-08_project-case-one.md  [tier 'P-Datasec/HPSM-POC' is not one of this seat's tiers (W, M, P-<own client>/<project>)]
+                   2026-05-01_c-no-tier.md  [no tier line in the frontmatter]
+                   2026-05-02_c-mixed.md  [tier 'MIXED' is not one of this seat's tiers (W, M, P-<own client>/<project>)]
+                   2026-05-03_c-ds-bracket.md  [tier 'P (Datasec/OXPd)' is not one of this seat's tiers (W, M, P-<own client>/<project>)]
+                   2026-05-04_c-unknown-client.md  [tier 'P-Acme/Thing' is not one of this seat's tiers (W, M, P-<own client>/<project>)]
+                   2026-05-05_c-own-bracket.md  [tier 'P (Secuura/Blockchain)' is not one of this seat's tiers (W, M, P-<own client>/<project>)]
+                   2026-05-06_c-own-no-project.md  [tier 'P-Secuura/' is not one of this seat's tiers (W, M, P-<own client>/<project>)]
+                   2026-05-07_c-w-lower.md  [tier 'w' is not one of this seat's tiers (W, M, P-<own client>/<project>)]
+                   2026-05-08_c-w-trailing-space.md  [tier 'W ' is not one of this seat's tiers (W, M, P-<own client>/<project>)]
+                   2026-05-09_c-w-comment.md  [tier 'W # really P-Other' is not one of this seat's tiers (W, M, P-<own client>/<project>)]
+                   2026-05-10_c-w-quoted.md  [tier '"W"' is not one of this seat's tiers (W, M, P-<own client>/<project>)]
+                   2026-05-11_c-w-list.md  [tier '[W]' is not one of this seat's tiers (W, M, P-<own client>/<project>)]
+                   2026-05-12_c-capital-key.md  [frontmatter line 4 is not a plain 'key: value' line]
+                   2026-05-13_c-upper-key.md  [frontmatter line 4 is not a plain 'key: value' line]
+                   2026-05-14_c-quoted-key.md  [frontmatter line 4 is not a plain 'key: value' line]
+                   2026-05-15_c-key-space.md  [frontmatter line 4 is not a plain 'key: value' line]
+                   2026-05-16_c-key-suffix.md  [frontmatter line 5 is not a plain 'key: value' line]
+                   2026-05-17_c-key-eq.md  [frontmatter line 5 is not a plain 'key: value' line]
+                   2026-05-18_c-key-tiers.md  [frontmatter key 'tiers' looks like a tier key and is not exactly 'tier']
+                   2026-05-19_c-key-tier-note.md  [frontmatter key 'tier_project' looks like a tier key and is not exactly 'tier']
+                   2026-05-20_c-dup-w-other.md  [frontmatter key 'tier' is given twice]
+                   2026-05-21_c-dup-other-w.md  [frontmatter key 'tier' is given twice]
+                   2026-05-22_c-dup-key.md  [frontmatter key 'source' is given twice]
+                   2026-05-23_c-list-item.md  [frontmatter line 5 is not a plain 'key: value' line]
+                   2026-05-24_c-nested.md  [frontmatter line 6 is not a plain 'key: value' line]
+                   2026-05-25_c-folded.md  [frontmatter line 5 is not a plain 'key: value' line]
+                   2026-05-26_c-block-scalar.md  [frontmatter line 5 is not a plain 'key: value' line]
+                   2026-05-27_c-tab-indent.md  [frontmatter line 4 is not a plain 'key: value' line]
+                   2026-05-28_c-yaml-comment.md  [frontmatter line 5 is not a plain 'key: value' line]
+                   2026-06-01_c-blank-in-block.md  [frontmatter line 5 is not a plain 'key: value' line]
+                   2026-06-02_c-value-tier.md  [frontmatter line 5 carries something tier-like inside the value of 'source']
+                   2026-06-03_c-value-tier-paren.md  [frontmatter line 5 carries something tier-like inside the value of 'scope']
+                   2026-06-04_c-unclosed.md  [the frontmatter is not closed by a line that is exactly '---']
+                   2026-06-05_c-leading-blank.md  [line 1 is not exactly '---' (the frontmatter must open on line 1)]
+                   2026-06-06_c-indented-fence.md  [line 1 is not exactly '---' (the frontmatter must open on line 1)]
+                   2026-06-07_c-fence-space.md  [line 1 is not exactly '---' (the frontmatter must open on line 1)]
+                   2026-06-08_c-fence-comment.md  [line 1 is not exactly '---' (the frontmatter must open on line 1)]
+                   2026-06-09_c-dashes4.md  [line 1 is not exactly '---' (the frontmatter must open on line 1)]
+                   2026-06-10_c-plusplus.md  [line 1 is not exactly '---' (the frontmatter must open on line 1)]
+                   2026-06-11_c-html-first.md  [line 1 is not exactly '---' (the frontmatter must open on line 1)]
+                   2026-06-12_c-no-frontmatter.md  [line 1 is not exactly '---' (the frontmatter must open on line 1)]
+                   2026-06-13_c-two-blocks.md  [a second frontmatter block follows the first (exactly one is allowed)]
+                   2026-06-14_c-second-block-far.md  [a second frontmatter block follows the first (exactly one is allowed)]
+                   2026-06-15_c-empty.md  [line 1 is not exactly '---' (the frontmatter must open on line 1)]
+                   2026-06-16_c-only-fence.md  [the frontmatter is not closed by a line that is exactly '---']
+            clause (d) tier marker or tier-like line in its text: 15
+                   2026-07-01_d-marker-ds.md  [it holds an HTML comment (a section marker in any spelling is one)]
+                   2026-07-02_d-marker-own.md  [it holds an HTML comment (a section marker in any spelling is one)]
+                   2026-07-03_d-marker-nested-fence.md  [it holds an HTML comment (a section marker in any spelling is one)]
+                   2026-07-04_d-marker-multiline.md  [it holds an HTML comment (a section marker in any spelling is one)]
+                   2026-07-05_d-marker-list.md  [it holds an HTML comment (a section marker in any spelling is one)]
+                   2026-07-06_d-marker-no-tier-word.md  [it holds an HTML comment (a section marker in any spelling is one)]
+                   2026-07-07_d-comment-plain.md  [it holds an HTML comment (a section marker in any spelling is one)]
+                   2026-07-08_d-comment-close-only.md  [it holds an HTML comment (a section marker in any spelling is one)]
+                   2026-07-09_d-body-tier-line.md  [line 17 is tier-like outside the frontmatter's one tier line]
+                   2026-07-10_d-body-tier-bold.md  [line 17 is tier-like outside the frontmatter's one tier line]
+                   2026-07-11_d-body-tier-bracket.md  [line 17 is tier-like outside the frontmatter's one tier line]
+                   2026-07-12_d-body-tier-quote.md  [line 17 is tier-like outside the frontmatter's one tier line]
+                   2026-07-13_d-body-tier-inline.md  [line 13 is tier-like outside the frontmatter's one tier line]
+                   2026-07-14_d-body-tier-linkref.md  [line 13 is tier-like outside the frontmatter's one tier line]
+                   2026-07-15_d-entity.md  [it holds a numeric character reference (&#...;), which can spell the word tier where the line test cannot see it]
+            clause (t) not plain text: 17
+                   2026-08-01_t-latin1.md  [the file is not valid UTF-8]
+                   2026-08-02_t-utf16.md  [the file is not valid UTF-8]
+                   2026-08-03_t-nul.md  [it holds a control, format or line-separator character (U+0000)]
+                   2026-08-04_t-rs-byte.md  [it holds a control, format or line-separator character (U+001E)]
+                   2026-08-05_t-crlf.md  [it holds a control, format or line-separator character (U+000D)]
+                   2026-08-06_t-cr-only.md  [it holds a control, format or line-separator character (U+000D)]
+                   2026-08-07_t-form-feed.md  [it holds a control, format or line-separator character (U+000C)]
+                   2026-08-08_t-line-sep.md  [it holds a control, format or line-separator character (U+2028)]
+                   2026-08-09_t-nel.md  [it holds a control, format or line-separator character (U+0085)]
+                   2026-08-10_t-zwsp.md  [it holds a control, format or line-separator character (U+200B)]
+                   2026-08-11_t-soft-hyphen.md  [it holds a control, format or line-separator character (U+00AD)]
+                   2026-08-12_t-cyrillic.md  [it holds a letter that is not a Latin letter (U+0430)]
+                   2026-08-13_t-cyrillic-key.md  [it holds a letter that is not a Latin letter (U+0456)]
+                   2026-08-14_t-greek.md  [it holds a letter that is not a Latin letter (U+0394)]
+                   2026-08-15_t-smallcap.md  [it holds a letter that is not a Latin letter (U+1D05)]
+                   2026-08-16_t-bidi.md  [it holds a control, format or line-separator character (U+202E)]
+                   2026-08-17_t-invalid-utf8.md  [the file is not valid UTF-8]
+            clause (f) not a plain regular file (link, hard link, unreadable): 4
+                   2026-09-01_f-symlink.md  [symlink]
+                   2026-09-02_f-hardlink.md  [hard link (link count 2): the same file exists under another name]
+                   2026-09-03_f-a-directory.md  [not a regular file]
+                   2026-09-04_f-a-fifo.md  [not a regular file]
+          time: 0.15 s (read and parse 0.03 s, load and index 0.12 s)
+        rebuild: done; no file was unreadable and no row was truncated; 117 lesson file(s) LEFT OUT by the qualify rule: a=31, b=5, c=45, d=15, t=17, f=4
+  PASS  check after rebuild is green (rc 0)
+  PASS  check prints the data directory it reports on
+  PASS  rebuild's last line says nothing was skipped for a fault
+
+== 5. the indexed path set is exactly the expected set
+  PASS  58 paths, exactly the expected ones
+  PASS  no indexed path is another seat's record, a sync leftover or a hard-excluded folder
+  PASS  (can fail) that path assertion: with 'learnings' added to the same pattern it is red
+  PASS  a lesson, a skill and an architecture file with another seat's word in the NAME are indexed (ANSWER-1 item 2)
+
+== 6. QUALIFY OR STAY OUT: every planted file is absent, every neighbour is present (whole-index dump)
+  PASS  absent  xcanary03  clause (b): its only row is scoped friday
+  PASS  absent  xcanary05  lesson, a (conflict_on_ copy (path rule)
+  PASS  absent  xcanary06  lesson, .pre- inside a name that still ends .md (path rule)
+  PASS  absent  xcanary07  lesson backup ending .md.pre-0101
+  PASS  absent  xcanary08  clause (c): tier P-Datasec/HPSM-POC (another client's project)
+  PASS  absent  xcanary17  clause (b): its only row is scoped tuesday
+  PASS  absent  xcanary03rule  the rule line of a lesson left out under (b)
+  PASS  absent  xcanary17rule  the rule line of a lesson left out under (b)
+  PASS  absent  xcanary08rule  the rule line of a lesson left out under (c)
+  PASS  absent  xcanary53rule  a row whose lesson file does not exist
+  PASS  absent  xcanary301  clause (a): no row at all (round 3 indexed this on the tier alone)
+  PASS  absent  xcanary302  clause (a): the only row's key lacks '.md'
+  PASS  absent  xcanary303  clause (a): the only row's key is in double quotes
+  PASS  absent  xcanary304  clause (a): the only row's key differs in case
+  PASS  absent  xcanary305  clause (a): the only row's key is written as a path
+  PASS  absent  xcanary306  clause (a): the only row's key has a trailing space (scoped all)
+  PASS  absent  xcanary307  clause (a): the only row has a leading space
+  PASS  absent  xcanary308  clause (a): the only row's key has one letter wrong
+  PASS  absent  xcanary309  clause (a): the only row's key is a wikilink
+  PASS  absent  xcanary310  clause (a): the row's TABs became spaces
+  PASS  absent  xcanary311  clause (a): a TAB inside the rule field (8 fields)
+  PASS  absent  xcanary312  clause (a): a row with 6 fields
+  PASS  absent  xcanary313  clause (a): a row ending in a carriage return
+  PASS  absent  xcanary314  clause (a): the only row's key is file.md#1
+  PASS  absent  xcanary315  clause (a): a good row scoped all AND a damaged '#x' row for the same lesson
+  PASS  absent  xcanary316  clause (a): two rows with the same key (tuesday, then all)
+  PASS  absent  xcanary317  clause (a): a plain row and the '#2' key twice
+  PASS  absent  xcanary318  clause (a): its only row is commented out
+  PASS  absent  xcanary319  clause (a): a good row scoped all, and a comment line below line 1 that names it
+  PASS  absent  xcanary320  clause (a): a good row scoped all, and a stray line of prose that names it
+  PASS  absent  xcanary321  clause (a): a '#2' row and no plain row
+  PASS  absent  xcanary322  clause (a): seats cell 'Tuesday' (the row cannot be read)
+  PASS  absent  xcanary323  clause (a): seats cell 'ALL' (not the spec's word 'all')
+  PASS  absent  xcanary324  clause (a): seats cell 'tuesday;friday'
+  PASS  absent  xcanary325  clause (a): seats cell 'tuesday friday'
+  PASS  absent  xcanary326  clause (a): an empty seats cell
+  PASS  absent  xcanary327  clause (a): seats cell 'not-wednesday'
+  PASS  absent  xcanary328  clause (a): seats cell 'all,tuesday'
+  PASS  absent  xcanary329  clause (a): seats cell 'wednesday,wednesday'
+  PASS  absent  xcanary330  clause (a): status cell 'LIVE'
+  PASS  absent  xcanary331  clause (a): a zero-width space inside the key, so it equals this file's name: a second row for it
+  PASS  absent  xcanary342  clause (b): file name stored NFD, key NFC, scoped tuesday (the key DOES equal the name once both are NFC)
+  PASS  absent  xcanary401  clause (b): row scoped tuesday,friday
+  PASS  absent  xcanary402  clause (b): the plain row is scoped tuesday; only a '#2' row names this seat
+  PASS  absent  xcanary405ruletwo  a '#2' rule line scoped to another seat, inside an indexed lesson
+  PASS  absent  xcanary501  clause (c): no tier line (round 3 called this untagged and indexed it)
+  PASS  absent  xcanary502  clause (c): tier MIXED
+  PASS  absent  xcanary503  clause (c): tier P (Datasec/OXPd)
+  PASS  absent  xcanary504  clause (c): tier P-Acme/Thing
+  PASS  absent  xcanary505  clause (c): own client in the bracket spelling, which no real lesson of this seat uses
+  PASS  absent  xcanary506  clause (c): P-Secuura/ with no project
+  PASS  absent  xcanary507  clause (c): tier w (lower case)
+  PASS  absent  xcanary508  clause (c): tier 'W ' with a trailing space
+  PASS  absent  xcanary509  clause (c): tier 'W # really the other client'
+  PASS  absent  xcanary510  clause (c): tier "W" in quotes
+  PASS  absent  xcanary511  clause (c): tier [W]
+  PASS  absent  xcanary512  clause (c): key spelled 'Tier:'
+  PASS  absent  xcanary513  clause (c): key spelled 'TIER:'
+  PASS  absent  xcanary514  clause (c): key in quotes
+  PASS  absent  xcanary515  clause (c): 'tier :' with a space before the colon
+  PASS  absent  xcanary516  clause (c): key 'tier (project):' beside a clean tier line
+  PASS  absent  xcanary517  clause (c): 'tier = P-Other/X' beside a clean tier line
+  PASS  absent  xcanary518  clause (c): a second key 'tiers:'
+  PASS  absent  xcanary519  clause (c): a second key 'tier_project:'
+  PASS  absent  xcanary520  clause (c): tier twice, W first
+  PASS  absent  xcanary521  clause (c): tier twice, W last
+  PASS  absent  xcanary522  clause (c): another key given twice
+  PASS  absent  xcanary523  clause (c): '- tier: P-Other/X' beside a clean tier line
+  PASS  absent  xcanary524  clause (c): tier nested under meta: beside a clean tier line
+  PASS  absent  xcanary525  clause (c): tier value folded onto the next line
+  PASS  absent  xcanary526  clause (c): tier: >- block scalar
+  PASS  absent  xcanary527  clause (c): tab-indented tier key
+  PASS  absent  xcanary528  clause (c): a YAML comment line in the block
+  PASS  absent  xcanary529  clause (c): a blank line inside the block
+  PASS  absent  xcanary530  clause (c): another key whose VALUE carries 'tier: P-Other/X'
+  PASS  absent  xcanary531  clause (c): another key whose value carries 'tier (project) = X'
+  PASS  absent  xcanary532  clause (c): frontmatter never closed
+  PASS  absent  xcanary533  clause (c): a blank line before the frontmatter
+  PASS  absent  xcanary534  clause (c): one space before the opening fence
+  PASS  absent  xcanary535  clause (c): a space after the opening fence
+  PASS  absent  xcanary536  clause (c): fence written '--- # frontmatter'
+  PASS  absent  xcanary537  clause (c): four dashes as the fence
+  PASS  absent  xcanary538  clause (c): TOML '+++' frontmatter
+  PASS  absent  xcanary539  clause (c): a line before the frontmatter
+  PASS  absent  xcanary540  clause (c): no frontmatter, a tier line above the heading
+  PASS  absent  xcanary541  clause (c): a second frontmatter block carrying another tier
+  PASS  absent  xcanary542  clause (c): a second block whose tier line is 80 lines down
+  PASS  absent  xcanary701  clause (d): a section marker for the other client
+  PASS  absent  xcanary702  clause (d): a section marker for this seat's OWN client (any marker leaves the lesson out whole)
+  PASS  absent  xcanary703  clause (d): a marked section holding nested code fences and a '# comment'
+  PASS  absent  xcanary704  clause (d): a marker written as a three-line HTML comment
+  PASS  absent  xcanary705  clause (d): a marker written as a list item
+  PASS  absent  xcanary706  clause (d): an HTML comment naming a project, without the word tier
+  PASS  absent  xcanary707  clause (d): any HTML comment at all
+  PASS  absent  xcanary708  clause (d): a stray '-->'
+  PASS  absent  xcanary709  clause (d): a body line 'tier: P-Other/X' (a marker without comment syntax)
+  PASS  absent  xcanary710  clause (d): a body line '**Tier:** P-Other/X'
+  PASS  absent  xcanary711  clause (d): a body line '[tier: P-Other/X]'
+  PASS  absent  xcanary712  clause (d): a body line '> tier = P-Other/X'
+  PASS  absent  xcanary713  clause (d): the words 'tier: P-Other/X' in the middle of a line
+  PASS  absent  xcanary714  clause (d): a link-reference comment '[//]: # (tier: P-Other/X)'
+  PASS  absent  xcanary715  clause (d): a numeric character reference spelling the first letter of the word tier
+  PASS  absent  xcanary801  clause (t): a Latin-1 file (not valid UTF-8)
+  PASS  absent  xcanary802  clause (t): a UTF-16 file
+  PASS  absent  xcanary803  clause (t): a NUL byte
+  PASS  absent  xcanary804  clause (t): byte 0x1E between two frontmatter keys
+  PASS  absent  xcanary805  clause (t): CRLF line endings
+  PASS  absent  xcanary806  clause (t): CR-only line endings
+  PASS  absent  xcanary807  clause (t): a form feed between two frontmatter keys
+  PASS  absent  xcanary808  clause (t): U+2028 between two frontmatter keys
+  PASS  absent  xcanary809  clause (t): U+0085 in the body
+  PASS  absent  xcanary810  clause (t): a zero-width space inside a word
+  PASS  absent  xcanary811  clause (t): a soft hyphen inside a key
+  PASS  absent  xcanary812  clause (t): a Cyrillic look-alike letter
+  PASS  absent  xcanary813  clause (t): a Cyrillic look-alike in a second tier key
+  PASS  absent  xcanary814  clause (t): a Greek letter
+  PASS  absent  xcanary815  clause (t): a Latin small-capital look-alike
+  PASS  absent  xcanary816  clause (t): a right-to-left override
+  PASS  absent  xcanary817  clause (t): invalid UTF-8 bytes
+  PASS  absent  xcanary15  clause (f): a 4_Credentials file reached through a SYMLINK in learnings/
+  PASS  absent  xcanary680  clause (f): a 4_Credentials file HARD-LINKED into learnings/
+  PASS  absent  xcanary681  an absolute symlinked FILE in skills/ pointing into 3_Access_Keys
+  PASS  absent  xcanary52  learnings/families/ (no recursion)
+  PASS  absent  xcanary690  a daily note whose name is not a plain date
+  PASS  absent  xcanary691  a daily note whose name is not a plain date
+  PASS  absent  xcanary692  a daily note whose name is not a plain date
+  PASS  absent  xcanary693  a daily note whose name is not a plain date
+  PASS  absent  xcanary22  the friday ledger and its archive
+  PASS  absent  xcanary23  the laptop_datasec ledger and its archive
+  PASS  absent  xcanary24  ledger (conflict_on_ copy
+  PASS  absent  xcanary25  ledger .pre- backup
+  PASS  absent  xcanary26  _ledger_fleet_insights.md (not in this seat's ledger table)
+  PASS  absent  xcanary33  daily/_template.md
+  PASS  absent  xcanary34  daily/.spoken.log
+  PASS  absent  xcanary35  daily (conflict_on_ copy
+  PASS  absent  xcanary36  daily .pre- backup
+  PASS  absent  xcanary37  daily_tuesday/
+  PASS  absent  xcanary38  daily_friday/
+  PASS  absent  xcanary41  skill .pre- backup
+  PASS  absent  xcanary43  a file named _ledger* in skills/
+  PASS  absent  xcanary76  a CLAUDE.md that is not one of the two allowed
+  PASS  absent  xcanary77  2_Project_Files/tuesday/
+  PASS  absent  xcanary78  a (conflict_on_ copy of the root rules file
+  PASS  absent  xcanary47  chat store under 0_Brain/dashboard/
+  PASS  absent  xcanary48  markdown under 0_Brain/dashboard/
+  PASS  absent  xcanary49  0_Brain/reference/
+  PASS  absent  xcanary50  3_Access_Keys/
+  PASS  absent  xcanary51  0_Brain/tasks/ (no allow line)
+  PASS  absent  xcanary700  another seat's pickup file
+  PASS  absent  xcanary701  another seat's week file
+  PASS  absent  xtasksown202  this seat's own pickup file (the shipped scope has no pickup line)
+  PASS  absent  xcanary  ANY canary token at all
+  PASS  present xneighbour01  lesson, tier W, one row scoped all plus a #2 row
+  PASS  present xneighbour02  lesson with 'tuesday' in its NAME whose row is scoped all
+  PASS  present xneighbour10  lesson, tier P-Secuura/Blockchain (this seat's own client)
+  PASS  present xneighbour11  lesson, tier M
+  PASS  present xneighbour16  superseded lesson
+  PASS  present xneighbour21z  lesson found by a title word
+  PASS  present xneighbour01apply  its second section
+  PASS  present xneighbour01rule  its rule line
+  PASS  present xneighbour01ruletwo  its #2 rule line
+  PASS  present xneighbour02rule  its rule line
+  PASS  present xneighbour340  (a) neighbour: a plain row and a '#2' row, both read
+  PASS  present xneighbour340two  its #2 rule line
+  PASS  present xneighbour341  (a) neighbour: file name stored NFD, key written NFC, scoped all
+  PASS  present xneighbour343  (a) neighbour: a well-read row carrying injection strings
+  PASS  present xneighbour403  (b) neighbour: row scoped wednesday
+  PASS  present xneighbour404  (b) neighbour: row scoped wednesday,friday
+  PASS  present xneighbour405  (b) neighbour: plain row all, '#2' row scoped tuesday (the lesson is in; that rule line is not)
+  PASS  present xneighbour405rule  its own rule line
+  PASS  present xneighbour560  (c) neighbour: tier M
+  PASS  present xneighbour561  (c) neighbour: project tier whose client is the own client 'general', spaces in the project
+  PASS  present xneighbour562  (c) neighbour: a UTF-8 BOM, then a clean block
+  PASS  present xneighbour563  (c) neighbour: the other keys real lessons carry
+  PASS  present xneighbour564  (c) neighbour: a status line that names a 'three-tier-routing' lesson, as real lessons do
+  PASS  present xneighbour565  (c) neighbour: a horizontal rule (---) further down the body
+  PASS  present xneighbour566  (c) neighbour: the words 'tiers', 'three-tier routing' and 'frontier' in the body
+  PASS  present xneighbour567  (c) neighbour: code fences, one unclosed (headings are not a decider any more)
+  PASS  present xneighbour568  (c) neighbour: an impossible frontmatter date
+  PASS  present xneighbour567b  text under an unclosed fence
+  PASS  present xneighbour741  (d) must succeed: the other client's name in the body
+  PASS  present xneighbour742  (d) must succeed: the name in capitals
+  PASS  present xneighbour743  (d) must succeed: the name inside a domain
+  PASS  present xneighbour744  (d) must succeed: the name split by markdown emphasis
+  PASS  present xneighbour745  (d) must succeed: the name with an accented letter
+  PASS  present xneighbour746  (d) must succeed: the name in full-width letters
+  PASS  present xneighbour747  (d) must succeed: the name in a section heading
+  PASS  present xneighbour748  (d) must succeed: the other client's name in the lesson's FILE NAME
+  PASS  present xneighbour749  (d) must succeed: the other client's name in its rules-index rule line
+  PASS  present xneighbour749rule  that rule line
+  PASS  present xneighbour750  (d) must succeed: the other client's name in a frontmatter value
+  PASS  present xneighbour751  (d) must succeed: own client's project tier whose project name carries the other client's name
+  PASS  present xneighbour730  (d) neighbour: the seat's OWN client named in the body, and 'data security'
+  PASS  present xneighbour830  (t) neighbour: accents, an em dash, arrows, a multiplication sign and a tab
+  PASS  present xneighbour921  a lesson whose NAME and body carry injection strings, indexed as plain text
+  PASS  present xneighbour922  a lesson whose NAME and body carry injection strings, indexed as plain text
+  PASS  present xneighbour923  a lesson whose NAME and body carry injection strings, indexed as plain text
+  PASS  present xneighbour951  N9 filler lesson
+  PASS  present xneighbour952  N9 filler lesson
+  PASS  present xneighbour953  N9 filler lesson
+  PASS  present xneighbour954  N9 filler lesson
+  PASS  present xneighbour955  N9 filler lesson
+  PASS  present xneighbour956  N9 filler lesson
+  PASS  present xneighbour957  N9 filler lesson
+  PASS  present xneighbour958  N9 filler lesson
+  PASS  present xneighbour20  this seat's ledger
+  PASS  present xneighbour20rule  a ledger row's rule sentence
+  PASS  present xneighbour21  this seat's ledger archive
+  PASS  present xneighbour30  daily bullet
+  PASS  present xneighbour30b  its continuation line
+  PASS  present xneighbour30c  daily bullet with no time
+  PASS  present xneighbour30d  daily plain paragraph
+  PASS  present xneighbour40  skill
+  PASS  present xneighbour42  skill with 'tuesday' in its name
+  PASS  present xneighbour43  identity
+  PASS  present xneighbour44  people
+  PASS  present xneighbour45  architecture
+  PASS  present xneighbour46  architecture file with 'tuesday' in its name
+  PASS  present xneighbour70  rules file: text before the first heading
+  PASS  present xneighbour70b  a section's own text before its numbered rules
+  PASS  present xneighbour71  numbered rule 0
+  PASS  present xneighbour71b  its continuation line
+  PASS  present xneighbour72  numbered rule 0a
+  PASS  present xneighbour73  numbered rule 3b-i
+  PASS  present xneighbour74  a numbered rule under a second heading
+  PASS  present xneighbour75  0_Brain/CLAUDE.md
+  PASS  present xneighbour910  a skill row holding the two separator bytes
+  PASS  (can fail) absence assertion: pointed at a neighbour token it is red
+  PASS  (can fail) presence assertion: pointed at a canary token it is red
+  PASS  the two rules files give 8 rows (1 intro, 1 section text, 3 numbered rules, 2 rules under later headings, 1 section of the brain file)
+  PASS  one row headed: CLAUDE.md > Rules > rule 0
+  PASS  one row headed: CLAUDE.md > Rules > rule 0a
+  PASS  one row headed: CLAUDE.md > Rules > rule 3b-i
+  PASS  one row headed: CLAUDE.md > Session end > rule 1
+  PASS  one row headed: 0_Brain/CLAUDE.md > Folders
+  PASS  no injection string in a file name, heading, body or rules-index field created a file (find PWNED*: nothing)
+  PASS  (control) the same find does find a file that exists
+
+== 6b. every left-out lesson is NAMED, under the clause it was planted for (N8)
+  PASS  all 117 left-out lessons are named in the rebuild report, each under the clause it was planted for
+  PASS  the report counts clause (a): 31
+  PASS    and the count printed for clause (a) is 31
+  PASS  the report counts clause (b): 5
+  PASS    and the count printed for clause (b) is 5
+  PASS  the report counts clause (c): 45
+  PASS    and the count printed for clause (c) is 45
+  PASS  the report counts clause (d): 15
+  PASS    and the count printed for clause (d) is 15
+  PASS  the report counts clause (t): 17
+  PASS    and the count printed for clause (t) is 17
+  PASS  the report counts clause (f): 4
+  PASS    and the count printed for clause (f) is 4
+  PASS  the rebuild's LAST line gives the count left out by each clause
+  PASS    (it is the last line)
+  PASS  check prints the same count
+  PASS    and names lessons under each clause, up to its limit
+  PASS    for example the hard link, by name
+  PASS  the report says which rules-index lines could not be read
+  PASS    and names a row whose lesson file does not exist
+  PASS  a daily note whose name is not a plain date is skipped with that reason
+  PASS  no Python traceback anywhere in the rebuild output
+  PASS  search for a left-out lesson's word says NO MATCH
+  PASS    and says that 117 lesson files are left out and not searched
+  PASS  doctor's one line carries the left-out count
+
+== 6c. ROUND 4b: a lesson that merely NAMES another client is indexed (ANSWER-7, must succeed)
+  PASS  present xneighbour741  a tier W or own-project lesson naming the other client in its text, name, rule line or frontmatter
+  PASS  present xneighbour742  a tier W or own-project lesson naming the other client in its text, name, rule line or frontmatter
+  PASS  present xneighbour743  a tier W or own-project lesson naming the other client in its text, name, rule line or frontmatter
+  PASS  present xneighbour744  a tier W or own-project lesson naming the other client in its text, name, rule line or frontmatter
+  PASS  present xneighbour745  a tier W or own-project lesson naming the other client in its text, name, rule line or frontmatter
+  PASS  present xneighbour746  a tier W or own-project lesson naming the other client in its text, name, rule line or frontmatter
+  PASS  present xneighbour747  a tier W or own-project lesson naming the other client in its text, name, rule line or frontmatter
+  PASS  present xneighbour748  a tier W or own-project lesson naming the other client in its text, name, rule line or frontmatter
+  PASS  present xneighbour749  a tier W or own-project lesson naming the other client in its text, name, rule line or frontmatter
+  PASS  present xneighbour749rule  a tier W or own-project lesson naming the other client in its text, name, rule line or frontmatter
+  PASS  present xneighbour750  a tier W or own-project lesson naming the other client in its text, name, rule line or frontmatter
+  PASS  present xneighbour751  a tier W or own-project lesson naming the other client in its text, name, rule line or frontmatter
+  PASS    and search finds one by its word
+  PASS    while every marker and tier-like case stays out (red-capable: the six marker forms, two comments, six tier-like lines, the numeric reference)
+  PASS  a scope file that still carries a deny_clients line is refused (rc 2): the line would promise a protection that no longer exists (rc 2)
+
+== 7. what a scope file may ask for is a closed table in the code (N5): anything else is REFUSED at load
+  PASS  refused (rc 2): allow daily 0_Brain/daily_tuesday/20*.md
+  PASS  refused (rc 2): allow daily 0_Brain/daily_friday/20*.md
+  PASS  refused (rc 2): allow skill 0_Brain/daily_tuesday/*.md
+  PASS  refused (rc 2): allow lesson 0_Brain/daily/20*.md
+  PASS  refused (rc 2): allow ledger 0_Brain/learnings/_ledger_friday.md
+  PASS  refused (rc 2): allow ledger 0_Brain/learnings/_ledger_laptop_datasec.md
+  PASS  refused (rc 2): allow ledger 0_Brain/learnings/_ledger*.md
+  PASS  refused (rc 2): allow ledger 0_Brain/learnings/_ledger_fleet_insights.md
+  PASS  refused (rc 2): allow skill 0_Brain/learnings/_ledger_*.md
+  PASS  refused (rc 2): allow skill 0_Brain/tasks/*.md
+  PASS  refused (rc 2): allow pickup 0_Brain/tasks/*.md
+  PASS  refused (rc 2): allow pickup 0_Brain/tasks/NEXT-PICKUP-TUESDAY.md
+  PASS  refused (rc 2): allow pickup 0_Brain/tasks/WEEK-INSTRUCTION-FRIDAY.md
+  PASS  refused (rc 2): allow skill 2_Project_Files/tuesday/*.md
+  PASS  refused (rc 2): allow rules 2_Project_Files/CLAUDE.md
+  PASS  refused (rc 2): allow rules_index 0_Brain/learnings/_other_index.tsv
+  PASS  refused (rc 2): allow architecture 1_Project_Definition/Discovery/*.md
+  PASS  the index is unchanged by the 17 refused scopes (58 files)
+  PASS  (can fail) a line for this seat's OWN pickup file, and wider patterns inside the table's folders, are accepted (rc 0)
+  PASS    the seat's own pickup file enters, so the table is live in both directions
+  PASS    and no other seat's record, ledger-named skill or planted lesson came with the wider patterns
+  PASS    a file whose name starts with '_' is never a skill or a lesson
+  PASS  a TUESDAY tree: 'allow ledger 0_Brain/learnings/_ledger.md' is refused (rc 2) and no cluster is created
+  PASS  a TUESDAY tree: 'allow ledger 0_Brain/learnings/_ledger_archive.md' is refused (rc 2) and no cluster is created
+  PASS  a TUESDAY tree: 'allow ledger 0_Brain/learnings/_ledger*.md' is refused (rc 2) and no cluster is created
+  PASS  a TUESDAY tree: 'allow daily 0_Brain/daily/20*.md' is refused (rc 2) and no cluster is created
+  PASS  a TUESDAY tree: 'allow skill 0_Brain/tasks/*.md' is refused (rc 2) and no cluster is created
+  PASS  a TUESDAY tree: 'allow pickup 0_Brain/tasks/NEXT-PICKUP.md' is refused (rc 2) and no cluster is created
+  PASS  a FRIDAY tree: 'allow ledger 0_Brain/learnings/_ledger.md' is refused (rc 2) and no cluster is created
+  PASS  a FRIDAY tree: 'allow ledger 0_Brain/learnings/_ledger_archive.md' is refused (rc 2) and no cluster is created
+  PASS  a FRIDAY tree: 'allow ledger 0_Brain/learnings/_ledger*.md' is refused (rc 2) and no cluster is created
+  PASS  a FRIDAY tree: 'allow daily 0_Brain/daily/20*.md' is refused (rc 2) and no cluster is created
+  PASS  a FRIDAY tree: 'allow skill 0_Brain/tasks/*.md' is refused (rc 2) and no cluster is created
+  PASS  a FRIDAY tree: 'allow pickup 0_Brain/tasks/NEXT-PICKUP.md' is refused (rc 2) and no cluster is created
+  PASS  rebuild under a scope that calls the other client its own (rc 0)
+  PASS  (can fail) under that scope xcanary08 DOES enter, so its absence above is clause (c)'s client test at work
+  PASS  even then: every lesson left out under (a), (b), (t) or (f), and every structural (c) and (d) case, stays out
+  PASS  even then: sync copies and backups stay out although the scope's deny_path lines are not what holds them
+  PASS  check under the real scope is red after that rebuild (rc 1)
+  PASS  rebuild under the real scope (rc 0)
+  PASS  and every canary is gone again
+  PASS  a scope file that differs only by a comment line makes check red (N24) (rc 1)
+  PASS    with 0 paths differing
+  PASS    and the reason given
+
+== 8. hard exclusions: a scope file that names them is refused, and the index is untouched
+  PASS  refused: allow skill 4_Credentials/*.md
+  PASS  refused: allow skill 3_Access_Keys/*.md
+  PASS  refused: allow skill 0_Brain/dashboard/*.md
+  PASS  refused: allow skill 0_Brain/dashboard/data/chat_*.json
+  PASS  refused: allow skill 0_Brain/reference/2026-01-01_x/*.md
+  PASS  refused: allow skill 0_Brain/../4_Credentials/*.md
+  PASS  refused: allow skill /etc/*.md
+  PASS  refused: allow skill 0_Brain/*/notes.md
+  PASS  refused: allow skill 0_Brain/skills/*
+  PASS  refused: allow nonsense 0_Brain/skills/*.md
+  PASS  refused: allow rules ../CLAUDE.md
+  PASS  refused: allow rules *.md
+  PASS  refused: allow lesson CLAUDE.md
+  PASS  refused: allow skill 0_Brain/skills/4_Credentials/*.md
+  PASS  refused: allow skill 0_Brain/skills_link/*.md
+  PASS  refused: deny_seat_word two words
+  PASS  refused: own_clients secuura general d-s
+  PASS  refused: deny_clients ds
+  PASS  refused: seat tuesday
+  PASS  refused: alow skill 0_Brain/skills/*.md
+  PASS  the index is unchanged by the refused rebuilds (check green) (rc 0)
+  PASS  a table folder that is itself a SYMLINK (people -> 4_Credentials) still rebuilds (rc 0)
+  PASS    but nothing behind the symlink is indexed
+  PASS    and the rebuild output names the skipped directory
+  PASS  back to the real scope (rc 0)
+
+== 8b. no usable rules index: the rebuild is REFUSED, not run with every lesson let in (ANSWER-3 F1 iii)
+  PASS  rebuild with the rules index missing is refused (rc 2)
+  PASS    and says why
+  PASS    the index still holds its 58 files
+  PASS    neither other-seat lesson entered
+  PASS  rebuild with a rules index that has no row is refused (rc 2)
+  PASS  rebuild with a rules index that is a SYMLINK is refused (rc 2)
+  PASS    and says it is not a plain regular file
+  PASS    the index still holds its 58 files
+  PASS  (can fail) with the rules index back, check is green again (rc 0)
+
+== 9. check: red on a changed, added or removed fixture; green after rebuild
+  PASS  (control) green before any change (rc 0)
+  PASS  red after one indexed file and one excluded file changed (rc 1)
+  PASS    and names the changed path
+  PASS    the changed LEFT-OUT file is not named as changed (it is not in the index)
+  PASS    and exactly one path differs
+  PASS  green after rebuild (rc 0)
+  PASS  a NEW lesson with no rules-index row does not make check red: it does not qualify, so it is not owed to the index (rc 0)
+  PASS    but check names it as left out under clause (a)
+  PASS  red after a file was added (rc 1)
+  PASS    and names it
+  PASS  red after a file was removed (rc 1)
+  PASS    and names it
+  PASS  red with 26 differing paths (rc 1)
+  PASS    names exactly 20 paths
+  PASS    and counts the rest
+  PASS  green after rebuild (rc 0)
+
+== 9b. one bad file does not lose the rebuild (ANSWER-3 F7)
+  PASS  rebuild with one unreadable lesson and one 3 MB section still succeeds (rc 0)
+  PASS    with no Python traceback
+  PASS    the unreadable file is listed
+  PASS    the truncated row is listed
+  PASS    and the LAST line says so
+  PASS    (it is the last line)
+  PASS  (can fail) fault line: the clean rebuild before it did not print it
+  PASS  check is green on what could be read (rc 0)
+  PASS    and reports the skipped counts
+  PASS    with no Python traceback
+  PASS  the truncated row is still found by a word before the cut
+  PASS  the unreadable file's word is not in the index
+  PASS  green and clean after the two files are moved away (rc 0)
+  PASS    the fault counts are back to zero
+
+== 10. rebuild is idempotent
+  PASS  two rebuilds give byte-identical data (built_at aside), 673 dump lines
+  PASS  (can fail) idempotence comparison: the permissive dump, filtered the same way, does differ
+
+== 11. search and at
+  PASS  search (rc 0)
+  PASS  search finds the lesson by a body word
+  PASS    and prints its rule line
+  PASS  search --kind daily finds the bullet with its time stamp
+  PASS  --kind filters (the daily word is not a ledger row)
+  PASS  search for an excluded file's word finds nothing
+  PASS    and says NO MATCH, pointing at the trigger form
+  PASS  (can fail) NO MATCH line: a search that finds something does not print it
+  PASS  --limit 2 gives two results
+  PASS  an unknown --kind is refused (rc 2)
+  PASS  a query of stop words gives zero results, not an error
+  PASS  a row holding the separator bytes 0x1F and 0x1E is FOUND by search (ANSWER-3 F8)
+  PASS    (control) and the database holds that row once
+  -- what a result is, lessons first, rules files, weak matches
+  PASS  search yakword (in five ledger headlines and one lesson body) (rc 0)
+        search: "yakword"  rules and lessons first
+         1. 0.0128  [lesson, live, ×3]  0_Brain/learnings/2026-01-01_alpha-keeps-panes-open.md:13
+            heading: Lesson xneighbour01 > How to apply
+            rule:    When closing a pane: xneighbour01rule keep it open until the wrap is read. / When wrapping: xneighbour01ruletwo write the note.
+            snippet: Apply xneighbour01apply every time. A [[yakword]] in the body only. an appended line
+          also, incident rows from the ledger and daily notes (what happened, not the rule):
+         2. 0.1205  [ledger, 2026-01-22]  0_Brain/learnings/_ledger.md:15
+            heading: THE SEAT DID A YAKWORD THING xneighbour20
+            snippet: 🟡 **THE SEAT DID A [[YAKWORD]] THING xneighbour20** [W] detail. 🔑 [[2026-01-11_fleet-rule]] Rule: say xneighbour20rule first. | correction | 1 | [[2026-01-11_fleet-rule]] | done
+         3. 0.1205  [ledger, 2026-01-23]  0_Brain/learnings/_ledger.md:17
+            heading: THE SEAT DID A YAKWORD THING xneighbour20
+            snippet: 🟡 **THE SEAT DID A [[YAKWORD]] THING xneighbour20** [W] detail. 🔑 [[2026-01-16_old-rule]] Rule: say xneighbour20rule first. | correction | 1 | [[2026-01-16_old-rule]] | done
+        (3 results, 24 ms; first result: score 0.0128; it holds all 1 of the question's rarest words [yakword])
+  PASS  default order says so in its header
+  PASS  default: the lesson is result 1 although ledger rows score higher
+  PASS  default: incident rows follow under their own heading
+  PASS  (can fail) --all: the same search puts a ledger row first (the old mixed order)
+  PASS  --kind with --all is refused (rc 2)
+  PASS  every result line carries its kind (3 of 3)
+  PASS  the last line states the first result's score and which of the question's rarest words it holds
+  PASS  no result is called weak or strong: the line states facts only (ANSWER-3 F10)
+        search: "zebraword"  rules and lessons first
+         1. 0.1310  [rules]  CLAUDE.md:9
+            heading: Zebraword first. > CLAUDE.md > Rules > rule 0
+            snippet: [[Zebraword]] first.** Everything lives on the drive, xneighbour71, and a good many more plain words follow here so that this row is of ordinary length. A continuation line of rule 0, xneighbour71b
+         2. 0.2034  [lesson, live]  0_Brain/learnings/2026-01-21_zebraword-zebraword.md:9
+            heading: Lesson xneighbour21z
+            rule:    When testing: xneighbour21zrule say zebraword.
+            snippet: lesson:** the word is xneighbour21z here. [[zebraword]] [[zebraword]] [[zebraword]]
+        (2 results, 20 ms; first result: score 0.1310; it holds all 1 of the question's rarest words [zebraword])
+  PASS  a rules-file row that matches well is result 1, ahead of the lesson
+  PASS    its heading names the file, section and rule
+  PASS    its last line says the row holds the question's one rare word
+  PASS  (can fail) a rules row that holds only ONE of the question's two rare words is not put first: the lesson holding both is result 1
+  PASS  a longer question whose rare words are ALL in the rule still puts the rules row first
+  PASS  when the first result lacks most of the question's rare words, the last line says how many it holds and lacks
+  PASS    and names the words it lacks
+  PASS    it gives no verdict (no WEAK MATCH line: no threshold separated right from wrong on 34 questions)
+  PASS  (can fail) that statement: a result holding every rare word does not print 'lacks'
+  PASS  --kind rules finds numbered rule 0a
+  PASS  BRAINDB_TOPK that is not 1 to 6 is refused (rc 2)
+  PASS    with a plain message, not a traceback
+  PASS  at pane (rc 0)
+        Rules for: pane (3)  [weights counted from this seat's indexed ledgers only]
+        • [×3] When closing a pane: xneighbour01rule keep it open until the wrap is read.  (2026-01-01_alpha-keeps-panes-open.md)
+        • [×2] When merging: xneighbour11rule read the gate.  (2026-01-11_fleet-rule.md)
+        • [new] When booting: xneighbour02rule sweep the projects.  (2026-01-02_tuesday-sweeps.md)
+  PASS  at pane lists three rules (the lesson named for tuesday but scoped all is among them)
+  PASS  third: the never-cited rule of the lesson with 'tuesday' in its name
+  PASS  most reinforced first: the lesson cited 3 times in this seat's ledgers
+  PASS  second: cited once plus one passed on by the superseded lesson (the laptop_datasec ledger's 3 citations are NOT counted)
+  PASS  another seat's rule, a superseded rule and excluded lessons' rules are not listed
+  PASS  a trigger that is not one plain word is refused (rc 2)
+  PASS  at --top with a negative number is refused (rc 2)
+  -- N9: whether a rules row leads does not depend on --limit
+  PASS  the rules row holding both rare words is result 1 (q1: default limit, --limit 20, --limit 1)
+  PASS  the rules row holding both rare words is result 1 (q2: default limit, --limit 20, --limit 1)
+  PASS  the rules row holding both rare words is result 1 (q3: default limit, --limit 20, --limit 1)
+  PASS  (control) eight lessons outscore that row on those words, so before the cut it was not in the first five
+  PASS  a trigger with a trailing newline is refused (rc 2)
+  PASS  a trigger holding a newline is refused (rc 2)
+  PASS    and the index is intact (rc 0)
+
+== 12. other seats: each from its OWN tree (a copy of the tool in a tree named TUESDAY, then FRIDAY)
+  PASS  a seat with no scope file is refused (rc 1)
+  PASS    and says why
+  PASS    and NOTHING was created: no cluster directory (ANSWER-3 F4)
+  PASS    and no server was started
+  PASS    the same for 'rebuild': refused, nothing created
+  PASS    the same for 'search': refused, nothing created
+  PASS    the same for 'at': refused, nothing created
+  PASS    the same for 'up': refused, nothing created
+  PASS    doctor on a seat with no scope file says 'not adopted' and is rc 0 (rc 0)
+  PASS  the wednesday seat cannot use the tuesday scope file (rc 2)
+  PASS  (can fail) once its scope file is in place the tuesday tree builds on the fixtures (rc 0)
+  PASS  tuesday scope: present xcanary23
+  PASS  tuesday scope: present xcanary37
+  PASS  tuesday scope: present xcanary08
+  PASS  tuesday scope: present xcanary17
+  PASS  tuesday scope: present xcanary401
+  PASS  tuesday scope: present xcanary402
+  PASS  tuesday scope: present xneighbour741
+  PASS  tuesday scope: present xneighbour748
+  PASS  tuesday scope: present xneighbour730
+  PASS  tuesday scope: present xneighbour02
+  PASS  tuesday scope: present xneighbour01
+  PASS  tuesday scope: present xneighbour46
+  PASS  tuesday scope: present xneighbour71
+  PASS  tuesday scope: absent  xneighbour20
+  PASS  tuesday scope: absent  xneighbour30
+  PASS  tuesday scope: absent  xneighbour10
+  PASS  tuesday scope: absent  xneighbour403
+  PASS  tuesday scope: absent  xcanary38
+  PASS  tuesday scope: absent  xcanary22
+  PASS  tuesday scope: absent  xcanary03
+  PASS  tuesday scope: absent  xcanary15
+  PASS  tuesday scope: absent  xcanary47
+  PASS  tuesday scope: absent  xcanary77
+  PASS  tuesday scope: absent  xcanary680
+  PASS  tuesday scope: absent  xcanary301
+  PASS  tuesday scope: absent  xcanary501
+  PASS  tuesday scope: absent  xcanary701
+  PASS  tuesday scope: absent  xcanary801
+  PASS  tuesday scope: absent  xtasksown202
+  PASS  tuesday's server stopped (rc 0)
+  PASS  the friday tree builds on the fixtures with its proposed scope (rc 0)
+  PASS  friday scope: present xcanary22
+  PASS  friday scope: present xcanary38
+  PASS  friday scope: present xcanary03
+  PASS  friday scope: present xcanary08
+  PASS  friday scope: present xcanary401
+  PASS  friday scope: present xneighbour741
+  PASS  friday scope: present xneighbour10
+  PASS  friday scope: present xneighbour01
+  PASS  friday scope: present xneighbour02
+  PASS  friday scope: present xneighbour404
+  PASS  friday scope: present xneighbour730
+  PASS  friday scope: absent  xneighbour20
+  PASS  friday scope: absent  xneighbour30
+  PASS  friday scope: absent  xneighbour403
+  PASS  friday scope: absent  xcanary37
+  PASS  friday scope: absent  xcanary23
+  PASS  friday scope: absent  xcanary17
+  PASS  friday scope: absent  xcanary15
+  PASS  friday scope: absent  xcanary47
+  PASS  friday scope: absent  xcanary77
+  PASS  friday scope: absent  xcanary680
+  PASS  friday scope: absent  xcanary301
+  PASS  friday scope: absent  xcanary501
+  PASS  friday scope: absent  xcanary701
+  PASS  friday scope: absent  xcanary801
+  PASS  friday's server stopped (rc 0)
+  PASS  no other-seat test server is left
+
+== 12b. a command can only act on the cluster it is addressed to (ANSWER-3 F2, the checker's P6)
+  PASS  a second cluster c2 is created and left STOPPED (rc 0)
+  PASS  with self-start OFF, a rebuild addressed to c2 while the main cluster answers on the same socket directory is REFUSED (rc 4)
+  PASS    and says which data directory answered and which was addressed
+  PASS    the main cluster's index is untouched (84 files, same tree)
+  PASS    a check addressed to c2 is refused the same way; it does NOT read GREEN off the other cluster (rc 4)
+  PASS    (no GREEN line was printed)
+  PASS    search likewise (rc 4)
+  PASS    at likewise (rc 4)
+  PASS    doctor for c2 warns (rc 1)
+  PASS      that ANOTHER cluster is answering, not 'index current'
+  PASS  with self-start ON the same rebuild also fails safely (rc 1)
+  PASS    and the main index is still untouched
+  PASS  (can fail) the same check addressed to the main cluster is accepted and green (rc 0)
+  PASS  doctor for the main cluster: rc 0 (rc 0)
+  PASS    it says index current and names the data directory
+  PASS  c2 was never started
+
+== 12c. the right database INSIDE the same session (N3; the second checker's F2c, lifted)
+  PASS  cluster t2 is built from its own tree (one file, token ztwotoken) (rc 0)
+  PASS  cluster t1 is built from the other tree, on the SAME socket directory, and is the one answering (rc 0)
+  PASS  (control) a rebuild behind a lock holder waits
+  PASS  (can fail) and, with no swap, ends rc 0 once the holder lets go (rc 0)
+  PASS  A. swapped during the lock wait: the rebuild addressed to t1 is REFUSED with rc 4 (rc 4)
+  PASS    it names the directory that answered and the one addressed
+  PASS    it does not print 'rebuild: done'
+  PASS    t2, never addressed, still holds its own index and nothing of t1's tree
+  PASS  B. the rebuild has passed every separate check and is about to open its load session
+  PASS    swapped at that point: REFUSED with rc 4 by the assertion INSIDE the load transaction (rc 4)
+  PASS    the refusal is the data-directory one
+  PASS    and t2's index is untouched (the transaction never dropped or loaded anything)
+  PASS    a 'check' addressed to t1 while t2 answers is refused in its own session (rc 4)
+  PASS      and printed no result or GREEN line off the other cluster
+  PASS    a 'search ztwotoken' addressed to t1 while t2 answers is refused in its own session (rc 4)
+  PASS      and printed no result or GREEN line off the other cluster
+  PASS    a 'at pane' addressed to t1 while t2 answers is refused in its own session (rc 4)
+  PASS      and printed no result or GREEN line off the other cluster
+  PASS  t2 stopped (rc 0)
+  PASS  no F2c server is left
+
+== 12d. spellings of the data directory, exit codes, the lock wait (N10, N11, N13)
+  PASS  the data directory spelled with a trailing slash is the same running cluster (rc 0)
+  PASS    status prints the one real spelling
+  PASS  spelled with a doubled slash: start says already running (rc 0)
+  PASS    (already running)
+  PASS  addressed through a symlink to the data directory: check is green for the same cluster (rc 0)
+  PASS    still exactly one server for it
+  PASS  c2 is started on its own socket name in the SAME socket directory (rc 0)
+  PASS  status addressed to c2 on the main cluster's socket prints REFUSED and exits 4, not 0 (N11) (rc 4)
+  PASS    (it printed REFUSED)
+  PASS  (can fail) on its own socket the same status is rc 0 (rc 0)
+  PASS  c2 stopped (rc 0)
+  PASS  no server on the socket named: rc 3 (rc 3)
+  PASS    it says 'not answering'
+  PASS    and never claims another cluster answered
+  PASS  a rebuild behind a holder that never lets go gives up at its limit: rc 75 (N13) (rc 75)
+  PASS    with the same words as the lock wrapper
+  PASS    stop behind the same holder gives up the same way (rc 75)
+  PASS    with the same words
+  PASS  (can fail) with the holder gone the index is intact and green (rc 0)
+
+== 12e. a scope file that EXISTS but is refused creates nothing (N7)
+  PASS  scope with 'seat tuesday': 'check' is rc 2 and created no cluster, no lock file and no server
+  PASS  scope with 'seat tuesday': 'rebuild' is rc 2 and created no cluster, no lock file and no server
+  PASS  scope with 'seat tuesday': 'search x' is rc 2 and created no cluster, no lock file and no server
+  PASS  scope with 'seat tuesday': 'up' is rc 2 and created no cluster, no lock file and no server
+  PASS  scope with 'allow skill 4_Credentials/*.md': 'check' is rc 2 and created no cluster, no lock file and no server
+  PASS  scope with 'allow skill 4_Credentials/*.md': 'rebuild' is rc 2 and created no cluster, no lock file and no server
+  PASS  scope with 'allow skill 4_Credentials/*.md': 'search x' is rc 2 and created no cluster, no lock file and no server
+  PASS  scope with 'allow skill 4_Credentials/*.md': 'up' is rc 2 and created no cluster, no lock file and no server
+  PASS  scope with 'alow skill 0_Brain/skills/*.md': 'check' is rc 2 and created no cluster, no lock file and no server
+  PASS  scope with 'alow skill 0_Brain/skills/*.md': 'rebuild' is rc 2 and created no cluster, no lock file and no server
+  PASS  scope with 'alow skill 0_Brain/skills/*.md': 'search x' is rc 2 and created no cluster, no lock file and no server
+  PASS  scope with 'alow skill 0_Brain/skills/*.md': 'up' is rc 2 and created no cluster, no lock file and no server
+  PASS  scope with 'allow ledger 0_Brain/learnings/_ledger_friday.md': 'check' is rc 2 and created no cluster, no lock file and no server
+  PASS  scope with 'allow ledger 0_Brain/learnings/_ledger_friday.md': 'rebuild' is rc 2 and created no cluster, no lock file and no server
+  PASS  scope with 'allow ledger 0_Brain/learnings/_ledger_friday.md': 'search x' is rc 2 and created no cluster, no lock file and no server
+  PASS  scope with 'allow ledger 0_Brain/learnings/_ledger_friday.md': 'up' is rc 2 and created no cluster, no lock file and no server
+  PASS  doctor on a seat with a refused scope does not print OK
+
+== 12f. a file swapped for a symlink while rebuilds run never gets read (N6)
+  PASS  14 rebuilds while the file flipped 14793 times: the 4_Credentials text entered the index in 0 of them
+  PASS  (control) the instrument saw both states: indexed as a regular file 6 time(s), skipped as a symlink 8 time(s)
+  PASS  green again with the swapped file moved away (rc 0)
+
+== 13. stop, and on-demand start
+  PASS  (control) one server process before stop
+  PASS  stop (rc 0)
+  PASS  no process is left with -D <scratch data directory>
+  PASS  pid 10815 is gone
+  PASS  a second stop is a clean no-op (rc 0)
+  PASS    and says not running
+  PASS  status reports STOPPED (rc 3)
+  PASS  with BRAINDB_NO_AUTOSTART=1 check on a stopped server is rc 3, and starts nothing (rc 3)
+  PASS    nothing was started
+  PASS  doctor on a stopped server: rc 0 (rc 0)
+  PASS    it says the server is stopped (on demand)
+  PASS    and doctor started nothing
+  PASS  search on a stopped server brings it up itself (rc 0)
+  PASS    and answers
+  PASS    one server is now running
+  PASS  stop again (rc 0)
+  PASS  check on a stopped server brings it up itself and is green (rc 0)
+  PASS  at on a stopped server brings it up itself (rc 0)
+  PASS  stop again (rc 0)
+  PASS  no server is left
+
+== 13b. two commands at once (ANSWER-3 F5)
+  PASS  two self-starting searches on a STOPPED cluster both succeed (rc 0, rc 0)
+  PASS    exactly one server is running
+  PASS  two starts at once both succeed (rc 0, rc 0)
+  PASS  two self-starting searches with NO cluster at all: both succeed and the new cluster survives, 3 trials of 3
+  PASS    no race server is left
+
+== 14. stop and start never touch a process that is not this cluster's server (ANSWER-3 F6, F9)
+  PASS  (control) the foreign process (a sleeper that dies on SIGINT or SIGTERM) is alive: pid 58526
+  PASS  stop with a pid file naming a live foreign process is refused (rc 1)
+  PASS    and says REFUSED
+  PASS    and the foreign process is still alive
+  PASS  start with that stale pid file is refused (rc 1)
+  PASS    it says STALE PID FILE in one line
+  PASS    it prints the exact recovery command (mv -n)
+  PASS    it did NOT move the file itself
+  PASS  search (which would start the server) is refused the same way (rc 1)
+  PASS    with the same recovery line
+  PASS  up likewise (rc 1)
+  PASS    and the foreign process is still alive after start, search and up
+  PASS    and no server was started
+  PASS  a pid file naming another data directory is refused (rc 1)
+  PASS    and the foreign process is still alive
+  PASS  (can fail) the same sleeper DIES on SIGINT, the signal a fast stop sends, so 'still alive' above could have failed
+  PASS  a stale pid file (dead pid) is a clean no-op (rc 0)
+  PASS    and start clears it by itself (dead pid: nothing to protect) (rc 0)
+  PASS  stopped again (rc 0)
+
+== 15. socket directory guards
+  PASS  a socket path over the macOS limit is refused (rc 1)
+  PASS    and says why
+  PASS  a socket directory that is not mode 700 is refused (rc 1)
+  PASS    for its MODE (the path is short enough to reach that test)
+  PASS  a socket directory that is a symlink is refused (rc 1)
+  PASS    and says so
+  PASS    and nothing was started
+  PASS    and the over-long directory was never created
+
+== 16. version marker
+  PASS  start on a mismatched version marker is refused (rc 1)
+  PASS    and says rebuild
+  PASS  search (which would start the server itself) is refused the same way (rc 1)
+  PASS    and says rebuild
+  PASS    and nothing was started
+  PASS  (can fail) with the real marker back, the same start succeeds (rc 0)
+  PASS  the index survived a clean stop and start (green) (rc 0)
+
+== 17. an unclean stop empties the index; check says so; search rebuilds it
+  PASS  start after an unclean stop (rc 0)
+  PASS  check is red (rc 1)
+  PASS    and says the index is empty
+  PASS  search on the emptied index rebuilds it itself (rc 0)
+  PASS    says it is building
+  PASS    and answers
+  PASS  green afterwards (rc 0)
+
+== 18. up, a first run with no cluster, and leave everything stopped
+  PASS  up starts a stopped cluster and ends green (rc 0)
+  PASS  stop (rc 0)
+  PASS  search with NO cluster at all creates one, starts it, builds the index and answers (rc 0)
+  PASS    the answer
+  PASS    the new cluster exists
+  PASS  final stop of that cluster (rc 0)
+  PASS  no test server process is left (any cluster of this run)
+  PASS  socket directory /tmp/wed-bdb-t10088 is empty
+  PASS    and was moved into the run directory (nothing is left in /tmp)
+  PASS  socket directory /tmp/wed-bdb-t10088b is empty
+  PASS    and was moved into the run directory (nothing is left in /tmp)
+
+finished 2026-11-27 20:46:24 AEDT
+RESULT: 692 passed, 0 failed  (run directory /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/mymut-204129/K07_many_boms/scr/braindb-test-20261127-204442-10088)

@@ -1,0 +1,3 @@
+# ritual
+
+qzskill

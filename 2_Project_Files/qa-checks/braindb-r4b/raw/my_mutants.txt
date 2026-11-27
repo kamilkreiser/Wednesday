@@ -1,0 +1,41 @@
+start 2026-11-27 20:41:29 AEDT ; 20:41  up 10:49, 2 users, load averages: 10.45 12.36 14.27
+none                                 predicted control  SURVIVED (692 passed, 0 failed, rc 0)
+    broke: nothing (control)
+K01_key_case_folded                  predicted caught   CAUGHT 3 FAIL line(s), 689 passed, rc 1: left-out lessons or their clauses differ from the plan
+    broke: (a) a key that differs from the file name only in case counts as its row
+K02_unread_line_first_field_only     predicted survive  SURVIVED (692 passed, 0 failed, rc 0)
+    broke: (a) an unread line leaves a lesson out only when the name is in its FIRST field, not anywhere in it
+K03_comment_lines_skipped            predicted caught   CAUGHT 13 FAIL line(s), 679 passed, rc 1: path set differs
+    broke: (a) a comment line below line 1 is ignored instead of counting against the lesson it names
+K04_plain_is_first_row               predicted caught   CAUGHT 31 FAIL line(s), 662 passed, rc 1: path set differs
+    broke: (a) a '#n' row alone counts as the lesson's row
+K05_tier_value_stripped              predicted caught   CAUGHT 13 FAIL line(s), 679 passed, rc 1: path set differs
+    broke: (c) outer white space round the tier value is forgiven
+K06_closing_fence_padded             predicted survive  SURVIVED (692 passed, 0 failed, rc 0)
+    broke: (c) the closing fence may carry trailing white space (not 'exactly ---')
+K07_many_boms                        predicted survive  SURVIVED (692 passed, 0 failed, rc 0)
+    broke: (t) any number of BOMs at the start is accepted (and the returned text then starts at the frontmatter)
+K08_arrow_close_ok                   predicted caught   CAUGHT 14 FAIL line(s), 678 passed, rc 1: path set differs
+    broke: (d) a stray comment end '-->' no longer leaves the lesson out
+K09_tier_line_exempt_anywhere        predicted caught   CAUGHT 14 FAIL line(s), 678 passed, rc 1: path set differs
+    broke: (d) a line 'tier: ...' is excused anywhere, not only the one frontmatter line
+K10_assign_colon_only                predicted caught   CAUGHT 13 FAIL line(s), 679 passed, rc 1: path set differs
+    broke: (c, d) 'tier = value' is no longer an assignment
+K11_daily_rel_unchecked              predicted survive  SURVIVED (692 passed, 0 failed, rc 0)
+    broke: (N5) the daily folder from tools/seat_note.sh need not agree with the code's table
+K12_create_db_unasserted             predicted survive  SURVIVED (692 passed, 0 failed, rc 0)
+    broke: (N3) the session that CREATEs the database no longer asserts the data directory
+K13_lesson_name_any                  predicted survive  SURVIVED (692 passed, 0 failed, rc 0)
+    broke: a file taken as a lesson need not have a lesson's (dated) name
+K14_ledger_names_by_pattern          predicted caught   CAUGHT 17 FAIL line(s), 675 passed, rc 1: NOT refused: allow ledger 0_Brain/learnings/_ledger*.md (rc 0): rebuild: done; no file was unreadable and no row was truncated; 117 lesson fil
+    broke: (N5) a ledger or pickup line may be a pattern that matches a table name
+K15_left_out_total_off_by_one        predicted caught   CAUGHT 1 FAIL line(s), 691 passed, rc 1:   and says that 117 lesson files are left out and not searched (no 'NOTE: 117 lesson file(s) are LEFT OUT' in sLO.out)
+    broke: (N8) the stored left-out total (search's NOTE, status) disagrees with the names
+K16_rejected_lines_not_normalised    predicted survive  SURVIVED (692 passed, 0 failed, rc 0)
+    broke: (a) an unread line is compared without NFC and format-character removal
+K17_parent_symlink_unseen            predicted survive  SURVIVED (692 passed, 0 failed, rc 0)
+    broke: a table folder is refused only when it is ITSELF a symlink, not when a folder above it is
+K18_nonzero_psql_is_done             predicted survive  SURVIVED (692 passed, 0 failed, rc 0)
+    broke: a rebuild whose psql session FAILED still prints 'rebuild: done' and exits 0
+server processes left under /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/mymut-204129: 0
+output dir /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/mymut-204129 ; end 2026-11-27 20:52:52 AEDT ; 20:52  up 11 hrs, 2 users, load averages: 7.12 10.47 12.31

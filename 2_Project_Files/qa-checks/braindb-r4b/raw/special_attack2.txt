@@ -1,0 +1,25 @@
+2026-11-27 20:17:07 AEDT
+20:17  up 10:24, 2 users, load averages: 27.89 19.29 14.45
+== SP4b. one torn rebuild, then what search, check and doctor say (the writer is stopped in state A: own text, row all)
+  disk now: lesson text holds qzflipOWN; index row seats = ['all']
+  rebuild number 5 returned rc 0 with the OTHER text indexed; its last line: rebuild: done; no file was unreadable and no row was truncated; 0 lesson files left out
+  the report names the lesson as left out: False
+  search qzflipOTHER rc 0:
+      search: "qzflipOTHER"  rules and lessons first
+       1. 0.0203  [lesson, live]  0_Brain/learnings/2027-01-02_q-flip.md:8
+          heading: Flip
+          rule:    When testing: qzflipruleall do it.
+          snippet: word is [[qzflipOTHER]] here
+      (1 result, 44 ms; first result: score 0.0203; it holds all 1 of the question's rarest words [qzflipoth])
+  at drive: rule line for the lesson present 1 (which seats word it carries: all)
+  check rc 1: check: RED, 1 path(s) differ (run: braindb.sh rebuild) /   changed since the last rebuild: 0_Brain/learnings/2027-01-02_q-flip.md
+  doctor rc 1: WARN brain-db: index stale, /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/sp2-201707/pg | braindb.sh 
+  after `up` (which rebuilds because check is red): rc 0, OTHER text in the index 0, OWN text 2
+== SP6 (bounded). a lesson that grows by 100 MB while one rebuild reads it
+  rebuild rc 0 in 1.2 s; traceback False; file is now 6780902 bytes; last line: rebuild: DONE WITH FAULTS: 0 unreadable file(s) skipped, 1 row(s) truncated; they are listed above; 0 lesson files left out
+  check rc 1: check: RED, 1 path(s) differ (run: braindb.sh rebuild)
+== SP8. a 300 MB sparse lesson file (NUL bytes after a clean head)
+  rebuild rc 0 in 5.9 s; traceback False; named: {'2027-07-03_q-huge.md': ('t', 'it holds a control, format or line-separator character (U+0000)')}; last line: rebuild: done; no file was unreadable and no row was truncated; 1 lesson file(s) LEFT OUT by the qualify rule: t=1
+stop rc 0: stop: stopped pid 29603 (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/sp2-201707/pg)
+2026-11-27 20:17:31 AEDT
+/dev/disk3s5   926Gi   751Gi   148Gi    84%     12M  1.6G    1%   /System/Volumes/Data

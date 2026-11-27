@@ -1,0 +1,100 @@
+2026-11-27 20:19:09 AEDT
+uptime: 20:19  up 10:26, 2 users, load averages: 21.93 19.93 15.37
+setup: c2 built from t2 rc 0
+  [procs after building c2 (POSITIVE CONTROL: expect 1, /c2)] postgres postmasters with -D under my work dir: 1 ['/c2'] ; all postmasters on this Mac: 4
+setup: c2 stopped rc 0
+setup: c1 built from t1 rc 0 (c1 now answers on the shared socket directory)
+== DB1. the second checker's F2c: the server is swapped while a rebuild addressed to c1 waits for c1's lock
+  the rebuild is waiting: True
+  pg_ctl stop c1: rc 0
+  c2 started on the same socket directory: rc 0
+  rebuild addressed to c1: rc 4 (want 4); says: ["braindb: REFUSED: the server answering on socket directory /tmp/q4d serves data directory '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/db-201909/c2', but this command is addressed to '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/db-201909/c1'. Nothing was read or changed. Another cluster is using this socket directory: stop it with its own braindb.sh, or give this one its own BRAINDB_SOCKDIR."]
+  'rebuild: done' printed: False ; c2 holds ztwotok 1 (want >0) and zonetok 0 (want 0)
+== DB2. the narrow form: swapped after every separate session, before the load session (BRAINDB_TEST_HOLD)
+  the rebuild reached the hold point: True
+  rebuild addressed to c1: rc 4 (want 4); 'rebuild: done' printed: False ; c2 holds ztwotok 1 and zonetok 0 (want 0)
+== DB3. reads addressed to c1 while c2 answers (self-start off)
+  check            rc 4 ; printed GREEN False, the other tree's token False, a rule list False ; first line: braindb: REFUSED: the server answering on socket directory /tmp/q4d serves data directory '/private/tmp/claude
+  search ztwotok   rc 4 ; printed GREEN False, the other tree's token False, a rule list False ; first line: braindb: REFUSED: the server answering on socket directory /tmp/q4d serves data directory '/private/tmp/claude
+  at drive         rc 4 ; printed GREEN False, the other tree's token False, a rule list False ; first line: braindb: REFUSED: the server answering on socket directory /tmp/q4d serves data directory '/private/tmp/claude
+  status           rc 3 ; printed GREEN False, the other tree's token False, a rule list False ; first line: seat: wednesday   tree: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229
+  doctor           rc 1 ; printed GREEN False, the other tree's token False, a rule list False ; first line: WARN brain-db: ANOTHER cluster is answering on this seat's socket directory /tmp/q4d | braindb: REFUSED: the s
+  search with self-start ON (c1 is down, c2 holds the socket): rc 1 ; token printed False ; last line: 2026-11-27 20:19:23.283 AEDT [9237] LOG:  database system is shut down
+  [procs after DB3] postgres postmasters with -D under my work dir: 1 ['/c2'] ; all postmasters on this Mac: 1
+  (stop c1 if that started it: rc 0 stop: not running (no pid file in /private/tmp/claude-501/-Volumes-DevMASTER-WED)
+== DB3b. a cluster with NO braindb database answers; a rebuild addressed to c1 must not CREATE one there
+  c3 created and started (no index database): rc 0 0
+  rebuild addressed to c1 (self-start off): rc 4 (want 4) ; databases named braindb in c3 now: 0 (want 0)
+  the same with self-start ON: rc 1 ; braindb in c3: 0 (want 0) ; last line: 2026-11-27 20:19:26.275 AEDT [11548] LOG:  database system is shut down
+  c3 stopped rc 0
+  [procs after DB3b] postgres postmasters with -D under my work dir: 0 [] ; all postmasters on this Mac: 4
+== DB4. the data directory is replaced by a SYMLINK to another cluster between sessions
+  search addressed to the path c1 (tree t1), which is now a link to c2: rc 0 ; returned the OTHER tree's lesson: True
+  check: rc 1 ; check: RED, 2 path(s) differ (run: braindb.sh rebuild) /   changed since the last rebuild: 0_Brain/learnings/2027-01-03_q-own.md
+  status: rc 0 ; data directory line: ['data directory: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/db-201909/c2']
+  [procs after DB4 (the server runs with -D c2: the link's target)] postgres postmasters with -D under my work dir: 1 ['/c2'] ; all postmasters on this Mac: 4
+  stop through the link: rc 0 6e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/db-201909/c2)
+== DB5. another SEAT's tool addressed to this seat's cluster (BRAINDB_PGDATA): does search or at notice the index is not its own?
+  TUESDAY tool, search zonetok in the index the WEDNESDAY tool built: rc 0 ; result printed: True ; seat line check: []
+  TUESDAY tool, search qzledger (a row of the Wednesday seat's LEDGER in that index): rc 0 ; ledger row printed: True
+  TUESDAY tool, at drive: rc 0 ; Rules for: drive (2)  [weights counted from this seat's indexed ledgers only]
+  TUESDAY tool, check: rc 1 ; check: RED, 2 path(s) differ; the scope file has changed since the last rebuild; the index was built for seat wednesday, this is seat tuesday (run: braindb.sh rebuild)
+  stop rc 0
+  [procs after DB5] postgres postmasters with -D under my work dir: 0 [] ; all postmasters on this Mac: 1
+== DB6. a server started BY HAND
+  (a) by hand with the SAME spelling of -D: pg_ctl rc 0
+      status  rc 0 ; ['server: RUNNING (pid 16623, socket /tmp/q4d/.s.PGSQL.5432)']
+      check   rc 0 ; ['check: GREEN, 7 files on disk match the index (built 2026-11-27T20:19:15+11:00)']
+      stop    rc 0 ; ['stop: stopped pid 16623 (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/db-201909/c1)']
+  [procs after DB6a (the tool's stop took the hand-started server: want 0)] postgres postmasters with -D under my work dir: 0 [] ; all postmasters on this Mac: 3
+  (b) by hand THROUGH A SYMLINK spelling of -D: pg_ctl rc 0
+  [procs after DB6b start (POSITIVE CONTROL: expect 1, /c1link)] postgres postmasters with -D under my work dir: 1 ['/c1link'] ; all postmasters on this Mac: 4
+      status  rc 3 ; server: STOPPED
+      check   rc 4 ; braindb: REFUSED: the server answering on socket directory /tmp/q4d serves data directory '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/db-201909/c1link', but this comman
+      search  rc 1 ; braindb: STALE PID FILE: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/db-201909/c1/postmaster.pid names data directory '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESD | braindb: TO RECOVER (a person or the coordinator runs this; the tool does not, because a wrong guess here would touch a live process that is not ours): | braindb:   mkdir -p "/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/db-2019
+      start   rc 1 ; braindb: STALE PID FILE: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/db-201909/c1/postmaster.pid names data directory '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESD | braindb: TO RECOVER (a person or the coordinator runs this; the tool does not, because a wrong guess here would touch a live process that is not ours): | braindb:   mkdir -p "/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/db-2019
+      stop    rc 1 ; braindb: REFUSED: /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/db-201909/c1/postmaster.pid names data directory '/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b | braindb: TO RECOVER (a person or the coordinator runs this; the tool does not, because a wrong guess here would touch a live process that is not ours): | braindb:   mkdir -p "/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/db-2019
+  [procs after DB6b after the tool's stop (the tool said what it said above; is the server still up?)] postgres postmasters with -D under my work dir: 1 ['/c1link'] ; all postmasters on this Mac: 1
+  my own pg_ctl stop through the same spelling: rc 0
+  [procs after DB6b after my stop (want 0)] postgres postmasters with -D under my work dir: 0 [] ; all postmasters on this Mac: 0
+== DB7. the lock wait has a limit
+  rebuild  behind a holder, limit 3 s: rc 1 after 3.4 s ; STER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/db-201909/c1.lock for more than 3 s; nothing was done
+  start    behind a holder, limit 3 s: rc 75 after 3.2 s ; STER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/db-201909/c1.lock for more than 3 s; nothing was done
+  stop     behind a holder, limit 3 s: rc 75 after 3.2 s ; STER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/db-201909/c1.lock for more than 3 s; nothing was done
+  search   behind a holder, limit 3 s: rc 1 after 3.3 s ; STER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/db-201909/c1.lock for more than 3 s; nothing was done
+  [procs after DB7] postgres postmasters with -D under my work dir: 0 [] ; all postmasters on this Mac: 4
+== DB8. kill -9 of the tool in the middle of a rebuild; then what check says and what the index holds
+  baseline rebuild of a 120-file, ~110 MB tree: rc 0 ; ['time: 16.86 s (read and parse 0.84 s, load and index 16.02 s)']
+  baseline index: hash 1383d4a98e6f45a8, zkilltok 0, dump bytes 115398258
+  kill -9 after 0.3 s (still running: True): index hash 1383d4a98e6f45a8, kill.md rows of THIS round in the index: 0 ; psql left: [] ; check rc 1: check: RED, 1 path(s) differ (run: braindb.sh rebuild)
+  kill -9 after 0.8 s (still running: True): index hash 1383d4a98e6f45a8, kill.md rows of THIS round in the index: 0 ; psql left: [] ; check rc 1: check: RED, 1 path(s) differ (run: braindb.sh rebuild)
+  kill -9 after 1.5 s (still running: True): index hash 1383d4a98e6f45a8, kill.md rows of THIS round in the index: 0 ; psql left: [] ; check rc 1: check: RED, 1 path(s) differ (run: braindb.sh rebuild)
+  kill -9 after 2.5 s (still running: True): index hash 1383d4a98e6f45a8, kill.md rows of THIS round in the index: 0 ; psql left: [] ; check rc 1: check: RED, 1 path(s) differ (run: braindb.sh rebuild)
+  kill -9 after 3.5 s (still running: True): index hash 1383d4a98e6f45a8, kill.md rows of THIS round in the index: 0 ; psql left: [] ; check rc 1: check: RED, 1 path(s) differ (run: braindb.sh rebuild)
+  kill -9 after 4.5 s (still running: True): index hash 1383d4a98e6f45a8, kill.md rows of THIS round in the index: 0 ; psql left: [] ; check rc 1: check: RED, 1 path(s) differ (run: braindb.sh rebuild)
+  kill -9 after 6.0 s (still running: True): index hash 1383d4a98e6f45a8, kill.md rows of THIS round in the index: 0 ; psql left: [] ; check rc 1: check: RED, 1 path(s) differ (run: braindb.sh rebuild)
+  kill -9 after 8.0 s (still running: True): index hash 1383d4a98e6f45a8, kill.md rows of THIS round in the index: 0 ; psql left: [] ; check rc 1: check: RED, 1 path(s) differ (run: braindb.sh rebuild)
+  (read: a round is consistent when EITHER its kill.md row is absent and check is RED naming the change, OR the row is present and check is GREEN)
+  a normal rebuild afterwards: rc 0 ; check rc 0 check: GREEN, 128 files on disk match the index (built 2026-
+  [procs after DB8] postgres postmasters with -D under my work dir: 1 ['/c1'] ; all postmasters on this Mac: 4
+== DB9. two rebuilds at once, three trials; DB10. rebuilds while searches run
+  trial 1: rc 0 and 0 ; check rc 0 check: GREEN, 128 files on disk match the index (b
+  trial 2: rc 0 and 0 ; check rc 0 check: GREEN, 128 files on disk match the index (b
+  trial 3: rc 0 and 0 ; check rc 0 check: GREEN, 128 files on disk match the index (b
+  25 searches while rebuilds ran back to back: 25 answered with the lesson, 0 did not []
+== DB11. stop, and what the tool reports against what runs
+  [procs after before stop (POSITIVE CONTROL: expect 1, /c1)] postgres postmasters with -D under my work dir: 1 ['/c1'] ; all postmasters on this Mac: 8
+  stop rc 0: SDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/db-201909/c1)
+  status rc 3: ['server: STOPPED']
+  [procs after stop (want 0)] postgres postmasters with -D under my work dir: 0 [] ; all postmasters on this Mac: 6
+  postmaster.pid files left under my work dir: []
+== DB12. init, start, status and stop given a scope file that EXISTS but is refused
+  status  rc 3 ; cluster directory exists: False ; lock file exists: False ; server: STOPPED
+  doctor  rc 1 ; cluster directory exists: False ; lock file exists: False ; WARN brain-db: no cluster yet | run 2_Project_Files/brain-db/braindb.sh up
+  check   rc 2 ; cluster directory exists: False ; lock file exists: False ; braindb: REFUSED: scope file /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c
+  init    rc 0 ; cluster directory exists: True ; lock file exists: True ; init: cluster created at /private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f22
+  start   rc 0 ; cluster directory exists: True ; lock file exists: True ; start: running (pid 90567, socket /tmp/q4d/.s.PGSQL.5432, no TCP listener)
+  stop    rc 0 ; cluster directory exists: True ; lock file exists: True ; stop: stopped pid 90567 (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f22
+  [procs after DB12 (want 0)] postgres postmasters with -D under my work dir: 0 [] ; all postmasters on this Mac: 6
+uptime: 20:26  up 10:34, 2 users, load averages: 20.22 19.57 16.96
+2026-11-27 20:26:59 AEDT

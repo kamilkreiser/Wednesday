@@ -1,0 +1,41 @@
+2026-11-27 20:04:35 AEDT
+20:04  up 10:12, 2 users, load averages: 15.08 10.32 10.02
+== SP1. two lesson FILES whose names are equal once format characters are removed (one row)
+  rebuild rc 1; last line: braindb: REBUILD FAILED (psql rc 3). The transaction was rolled back; the previous index, if any, is unchanged.
+  psql error lines: ['ERROR:  duplicate key value violates unique constraint "rules_pkey"']
+  in the index: qzsp1own 0, qzsp1twin 0, control qzcontrol 0
+  check rc 1: check: RED, the index schema is missing (run: braindb.sh rebuild)
+== SP1b. the same, but ONLY the file with the zero-width space in its NAME exists (its row's key is the plain name)
+  rebuild rc 0; last line: rebuild: done; no file was unreadable and no row was truncated; 0 lesson files left out
+  in the index: qzsp1btwin 3, its rule line qzsp1brule 3
+== SP1c. a row scoped TUESDAY for the plain name; the file on disk carries a zero-width space in its name
+  rebuild rc 0; in the index: qzsp1ctwin 0 (want 0); named: {'2027-05-01_q-dup\u200b.md': ('b', 'its rules-index row is scoped to tuesday')}
+== SP2/SP3 on scratch-volume (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/sp-200435)
+  NFC and NFD names can coexist on this volume: False (directory lists 1 name(s): ['2027-05-02_q-caf\\xe9.md'])
+  names differing only in case can coexist on this volume: False
+  rebuild rc 0; last line: rebuild: done; no file was unreadable and no row was truncated; 0 lesson files left out
+  psql error lines: []
+  in the index: qzsp2nfc 3, qzsp2nfd 0, qzsp3lower 3, qzsp3upper 0 (the upper-case twin has no row: want 0)
+  named as left out: {}
+== SP2/SP3 on drive-volume (/Volumes/DevMASTER/WEDNESDAY/2_Project_Files/qa-checks/braindb-r4b/raw/voltree-200435)
+  NFC and NFD names can coexist on this volume: False (directory lists 1 name(s): ['2027-05-02_q-caf\\xe9.md'])
+  names differing only in case can coexist on this volume: True
+  rebuild rc 0; last line: rebuild: done; no file was unreadable and no row was truncated; 1 lesson file(s) LEFT OUT by the qualify rule: a=1
+  psql error lines: []
+  in the index: qzsp2nfc 3, qzsp2nfd 0, qzsp3lower 3, qzsp3upper 0 (the upper-case twin has no row: want 0)
+  named as left out: {'2027-05-03_Q-CASE.md': 'a'}
+== SP4. the rules index edited DURING rebuilds
+   states: A = (lesson text qzflipOWN, row scoped all), B = (lesson text qzflipOTHER, row scoped tuesday).
+   the writer goes A->B row first then text, B->A text first then row: at EVERY instant on disk, text OTHER implies row tuesday.
+  40 rebuilds while the pair flipped 4304 times: indexed with OWN text 12, left out 21, rebuild failed 0, **indexed with OTHER text 7**
+  (control: the instrument saw both states: own 12 > 0 and left out 21 > 0)
+== SP5. a lesson renamed between listing and open
+  30 rebuilds while the file was renamed back and forth 125447 times: {'in': 21, 'named-unreadable': 9, 'absent-not-named': 0, 'failed': 0, 'traceback': 0, 'done-with-faults': 9}
+== SP6. a lesson that grows while rebuilds read it
+2026-11-27 20:15:02 AEDT
+  [CHECKER'S NOTE, 20:15 AEDT] SP6 never finished and SP8 did not run in this file. MY INSTRUMENT ERROR: the grower thread wrote without
+  any limit and reached 108,517,864,102 bytes in my scratchpad (internal volume) between 20:06 and 20:14; free space on the internal
+  volume fell to 2.8 GiB (df at 20:15:02). I killed my two processes (pids 4267 and 20859, both mine), deleted that one scratch file,
+  and free space read 116 GiB at 20:15:09 and 150 GiB at 20:15:19. What the run DID show before I stopped it: the one rebuild reading
+  that file had been running for 6 min 00 s (ps etime) and had not ended: a file that grows faster than it is read is read without any
+  size limit or deadline. SP6 (bounded) and SP8 are re-run in special_attack2.txt.

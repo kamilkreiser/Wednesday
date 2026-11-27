@@ -1,0 +1,305 @@
+2026-11-27 20:34:44 AEDT
+TOOL = the scratch copy with the client-name test PUT BACK (my own edit of a copy; for comparison only)
+rebuild rc 0; last line: rebuild: DONE WITH FAULTS: 2 unreadable file(s) skipped, 2 row(s) truncated; they are listed above; 110 lesson file(s) LEFT OUT by the qualify rule: a=23, b=11, c=24, d=22, t=18, f=12
+Traceback in rebuild output: 0
+control token qzcontrol in dump: 6 ; qzcontrolrule: 2 ; fake secret words: 0
+a01      ok-out (a) [a rules-index line that could not be read names it (line 3)] 
+         key ends in a no-break space (U+00A0), scoped tuesday
+a02      ok-out (a) [a rules-index line that could not be read names it (line 4)] 
+         key written with a full-width full stop before md
+a03      ok-out (a) [it has no rules-index row whose key is exactly its file name] 
+         the only row is on LINE 1 of the index, where a '#' line is the header (written '# <row>')
+a04      ok-out (a) [a rules-index line that could not be read names it (line 5)] 
+         its row and the next row are joined by a vertical tab instead of a newline
+a04b     ok-out (a) [a rules-index line that could not be read names it (line 5)] 
+         the second half of that joined line (a row scoped all for this file)
+a05      ok-out (a) [a rules-index line that could not be read names it (line 6)] 
+         its row and the next are joined by U+2028
+a05b     ok-out (a) [a rules-index line that could not be read names it (line 6)] 
+         the second half of that joined line
+a06      ok-out (a) [it has 2 rules-index rows with the same key] 
+         file name with an accent; one row keyed NFC scoped all and one keyed NFD scoped tuesday (two rows equal the name)
+a07      ok-out (a) [it has no rules-index row whose key is exactly its file name] 
+         key written with U+2010 HYPHEN where the name has '-'
+a08      ok-out (a) [it has no rules-index row whose key is exactly its file name] 
+         file name has a space before .md, the key has none
+a09      ok-out (a) [a rules-index line that could not be read names it (line 11)] 
+         seats cell 'all' written with a Cyrillic first letter
+a10      ok-out (a) [a rules-index line that could not be read names it (line 12)] 
+         key 'file.md#2#3'
+a11      ok-out (a) [a rules-index line that could not be read names it (line 14)] 
+         a good row scoped all, and a DAMAGED row for a longer file name that contains this stem
+a12      ok-out (a) [a rules-index line that could not be read names it (line 15)] 
+         a NUL byte in front of its row
+a13      ok-out (a) [it has 2 rules-index rows with the same key] 
+         two IDENTICAL good rows scoped all
+a14      ok-out (a) [a rules-index line that could not be read names it (line 19)] 
+         a 100,000-character index line that is not a row and names it, beside a good row scoped all
+a15      ok-out (a) [a rules-index line that could not be read names it (line 20)] 
+         key written './file.md'
+a16      ok-out (a) [it has no rules-index row whose key is exactly its file name] 
+         key percent-encoded
+a17      ok-out (a) [a rules-index line that could not be read names it (line 23)] 
+         key 'file.md#02' (leading zero) beside a good plain row
+a18      ok-out (a) [two of its rules-index rows have the same '#n' key] 
+         plain row all, '#2' row all, '#2' row again scoped wednesday
+a19      ok-out (a) [a rules-index line that could not be read names it (line 27)] 
+         status cell 'live ' padded with U+2003 EM SPACE
+a20      ok-out (a) [a rules-index line that could not be read names it (line 28)] 
+         its row has an empty enforced_by field
+a21      ok-out (a) [it has no rules-index row whose key is exactly its file name] 
+         file name upper-case stem, key lower-case
+an1      ok-in                                    
+         (a) neighbour: plain row plus #2, #3 and #10 rows
+an2      ok-in                                    
+         (a) neighbour: a 5,000-character rule field with accents
+an3      ok-in                                    
+         (a) neighbour: its stem is a prefix of another GOOD lesson's stem
+an3-more ok-in                                    
+         (a) neighbour: the longer-named lesson
+an4      ok-in                                    
+         (a) neighbour: a file name with spaces, brackets and an apostrophe
+an5      ok-in                                    
+         (a) neighbour: a 100,000-character RULE field in a well-formed row scoped all
+b01      ok-out (b) [its rules-index row is scoped to tuesday] 
+         key holds a zero-width space, scoped tuesday (the key equals the name once format characters are removed)
+b02      ok-out (b) [its rules-index row is scoped to tuesday] 
+         row scoped tuesday, status dead
+b03      ok-out (b) [its rules-index row is scoped to friday,tuesday] 
+         row scoped friday,tuesday
+b04      ok-out (b) [its rules-index row is scoped to tuesday] 
+         plain row tuesday, '#2' wednesday, '#3' all
+b05      ok-out (b) [its rules-index row is scoped to tuesday] 
+         100,000-character rule field, scoped tuesday
+b06      ok-out (b) [its rules-index row is scoped to friday] 
+         row scoped friday whose rule text says 'all seats, wednesday included'
+b07      ok-out (b) [its rules-index row is scoped to tuesday] 
+         file name holds 'wednesday', row scoped tuesday
+b08      ok-out (b) [its rules-index row is scoped to tuesday] 
+         superseded row scoped tuesday pointing at the control lesson
+b09      ok-out (b) [its rules-index row is scoped to tuesday] 
+         row scoped tuesday whose family is 'wednesday' and trigger list holds 'all'
+b10      ok-out (b) [its rules-index row is scoped to friday] 
+         file name stored NFD, key NFC, scoped friday
+b11      ok-out (b) [its rules-index row is scoped to tuesday] 
+         a BOM in front of its row (mid-file), scoped tuesday
+bn1      ok-in                                    
+         (b) neighbour: scoped friday,wednesday
+bn2      ok-in                                    
+         (b) neighbour: scoped wednesday,tuesday,friday
+bn3      ok-in                                    
+         (b) neighbour: scoped wednesday, status dead
+bn4      ok-in                                    
+         (b) neighbour: plain all; '#2' tuesday (lesson in, that rule line out)
+c01      ok-out (c) [frontmatter line 4 is not a plain 'key: value' line] 
+         tier value with two spaces after the colon
+c02      ok-out (c) [tier 'W	' is not one of this seat's tiers (W, M, P-<own client>/<project>)] 
+         tier value followed by a TAB
+c03      ok-out (c) [frontmatter key 'x-tier' looks like a tier key and is not exactly 'tier'] 
+         a second key 'x-tier'
+c04      ok-out (c) [frontmatter line 5 carries something tier-like inside the value of 'aliases'] 
+         another key whose value is a list '[tier P-Other/X]'
+c05      ok-out (c) [tier 'P-Secuura/x/Datasec' is not one of this seat's tiers (W, M, P-<own client>/<project>] 
+         tier P-Secuura/x/Datasec (a second slash)
+c06      ok-out (c) [tier 'P-General,Datasec/x' is not one of this seat's tiers (W, M, P-<own client>/<project>] 
+         tier 'P-General,Datasec/x'
+c07      ok-out (c) [tier 'Ｗ' is not one of this seat's tiers (W, M, P-<own client>/<project>)] 
+         tier written with a full-width W
+c08      ok-out (c) [the frontmatter is not closed by a line that is exactly '---'] 
+         closing fence followed by a space (and no other '---' line)
+c09      ok-out (c) [frontmatter line 5 is not a plain 'key: value' line] 
+         a key with a capital letter beside a clean tier line
+c10      ok-out (c) [tier 'W;P-Other/X' is not one of this seat's tiers (W, M, P-<own client>/<project>)] 
+         tier W;P-Other/X
+c11      ok-out (c) [tier ''W'' is not one of this seat's tiers (W, M, P-<own client>/<project>)] 
+         tier 'W' in single quotes
+c12      ok-out (c) [tier 'P-Secuura/X Datasec' is not one of this seat's tiers (W, M, P-<own client>/<project>] 
+         tier 'P-Secuura/X' with a no-break space in the project
+c13      ok-out (c) [tier 'Ẃ' is not one of this seat's tiers (W, M, P-<own client>/<project>)] 
+         tier 'W' with a combining acute accent
+c14      ok-out (c) [line 1 is not exactly '---' (the frontmatter must open on line 1)] 
+         tier key after a YAML document-start with a tag '--- !lesson'
+c15      ok-out (c) [the frontmatter is not closed by a line that is exactly '---'] 
+         frontmatter closed by '...' (YAML's other end marker), tier W
+c16      ok-out (c) [tier 'M W' is not one of this seat's tiers (W, M, P-<own client>/<project>)] 
+         tier: M W
+c17      ok-out (c) [tier 'P-Datasec/NexusAI' is not one of this seat's tiers (W, M, P-<own client>/<project>)] 
+         tier: P-Datasec/NexusAI (the other client), row scoped all
+c18      ok-out (c) [tier 'P-secuuraX/y' is not one of this seat's tiers (W, M, P-<own client>/<project>)] 
+         tier: P-secuuraX/y (own client's name as a prefix of another)
+c19      ok-out (c) [tier 'P- Secuura/x' is not one of this seat's tiers (W, M, P-<own client>/<project>)] 
+         tier: 'P- Secuura/x'
+c20      ok-out (c) [frontmatter line 4 is not a plain 'key: value' line] 
+         a key 'tier' given as 'tier:W' (no space)
+c21      ok-out (c) [a second frontmatter block follows the first (exactly one is allowed)] 
+         tier W, then the block is closed, then IMMEDIATELY a '+++' block with tier
+c22      ok-out (c) [frontmatter line 5 is not a plain 'key: value' line] 
+         key 'tier' reached by a YAML merge '<<: {tier: P-Other/X}'
+c23      ok-out (c) [frontmatter line 4 is not a plain 'key: value' line] 
+         an anchor line '&a tier: W'
+c24      ok-out (c) [frontmatter key 't_i_e_r' looks like a tier key and is not exactly 'tier'] 
+         a key 't_i_e_r' beside the clean one
+cn1      ok-in                                    
+         (c) neighbour: tier P-secuura/x (own client, lower case: the list folds the client's case)
+cn2      ok-in                                    
+         (c) neighbour: tier P-Wed/tools (own client 'wed')
+cn3      ok-in                                    
+         (c) neighbour: 400 other keys before the tier line
+cn4      ok-in                                    
+         (c) neighbour: values holding colons, quotes, a URL and a TAB
+cq1      RECORDED: OUT under (d) [it names another client] 
+         RECORD: tier P-Secuura/Datasec-NexusAI (own-client tier whose project is the other client's: stated limit)
+d01      ok-out (d) [it holds an HTML comment (a section marker in any spelling is one)] 
+         '<!---tier: P-Other/X--->' (three dashes)
+d02      ok-out (d) [it holds an HTML comment (a section marker in any spelling is one)] 
+         comment opened and never closed
+d03      ok-out (d) [line 12 is tier-like outside the frontmatter's one tier line] 
+         markdown-escaped comment '<\!-- tier: P-Other/X --\>'
+d04      ok-out (d) [line 12 is tier-like outside the frontmatter's one tier line] 
+         an HTML tag '<tier value=...>'
+d05      ok-out (d) [line 12 is tier-like outside the frontmatter's one tier line] 
+         an attribute data-tier="P-Other/X" mid-line
+d06      ok-out (d) [line 12 is tier-like outside the frontmatter's one tier line] 
+         'TIER' then a no-break space then a colon, mid-line
+d07      ok-out (d) [line 14 is tier-like outside the frontmatter's one tier line] 
+         a table row '| tier | P-Other/X |'
+d08      ok-out (d) [line 12 is tier-like outside the frontmatter's one tier line] 
+         a link reference definition '[tier]: P-Other/X'
+d09      ok-out (d) [line 12 is tier-like outside the frontmatter's one tier line] 
+         a footnote '[^tier]: P-Other/X'
+d10      ok-out (d) [line 12 is tier-like outside the frontmatter's one tier line] 
+         an Obsidian comment '%% tier: P-Other/X %%'
+d11      ok-out (d) [line 12 is tier-like outside the frontmatter's one tier line] 
+         the word tier written with a mathematical bold t, then a colon
+d12      ok-out (d) [line 12 is tier-like outside the frontmatter's one tier line] 
+         the word written 'TİER:' (dotted capital I)
+d13      ok-out (d) [line 12 is tier-like outside the frontmatter's one tier line] 
+         circled letters spelling TIER, then a colon
+d14      ok-out (d) [line 12 is tier-like outside the frontmatter's one tier line] 
+         'tier' with a combining grapheme joiner inside, then a colon
+d15      ok-out (d) [line 17 is tier-like outside the frontmatter's one tier line] 
+         a second fenced block far down the body whose line is 'tier: P-Other/X'
+d16      ok-out (d) [it holds a numeric character reference (&#...;), which can spell the word tier where the l] 
+         a hexadecimal character reference '&#x74;ier: ...'
+d17      ok-out (d) [it holds an HTML comment (a section marker in any spelling is one)] 
+         a stray '--&gt;' is fine but '-->' in an arrow is a comment end: 'a --> b'
+d18      ok-out (d) [line 13 is tier-like outside the frontmatter's one tier line] 
+         tier line inside a code fence
+d19      ok-out (d) [line 14 is tier-like outside the frontmatter's one tier line] 
+         a YAML-looking line at the very END of the file, 'tier = P-Other/X' with no newline
+d20      ok-out (d) [line 12 is tier-like outside the frontmatter's one tier line] 
+         'Tier' as a setext heading over '===='
+dn1      ok-in                                    
+         (d) neighbour: 'frontier:', 'tiered:', 'three-tier routing', 'tiers are'
+dn2      ok-in                                    
+         (d) neighbour: named entities that are not numeric (&amp; &lt; &rarr;) and an arrow ->
+dn3      WRONG: wanted IN, token 0, named ('d', 'it names another client') 
+         (d) neighbour: the other client named in the body and in a heading (round 4b)
+dn4      ok-in                                    
+         (d) neighbour: a horizontal rule and a line of dashes '----' in the body
+dq1      RECORDED: IN (token 5)                   
+         RECORD: mid-line 'tier&colon; P-Other/X' (a NAMED character reference spelling the colon)
+dq2      RECORDED: IN (token 5)                   
+         RECORD: mid-line 'tier&equals;P-Other/X'
+dq3      RECORDED: IN (token 5)                   
+         RECORD: an ordered list item '1. Tier P-Other/X' (starts with the word after a number)
+dq4      RECORDED: IN (token 5)                   
+         RECORD: mid-line 'tier' then FOUR spaces then a colon
+dq5      RECORDED: IN (token 5)                   
+         RECORD: an Obsidian comment naming a project without the word tier '%% P-Other/X %%'
+dq6      RECORDED: IN (token 5)                   
+         RECORD: a sentence 'the next section belongs to tier P-Other/X'
+dq7      RECORDED: IN (token 5)                   
+         RECORD: 'tier' with an enclosing circle mark after the t (category Me), then a colon
+dq8      RECORDED: IN (token 5)                   
+         RECORD: 'tier -> P-Other/X' mid-line
+dq9      RECORDED: IN (token 5)                   
+         RECORD: a named reference spelling a letter is impossible, but '&Tab;tier: X' at line start
+t01      ok-out (t) [it holds a control, format or line-separator character (U+FEFF)] 
+         two BOMs, then a clean block
+t02      ok-out (t) [it holds a control, format or line-separator character (U+200B)] 
+         a BOM, a zero-width space, then '---'
+t03      ok-out (t) [it holds a control, format or line-separator character (U+2060)] 
+         U+2060 WORD JOINER inside a body word
+t04      ok-out (t) [it holds a control, format or line-separator character (U+007F)] 
+         DEL (0x7F) in the body
+t05      ok-out (t) [it holds a control, format or line-separator character (U+001B)] 
+         ESC in the body
+t06      ok-out (t) [it holds a control, format or line-separator character (U+0008)] 
+         a backspace hiding a letter
+t07      ok-out (t) [it holds a control, format or line-separator character (U+E000)] 
+         a private-use character
+t08      ok-out (t) [it holds a control, format or line-separator character (U+E0074)] 
+         a language tag character (U+E0074)
+t09      ok-out (t) [it holds a letter that is not a Latin letter (U+0131)] 
+         dotless i in 'tıer:'
+t10      ok-out (t) [it holds a letter that is not a Latin letter (U+3164)] 
+         Hangul filler (an invisible LETTER)
+t11      ok-out (t) [it holds a control, format or line-separator character (U+200E)] 
+         left-to-right mark between frontmatter keys
+t12      ok-out (t) [it holds a control, format or line-separator character (U+000B)] 
+         vertical tab between two frontmatter keys
+t13      ok-out (t) [the file is not valid UTF-8] 
+         an unpaired surrogate encoded as CESU bytes (invalid UTF-8)
+t14      ok-out (t) [the file is not valid UTF-8] 
+         an overlong encoding of '/' (invalid UTF-8)
+t15      ok-out (t) [it holds a letter that is not a Latin letter (U+0561)] 
+         Armenian letter
+t16      ok-out (t) [it holds a control, format or line-separator character (U+FEFF)] 
+         U+FEFF in the middle of the body
+t17      ok-out (t) [it holds a control, format or line-separator character (U+000D)] 
+         a lone CR in the middle of a body line
+tn1      ok-in                                    
+         (t) neighbour: emoji, box drawing, CJK punctuation, a no-break space and accents
+tn2      ok-in                                    
+         (t) neighbour: a file with no trailing newline and trailing spaces on lines
+tn3      ok-in                                    
+         (t) neighbour: combining accents written NFD in the body
+tq1      RECORDED: OUT under (t) [it holds a letter that is not a Latin letter (U+00E6)] 
+         RECORD: Latin letters that do not decompose (sharp s, o-slash, ae): the rule calls them 'not a Latin letter'
+tq2      RECORDED: IN (token 5)                   
+         RECORD: a character assigned only in a recent Unicode version (U+1FAE8, 2022): Python-version dependent
+f01      ok-out (f) [symlink]                     
+         symlink to a fake 4_Credentials file
+f02      ok-out (f) [hard link (link count 2): the same file exists under another name] 
+         hard link to a fake 4_Credentials file
+f03      ok-out (f) [symlink]                     
+         absolute symlink to a file outside learnings
+f04      ok-in                                    
+         (f) control for f05: an ordinary lesson
+f05      ok-out (f) [symlink]                     
+         symlink to a sibling lesson in the same folder
+f06      ok-out (f) [hard link (link count 2): the same file exists under another name] 
+         an own lesson that has a second hard link INSIDE learnings (both names have link count 2)
+f07      ok-out (f) [hard link (link count 2): the same file exists under another name] 
+         the other name of that hard-linked lesson
+f08      ok-out (f) [symlink]                     
+         a symlink to itself (loop)
+f09      ok-out (f) [symlink]                     
+         a dangling symlink
+f10      ok-out (f) [symlink]                     
+         a symlink to /dev/zero
+f11      ok-out (f) [unreadable: OSError]         
+         a Unix socket file
+f12      ok-out (f) [unreadable: PermissionError] 
+         a lesson with mode 000
+f13      ok-out (f) [not a regular file]          
+         a directory named like a lesson, holding a file
+fn1      ok-in                                    
+         (f) neighbour: a lesson with mode 0444
+fn2      ok-in                                    
+         (f) neighbour: a lesson with an extended attribute
+fn3      ok-in                                    
+         (f) neighbour: a lesson of 2 MB
+TALLY: {"RECORDED": 12, "WRONG": 1, "ok-in": 24, "ok-out": 107}
+special tokens: qzb04rule2 0 qzb04rule3 0 (rule lines of a lesson left out under b: want 0 0); qzbn4ruleTWO 0 (a tuesday '#2' line of an indexed lesson: want 0); qzf13tok 0 (file inside a directory named like a lesson: want 0)
+report names 110 left-out lessons; rebuild last line: they are listed above; 110 lesson file(s) LEFT OUT by the qualify rule: a=23, b=11, c=24, d=22, t=18, f=12
+check rc 0: ['  left out: 110 lesson file(s) LEFT OUT by the qualify rule: a=23, b=11, c=24, d=22, t=18, f=12']
+status rc 0: ['  left_out: {"total": 110, "by_clause": {"a": 23, "b": 11, "c": 24, "d": 22, "t": 18, "f": 12}}']
+doctor rc 0: c1f229efa/scratchpad/r4b/qa1n-203444/pg (GREEN, 40 files on disk match the index (built 2026-11-27T20:34:46+11:00)); 110 lesson file(s) LEFT OUT by the qualify rule: a=23, b=11, c=24, d=22, t=18, f=12
+search over 107 must-be-out tokens: NO MATCH 107, leaks 0 (control: search qzcontrol rc 0, result lines 1)
+at drive rc 0: Rules for: drive (37)  [weights counted from this seat's indexed ledgers only] ; rule tokens of must-be-out cases in it: [] (control qzcontrolrule: 1)
+stop rc 0: waiting for server to shut down.... done
+server stopped
+stop: stopped pid 80664 (/private/tmp/claude-501/-Volumes-DevMASTER-WEDNESDAY/063b86e1-bf25-4ab6-9e57-b16c1f229efa/scratchpad/r4b/qa1n-203444/pg)
+RESULT: 1 wrong of 144 cases
