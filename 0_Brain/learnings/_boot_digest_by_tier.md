@@ -7,7 +7,7 @@ status: live
 
 # Boot digest BY TIER — W whole, M rules-only, every project case a handle
 
-Generated 2026-11-27 17:50 from 292 lesson files (1,231,869 B). M 43 · MIXED 5 · P (Datasec/OXPd) 1 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 6 · W 235. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
+Generated 2026-11-27 19:22 from 293 lesson files (1,234,666 B). M 43 · MIXED 5 · P (Datasec/OXPd) 1 · P-Datasec/HPSM-POC 1 · P-General/Claude to Claude 1 · UNTAGGED 6 · W 236. 5 project CASE sections inside MIXED files are reduced to one line each: the heading and the path to read it at. W blocks are exactly what the default digest carries; M blocks drop the section index and keep the rules; a P file is a single handle. The CASES behind every rule live only in the lesson files — open one the moment its rule fires.
 
 **UNTAGGED (6) — no `tier:` in the frontmatter, so these fall back to the default shape:** 2026-10-12_be-more-careful-with-coding-files-and-deploys.md · 2026-10-12_clear-fleet-activity-once-answered-as-a-rule.md · 2026-10-31_never-invoke-a-write-command-to-read-what-it-would-say.md · 2026-11-21_a-holding-helper-gets-the-next-useful-job.md · 2026-11-21_friday-runs-on-opus-fable-only-when-flagged.md · 2026-11-21_windows-helper-launches-without-permission-prompts.md
 
@@ -8185,6 +8185,20 @@ sections (open the file for these): The rule · Why · The failure behind it (le
 4. Corrections are named for what they are, never minimised ("small", "minor") in a message to Kam.
 5. One Kam thread answered at a time; agent wakes wait behind his message.
 6. **Test, don't hedge (Kam, live board 11:53, verbatim: "You should have tested. I did. It works").** When a fact can be measured quickly and safely (a GET of a sign-in page, a read-only list), measure it before the message; "I haven't tested it" is acceptable only when the test is unsafe, approval-class or out of reach, and the message says why.
+
+
+## Before handing Kam a step, check whether we can do it ourselves with an identity we already hold
+`2026-11-27_check-our-own-identities-before-handing-kam-a-step.md` · correction · 2026-11-27 · status: live · tier: W
+
+**Rule.** Before any card, set of steps or email asks Kam to *do* something (create a user, an app registration, a role, consent, a resource, a setting), read whether a seat can do it with an identity or grant we already hold: the project's own `AZURE_CONFIG_DIR` (`az account show`, then a read-only `az ad` call), `gh auth status`, the project's `CLAUDE.md`, and `EXPIRING-GRANTS.md`. If a seat can, a seat does it and Kam gets a receipt. Only money, the signature classes (production, external comms, irreversible) and identities we genuinely do not hold go to his hands, and then the ask says why we could not do it.
+
+**How to apply.**
+- A card option that says "you do X" is a premise to verify, not a decision about who acts.
+- The identity read is cheap and safe (read-only); run it before writing the ask.
+- When Kam has already started, tell him to stop where he is, read what he made, and only add.
+- Second factor for a test user: no phone number needed. A seat-held software OATH (TOTP) token covers automated runs, if the tenant's authentication methods policy allows it (check first). A customer-mirror test of Authenticator number matching needs the Authenticator app on one device (no SIM).
+
+Links: [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]], [[2026-09-23_fix-it-yourself-talk-to-sister-seats-directly]], [[2026-09-18_a-premise-under-a-question-to-kam-is-load-bearing-verify-it]].
 
 
 ## Fleet-structure project (Kam's priority beside Secuura): Fable for Wednesday and its agents; Postgres-backed brain, tiered project briefs, specialist skill loads

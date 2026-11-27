@@ -7,7 +7,7 @@ status: live
 
 # Boot digest — headline + rules of every lesson (open the file when it fires)
 
-Generated 2026-11-27 17:50 from 292 lesson files (1,231,659 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 22 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
+Generated 2026-11-27 19:22 from 293 lesson files (1,234,456 B). Each block = the lesson's retrieval handle (H1), its frontmatter, the operative paragraph, its section index, and every RULES section verbatim. 22 files carry no rules-shaped section and are included whole. The CASES behind a rule live only in the file: open it the moment the rule fires, or when a diagnosis needs the evidence. `_ledger.md` is read whole beside this digest; `_ledger_archive.md` on demand.
 
 ## The T9 SSD is the master — Wednesday must be fully portable
 `2026-07-31_fully-portable-drive.md` · principle · 2026-07-31 · status: superseded — the "T9 is the master" half by [[2026-08-25_one-drive-devmaster-is-master]] (2026-08-25); the portability principle itself still lives
@@ -8273,6 +8273,20 @@ sections (open the file for these): The rule · Why · The failure behind it (le
 4. Corrections are named for what they are, never minimised ("small", "minor") in a message to Kam.
 5. One Kam thread answered at a time; agent wakes wait behind his message.
 6. **Test, don't hedge (Kam, live board 11:53, verbatim: "You should have tested. I did. It works").** When a fact can be measured quickly and safely (a GET of a sign-in page, a read-only list), measure it before the message; "I haven't tested it" is acceptable only when the test is unsafe, approval-class or out of reach, and the message says why.
+
+
+## Before handing Kam a step, check whether we can do it ourselves with an identity we already hold
+`2026-11-27_check-our-own-identities-before-handing-kam-a-step.md` · correction · 2026-11-27 · status: live
+
+**Rule.** Before any card, set of steps or email asks Kam to *do* something (create a user, an app registration, a role, consent, a resource, a setting), read whether a seat can do it with an identity or grant we already hold: the project's own `AZURE_CONFIG_DIR` (`az account show`, then a read-only `az ad` call), `gh auth status`, the project's `CLAUDE.md`, and `EXPIRING-GRANTS.md`. If a seat can, a seat does it and Kam gets a receipt. Only money, the signature classes (production, external comms, irreversible) and identities we genuinely do not hold go to his hands, and then the ask says why we could not do it.
+
+**How to apply.**
+- A card option that says "you do X" is a premise to verify, not a decision about who acts.
+- The identity read is cheap and safe (read-only); run it before writing the ask.
+- When Kam has already started, tell him to stop where he is, read what he made, and only add.
+- Second factor for a test user: no phone number needed. A seat-held software OATH (TOTP) token covers automated runs, if the tenant's authentication methods policy allows it (check first). A customer-mirror test of Authenticator number matching needs the Authenticator app on one device (no SIM).
+
+Links: [[2026-09-02_coo-actionable-tickets-never-wait-for-kam]], [[2026-09-23_fix-it-yourself-talk-to-sister-seats-directly]], [[2026-09-18_a-premise-under-a-question-to-kam-is-load-bearing-verify-it]].
 
 
 ## Fleet-structure project (Kam's priority beside Secuura): Fable for Wednesday and its agents; Postgres-backed brain, tiered project briefs, specialist skill loads

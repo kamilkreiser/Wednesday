@@ -45,9 +45,10 @@ functional understanding; Wednesday takes it seriously, records it, and applies 
 
 ## Rules (inherits the workspace seven hard rules, plus)
 
-0. **Portability first (Kam, 2026-07-31).** The T9 SSD is the master copy —
-   everything for this project lives on the drive so Kam can pull it and plug it
-   into his laptop. Duplication is fine; tools may be installed drive-local
+0. **Portability first (Kam, 2026-07-31).** The drive is the master copy
+   (DevMASTER since Kam's 2026-08-25 ruling in the header above; the T9 is its
+   sync copy) — everything for this project lives on the drive so Kam can pull it
+   and plug it into his laptop. Duplication is fine; tools may be installed drive-local
    (`2_Project_Files/tools/`). Machine-local dependencies (voice downloads,
    keychain items, Claude Code itself) go on the `PORTABILITY.md` checklist.
    Never store project state off-drive.
@@ -77,7 +78,8 @@ functional understanding; Wednesday takes it seriously, records it, and applies 
    labelled `lesson` are async teaching — ingest at session start per
    `0_Brain/skills/lesson-ingestion.md`.
 3. **Verbal channel.** Use `2_Project_Files/voice/speak.sh "short message"` for
-   spoken updates (Moira, en_IE). Keep spoken messages to 1–3 sentences; the full
+   spoken updates (the voice is chosen by `speak.sh`: Matilda Premium, falling
+   back to Moira). Keep spoken messages to 1–3 sentences; the full
    detail always goes in text. Kam replies by voice via Whisperflow (arrives as
    normal prompt text). Speak at: session start (greeting + status), when finishing
    a long task, when blocked on Kam, and when something important changes.
