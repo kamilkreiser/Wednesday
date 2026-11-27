@@ -218,6 +218,14 @@ plus a protected leaf, N1 on another endpoint; and the selftest's own 20 NOISE c
   lane's parameters file 1.
 - Landing texts: see FOR-RECORDS.md and landing.txt (squash_scan and words over the subject, body and title).
 
-## MAIN AT THE END
-`d9f89115333bbed2ade723e4c11d523b2a9cd079` at 03:20:10 (unchanged since 03:14:07); branch `14896ed0...`; open pull
-requests 1 (#63, disjoint, above). No az process.
+## MAIN AT THE END: MOVED
+`d9f89115...` at 03:14:07 and 03:20:10; **at 03:23:44 main is `e1802e24d87bf8663f3f904ff478a833d483268f`** (PR #63's
+squash, merged 2026-11-27T16:20:23Z = 03:20:23 AEDT; tree `58145d4f...`; one parent `d9f89115`). `compare
+d9f89115...e1802e24`: 16 files, **0 under `deploy/`, 0 under `.github/`** (so ci.yml is unchanged and nothing deploys);
+`compare e1802e24...14896ed0`: ahead 1, behind 1, 2 files. The branch is unchanged (`14896ed0...`); open pull requests
+0. The gate's reading of the two files and every Azure answer stands (no path of this lane moved); only the hosted
+numbers of the merge ref change: landing.txt MAIN MOVES (B) applies, with e1802e24's own push-run PASS line (its
+windows leg was still `in_progress` at 03:24:18; the other six rows success). No merge with e1802e24 was built by the
+gate (DERIVED: disjoint paths, no conflict possible). Lane listings: no file in `<lane>` or `<x98>` newer than the
+gate's first script (`find -maxdepth 6 -newer`: 0 rows; the `ls -laTR` hash of both lanes moved only by the `..` line,
+the shared `.tools` folder's time, 03:24:07, written by other seats). No az process.
