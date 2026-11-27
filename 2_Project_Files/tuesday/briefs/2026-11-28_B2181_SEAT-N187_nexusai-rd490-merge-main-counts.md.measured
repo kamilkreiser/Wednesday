@@ -1,0 +1,186 @@
+7c44982c | gh api -X GET (NexusAI GH_CONFIG_DIR) 00:02:32 git/ref/heads/main --jq .object.sha -> 826bb7a89bfe9517f5aa538a110ab0b1dea3317f
+a7eea035 | the instrument named (gh api -X GET under the NexusAI GH_CONFIG_DIR); used for every GitHub read of the drafting
+54349f8d | gh api -X GET (NexusAI GH_CONFIG_DIR) 00:02:32 git/ref/heads/main -> 826bb7a89bfe9517f5aa538a110ab0b1dea3317f
+681e84b6 | gh api -X GET (NexusAI GH_CONFIG_DIR) 00:02:32 git/ref/heads/main --jq .object.sha -> 826bb7a89bfe9517f5aa538a110ab0b1dea3317f
+28bca897 | gh api -X GET (NexusAI GH_CONFIG_DIR) 00:02:32 commits/826bb7a8... --jq parents -> [d2aeecf8cda67265cc316646953c45d92b861f77, c02a04c528d954ef1cf78d3ceab346b0daf251f6], message 'Merge pull request #269 from datasecau/b2139/lane2-kit3', 2026-11-27T12:17:09Z
+10eb9536 | gh api -X GET (NexusAI GH_CONFIG_DIR) 00:02:32 commits/826bb7a8... first parent -> d2aeecf8cda67265cc316646953c45d92b861f77
+e4e8d96b | gh api -X GET compare/d2aeecf8...826bb7a8 -> ahead_by 4, behind_by 0, 6 files (rd455 added, rd981 added, routes/entraProvisioning.js, services/entraProvisioning.js, simpleDb.js, verify-expected-counts.json)
+024e0439 | gh api -X GET compare/BASE...M1 --jq .ahead_by -> 4
+f6375e22 | gh api -X GET compare/BASE...M1 --jq .behind_by -> 0
+9ff1f90d | gh api -X GET git/matching-refs/heads/b2175 --jq '.[]|[.ref,.object.sha]|@tsv' (00:02:32 and 00:09:13) -> one line refs/heads/b2175/rd490-portband f1df71f5125994d964b695ebc185947fd401642c
+9cf65999 | same read -> refs/heads/b2175/rd490-portband
+dc44c6a4 | same read -> f1df71f5125994d964b695ebc185947fd401642c
+3d594450 | gh api -X GET git/matching-refs/heads/records --jq length -> 58
+db333a95 | gh api -X GET compare/826bb7a8...f1df71f5 --jq '[.status,.ahead_by,.behind_by,.merge_base_commit.sha,files]' -> [diverged,2,4,d2aeecf8...,[__tests__/helpers/test-server.js, __tests__/rd490-open-access-banner-browser.test.js, scripts/verify-expected-counts.json]]
+b893a77a | same compare --jq .status -> diverged
+0e6683e0 | gh api -X GET --allow-escape-sequences repos/.../actions/jobs/140481663786/logs > scratch pr269-build.log -> 27610 lines (without the flag gh refused: 'terminal escape sequences')
+ef59c18b | grep -a over pr269-build.log -> 'verify-suite: expectation — tests=6654 suites=421 (from scripts/verify-expected-counts.json)'; also 'Test Suites: 421 passed, 421 total', 'Tests:       6654 passed, 6654 total', 'VERDICT: PASS — 6654/6654 tests passed across 421 suites (jest exit 0)'
+1c8d5808 | gh api -X GET actions/runs?head_sha=826bb7a8... -> 'Build push in_progress' run 45997365963 (also Deploy demo skipped, Gitleaks Scan success, npm-audit success)
+48103367 | same read (00:03) and runs/45997365963 --jq .status -> in_progress
+2f94851c | awk 'NR==2067' 1_Project_Definition/CLARIFICATIONS.md -> '  2. Merge path: ... Never squash, never rebase ([[C-68]]) ...'
+3a463529 | a file name the seat must not write; B2175's STATUS records it not written; ls of the live lock base -> queue-docker queue-jest released (no slots-jest)
+2ad7ca24 | /usr/bin/grep -c -i -E 'opus|sonnet|claude model|BRIEF_SEAT_LEVEL' NexusAI/CLAUDE.md -> 0
+82518962 | /usr/bin/grep -c -i 'model' NexusAI/CLAUDE.md -> 5 (line 9 Phi-3, 238/240/245 tenancy model)
+89f22708 | in scratch clone at f1df71f5: git merge --no-ff --no-commit 826bb7a8... -> 'CONFLICT (content): Merge conflict in scripts/verify-expected-counts.json', merge rc=1
+9d0bb552 | merge2181.py conflicts on the finished simulated commit -> four 'FAIL' lines (HEAD is K, MERGE_HEAD, unmerged, ls-files -u)
+52ef825a | same run -> last line 'MERGE2181 conflicts FAIL', rc=1
+fcaf20bf | git rev-parse <sha>:scripts/verify-suite.sh for d2aeecf8, f1df71f5, 826bb7a8 -> eb9731f5cd97d8a03d2b94c9abd067f6be9b2466 (all three)
+3e2b68db | awk NR==237 over git show 826bb7a8:scripts/verify-suite.sh -> '    if [ ! -s "$EXPECTED_FILE" ]; then'
+df2b0904 | same awk -> '    if [ ! -s "$EXPECTED_FILE" ]; then'
+e1e68105 | same line holds $EXPECTED_FILE (awk NR==237)
+66c3e382 | fill2181.py run a second time onto the existing raw/msg-M.filled.txt -> 'FILL2181 FAIL out file exists: ...', rc=1
+7ca654d1 | git -C <scratch clone> commit -q -F raw/msg-M.filled.txt -> commit rc=0, HEAD 3d64a41110b003b7bde94c0fbb5b679ea2159dad
+1396e7d6 | xargs -0 python3 -I -B merge2181.py post <scratch clone> raw/msg-M.filled.txt <4 names> -> 20 OK lines, 'MERGE2181 post PASS', rc=0
+599d4161 | git diff --numstat 826bb7a8 HEAD (scratch M2) -> '2 2 scripts/verify-expected-counts.json'; merge2181.py post -> 'numstat ... is 2 2 ([2, 2])'
+7b5d62ae | the form kit's carried value; the six counts commits on main where suites moved read 3 3 (B2175 STATUS P7 line); this kit's pair moves tests only -> 2 2 (measured above)
+a7a6a2e9 | gh api -X GET --paginate git/matching-refs/heads/ --jq '.[]|[.ref,.object.sha]|@tsv' -> 530 lines; cut -f2|sort -u -> 529
+bee47ac1 | xargs -P 8 cmp1.sh over 529 shas: gh api -X GET compare/826bb7a8...<sha> --jq '[.ahead_by, files joined]' -> 529 lines, 0 with a non-numeric ahead_by; rd490 file 1 (f1df71f5), helpers/test-server.js 1 (f1df71f5), verify-expected-counts.json 64
+5d8bbc7e | the instrument named; every GitHub read of the drafting
+5341aff8 | git -C <scratch clone> diff f1df71f5 HEAD | gitleaks stdin --no-banner -> 'no leaks found'
+ad3fc422 | gitleaks stdin --no-banner < raw/m1-m2.diff (103 lines) -> 'INF no leaks found', rc=0
+652681eb | planted diff with aws_access_key_id/aws_secret_access_key random values (python secrets) -> gitleaks 'leaks found: 2', rc=1
+e36c3a6d | gitleaks stdin --no-banner < raw/planted.diff > raw/planted.out; rc=1; grep -o -> 'leaks found: 2'
+e3bd4e02 | node slot.js b2152-nodot/mg -> slot 15 span 29600-30239 (B2152 kit printed slot 15)
+c8a5f800 | node slot.js b2143-nodot/chk -> slot 17 span 30880-31519 (B2152 kit printed slot 17)
+3f7cd270 | cat .tools/b2175/logs/pair-head.out -> 23 waiting lines, then 'jest lock acquired by b2175-pair-head after 1370s' ... 'PAIRSUM head shape=OWN-SLOTS-DISJOINT result=BOTH-GREEN', 'lock-wrapper rc=0'
+1e6d0e7a | same file -> '[nexusai-lock] jest lock acquired by b2175-pair-head after 1370s'
+715e825e | same file -> 'PAIRSUM head shape=OWN-SLOTS-DISJOINT result=BOTH-GREEN'
+4a176a88 | gh api user --jq .login | /usr/bin/grep -c -i datasec -> 1 (00:09:13)
+13b74ece | same -> 1
+ac83bd35 | /usr/bin/grep -c -w N186 over tuesday/briefs/*.md, files with a non-zero count -> 8; /usr/bin/grep -l -w N187 -> 1 file (the commission)
+b7ad7003 | [ -e .tools/b2175 ] -> yes
+98d44e77 | ls -d NexusAI/b21*-nodot -> includes b2175-nodot
+f85c2428 | git --no-optional-locks -C .tools/b2175/clone config --get user.name | tr -d '\n' | wc -c -> 12; user.email -> 46
+1ae56f02 | same -> name 12
+505fb1a1 | same -> email 46
+f0f238a1 | same read of .tools/b2152/clone -> name 12 email 46
+45888348 | a folder the seat makes at Step 0; does not exist at drafting ([ -e .tools/b2181 ] -> no)
+8d5df72e | shasum -a 256 over scratch frozen/ -> merge2181.py 02ff7f99...b9d, fill2181.py 2a4ebc5d...d1f, msg-M.txt 8754aca7...671, v2152.sh ae0f07cb...ba6f, pair2175.sh 9edf9985...0d74, pairsum2175.py 262eb56b...c66d (wc -c 7756 1556 96 2349 3171 3211)
+9e8b1305 | merge2181.py docstring line 1 -> 'merge2181.py <conflicts|counts|post> <tree> [<filled msg file> <name> ...]'
+86976964 | fragment between two backticked literals (prose): not a match literal
+2ab0e8fc | fragment between two backticked literals (prose): not a match literal
+18b17ce5 | fill2181.py in scratch -> 'FILL2181 tests 6655 suites 421'
+7f2f2a14 | same run -> 'FILL2181 PASS', rc=0
+9c06004e | python3 -I -B names2142.py scanlib1114.py raw/names.txt -> 'names 4 found [True, True, True, True]', rc=0
+f6864509 | paths N186 owns (ls .tools/b2175 -> _quarantine clone frozen lock logs raw runcell.sh runpair-base.sh runpair-head.sh runv-linux.sh runv-plain.sh wt); read-only to this seat
+bccd6764 | ls -d b2175-nodot -> exists; read-only to this seat
+d228f869 | ls -la session-tools/locks-laptop-1017/ (00:05:12) -> queue-docker, queue-jest, released
+c2dd3bb9 | fragment between two backticked literals (prose): not a match literal
+19c7afa6 | fragment between two backticked literals (prose): not a match literal (the STOP line form)
+5f7ebd95 | fragment between two backticked literals (prose): not a match literal
+9f0fe554 | [ -e .tools/b2175 ] -> yes (the REFUSE 3 control)
+16de8404 | the instrument named
+f858c083 | gh api -X GET git/matching-refs/heads/b2175 --jq '.[]|[.ref,.object.sha]|@tsv' (00:09:13) -> refs/heads/b2175/rd490-portband<TAB>f1df71f5125994d964b695ebc185947fd401642c
+d01a576a | same -> refs/heads/b2175/rd490-portband
+6aa56a09 | gh api -X GET git/matching-refs/heads/records --jq length -> 58
+3f1828f1 | gh api user under that GH_CONFIG_DIR, login grep -c -i datasec -> 1
+153e0799 | same -> 1
+062c1535 | fragment between two backticked literals (prose): not a match literal
+e6749d66 | REFUSE 8 instrument (seat's); control '.tools/b2181/clone' has 1 dot-segment by construction (.tools)
+829f127f | fragment between two backticked literals (prose): not a match literal
+283b202f | fragment between two backticked literals (prose): not a match literal
+66305b7e | a folder the seat makes; its path holds no /tmp/ by construction (/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/b2181-nodot/rt)
+3bd1a57c | v2152.sh line 20 sets RUNNER_TEMP="$RT" (cat of the frozen copy)
+6677d35d | v2152.sh: case "$RT" in */tmp/*|/tmp*) REFUSED (cat of the frozen copy)
+04adc25e | control by construction: '/private/tmp' contains '/tmp' (N186 STATUS REFUSE 9: control /private/tmp/x matches)
+168067f2 | N186 STATUS Step 1: TMPDIR=/var/folders/1x/t0xjkhzs2p706m7dr36bgk840000gn/T/ (RELAYED; the seat prints its own)
+70a56134 | seat's own command; N186 printed a /var/folders/... value (RELAYED)
+a4080b3a | N186 STATUS: TMPDIR=/var/folders/1x/... (RELAYED)
+c07d875f | fragment between two backticked literals (prose): not a match literal
+bddd6d1c | fragment between two backticked literals (prose): not a match literal
+53e51cc4 | fragment between two backticked literals (prose): not a match literal
+78ab47db | a forbidden form (HOLD); nothing to match
+d8193057 | a forbidden variable family (HOLD); nothing to match
+8b30199f | a forbidden variable family (HOLD); nothing to match
+b6271881 | in the scratch clone after the simulated commit, merge2181.py post 'author and committer email equal the clone's configured email (lengths 15 15 15)' OK (scratch identity); the seat's lengths are 46
+f9d7e8be | the seat's command at the last look; UNMEASURED (main has not moved at drafting)
+323ca2b8 | gh api -X GET actions/runs?head_sha=826bb7a8 -> 'Deploy demo push completed skipped' run 45997366088
+acbd10a2 | git show 826bb7a8:.github/workflows/deploy-demo.yml; rev-parse at M1 and BASE -> 597b3487c59e73fa8ffb518578a3e044a80a47e4 (both); awk 26-32 -> on: push: branches [main] paths-ignore '**.md' 'docs/**' 'tests/**'
+9f4fa04e | same runs read -> status completed
+3b6a5528 | same runs read -> conclusion skipped; runs/45997366088/jobs -> 'deploy completed skipped', 'build completed skipped'
+fd65de1c | jobs read -> build skipped; deploy-demo.yml line 51 '  build:', line 53 if vars.CI_DEPLOY_ENABLED == 'true'
+275cad34 | jobs read -> deploy skipped; deploy-demo.yml line 91 if ... CI_DEPLOY_ENABLED, line 95 'environment: demo'
+98be5a16 | cat -n .tools/b2175/runv-linux.sh -> every path holds b2175 (lines 5-7)
+311d3591 | the substitution value; nothing named b2181 exists at drafting
+0c10bf23 | cat -n .tools/b2175/runv-linux.sh line 6 -> '... linux-update '/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/b2175-nodot/chk''
+a2f101a2 | fragment between two backticked literals (prose): not a match literal
+0d6d8f6d | fragment between two backticked literals (prose): not a match literal
+1aa5be16 | fragment between two backticked literals (prose): not a match literal
+1f1bf234 | fragment between two backticked literals (prose): not a match literal
+ca818fa1 | fragment between two backticked literals (prose): not a match literal
+d98455d4 | fragment between two backticked literals (prose): not a match literal
+f9e6c6fa | fragment between two backticked literals (prose): not a match literal
+8fb8b20e | fragment between two backticked literals (prose): not a match literal
+35168748 | fragment between two backticked literals (prose): not a match literal
+33e6cdc9 | fragment between two backticked literals (prose): not a match literal
+7ec2f332 | '/Volumes/Datasec_DEV/TUESDAY/2_Project_Files/tools/node-v24.22.2-darwin-arm64/bin/node' -v -> v24.22.2
+e4d4dca3 | same -> v24.22.2
+ab6feb9c | the export line of .tools/b2175/runv-linux.sh line 2 (cat -n) -> export NEXUSAI_LOCK_BASE='/Volumes/Datasec_DEV/!CODING/Datasec/NexusAI/session-tools/locks-laptop-1017'; ls of it -> queue-docker queue-jest released
+6ea2897e | fragment between two backticked literals (prose): not a match literal
+ababad3c | fragment between two backticked literals (prose): not a match literal
+45ab54b2 | fragment between two backticked literals (prose): not a match literal
+2b9d8fbe | fragment between two backticked literals (prose): not a match literal
+f53a1d53 | fragment between two backticked literals (prose): not a match literal
+e2b1d1cc | fragment between two backticked literals (prose): not a match literal
+fb424c02 | fragment between two backticked literals (prose): not a match literal
+bf78d2fb | git config --get user.email (.tools/b2175/clone) | tr -d '\n' | wc -c -> 46; user.name -> 12
+7f1c8fb9 | .tools/b2152/clone -> name 12, email 46
+1a045acc | fragment between two backticked literals (prose): not a match literal
+83b6c86a | fragment between two backticked literals (prose): not a match literal
+a1ae437f | fragment between two backticked literals (prose): not a match literal
+92b0f785 | git log --format='%H %P | %s' d2aeecf8..f1df71f5 (scratch clone) -> f1df71f5 parent 07fb8eb6; 07fb8eb6 parent d2aeecf8; rev-list --count -> 2
+62b3f62d | fragment between two backticked literals (prose): not a match literal
+35996fc8 | fragment between two backticked literals (prose): not a match literal
+2f90fe76 | fragment between two backticked literals (prose): not a match literal
+265a906c | gh api -X GET contents/scripts/verify-expected-counts.json?ref=<sha> decoded -> d2aeecf8 6634 419; f1df71f5 6635 419; 826bb7a8 6654 421
+f05ba417 | fragment between two backticked literals (prose): not a match literal
+0fe6dd15 | the seat's tree; the scratch clone's detached checkout at f1df71f5 rev-parse HEAD -> f1df71f5 before the merge (merge2181 conflicts 'OK HEAD is K')
+a86fe12f | the seat's own branch name (worktree add -b b2175/rd490-portband); UNMEASURED by the drafter (its scratch was detached)
+d76392d7 | the branch name; gh matching-refs -> refs/heads/b2175/rd490-portband
+c636542f | fragment between two backticked literals (prose): not a match literal (table cell separator)
+922b351a | fragment between two backticked literals (prose): not a match literal (table cell separator)
+7c664218 | fragment between two backticked literals (prose): not a match literal
+a8a31efb | in scratch: /usr/bin/grep -c -F '<<<<<<<' counts file after the merge -> 1; after git show M1:... redirected -> 0
+3ec48d69 | fragment between two backticked literals (prose): not a match literal
+86c40da5 | node -e require(counts file) after writing M1's version -> '6654 421'
+c94ef954 | a log the seat's run writes; N186's same-named log exists (.tools/b2175/logs/verify-linux-update.log)
+96902752 | PREDICTED: the expectation line reads M1's file; git show 826bb7a8:scripts/verify-expected-counts.json via node -> 6654 421; N186's line 6 read 'tests=6634 suites=419' (BASE's file) by grep -n
+53d12a90 | PREDICTED arithmetic 6654+1 / 421+0; the drafter's hand-set simulation used 6655 421 (merge2181 counts PASS); UNMEASURED under jest
+a58cdd94 | /usr/bin/grep -a -c EADDRINUSE .tools/b2175/logs/verify-linux-update.log -> 0 (N186's run; the seat's is UNMEASURED)
+61b3d80a | /usr/bin/grep -a -c -E '^PASS ' .tools/b2175/logs/verify-linux-update.log -> 419
+9ebefa0b | fragment between two backticked literals (prose): not a match literal
+3e4c3ce0 | fragment between two backticked literals (prose): not a match literal
+8364940c | fragment between two backticked literals (prose): not a match literal (table cell separator)
+c94ee4e0 | fragment between two backticked literals (prose): not a match literal
+4d00aed4 | fragment between two backticked literals (prose): not a match literal
+d2586e61 | git -C <scratch> diff --numstat 826bb7a8 HEAD -> '3 2 __tests__/helpers/test-server.js', '22 6 __tests__/rd490-open-access-banner-browser.test.js', '2 2 scripts/verify-expected-counts.json'
+b20bfd95 | fragment between two backticked literals (prose): not a match literal (table cell separator)
+4042f9fb | fragment between two backticked literals (prose): not a match literal
+38c98791 | a log the seat's run writes; N186's verify-plain.log: grep -n -> 'VERDICT: PASS — 6635/6635 tests passed across 419 suites (jest exit 0)'
+777605f3 | /usr/bin/grep -a -c EADDRINUSE .tools/b2175/logs/verify-plain.log -> 0 (N186's; the seat's UNMEASURED)
+fd900bb9 | git show f1df71f5:rd490 file; grep -n -F -> 311:describe('RD-490 preconditions: the surface under test is really the open state', ...; 312:    test('every measurement completed (none threw)', ...
+0202154b | the seat's check; in scratch the simulated M2 had first parent f1df71f5 (merge2181 post 'two parents, first K, second M1' OK)
+e780a027 | grep -a -n over .tools/b2175/logs/verify-linux-update.log -> 6: expectation tests=6634 suites=419; 26781 Test Suites: 419 passed; 26782 Tests: 6635 passed; 26791 expectation UPDATED tests=6635 suites=419; 26796 VERDICT: PASS 6635/6635 ... 419 suites
+e06d08ce | grep -a -n over .tools/b2175/logs/verify-plain.log -> 6: expectation tests=6635 suites=419; 26344 VERDICT: PASS 6635/6635 tests passed across 419 suites (jest exit 0); ^PASS 419; EADDRINUSE 0
+02c0b5f2 | cat .tools/b2175/logs/pair-head.out -> 'jest A rc=0', 'jest B rc=0', 'A tests 73 failed 0 listener-guard-messages 0', 'PAIRSUM head shape=OWN-SLOTS-DISJOINT result=BOTH-GREEN', start 21:44:10, end 21:45:43
+d7b1860b | grep -a -n 'verify-suite: expectation' N186 verify-linux-update.log -> line 6 'verify-suite: expectation — tests=6634 suites=419 (from scripts/verify-expected-counts.json)'
+ffa4bfea | PREDICTED for the seat; M1's file via node -> 6654 421; the PR 269 hosted log -> 'verify-suite: expectation — tests=6654 suites=421'
+624d350f | grep -a -n N186 verify-linux-update.log -> 26781:Test Suites: 419 passed, 419 total
+81ba88ab | grep -a -n N186 verify-linux-update.log -> 26782:Tests:       6635 passed, 6635 total
+0cc479f7 | cat .tools/b2175/logs/pair-head.out -> 'jest A rc=0'
+e4b78811 | same -> 'jest B rc=0'
+10a0861b | same -> 'A tests 73 failed 0 listener-guard-messages 0'
+730ce3bc | B2175 ANSWER-1 file (cat) -> 'numstat `2 2`'; N186 STATUS P7 -> '2 2 scripts/verify-expected-counts.json'
+3bf2d739 | gh api -X GET git/matching-refs/heads/b2175 --jq '.[]|.object.sha' (form of the 00:09:13 read) -> f1df71f5125994d964b695ebc185947fd401642c
+6096797a | same -> f1df71f5125994d964b695ebc185947fd401642c
+d0a18265 | the seat's check; in scratch: git rev-list --parents -n 1 HEAD -> parents f1df71f5... 826bb7a8... (merge2181 post OK)
+76bcdbda | same scratch read -> second parent 826bb7a8...
+b5e6f311 | the seat's check (UNMEASURED on the real M2); scratch first parent K
+082b0ac5 | in scratch: git diff f1df71f5 HEAD | gitleaks stdin --no-banner -> 'no leaks found'
+740ed3e2 | same -> 'INF no leaks found'
+d21ccb04 | fragment between two backticked literals (prose): not a match literal
+4bd523f2 | the seat's read after the push; UNMEASURED (no push at drafting)
+a1f54438 | shasum -a 256 session-tools/nexusai-lock.sh (00:05:12) -> cf01bafbc51f555ca0f14d1711f01885bcec5bc6293b177fe24702226bb4971f
+45aa655f | a section heading the seat writes; nothing to match
+a01839be | ls tuesday/briefs | grep SEAT-N187 -> this kit and its sidecar (2 files at drafting; a .pre-stamp copy appears at Tuesday's stamp)
+6d2ecafb | the copy Tuesday makes at the stamp; absent at drafting
