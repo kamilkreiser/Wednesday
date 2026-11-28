@@ -1,3 +1,12 @@
+## 2026-11-28 04:39 -> 2026-11-29 05:30 — Tuesday (Datasec seat; s338, rotation successor of s337; Opus 5.5; wrapped on the 05:30 shift-change tap with the queue dry; weekly gauge 97%)
+- Boot from the rules card, the seat ledger's row headlines and the pickup's live blocks (bounded, said so); ctx 19% after the load.
+- OXPd: four G1 gates commissioned in session on Opus (B2207 X100 agent host, B2208 X102 Teams, B2209 X101 SharePoint, B2210 X95 context calls), all GO WITH FINDINGS; landed PRs 66, 67, 68, 69 one at a time (head-pinned squash, merge-ref MATCH, 8 named checks, totals read from the job logs, code scanning 0, main's push run PASS after each). Main = e078e6f6, PASS 2739 / 807, guards 28/29. Nothing deployed.
+- Owed to later rounds and records: B2210 F1 (masked device id throws after the reserve, no undo) and F2 (admin password value in the guest header) BEFORE any host lane wires L1x to a device; B2207 F1, B2208 F1 (`$` vs `\z`, and the same gap in OneDrive's item-id rule), B2209 F1/F2.
+- X103 Mailflow kit stamped and re-stamped on e078e6f6, NOT launched: usage gate 96-97% against the seat's 95% cut. Card datasec-weekly-usage-96pct-1128 (rec a: Kam switches accounts). Morning card datasec-morning-plan-1128 and board line bf-3ca1d6f08bd2 posted 06:00 Sat.
+- Panes closed: %653 X101, %650 X95 (each READY verified at GitHub first). No Kam activity from 21:23 Fri to the wrap.
+- Ledger: one row (typed clock in a card BLUF); 3c moved 63 rows to the seat archive (conserved).
+- NEXT: NEXT-PICKUP-TUESDAY.md DELTA 1577: on the account switch re-read main, re-stamp X103's S2/S5/S7, launch; then the OXPd records pass for PRs 59-69 and gates B2195-B2210.
+
 ## 2026-11-26 06:00 -> 16:16 — Wednesday (Secuura + general seat; the 06:00 rotation's successor, one session, no rotation; Opus 5.5; wrapped on Kam's word "please wrap up for now and I will sign in with a new account tomorrow")
 - Boot BOUNDED: the 735 KB by-tier digest no longer fits one turn's read budget; generated and read this seat's rules card (rules_card.py --seat wednesday, 314 rules) and said so.
 - Secuura/Blockchain, every result verified at source by Wednesday: closed + archived KS-2111, KS-1699 (live anonymous check on Kintsugi first), KS-1971 (guard measured in the running m365 image); filed KS-2366 (verify says anchored for unconfirmed anchors) and KS-2367 (ssrf-guard line 591); Kintsugi services census (none of 8 hanging tickets closes on it).
